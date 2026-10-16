@@ -1,0 +1,152 @@
+/* The card stack: «Управление», «Документы», «Финансы» take turns on one screen while the page scrolls by.
+   How it moves is described in scripts/cards.js. Without the script the cards simply stand one under another.
+
+     .stack            the section
+       .stack__stage   the space around the cards and between them (its bottom padding is the gap)
+         .card         one per subject: its colour is --card-bg; it fills the stage, up to 1440px wide
+           .card__text   the label (.card__tag) and the titles (.card__title, one per step), on the left
+           .card__art    the drawings (.art), one per step, on the right                                  */
+
+.stack { position: relative; }
+.stack__stage {
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 0 16px 16px;
+  @media (--lg) { gap: 24px; padding: 0 24px 24px; }
+  @media (--phone) { gap: 8px; padding: 0 8px 8px; }
+}
+
+.card {
+  position: relative;
+  width: 100%; max-width: 1440px;
+  overflow: hidden;
+  border-radius: 43.5px;
+  background-color: var(--card-bg);
+  @media (--lg) { border-radius: 66px; }
+}
+.card__text {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
+  width: 50%; max-width: 480px; padding: 24px 0 0 24px;
+
+  @media (--lg) { gap: 24px; max-width: 620px; padding: 40px 0 0 40px; }
+  @media (--tablet) { max-width: 440px; }
+  @media (--phone) { width: 100%; padding-right: 24px; }
+}
+.card__tag {
+  position: relative;
+  padding: 8px 16px;
+  border: 2px solid rgb(255 255 255 / 0.3); border-radius: var(--round);
+  @media (--lg) { padding: 12px 24px; }
+}
+.card__tag-label {
+  display: block;
+  font-weight: 500; line-height: normal; letter-spacing: 0.1rem; text-transform: uppercase; color: var(--paper);
+  @media (--lg) { font-size: 20px; }
+}
+.card__titles { width: 100%; height: 100%; }
+.card__title {
+  font-family: var(--font-display); font-weight: 700; font-size: 36px; line-height: 1; color: var(--paper);
+  @media (--lg) { font-size: 48px; }
+  @media (--tablet) { font-size: 28px; }
+}
+.card__art {
+  position: absolute; top: 0; bottom: 0; right: -60px;
+  width: 520px;
+
+  @media (--lg) { width: 760px; }
+  @media (--xl) { width: 1000px; right: -120px; }
+  @media (--tablet) { width: 460px; }
+  @media (--phone) { width: 100%; top: 35%; left: 0; right: 0; }
+
+  & > .art { position: absolute; inset: 0; }
+}
+
+/* ── while the script runs (stack-on) ──
+   The browser moves the cards itself, with the page: each card is sticky under the navbar in a block of its own
+   (.stack__slot, made by the script) that is as tall as the scroll the card stays for; the next slot overlaps it
+   from below, so the next card comes up over the old one. The gap between them and the rounded bottom corners of
+   the old card are drawn over it: a strip in the colour of the page above every card but the first (.stack__collar),
+   with the card's corners cut out of it. The same strip stands at the bottom of the screen (.stack__mask, in
+   .stack__frame: one screen tall and sticky), so a card that comes up ends the gap above the bottom of the screen.
+   All heights are in --fm-vh, the steady screen height of phones (see scripts/boot.js), so they follow it by themselves.
+     · --stack-a is the height of a card: one screen, less the navbar and the gap at the bottom (--stack-gap);
+     · the section cuts off what reaches outside it (overflow: clip, which keeps sticky working). */
+.stack.stack-on {
+  --stack-a: calc(100 * var(--fm-vh, 1vh) - var(--stack-nav, 64px) - var(--stack-gap, 8px));
+  isolation: isolate; overflow: clip; pointer-events: none;
+}
+/* the stage: its top padding is the navbar (the cards start under it; it also keeps the frame's negative margin
+   inside the stage). It is hidden itself (Safari would colour its bars after it), the cards are visible again. */
+.stack-on .stack__stage { display: block; padding-top: var(--stack-nav, 64px); visibility: hidden; pointer-events: none; }
+.stack-on .stack__slot { position: relative; }
+.stack-on .card {
+  position: sticky; top: var(--stack-nav, 64px);
+  display: block; height: var(--stack-a); margin: 0 auto;
+  visibility: visible;
+}
+.stack-on .card__text { z-index: 1; }
+.stack-on .card__titles { display: grid; }
+.stack-on .card__title {
+  grid-area: 1 / 1; position: relative;
+  visibility: hidden;                                                  /* until the script has split it into lines */
+  & .fm-line { white-space: nowrap; }
+}
+.stack-on .card.is-asleep .card__art { display: none; }               /* far from its turn: its drawings let go of their memory */
+.stack-on .card.is-off { visibility: hidden; }                        /* nothing of it is seen: not under the navbar either */
+/* a card that comes up while it is still the smallest card: cut to that size by itself (--stack-pill, written by the
+   script), and the strip at the bottom of the screen is hidden meanwhile (stack-rising), so it comes up whole */
+.stack-on .card.is-pill { clip-path: var(--stack-pill); }
+.stack-rising .stack__mask { visibility: hidden; }
+/* for a moment, while the script measures the cards: no transitions */
+.stack-instant .card, .stack-instant .card *, .stack-instant .card__tag { transition: none !important; }
+
+/* the frame: one screen tall, its top one screen above the section, so it is stuck at the top of the screen (sticky)
+   as soon as the section's top is one screen high; it takes no room (margins). Hidden itself (Safari would colour its
+   bars after it), only the mask in it is seen. Above the cards. */
+.stack-on .stack__frame {
+  position: sticky; top: 0; z-index: 1; display: block;
+  height: calc(100 * var(--fm-vh, 1vh));
+  margin: calc(-100 * var(--fm-vh, 1vh) - var(--stack-nav, 64px)) 0 var(--stack-nav, 64px);
+  visibility: hidden; pointer-events: none;
+}
+.stack__collar {
+  --r: 40px;
+  position: absolute; display: block; visibility: visible; pointer-events: none;
+  background:
+    radial-gradient(circle var(--r) at 100% 0, transparent calc(var(--r) - 0.5px), var(--stack-page, #fff) calc(var(--r) + 0.5px)) 1px 0 / var(--r) var(--r) no-repeat,
+    radial-gradient(circle var(--r) at 0 0, transparent calc(var(--r) - 0.5px), var(--stack-page, #fff) calc(var(--r) + 0.5px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
+    linear-gradient(var(--stack-page, #fff), var(--stack-page, #fff)) 0 var(--r) / 100% 100% no-repeat,
+    linear-gradient(to right, var(--stack-page, #fff) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, #fff) calc(100% - 1px));
+}
+.stack__mask {
+  top: calc(100% - var(--stack-gap, 8px) - var(--r));
+  height: calc(var(--stack-gap, 8px) + var(--r) + 50vh);
+}
+/* the cap: under a card, sticky with it (it takes no room: its bottom margin), the page colour outside its two top
+   corners. It hides the card before, which is still whole under this one, in those corners. Its quarter circles are a
+   little smaller than the card's corners, so the soft edge of the card's corner is drawn over the page colour. */
+.stack__cap {
+  --r: 40px;
+  position: sticky; top: var(--stack-nav, 64px); display: block;
+  visibility: visible; pointer-events: none;
+  background:
+    radial-gradient(circle var(--r) at 100% 100%, transparent calc(var(--r) - 2px), var(--stack-page, #fff) calc(var(--r) - 1px)) 1px 0 / var(--r) var(--r) no-repeat,
+    radial-gradient(circle var(--r) at 0 100%, transparent calc(var(--r) - 2px), var(--stack-page, #fff) calc(var(--r) - 1px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
+    linear-gradient(to right, var(--stack-page, #fff) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, #fff) calc(100% - 1px));
+}
+
+/* the label: the progress (.card__tag-fill) fills it from the left while the card goes through its steps; the white
+   copy (.card__tag-done, the text in the card's colour) fades in over it when the card is done (is-done).
+   Both are made by the script. */
+.stack-on .card__tag { isolation: isolate; overflow: visible; }
+.card__tag-fill, .card__tag-done { position: absolute; pointer-events: none; border-radius: inherit; }
+.card__tag-fill { inset: 0; z-index: -1; background: rgb(255 255 255 / 0.3); clip-path: inset(0 100% 0 0); }
+.card__tag-done {
+  inset: -2px; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--paper);
+  opacity: 0; transition: opacity 0.3s var(--ease-out);
+  & * { color: var(--card-bg) !important; }
+  @media (--calm) { transition: none; }
+}
+.card__tag.is-done > .card__tag-done { opacity: 1; }

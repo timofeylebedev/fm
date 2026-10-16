@@ -1,0 +1,10 @@
+/* The screen widths and conditions the styles are written for (custom media: replaced by the build, nothing of this
+   file is left in the output). Every stylesheet that uses them imports this file. */
+/* Screen widths (the same steps as the design in Taptop): */
+@custom-media --lg (width >= 1280px);     /* large computers */
+@custom-media --xl (width >= 1440px);     /* the widest */
+@custom-media --tablet (width <= 991px);  /* tablets and phones: the burger menu */
+@custom-media --phone (width <= 767px);   /* phones, and phones turned sideways */
+@custom-media --narrow (width <= 479px);  /* phones held upright */
+@custom-media --mouse (hover: hover) and (pointer: fine);
+@custom-media --calm (prefers-reduced-motion: reduce);

@@ -1,0 +1,122 @@
+// The small build steps of the site, as Vite plugins.
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { resolve, dirname } from "node:path";
+import { minify as minifyJs } from "terser";
+import { minify as minifyHtml } from "html-minifier-terser";
+import { typographHtml } from "./typograph.js";
+
+// <svg data-icon="logo" class="…"></svg> in the HTML → the SVG of src/assets/icons/logo.svg, with the attributes of the
+// tag added (a class, a label). Icons without a label are hidden from screen readers.
+export function icons(dir) {
+  return {
+    name: "fm-icons",
+    transformIndexHtml: {
+      order: "pre",
+      handler(html) {
+        return html.replace(/<svg data-icon="([\w-]+)"([^>]*)><\/svg>/g, (tag, name, attrs) => {
+          const svg = readFileSync(resolve(dir, name + ".svg"), "utf8").trim();
+          const label = /\baria-label=|\brole=/.test(attrs) ? "" : ' aria-hidden="true"';
+          return svg.replace(/^<svg\b/, "<svg" + attrs + label + ' focusable="false"');
+        });
+      }
+    }
+  };
+}
+
+// <script data-inline src="./scripts/boot.js"></script> → the script itself, inside the page (minified when building):
+// it has to run before the page is drawn, without waiting for a file.
+export function inlineScripts(root) {
+  let building = false;
+  return {
+    name: "fm-inline-scripts",
+    configResolved(config) { building = config.command === "build"; },
+    transformIndexHtml: {
+      order: "pre",
+      async handler(html, ctx) {
+        const tags = [...html.matchAll(/<script data-inline src="([^"]+)"><\/script>/g)];
+        for (const [tag, src] of tags) {
+          let code = readFileSync(resolve(dirname(ctx.filename), src), "utf8");
+          if (building) code = (await minifyJs(code, { ecma: 2020, compress: { passes: 2 }, mangle: true })).code;
+          html = html.replace(tag, "<script>" + code + "</script>");
+        }
+        return html;
+      }
+    }
+  };
+}
+
+// Russian non-breaking spaces (see typograph.js)
+export function typograph() {
+  return { name: "fm-typograph", transformIndexHtml: { order: "pre", handler: (html) => typographHtml(html) } };
+}
+
+// The finished pages, minified: no comments, no indentation (whitespace that shows on the page is kept)
+export function minifyPages() {
+  return {
+    name: "fm-minify-html",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler: (html) => minifyHtml(html, {
+        collapseWhitespace: true, conservativeCollapse: true, removeComments: true,
+        removeRedundantAttributes: true, removeScriptTypeAttributes: true, useShortDoctype: true,
+        minifyJS: false, minifyCSS: true, sortAttributes: false
+      })
+    }
+  };
+}
+
+// A Content Security Policy for every page, written into it when the site is built: the page may run only its own
+// scripts (and the inline ones it was built with: their hashes are worked out here), and frame only the booking page of
+// Planerka. Whatever else tried to run (an injected script, a browser extension's code put into the page) is blocked.
+// When something new is added to the site (an analytics counter, a chat), add its addresses to POLICY below.
+// (frame-ancestors cannot be set from the page itself: the server sends it, see deploy/.)
+const POLICY = {
+  "default-src": ["'self'"],
+  "script-src": ["'self'", "https://planerka.app"],
+  "style-src": ["'self'", "'unsafe-inline'"],          // the drawings and GSAP set styles on the elements they move
+  "img-src": ["'self'", "data:", "blob:"],
+  "font-src": ["'self'"],
+  "connect-src": ["'self'"],
+  "frame-src": ["https://planerka.app"],
+  "object-src": ["'none'"],
+  "base-uri": ["'self'"],
+  "form-action": ["'self'"]
+};
+export function csp() {
+  return {
+    name: "fm-csp",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(html) {
+        const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+          .map(([, code]) => "'sha256-" + createHash("sha256").update(code).digest("base64") + "'");
+        const policy = Object.entries(POLICY).map(([k, v]) => k + " " + (k === "script-src" ? v.concat(hashes) : v).join(" ")).join("; ");
+        return html.replace(/<meta charset="utf-8">/i, (m) => m + '<meta http-equiv="Content-Security-Policy" content="' + policy + '">');
+      }
+    }
+  };
+}
+
+// Every text file of the finished site is also saved compressed (.br and .gz next to it), at the strongest level, once:
+// a server that can send these (nginx gzip_static / brotli_static, Caddy precompressed) does not compress on every request.
+export function precompress(outDir) {
+  return {
+    name: "fm-precompress",
+    apply: "build",
+    async closeBundle() {
+      const { readdirSync, statSync, readFileSync, writeFileSync } = await import("node:fs");
+      const { join } = await import("node:path");
+      const zlib = await import("node:zlib");
+      const walk = (dir) => readdirSync(dir).flatMap((f) => { const p = join(dir, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
+      for (const file of walk(outDir).filter((f) => /\.(html|css|js|svg|json|webmanifest|xml|txt)$/.test(f))) {
+        const data = readFileSync(file);
+        if (data.length < 1024) continue;
+        writeFileSync(file + ".br", zlib.brotliCompressSync(data, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 } }));
+        writeFileSync(file + ".gz", zlib.gzipSync(data, { level: 9 }));
+      }
+    }
+  };
+}

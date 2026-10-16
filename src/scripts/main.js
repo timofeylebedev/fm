@@ -1,0 +1,95 @@
+/* The scripts of the page, started in order. Each part is described in its own file. */
+import { ScrollTrigger, refreshSoon } from "./gsap.js";
+import { initMotion } from "./motion.js";
+import { initMenu } from "./menu.js";
+import { initTint, initCap } from "./nav.js";
+import { initPill } from "./nav-pill.js";
+import { initCards } from "./cards.js";
+import { initLinkCards } from "./link-cards.js";
+import { initHero } from "./hero.js";
+import { initRing } from "./ring.js";
+import { initLogos } from "./logos.js";
+
+const root = document.documentElement;
+root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
+
+// boot.js asks for the page to be measured again (after a reload restores the scroll, or a phone's bars change)
+window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
+
+// What the first screen needs runs at once; the rest right after the first frame has been drawn, so that frame is not
+// held up (the ring and the pinned logos are far below). When all of it is in place, "fm:ready" tells boot.js that the
+// page has its final height (a reload then scrolls back to where the visitor was).
+const nav = document.querySelector("[data-nav]");
+initMotion();
+if (nav) initTint(nav);
+initCards();
+initHero();
+requestAnimationFrame(() => setTimeout(() => {
+  initMenu();
+  initPill();
+  if (nav) initCap(nav);
+  initLinkCards();
+  initRing();
+  initLogos();
+  refreshSoon();
+  requestAnimationFrame(() => requestAnimationFrame(() => document.dispatchEvent(new Event("fm:ready"))));
+}, 0));
+
+// ── loaded when needed: the dots (WebGL) and the drawings, each when its blocks come within reach ──
+const near = (els, margin, load) => {
+  if (!els.length) return;
+  const io = new IntersectionObserver((entries) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    setTimeout(load, 0);                         // in a task of its own, not together with the other work of this moment
+  }, { rootMargin: margin });
+  els.forEach((el) => io.observe(el));
+};
+["cards", "cta"].forEach((set) => near([...document.querySelectorAll(`[data-dots='${set}']`)], "100% 0px",
+  () => import("./stipple.js").then((m) => m.initDots(set))));
+near([...document.querySelectorAll(".art[data-art]")].slice(0, 1), "300% 0px",
+  () => import("./art/mount.js").then((m) => m.initArt()));
+
+// ── links to a section of the page: a smooth scroll there ("#top": to the top) ──
+const calm = matchMedia("(prefers-reduced-motion: reduce)");
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[href^='#']");
+  if (!a || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const id = a.getAttribute("href").slice(1);
+  const target = id === "top" ? document.body : document.getElementById(id);
+  if (!target) return;
+  e.preventDefault();
+  scrollTo({ top: id === "top" ? 0 : target.getBoundingClientRect().top + scrollY, behavior: calm.matches ? "instant" : "smooth" });
+  history.pushState(null, "", id === "top" ? location.pathname + location.search : "#" + id);
+  if (id === "top") return;
+  if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");   // keyboard and screen readers go on from there
+  target.focus({ preventScroll: true });
+});
+
+// ── the scroll animations measure the page again when its height has changed by itself, after it has loaded
+//    (a late font, a picture, an app's browser resizing the page); ScrollTrigger measures only on load and resize ──
+addEventListener("load", () => setTimeout(() => {
+  const height = () => root.scrollHeight;
+  let measured = height(), busy = false, timer = 0;
+  ScrollTrigger.addEventListener("refreshInit", () => { busy = true; });
+  ScrollTrigger.addEventListener("refresh", () => { busy = false; measured = height(); });
+  new ResizeObserver(() => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { if (!busy && Math.abs(height() - measured) > 2) ScrollTrigger.refresh(true); }, 300);
+  }).observe(document.body);
+}, 0));
+
+// ── the booking popup of Planerka: its script is loaded once the page has loaded and the browser is free, so it does
+//    not compete with the page. A click before that simply opens the booking page itself (the link's own address). ──
+addEventListener("load", () => (window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(() => {
+  document.querySelectorAll("[data-demo]").forEach((a) => Object.assign(a.dataset, {
+    planerkaEmbed: "popup", planerkaUrl: "https://planerka.app", planerkaUser: "flow-medium-8nzjz3", planerkaEvent: "demo"
+  }));
+  const s = document.createElement("script");
+  s.src = "https://planerka.app/assets/external/embed.js";
+  s.async = true;
+  document.body.appendChild(s);
+}, { timeout: 3000 }));
+
+// iOS shows :active (the press of a button, see button.css) only on pages that listen to touches
+document.addEventListener("touchstart", () => {}, { passive: true });

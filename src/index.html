@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flow Medium — система управления музыкальным лейблом</title>
+  <meta name="description" content="Весь лейбл — на одной волне. Порядок в релизах и проектах, правах и документах, роялти и платежах.">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#eeeae9">
+  <link rel="canonical" href="https://flowmedium.pro/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Flow Medium">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:url" content="https://flowmedium.pro/">
+  <meta property="og:title" content="Flow Medium">
+  <meta property="og:description" content="Весь лейбл — на одной волне. Порядок в релизах и проектах, правах и документах, роялти и платежах">
+  <meta property="og:image" content="https://flowmedium.pro/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <!-- Asked for first: the two fonts of the first screen and the hero picture (the <img> below says which size). -->
+  <link rel="preload" href="./assets/fonts/pragmatica-ext-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/golos-400.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- Runs before anything is drawn: reload scroll restore, steady screen height on phones, hero fade-in. See scripts/boot.js -->
+  <script data-inline src="./scripts/boot.js"></script>
+
+  <link rel="stylesheet" href="./styles/main.css">
+  <script type="module" src="./scripts/main.js"></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Flow Medium",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "Система управления музыкальным лейблом: релизы и проекты, права и документы, роялти и платежи.",
+    "url": "https://flowmedium.pro/",
+    "publisher": { "@type": "Organization", "name": "Flow Medium", "email": "hello@flowmedium.pro", "url": "https://flowmedium.pro/" }
+  }
+  </script>
+</head>
+<body>
+  <!-- icons used more than once -->
+  <svg width="0" height="0" class="sprite" aria-hidden="true"><symbol id="icon-arrow" viewBox="0 0 32 32"><path fill="currentColor" d="M29 24.47a1 1 0 1 1-2 0V6.88L4.7 29.18a1 1 0 1 1-1.4-1.42l22.29-22.3H8a1 1 0 0 1 0-2h20a1 1 0 0 1 1 1z"/></symbol></svg>
+
+  <a class="skip" href="#main">Перейти к содержанию</a>
+
+  <header class="nav" data-nav>
+    <div class="nav__row">
+      <div class="nav__start">
+        <a class="nav__logo" href="#top" aria-label="Flow Medium, в начало страницы"><svg data-icon="logo"></svg></a>
+      </div>
+      <nav class="nav__links" aria-label="Разделы страницы" data-pill-row>
+        <a class="nav__link" href="#product">Продукт</a>
+        <a class="nav__link" href="#clients">Клиенты</a>
+        <a class="nav__link" href="#tools">Инструменты</a>
+        <a class="nav__link" href="#publications">Публикации</a>
+        <a class="nav__link" href="#contacts">Контакты</a>
+      </nav>
+      <div class="nav__end">
+        <a class="btn btn--purple btn--nav nav__cta" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo>Запланировать демо</a>
+        <button class="nav__burger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="menu" data-menu-button><i></i><i></i></button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="menu" id="menu" aria-label="Меню" data-menu>
+    <a class="menu__item" href="#product">Продукт</a>
+    <a class="menu__item" href="#tools">Инструменты</a>
+    <a class="menu__item" href="#publications">Публикации</a>
+    <a class="menu__item" href="#contacts">Контакты</a>
+    <a class="menu__item menu__item--demo" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo>Демо</a>
+  </nav>
+
+  <main id="main">
+    <!-- ── Hero ── -->
+    <section class="hero" id="product">
+      <div class="hero__inner">
+        <div class="hero__text">
+          <div class="hero__copy">
+            <h1 class="hero__title" data-reveal="chars">Весь лейбл —<br>на одной волне</h1>
+            <div class="hero__lead-box">
+              <p class="hero__lead" data-reveal="lines">Порядок в релизах и проектах, правах и документах, роялти и платежах</p>
+            </div>
+          </div>
+          <a class="btn btn--purple" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo data-reveal="block">Запланировать демо</a>
+        </div>
+      </div>
+      <div class="hero__table" data-hero-table>
+        <picture>
+          <source type="image/avif" sizes="160vw" srcset="./assets/img/hero-table-900.avif 900w, ./assets/img/hero-table-1400.avif 1400w, ./assets/img/hero-table-1800.avif 1800w, ./assets/img/hero-table-2600.avif 2600w, ./assets/img/hero-table-3531.avif 3531w">
+          <img class="hero__img" src="./assets/img/hero-table-1800.webp" sizes="160vw" srcset="./assets/img/hero-table-900.webp 900w, ./assets/img/hero-table-1400.webp 1400w, ./assets/img/hero-table-1800.webp 1800w, ./assets/img/hero-table-2600.webp 2600w, ./assets/img/hero-table-3531.webp 3531w" width="3531" height="900" alt="Команда лейбла работает за общим столом" fetchpriority="high">
+        </picture>
+      </div>
+    </section>
+
+    <!-- ── Card stack: Управление, Документы, Финансы (scripts/cards.js) ── -->
+    <section class="stack" aria-label="Возможности Flow Medium" data-stack>
+      <div class="stack__stage">
+        <article class="card" style="--card-bg: #004de5">
+          <div class="card__text">
+            <h2 class="card__tag"><span class="card__tag-label">Управление</span></h2>
+            <div class="card__titles">
+              <h3 class="card__title">Любые проекты лейбла — от релиза до партии мерча</h3>
+              <h3 class="card__title">Статусы и поля настраиваются под ваши процессы</h3>
+              <h3 class="card__title">Будьте в курсе без уточнений — история изменений под рукой</h3>
+            </div>
+          </div>
+          <div class="card__art">
+            <div class="art" data-art="s1-1"></div>
+            <div class="art" data-art="s1-2"></div>
+            <div class="art" data-art="s1-3"></div>
+          </div>
+        </article>
+        <article class="card" style="--card-bg: #f56e00">
+          <div class="card__text">
+            <h2 class="card__tag"><span class="card__tag-label">Документы</span></h2>
+            <div class="card__titles">
+              <h3 class="card__title">Прогресс по всем договорам на одном экране</h3>
+              <h3 class="card__title">Пакет документов по релизу — в пару кликов</h3>
+            </div>
+          </div>
+          <div class="card__art">
+            <div class="art" data-art="s2-1"></div>
+            <div class="art" data-art="s2-2"></div>
+          </div>
+        </article>
+        <article class="card" style="--card-bg: #009929">
+          <div class="card__text">
+            <h2 class="card__tag"><span class="card__tag-label">Финансы</span></h2>
+            <div class="card__titles">
+              <h3 class="card__title">Полная финансовая картина: от трека до артиста</h3>
+              <h3 class="card__title">Согласование платежей без переписок и Excel</h3>
+              <h3 class="card__title">Бюджеты, которые не дают потратить лишнего</h3>
+            </div>
+          </div>
+          <div class="card__art">
+            <div class="art" data-art="s3-1"></div>
+            <div class="art" data-art="s3-2"></div>
+            <div class="art" data-art="s3-3"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ── Royalty ── -->
+    <section class="royalty">
+      <div class="head"><h2 class="head__title" data-reveal="chars">Роялти без споров о цифрах</h2></div>
+      <div class="royalty__cards">
+        <article class="royalty__card" data-reveal="block">
+          <div class="art art--royalty-1" data-art="royalty-1"></div>
+          <p class="royalty__text">Роялти считаются автоматически с учетом сплит роялти и авансов</p>
+        </article>
+        <article class="royalty__card" data-reveal="block">
+          <div class="art art--royalty-2" data-art="royalty-2"></div>
+          <p class="royalty__text">Каждый правообладатель получает один отчёт со всеми данными</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ── Access rights: three ID cards ── -->
+    <section class="access">
+      <div class="head"><h2 class="head__title" data-reveal="chars">Гибкая настройка прав доступа</h2></div>
+      <div class="access__stage">
+        <ul class="access__cards" role="list">
+          <li class="access__slot access__slot--1">
+            <div class="idcard" data-reveal="tilt" style="--rest: -5deg">
+              <div class="idcard__face idcard__face--1">
+                <i class="idcard__clip"></i>
+                <div class="idcard__who">
+                  <img class="idcard__photo" src="./assets/img/face-petr-160.webp" srcset="./assets/img/face-petr-160.webp 2x, ./assets/img/face-petr-240.webp 3x" width="80" height="80" alt="" loading="lazy" decoding="async">
+                  <p class="idcard__name">Петр<br>Кузнецов</p>
+                </div>
+                <dl class="idcard__table">
+                  <div class="idcard__row"><dt>Роль:</dt><dd>Младший юрист</dd></div>
+                  <div class="idcard__row"><dt>Группа:</dt><dd>Юридический отдел</dd></div>
+                </dl>
+              </div>
+            </div>
+          </li>
+          <li class="access__slot access__slot--2">
+            <div class="idcard" data-reveal="tilt" style="--rest: -1.5deg">
+              <div class="idcard__face idcard__face--2">
+                <i class="idcard__clip"></i>
+                <div class="idcard__who">
+                  <img class="idcard__photo" src="./assets/img/face-nazar-160.webp" srcset="./assets/img/face-nazar-160.webp 2x, ./assets/img/face-nazar-240.webp 3x" width="80" height="80" alt="" loading="lazy" decoding="async">
+                  <p class="idcard__name">Назар<br>Волков</p>
+                </div>
+                <dl class="idcard__table">
+                  <div class="idcard__row"><dt>Роль:</dt><dd>Менеджер</dd></div>
+                  <div class="idcard__row"><dt>Группа:</dt><dd>A&amp;R</dd></div>
+                </dl>
+              </div>
+            </div>
+          </li>
+          <li class="access__slot access__slot--3">
+            <div class="idcard" data-reveal="tilt" style="--rest: 8deg">
+              <div class="idcard__face idcard__face--3">
+                <i class="idcard__clip"></i>
+                <div class="idcard__who">
+                  <img class="idcard__photo" src="./assets/img/face-maria-160.webp" srcset="./assets/img/face-maria-160.webp 2x, ./assets/img/face-maria-240.webp 3x" width="80" height="80" alt="" loading="lazy" decoding="async">
+                  <p class="idcard__name">Анна<br>Смирнова</p>
+                </div>
+                <dl class="idcard__table">
+                  <div class="idcard__row"><dt>Роль:</dt><dd>Главный бухгалтер</dd></div>
+                  <div class="idcard__row"><dt>Группа:</dt><dd>Финансовый отдел</dd></div>
+                </dl>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Releases: the ring of covers (scripts/ring.js) and four features ── -->
+    <section class="releases">
+      <div class="head"><h2 class="head__title" data-reveal="chars">Больше релизов, меньше хаоса</h2></div>
+      <div class="ring" data-ring aria-hidden="true"></div>
+      <ul class="features" role="list">
+        <li class="feature" data-reveal="block">
+          <svg data-icon="calendar" class="feature__icon"></svg>
+          <div class="feature__text">
+            <h3 class="feature__title">Календарь выпуска релизов</h3>
+            <p class="feature__desc">Планируйте наперёд, чтобы релизы не накладывались</p>
+          </div>
+        </li>
+        <li class="feature" data-reveal="block">
+          <svg data-icon="form" class="feature__icon"></svg>
+          <div class="feature__text">
+            <h3 class="feature__title">Легкий сбор данных от артистов</h3>
+            <p class="feature__desc">Одна простая форма, а не десяток сообщений</p>
+          </div>
+        </li>
+        <li class="feature" data-reveal="block">
+          <svg data-icon="file-check" class="feature__icon"></svg>
+          <div class="feature__text">
+            <h3 class="feature__title">Автопроверка формата файлов</h3>
+            <p class="feature__desc">Ошибки выявляются при загрузке, а не в последний момент</p>
+          </div>
+        </li>
+        <li class="feature" data-reveal="block">
+          <svg data-icon="status" class="feature__icon"></svg>
+          <div class="feature__text">
+            <h3 class="feature__title">Вся картина по статусам сразу</h3>
+            <p class="feature__desc">Что готово, что в работе, что горит — на одном экране</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ── Clients: the strip of logos and numbers (scripts/logos.js, scripts/stipple.js) ── -->
+    <section class="clients" id="clients">
+      <div class="head"><h2 class="head__title" data-reveal="chars">Три года музыки</h2></div>
+      <div class="logos" data-logos>
+        <ul class="logos__track" role="list">
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-dnk.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">DNK</span></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-gs.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">Golden Sound</span></li>
+          <li class="stat stat--orange" data-reveal="block" data-dots="cards"><p class="stat__number">&gt;20 000</p><p class="stat__label">Договоров</p></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-cplus.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">CPLUS</span></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-osuma.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">OSUMA</span></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-1mp.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">Первое Музыкальное</span></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-lb.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">Loud Boyz</span></li>
+          <li class="stat stat--blue" data-reveal="block" data-dots="cards"><p class="stat__number">&gt;30 000</p><p class="stat__label">Релизов</p></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-moza.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">MOZA</span></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-14.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">14</span></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-big-bro-rec.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">BIG BRO REC</span></li>
+          <li class="stat stat--green" data-reveal="block" data-dots="cards"><p class="stat__number">&gt;10 000</p><p class="stat__label">Отчетов по дистрибуции</p></li>
+          <li class="logo-card" data-reveal="block"><img class="logo-card__img" src="./assets/img/logo-acid-houze.svg" alt="" width="300" height="300" loading="lazy"><span class="logo-card__name">ACID HOUZE</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Call to action: the purple card with dots (scripts/stipple.js) ── -->
+    <section class="cta">
+      <div class="cta__card" data-reveal="block" data-linkcard data-dots="cta">
+        <div class="cta__content">
+          <div class="cta__copy">
+            <h2 class="cta__title" data-reveal="chars">От тихой рутины к громким результатам</h2>
+            <div class="cta__lead-box">
+              <p class="cta__lead" data-reveal="lines">Созвонитесь с нами на полчаса, чтобы мы показали, как ваш лейбл может работать слаженнее и расти.</p>
+            </div>
+          </div>
+          <a class="btn btn--white" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo data-reveal="block">Запланировать демо</a>
+        </div>
+        <div class="cta__marquee" aria-hidden="true"><div class="cta__strip"></div></div>
+      </div>
+    </section>
+
+    <!-- ── Tools ── -->
+    <section class="tools" id="tools">
+      <div class="head head--center"><h2 class="head__title" data-reveal="chars">Полезные инструменты для вашего лейбла</h2></div>
+      <div class="tools__list">
+        <article class="tool" data-reveal="block" data-linkcard>
+          <div class="tool__body">
+            <div class="tool__copy">
+              <p class="tool__brand"><svg data-icon="fm-litmus" class="tool__logo tool__logo--litmus" role="img" aria-label="FM Litmus"></svg></p>
+              <h3 class="tool__title">Проверяйте треки на упоминание запрещенных веществ</h3>
+              <p class="tool__desc">Убедитесь в соответствии закону до того, как это станет проблемой</p>
+            </div>
+            <a class="btn btn--teal btn--icon" href="https://t.me/clean_lyrica_bot" target="_blank" rel="noopener"><svg data-icon="telegram" class="btn__icon"></svg>Telegram-бот</a>
+          </div>
+          <div class="tool__media">
+            <picture>
+              <source type="image/avif" sizes="(max-width: 767px) 300px, 462px" srcset="./assets/img/fm-litmus-480.avif 480w, ./assets/img/fm-litmus-820.avif 820w">
+              <img class="tool__img" src="./assets/img/fm-litmus-820.webp" sizes="(max-width: 767px) 300px, 462px" srcset="./assets/img/fm-litmus-480.webp 480w, ./assets/img/fm-litmus-820.webp 820w" width="820" height="896" alt="Отчёт FM Litmus о проверке текста трека в Telegram" loading="lazy" decoding="async">
+            </picture>
+          </div>
+        </article>
+        <article class="tool" data-reveal="block" data-linkcard>
+          <div class="tool__body">
+            <div class="tool__copy">
+              <p class="tool__brand"><svg data-icon="fm-lens" class="tool__logo tool__logo--lens" role="img" aria-label="FM Lens"></svg></p>
+              <h3 class="tool__title">Превратите тысячи сканов в единый архив с удобным поиском</h3>
+              <p class="tool__desc">Распознаем и систематизируем ваши сканы, чтобы нужный находился за секунды</p>
+            </div>
+            <a class="btn btn--orange" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo>Запланировать демо</a>
+          </div>
+          <div class="tool__media">
+            <picture>
+              <source type="image/avif" sizes="(max-width: 767px) 300px, 462px" srcset="./assets/img/fm-lens-480.avif 480w, ./assets/img/fm-lens-820.avif 820w">
+              <img class="tool__img" src="./assets/img/fm-lens-820.webp" sizes="(max-width: 767px) 300px, 462px" srcset="./assets/img/fm-lens-480.webp 480w, ./assets/img/fm-lens-820.webp 820w" width="820" height="896" alt="Поиск по архиву отсканированных документов в FM Lens" loading="lazy" decoding="async">
+            </picture>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ── Publications ── -->
+    <section class="pubs" id="publications">
+      <div class="head head--center"><h2 class="head__title" data-reveal="chars">Делимся знаниями о музыкальной индустрии</h2></div>
+      <div class="pubs__grid">
+        <a class="pub" href="https://i-m-i.ru/guides/kak-razobratsya-v-royalti-otchetah" target="_blank" rel="noopener" data-reveal="block">
+          <div class="pub__body">
+            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+            <div class="pub__copy">
+              <h3 class="pub__title">Как разобраться в отчетах по роялти</h3>
+              <p class="pub__desc">Что должно быть в роялти-отчетах, как проверить их корректность, почему один трек может повторяться десятки раз, откуда берутся отрицательные стримы.</p>
+            </div>
+          </div>
+          <div class="pub__foot">
+            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+          </div>
+        </a>
+        <div class="pub-video" data-reveal="block">
+          <a class="pub__cover" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener">
+            <div class="pub__body">
+              <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+              <div class="pub__copy">
+                <h3 class="pub__title">Как получать максимум от треков</h3>
+                <p class="pub__desc">Как подписки на стриминги превращаются в роялти артиста, что определяет цену стрима и почему прямой контракт с платформой не всегда выгоден.</p>
+              </div>
+            </div>
+            <div class="pub__foot">
+              <img class="pub__source pub__source--mark" src="./assets/img/institute-mark.webp" width="76" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <img class="pub__source pub__source--full" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+            </div>
+          </a>
+          <div class="pub__watch">
+            <a class="pub__platform" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener"><img src="./assets/img/vk-video.webp" width="32" height="32" alt="Смотреть в VK Видео" loading="lazy" decoding="async"></a>
+            <a class="pub__platform" href="https://youtu.be/WegSIuNXDJg" target="_blank" rel="noopener"><img src="./assets/img/youtube.webp" width="32" height="32" alt="Смотреть на YouTube" loading="lazy" decoding="async"></a>
+          </div>
+        </div>
+        <a class="pub" href="https://i-m-i.ru/post/razbor-2025-leybly" target="_blank" rel="noopener" data-reveal="block">
+          <div class="pub__body">
+            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+            <div class="pub__copy">
+              <h3 class="pub__title">Трансформация рынка лейблов в России</h3>
+              <p class="pub__desc">Анализ российской музыкальной индустрии за 2022–2025 годы: правовое поле, стриминги, лейблы и дистрибьюторы, концерты и фестивали, артисты, музыкальные тренды.</p>
+            </div>
+          </div>
+          <div class="pub__foot">
+            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+          </div>
+        </a>
+        <a class="pub" href="https://i-m-i.ru/post/razbor-2025-strimingi" target="_blank" rel="noopener" data-reveal="block">
+          <div class="pub__body">
+            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+            <div class="pub__copy">
+              <h3 class="pub__title">Динамика объема и стоимости стримов в России</h3>
+              <p class="pub__desc">Как экосистемные подписки и рекомендательные системы стали драйверами роста, кто лидирует по доходам и аудитории и как изменилась стоимость стрима.</p>
+            </div>
+          </div>
+          <div class="pub__foot">
+            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── Contacts ── -->
+  <footer class="footer" id="contacts">
+    <div class="footer__contact">
+      <div class="footer__row">
+        <div class="footer__ask">
+          <p class="footer__question">Остались вопросы? Напишите нам</p>
+          <a class="footer__mail" href="mailto:hello@flowmedium.pro">hello@flowmedium.pro</a>
+        </div>
+        <a class="btn btn--purple" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo>Запланировать демо</a>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <div class="footer__legal-row">
+        <p class="footer__note">© 2026, Все права защищены</p>
+        <p class="footer__note">ИНН: 780442153483</p>
+        <a class="footer__note footer__link" href="https://flowmedium.pro/privacy_policy_ru" target="_blank" rel="noopener">Политика обработки персональных данных</a>
+        <a class="footer__note footer__link" href="https://t.me/tim_lebedev" target="_blank" rel="noopener">Дизайн — Тим Лебедев</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
