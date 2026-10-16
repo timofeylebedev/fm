@@ -1,0 +1,16 @@
+/* The ring of covers under «Больше релизов, меньше хаоса» (scripts/ring.js): a 3D ring that turns with the scroll.
+   The script sizes everything to the width of the block; these are only the pieces. */
+.ring .rc-tilt { position: absolute; transform-style: preserve-3d; will-change: transform; }
+.ring .rc-ring { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.ring .rc-item {
+  position: absolute; inset: 0; transform-style: preserve-3d;
+  transform: rotateY(var(--rc-angle)) translateZ(var(--rc-radius));
+}
+.ring .rc-face {
+  position: absolute; inset: 0; overflow: hidden; border-radius: var(--rc-corner);
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  background: #f0f0f0 center / cover no-repeat;
+}
+/* the back of each cover: the same picture, faded towards the page colour */
+.ring .rc-back { transform: rotateY(180deg); }
+.ring .rc-back::after { content: ""; position: absolute; inset: 0; background: var(--rc-fade-color); opacity: var(--rc-fade); }

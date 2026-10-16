@@ -1,0 +1,32 @@
+/* The fonts of the site, cut down to Latin and Cyrillic by build/fonts.py (the originals are in assets-src/fonts).
+   The text shows at once in a stand-in font (font-display: swap) and changes when the font has arrived.
+   The stand-ins are Arial resized to take as much room as the real fonts, so the change moves nothing
+   (the numbers come from the fonts' own metrics; see build/fonts.py). */
+
+@font-face {
+  font-family: "Golos Text"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("../../assets/fonts/golos-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Golos Text"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("../../assets/fonts/golos-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Golos Text"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("../../assets/fonts/golos-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Pragmatica Ext"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("../../assets/fonts/pragmatica-ext-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Golos Fallback";
+  src: local("Arial"), local("ArialMT"), local("Helvetica"), local("Liberation Sans");
+  size-adjust: 105.7%; ascent-override: 92.7%; descent-override: 20.8%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Pragmatica Fallback"; font-weight: 700;
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Bold"), local("Liberation Sans Bold");
+  size-adjust: 117.2%; ascent-override: 85.4%; descent-override: 24.9%; line-gap-override: 2.2%;
+}

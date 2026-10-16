@@ -1,0 +1,45 @@
+/* The footer: contacts, then the legal line. */
+
+.footer { display: flex; flex-direction: column; background: var(--mist); }
+.footer__contact {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 24px;
+  @media (--phone) { padding: 40px 24px; }
+}
+.footer__row {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; max-width: 1024px;
+  @media (--phone) { flex-direction: column-reverse; gap: 24px; }
+}
+.footer__ask {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
+  @media (--phone) { align-items: center; text-align: center; }
+}
+.footer__question {
+  width: 100%; font-size: 16px; line-height: 1.2;
+  @media (--narrow) { font-size: 14px; }
+}
+.footer__mail {
+  color: var(--ink-60);
+  transition: color var(--hover-out) var(--ease-out);
+  @media (--narrow) { font-size: 14px; }
+}
+.footer__legal {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 16px 24px;
+  border-top: 1px solid var(--ink-10);
+  @media (--phone) { padding: 24px; }
+}
+.footer__legal-row {
+  display: flex; column-gap: 24px;
+  width: 100%; max-width: 1024px;
+  @media (--tablet) { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; row-gap: 4px; }
+}
+.footer__note {
+  font-size: 14px; color: var(--ink-40);
+  @media (--narrow) { font-size: 12px; }
+}
+.footer__link { transition: color var(--hover-out) var(--ease-out); }
+@media (--mouse) {
+  .footer__mail:hover, .footer__link:hover { color: var(--ink); transition-duration: var(--hover-in); }
+}
