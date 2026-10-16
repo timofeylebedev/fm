@@ -1,0 +1,13 @@
+{
+  "name": "fm-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
+  },
+  "devDependencies": {
+    "clean-css": "5.3.3",
+    "terser": "5.51.2"
+  }
+}
