@@ -238,12 +238,13 @@ export function initCards() {
   }
 
   // measured with every card at its full size (nothing is drawn in between). The titles are split into lines again
-  // when it is needed: the cards have another width, or a font has arrived since the last split.
+  // when it is needed: the cards or their titles have another width (a title's width also depends on the card's
+  // height: wide and tall cards lay out their text differently), or a font has arrived since the last split.
   let splitFor = "";
   function refresh() {
     section.classList.add("stack-instant");                  // no transitions while everything is put in place
     measure();
-    const key = cards.map((c) => c.el.offsetWidth).join() + "/" + fontsDone;
+    const key = cards.map((c) => c.el.offsetWidth + ":" + c.titles[0].el.offsetWidth).join() + "/" + fontsDone;
     const resplit = key !== splitFor;
     splitFor = key;
     cards.forEach((c) => c.titles.forEach((title) => { if (resplit) title.split.split(); sizeOf(c, title); }));

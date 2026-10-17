@@ -464,7 +464,7 @@ function prepare(it) {
     tidy(it.el);
     SplitText.create(it.el, {
       type: lines ? "lines" : "words, chars",
-      linesClass: lines ? "fm-line" : undefined,         // a line never wraps again by itself (see .fm-line in the styles)
+      linesClass: lines ? "fm-line" : undefined,         // a line wraps again only at rest (see .fm-line in the styles)
       reduceWhiteSpace: false,                            // keep the non-breaking spaces
       autoSplit: true,                                    // split again when the width or the font changes
       // screen readers: a heading is read from its label (its letters are hidden from them); a text split into lines
