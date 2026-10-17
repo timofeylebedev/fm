@@ -1,6 +1,7 @@
 /* The page for an address that does not exist (404.html): the logo, and a link home in the middle of the screen. */
 @import "./base/media.css";
 @import "./base/tokens.css";
+@import "./base/tokens.gen.css";
 @import "./base/fonts.css";
 @import "./base/base.css";
 

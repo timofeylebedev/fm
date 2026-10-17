@@ -1,10 +1,9 @@
-/* The footer: contacts, then the legal line. */
+/* The footer: contacts, then the legal line. Sizes from Figma variables footer/*, type/footer* (tokens.gen.css). */
 
 .footer { display: flex; flex-direction: column; background: var(--mist); }
 .footer__contact {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 32px 24px;
-  @media (--phone) { padding: 40px 24px; }
+  padding: var(--footer-contact-y) 24px;
 }
 .footer__row {
   display: flex; align-items: center; justify-content: space-between;
@@ -16,19 +15,16 @@
   @media (--phone) { align-items: center; text-align: center; }
 }
 .footer__question {
-  width: 100%; font-size: 16px; line-height: 1.2;
-  @media (--narrow) { font-size: 14px; }
+  width: 100%; font-size: var(--type-footer); line-height: 1.2;
 }
 .footer__mail {
-  color: var(--ink-60);
+  font-size: var(--type-footer); color: var(--ink-60);
   transition: color var(--hover-out) var(--ease-out);
-  @media (--narrow) { font-size: 14px; }
 }
 .footer__legal {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 16px 24px;
+  padding: var(--footer-legal-y) 24px;
   border-top: 1px solid var(--ink-10);
-  @media (--phone) { padding: 24px; }
 }
 .footer__legal-row {
   display: flex; column-gap: 24px;
@@ -36,8 +32,7 @@
   @media (--tablet) { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; row-gap: 4px; }
 }
 .footer__note {
-  font-size: 14px; color: var(--ink-40);
-  @media (--narrow) { font-size: 12px; }
+  font-size: var(--type-footer-note); color: var(--ink-40);
 }
 .footer__link { transition: color var(--hover-out) var(--ease-out); }
 @media (--mouse) {

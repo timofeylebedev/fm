@@ -1,4 +1,4 @@
-/* Buttons: a pill with a colour of its own.
+/* Buttons: a pill with a colour of its own. Height, side padding and type size from Figma variables button/*, type/button.
    With a mouse, the colour deepens while the mouse is over it (quick in, a little slower out).
    Pressed (mouse or finger), it gives in to 97% and springs back past its size and settles. */
 
@@ -6,21 +6,17 @@
   position: relative;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   flex: none;
-  height: 40px; padding: 9px 20px;
+  height: var(--button-height); padding: 9px var(--button-pad-x);
   border-radius: var(--round);
-  font-size: 16px; line-height: normal; white-space: nowrap;
+  font-size: var(--type-button); line-height: normal; white-space: nowrap;
   color: var(--paper); background-color: var(--purple);
   transition: background-color var(--hover-out) var(--ease-out), color var(--hover-out) var(--ease-out);
   user-select: none; -webkit-user-select: none;
-
-  @media (--tablet) { height: 36px; padding: 9px 18px; font-size: 14px; }
 }
 
 .btn--purple { --btn-hover: var(--purple-hover); }
-.btn--orange { --btn-hover: var(--orange-hover); background-color: var(--orange); padding-inline: 16px;
-  @media (--tablet) { padding-inline: 18px; } }
-.btn--teal { --btn-hover: var(--teal-hover); background-color: var(--teal); padding: 9px 16px 9px 10px;
-  @media (--tablet) { padding: 9px 18px 9px 10px; } }
+.btn--orange { --btn-hover: var(--orange-hover); background-color: var(--orange); padding-inline: var(--button-pad-x-alt); }
+.btn--teal { --btn-hover: var(--teal-hover); background-color: var(--teal); padding: 9px var(--button-pad-x-alt) 9px 10px; }
 .btn--white { background-color: var(--paper); color: var(--purple); }
 /* the small one in the navbar */
 .btn--nav { height: 32px; padding: 9px 16px; font-size: 14px; }
