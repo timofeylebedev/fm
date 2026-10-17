@@ -88,7 +88,8 @@
       <div class="hero__inner">
         <div class="hero__text">
           <div class="hero__copy">
-            <h1 class="hero__title" data-reveal="chars">Весь лейбл —<br>на одной волне</h1>
+            <!-- on the narrowest phones (--narrow) the title reads «Весь лейбл. На одной волне»: the parts that differ are .t-wide / .t-narrow (hero.css); data-label is what screen readers hear (motion.js) -->
+            <h1 class="hero__title" data-reveal="chars" data-label="Весь лейбл — на одной волне"><span class="t-wide">Весь лейбл —</span><span class="t-narrow">Весь лейбл.</span><br><span class="t-wide">на одной волне</span><span class="t-narrow">На одной волне</span></h1>
             <div class="hero__lead-box">
               <p class="hero__lead" data-reveal="lines">Порядок в релизах и проектах, правах и документах, роялти и платежах</p>
             </div>
@@ -178,7 +179,6 @@
           <li class="access__slot access__slot--1">
             <div class="idcard" data-reveal="tilt" style="--rest: -5deg">
               <div class="idcard__face idcard__face--1">
-                <i class="idcard__clip"></i>
                 <div class="idcard__who">
                   <img class="idcard__photo" src="./assets/img/face-petr-160.webp" srcset="./assets/img/face-petr-160.webp 2x, ./assets/img/face-petr-240.webp 3x" width="80" height="80" alt="" loading="lazy" decoding="async">
                   <p class="idcard__name">Петр<br>Кузнецов</p>
@@ -193,7 +193,6 @@
           <li class="access__slot access__slot--2">
             <div class="idcard" data-reveal="tilt" style="--rest: -1.5deg">
               <div class="idcard__face idcard__face--2">
-                <i class="idcard__clip"></i>
                 <div class="idcard__who">
                   <img class="idcard__photo" src="./assets/img/face-nazar-160.webp" srcset="./assets/img/face-nazar-160.webp 2x, ./assets/img/face-nazar-240.webp 3x" width="80" height="80" alt="" loading="lazy" decoding="async">
                   <p class="idcard__name">Назар<br>Волков</p>
@@ -208,7 +207,6 @@
           <li class="access__slot access__slot--3">
             <div class="idcard" data-reveal="tilt" style="--rest: 8deg">
               <div class="idcard__face idcard__face--3">
-                <i class="idcard__clip"></i>
                 <div class="idcard__who">
                   <img class="idcard__photo" src="./assets/img/face-maria-160.webp" srcset="./assets/img/face-maria-160.webp 2x, ./assets/img/face-maria-240.webp 3x" width="80" height="80" alt="" loading="lazy" decoding="async">
                   <p class="idcard__name">Анна<br>Смирнова</p>
@@ -222,7 +220,6 @@
           </li>
         </ul>
       </div>
-      <div class="access__dots" data-deck-dots hidden></div>
     </section>
 
     <!-- ── Releases: the ring of covers (scripts/ring.js) and four features ── -->

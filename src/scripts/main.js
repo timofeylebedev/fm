@@ -1,8 +1,10 @@
 /* The scripts of the page, started in order. Each part is described in its own file. */
 import { ScrollTrigger, refreshSoon } from "./gsap.js";
-import { initMotion, reveal } from "./motion.js";
+import { initMotion } from "./motion.js";
+import { initScroll } from "./scroll.js";
+import { initAnchor } from "./anchor.js";
 import { initMenu } from "./menu.js";
-import { initTint, initCap } from "./nav.js";
+import { initTint, initCap, initHide } from "./nav.js";
 import { initPill } from "./nav-pill.js";
 import { initCards } from "./cards.js";
 import { initLinkCards } from "./link-cards.js";
@@ -23,7 +25,7 @@ window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
 const nav = document.querySelector("[data-nav]");
 initDeck();                                      // before the motion: it decides how the ID cards fall (onto a deck or into a row)
 initMotion();
-if (nav) initTint(nav);
+if (nav) { initTint(nav); initHide(nav); }
 initCards();
 initHero();
 requestAnimationFrame(() => setTimeout(() => {
@@ -34,6 +36,7 @@ requestAnimationFrame(() => setTimeout(() => {
   initRing();
   initLogos();
   refreshSoon();
+  initAnchor();
   requestAnimationFrame(() => requestAnimationFrame(() => document.dispatchEvent(new Event("fm:ready"))));
 }, 0));
 
@@ -49,25 +52,13 @@ const near = (els, margin, load) => {
 };
 ["cards", "cta"].forEach((set) => near([...document.querySelectorAll(`[data-dots='${set}']`)], "100% 0px",
   () => import("./stipple.js").then((m) => m.initDots(set))));
-near([...document.querySelectorAll(".art[data-art]")].slice(0, 1), "300% 0px",
+// any drawing, not only the first one: after a reload further down the page, the drawings above it (the royalty
+// ones, say) are many screens away from the first drawing of the card stack, and would never have been put in place
+near([...document.querySelectorAll(".art[data-art]")], "300% 0px",
   () => import("./art/mount.js").then((m) => m.initArt()));
 
-// ── links to a section of the page: a smooth scroll there ("#top": to the top) ──
-const calm = matchMedia("(prefers-reduced-motion: reduce)");
-document.addEventListener("click", (e) => {
-  const a = e.target.closest("a[href^='#']");
-  if (!a || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-  const id = a.getAttribute("href").slice(1);
-  const target = id === "top" ? document.body : document.getElementById(id);
-  if (!target) return;
-  e.preventDefault();
-  if (id !== "top") reveal(target);
-  scrollTo({ top: id === "top" ? 0 : target.getBoundingClientRect().top + scrollY, behavior: calm.matches ? "instant" : "smooth" });
-  history.pushState(null, "", id === "top" ? location.pathname + location.search : "#" + id);
-  if (id === "top") return;
-  if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");   // keyboard and screen readers go on from there
-  target.focus({ preventScroll: true });
-});
+// ── links to a section of the page: our own smooth scroll (scroll.js) ──
+initScroll();
 
 // ── the scroll animations measure the page again when its height has changed by itself, after it has loaded
 //    (a late font, a picture, an app's browser resizing the page); ScrollTrigger measures only on load and resize ──

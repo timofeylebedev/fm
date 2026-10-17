@@ -41,16 +41,16 @@
 
 /* ── Access rights: three ID cards, dropped onto the page (motion.js, "tilt") ──
    The cards keep the size they have in the design (240×345: their text stays readable); the room decides how they lie.
-     · a row, where it fits at 92% of that size or more (the text of the cards then stays at 12px or more): side by side, closer together as the room gets narrower
-       (by at most 24px each: the air around a card, so no card ever covers the text of the one under it), then
-       scaled down a little;
-     · below a 728px column (phones, tablets up to 768px upright, narrow windows): a deck, one card on top of the others,
-       which you swipe from right to left (scripts/deck.js). The deck is scaled down only below a 300px column.
+     · a row: side by side, closer together as the room gets narrower (by at most 40px each: the cards then just
+       overlap at their edges, never over the text of the one under it), then scaled down a little;
+     · below a 560px column (phones held upright, narrow windows): a deck, one card on top of the others, which you
+       swipe away to either side (scripts/deck.js). The deck is scaled down only below a 300px column. Phones turned
+       sideways and tablets held upright have a row, a little smaller.
    The section is the container: 100cqw is its column. */
 .access { container: access / inline-size; overflow: hidden; padding-bottom: calc(var(--section-y) * 1.6); }
 .access__stage {
-  --o: clamp(-24px, (100cqw - 837px) / 2, 0px);                         /* each card's step towards the next */
-  --k: min(1, tan(atan2(100cqw, 789px)));                               /* the row's scale, below a 789px column */
+  --o: clamp(-40px, (100cqw - 837px) / 2, 0px);                         /* each card's step towards the next */
+  --k: min(1, tan(atan2(100cqw, 757px)));                               /* the row's scale, below a 757px column */
   position: relative;
   width: 100%; height: calc(392px * var(--k));
 }
@@ -67,9 +67,8 @@
 .access__slot--2 { width: 249px; height: 352px; margin-top: 24px; }
 .access__slot--3 { width: 286px; height: 376px; }
 .access__slot--1, .access__slot--2 { margin-right: var(--o); }
-.access__dots { display: none; }
 
-@container access (width < 728px) {
+@container access (width < 560px) {
   .access__stage {
     --k: min(1, tan(atan2(100cqw, 300px)));
     --deck: 1;                                                          /* read by scripts/deck.js */
@@ -90,39 +89,36 @@
   .access__slot--2 { --d: 1; }
   .access__slot--3 { --d: 2; }
   .access__stage.is-dragging .access__slot { transition: none; }
-  .access__dots {
-    display: flex; justify-content: center; gap: 4px;
-    margin-top: 4px;
-  }
-}
-/* the dots under the deck: which card is on top; a tap brings that card up (each is a 24px target round a 8px dot) */
-.access__dot {
-  display: grid; place-items: center; width: 24px; height: 24px;
-  &::before {
-    content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-30);
-    transition: background-color var(--hover-out) var(--ease-out), scale var(--hover-out) var(--ease-out);
-  }
-  &[aria-current="true"]::before { background: var(--ink); scale: 1.25; }
 }
 
 .idcard {
   position: relative;
   width: 240px; height: 345px;
-  border-radius: 28px; background: var(--paper);
+  border-radius: 28px;
   rotate: var(--rest);
 }
+/* The card's face. Its colour is a layer of its own (::before) with the slot for the clip cut right through it, so
+   what lies under the card (the cards under it in the deck, the page) shows through the slot, as through a real one.
+   The face itself has no colour, only the shadow, which a box-shadow draws outside the card and not in the slot. */
 .idcard__face {
-  position: relative;
+  position: relative; isolation: isolate;
   display: flex; flex-direction: column;
   width: 240px; height: 345px;
-  overflow: hidden; border-radius: 28px;
+  border-radius: 28px;
   box-shadow: 0 24px 24px -16px rgb(0 0 0 / 0.4), 0 0 16px rgb(0 0 0 / 0.02), 0 24px 56px rgb(0 0 0 / 0.1);
   color: var(--paper);
+
+  &::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    border-radius: inherit; background: var(--face);
+    /* the card less the slot: 48×12px, fully rounded, 12px from the top, centred */
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+  }
 }
-.idcard__face--1 { --line: #999; background: #666; }
-.idcard__face--2 { --line: #808080; background: #4d4d4d; }
-.idcard__face--3 { --line: #666; background: #333; }
-.idcard__clip { position: absolute; top: 12px; left: 96px; width: 48px; height: 12px; border-radius: var(--round); background: var(--paper); }
+.idcard__face--1 { --line: #999; --face: #666; }
+.idcard__face--2 { --line: #808080; --face: #4d4d4d; }
+.idcard__face--3 { --line: #666; --face: #333; }
 .idcard__who {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
   width: 100%; height: 100%; padding: 28px 34px 0;
@@ -137,8 +133,8 @@
 }
 
 /* ── Releases: the ring of covers (scripts/ring.js) and four features ──
-   The features stay in two columns down to the narrowest phone, and become a row of four once each would be at
-   least about 170px wide (a 736px column). Never three: four cards would leave one alone on a row. */
+   The features are in two columns on phones (one on the narrowest, below 390px), and become a row of four once each
+   would be at least about 170px wide (a 736px column). Never three: four cards would leave one alone on a row. */
 .releases { padding-top: 0; container: releases / inline-size; }
 .ring { position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto; overflow: hidden; }
 .features {
@@ -146,6 +142,8 @@
   width: 100%; max-width: var(--column-max);
 }
 @container releases (width >= 46rem) { .features { grid-template-columns: repeat(4, 1fr); } }
+/* the narrowest phones: one card a row (two would leave about 130px each: four or five words a line, cut short) */
+@media (--narrow) { .features { grid-template-columns: 1fr; } }
 .feature {
   display: flex; flex-direction: column; justify-content: space-between; gap: clamp(24px, 3vw, 40px);
   padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);
@@ -184,12 +182,18 @@
 .logo-card__img { width: 100%; height: 100%; }
 .logo-card__name {
   position: absolute; left: 0; right: 0; bottom: 0;
+  /* one line, never two: a long name ends in "…" (the whole name is still read by screen readers). The space at its
+     sides is the space under it (8% of the tile both ways). */
   padding: 0 8% 8%;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   font-size: max(12px, var(--u) * 14 / 247); line-height: 1.1; text-align: center; color: var(--ink-60);
-  opacity: 0; transition: opacity var(--hover-out) var(--ease-out);
+  /* it comes in softly, the way a button deepens under the mouse (button.css: the --ease-out curve, quick in, a
+     little slower out), rising a few px into place as it fades in */
+  opacity: 0; translate: 0 6px;
+  transition: opacity var(--hover-out) var(--ease-out), translate var(--hover-out) var(--ease-out);
 }
-.logo-card.is-named .logo-card__name { opacity: 1; transition-duration: var(--hover-in); }
-@media (--mouse) { .logo-card:hover .logo-card__name { opacity: 1; transition-duration: var(--hover-in); } }
+.logo-card.is-named .logo-card__name { opacity: 1; translate: none; transition-duration: calc(var(--hover-in) * 2); }
+@media (--mouse) { .logo-card:hover .logo-card__name { opacity: 1; translate: none; transition-duration: calc(var(--hover-in) * 2); } }
 .stat {
   grid-column: span 2;
   display: flex; flex-direction: column; justify-content: flex-end;
@@ -210,17 +214,24 @@
 /* ── Call to action: the purple card, with dots along its border (scripts/stipple.js) and a strip of words ──
    As wide as the column (on phones nearly the whole screen, like the card stack: --inset), and about three quarters
    of the screen's height (at most 680px): on a short screen it never needs scrolling through, on a tall one it never
-   becomes a tower. Its content sets the least it can be. */
+   becomes a tower. Its content sets the least it can be. On phones held upright its shape comes from its width
+   instead: 1.15 to 1.4 times as tall as wide, within that by the screen's height. A tall phone no longer stretches
+   it into a column, a short one no longer squashes it. */
 .cta {
   display: flex; flex-direction: column; align-items: center;
   padding: var(--section-y) var(--inset) calc(var(--section-y) * 1.4);
   @media not (--phone) { padding-inline: var(--gutter); }
 }
 .cta__card {
+  --cta-title: clamp(min(var(--type-h2), 26px), var(--screen) * 0.09, var(--type-h2));
   position: relative; isolation: isolate;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   width: 100%; max-width: var(--column-max);
   min-height: min(0.72 * var(--screen), 680px);
+  @media (--phone) and (--portrait) {
+    --w: calc(100vw - 2 * var(--inset));
+    min-height: clamp(var(--w) * 1.15, 0.72 * var(--screen), var(--w) * 1.4);
+  }
   padding: calc(var(--section-y) * 0.8) clamp(24px, 5vw, 48px) calc(65px + var(--section-y) * 0.6);
   overflow: hidden; border-radius: var(--radius-l);
   background-color: var(--purple);
@@ -235,15 +246,17 @@
 }
 .cta__copy { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
 .cta__title {
-  max-width: 13em;
+  max-width: 13em; padding-inline: var(--center-air);
   font-family: var(--font-display); font-weight: 700; line-height: 1; text-align: center; color: var(--paper);
-  font-size: min(var(--type-h2), 9vh);               /* a phone turned sideways: the card still fits the screen */
+  /* a phone turned sideways: the card still fits the screen; but never under 26px, and the text under it keeps
+     smaller than it (as in the hero) */
+  font-size: var(--cta-title);
   text-wrap: balance;
 }
 .cta__lead-box { display: flex; justify-content: center; width: 100%; }
 .cta__lead {
   max-width: 26em;
-  font-size: var(--type-lead); line-height: 1.3; text-align: center; color: var(--paper);
+  font-size: min(var(--type-lead), var(--cta-title) * 0.6); line-height: 1.3; text-align: center; color: var(--paper);
   text-wrap: balance;
 }
 /* the strip of words along the bottom: one picture (marquee.svg, a word list 714px long and a 24px gap) repeated,

@@ -19,12 +19,15 @@
 
    Heights. Phones turned sideways and short laptop windows (1366×768 and 1536×864 screens leave 620–730 px of page)
    are handled without steps: what is sized by the screen's height (the hero, the cards of the stack, the CTA card, the
-   pinned logos) is capped by it directly (vh), so it shrinks smoothly with the window. */
+   pinned logos) is capped by it directly (vh), so it shrinks smoothly with the window.
+   One height condition: --sideways, a phone turned sideways (or a window as short and narrow as one): the navbar
+   hides while scrolling down (scripts/nav.js) and the card stack sticks to the top of the screen instead of under it. */
 @custom-media --desktop (width >= 1440px);
 @custom-media --wide (width >= 1920px);
 @custom-media --tablet (width < 1024px);
 @custom-media --phone (width < 768px);
 @custom-media --narrow (width < 390px);
 @custom-media --portrait (orientation: portrait);
+@custom-media --sideways (width < 1024px) and (height < 500px) and (orientation: landscape);
 @custom-media --mouse (hover: hover) and (pointer: fine);
 @custom-media --calm (prefers-reduced-motion: reduce);

@@ -8,9 +8,11 @@
    A section counts as reached when its top has come up to LINE: 40% of the way from the navbar's bottom edge down to
    the bottom of the screen. At the very bottom of the page the last section with a link is reached whatever its size.
    After a click on a link, the outline goes straight there and waits until the page has stopped scrolling, instead of
-   stopping at every section on the way. With "reduce motion" it jumps instead of sliding.
+   stopping at every section on the way. A click on another link while it slides sends it on from where it is, at the
+   speed it has (glide.js), instead of stopping it and starting again. With "reduce motion" it jumps instead of sliding.
    The current link has aria-current (screen readers say which section is on screen; the outline is its only mark). */
-import { css as curves } from "./motion.js";
+import { M } from "./motion.js";
+import { bezier, glider } from "./glide.js";
 
 const MIN = 250, MAX = 650;          // ms: the shortest move, and a move across the whole row
 const LINE = 0.4;                    // where a section counts as reached (see above)
@@ -28,7 +30,9 @@ export function initPill() {
   row.appendChild(pill);
   document.documentElement.classList.add("pill-on");
 
-  let cur = null, box = null, span = 1, lock = null, lockTimer = 0, lockStart = 0, queued = 0;
+  let cur = null, box = null, span = 1, lock = null, lockTimer = 0, lockStart = 0, queued = 0, raf = 0;
+  const motion = glider(bezier(...M.curve.move), [0, 0, 0, 0]);       // x, y, width, height
+  const clock = () => performance.now() / 1000;
   const shown = (el) => el.offsetWidth > 0 || el.offsetHeight > 0;
 
   // where a link is in its row (in the row's own px, right even while the navbar is scaled)
@@ -43,10 +47,17 @@ export function initPill() {
     for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) s = Math.max(s, Math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]));
     return s;
   };
-  const place = (b) => {
-    pill.style.width = b.w + "px";
-    pill.style.height = b.h + "px";
-    pill.style.transform = "translate(" + b.x + "px, " + b.y + "px)";
+  const draw = ([x, y, w, h]) => {
+    pill.style.width = w.toFixed(2) + "px";
+    pill.style.height = h.toFixed(2) + "px";
+    pill.style.transform = "translate(" + x.toFixed(2) + "px, " + y.toFixed(2) + "px)";
+  };
+  const place = (b) => { cancelAnimationFrame(raf); raf = 0; motion.jump([b.x, b.y, b.w, b.h]); draw([b.x, b.y, b.w, b.h]); };
+  const slide = (b, seconds) => {
+    motion.to([b.x, b.y, b.w, b.h], seconds, clock());
+    if (raf) return;
+    const tick = () => { const s = motion.at(clock()); draw(s.p); raf = s.done ? 0 : requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
   };
   const mark = (a) => items.forEach((it) => { if (it.a === a) it.a.setAttribute("aria-current", "location"); else it.a.removeAttribute("aria-current"); });
 
@@ -54,7 +65,7 @@ export function initPill() {
   function go(a, now) {
     if (a === cur && !now) return;
     mark(a);
-    if (!a) { pill.style.transition = "opacity 0.25s ease"; pill.style.opacity = "0"; cur = box = null; return; }
+    if (!a) { cancelAnimationFrame(raf); raf = 0; pill.style.transition = "opacity 0.25s ease"; pill.style.opacity = "0"; cur = box = null; return; }
     const b = measure(a);
     if (now || !box || calm.matches) {
       // it was not shown: it appears in place (fading in), it does not slide in from somewhere
@@ -64,10 +75,12 @@ export function initPill() {
       if (appear) { pill.style.opacity = "0"; void pill.offsetWidth; pill.style.transition = "opacity 0.25s ease"; }
       pill.style.opacity = "1";
     } else {
-      const far = Math.hypot(b.x + b.w / 2 - (box.x + box.w / 2), b.y + b.h / 2 - (box.y + box.h / 2));
+      // the time by the way it has to go from where it is now (it may be on its way somewhere else)
+      const [x, y, w, h] = motion.at(clock()).p;
+      const far = Math.hypot(b.x + b.w / 2 - (x + w / 2), b.y + b.h / 2 - (y + h / 2));
       const ms = Math.round(MIN + (MAX - MIN) * Math.min(1, far / span));
-      pill.style.transition = ["transform", "width", "height"].map((k) => k + " " + ms + "ms " + curves.move).join(", ") + ", opacity 0.25s ease";
-      place(b);
+      pill.style.transition = "opacity 0.25s ease";
+      slide(b, ms / 1000);
       pill.style.opacity = "1";
     }
     cur = a; box = b;

@@ -30,6 +30,10 @@
   --column-max: 1024px;
   --column: min(var(--column-max), 100vw - 2 * var(--gutter));
 
+  /* the extra air at the sides of a centred heading on narrow phones (8px up to 400px wide, none from 600px):
+     there a centred line of big letters reaches the gutter on both sides and looks pressed against the edges */
+  --center-air: clamp(0px, (600px - 100vw) / 25, 8px);
+
   /* the screen's height: steady on phones (scripts/boot.js), the browser's own elsewhere */
   --screen: calc(100 * var(--fm-vh, 1vh));
   --screen-s: calc(100 * var(--fm-svh, 1svh));
