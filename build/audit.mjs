@@ -13,8 +13,8 @@
 //
 // Browser: Playwright's Chromium (`npx playwright install chromium` once), or the one in PLAYWRIGHT_CHROMIUM.
 // Other engines: FM_ENGINE=firefox or FM_ENGINE=webkit (`npx playwright install firefox webkit`). They have no phone
-// emulation of Chromium's kind (Firefox none at all) and no way to set the browser's text size, so there the phone
-// sizes are plain windows of that size and the bigger-text sizes are left out.
+// emulation of Chromium's kind (Firefox none at all), so there the phone sizes are plain windows of that size. The
+// bigger text is set in Chromium through DevTools and in Firefox through its settings; WebKit leaves those sizes out.
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -95,9 +95,12 @@ const executablePath = chrome ? process.env.PLAYWRIGHT_CHROMIUM || (existsSync("
 const browser = await playwright[ENGINE].launch(chrome ? { executablePath, args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] } : {});
 console.log(`engine: ${ENGINE} ${browser.version()}`);
 const failures = [];
+// Firefox: its text size is a setting of the browser, so a second browser is started with it
+const big = ENGINE === "firefox" && SIZES.some((s) => s.font)
+  ? await playwright.firefox.launch({ firefoxUserPrefs: { "font.size.variable.x-cyrillic": 24, "font.size.variable.x-western": 24 } }) : null;
 for (const s of SIZES) {
-  if (s.font && !chrome) continue;                    // the text size can only be set in Chromium
-  const ctx = await browser.newContext({ viewport: { width: s.w, height: s.h }, hasTouch: !!s.touch, isMobile: !!s.touch && ENGINE !== "firefox", bypassCSP: true });
+  if (s.font && !chrome && !big) continue;            // WebKit: no way to set the text size
+  const ctx = await (s.font && big ? big : browser).newContext({ viewport: { width: s.w, height: s.h }, hasTouch: !!s.touch, isMobile: !!s.touch && ENGINE !== "firefox", bypassCSP: true });
   const page = await ctx.newPage();
   if (s.font) { const cdp = await ctx.newCDPSession(page); await cdp.send("Page.enable"); await cdp.send("Page.setFontSizes", { fontSizes: { standard: s.font, fixed: Math.round(s.font * 13 / 16) } }); }
   const errors = [];
@@ -137,6 +140,7 @@ for (const s of SIZES) {
   await ctx.close();
 }
 await browser.close();
+if (big) await big.close();
 server.close();
 if (failures.length) { console.log(`\n${failures.length} problem(s):`); failures.forEach((f) => console.log("  " + f)); process.exitCode = 1; }
 else console.log("\nAll checks passed.");
