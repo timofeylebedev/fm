@@ -133,17 +133,19 @@
 }
 
 /* ── Releases: the ring of covers (scripts/ring.js) and four features ──
-   The features are in two columns on phones (one on the narrowest, below 390px), and become a row of four once each
-   would be at least about 170px wide (a 736px column). Never three: four cards would leave one alone on a row. */
+   The features are in two columns on phones (one in a column under 350px: the narrowest phones), and become a row of
+   four once each would be at least about 170px wide (a 736px column). Never three: four cards would leave one alone on a row. */
 .releases { padding-top: 0; container: releases / inline-size; }
 .ring { position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto; overflow: hidden; }
+/* one card a row in a column under 350px (the narrowest phones: two would leave about 130px each, four or five words a
+   line, cut short), two from there, four from 736px. In rem, so a visitor with bigger text gets fewer, wider cards
+   (with the browser's text at 24px, a 390px phone shows one a row). minmax(0, 1fr): a long word never widens its card. */
 .features {
-  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.2vw, 12px);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(8px, 1.2vw, 12px);
   width: 100%; max-width: var(--column-max);
 }
-@container releases (width >= 46rem) { .features { grid-template-columns: repeat(4, 1fr); } }
-/* the narrowest phones: one card a row (two would leave about 130px each: four or five words a line, cut short) */
-@media (--narrow) { .features { grid-template-columns: 1fr; } }
+@container releases (width >= 21.875rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container releases (width >= 46rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .feature {
   display: flex; flex-direction: column; justify-content: space-between; gap: clamp(24px, 3vw, 40px);
   padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);

@@ -6,7 +6,7 @@
    fifth of mobile visits) or 390–430 (about a quarter), tablets 686–834 upright and 1024–1280 sideways, computers
    mostly 1366–1920. Between the steps, sizes do not jump: most of them grow in a straight line from one step to the
    next (the fluid values of tokens.gen.css), and blocks that can arrange themselves by their own width do so
-   (container queries: the ID cards become a deck below a 728px column, the features go from two columns to four,
+   (container queries: the ID cards become a deck below a 560px column, the features go from one column to two and four,
    the royalty cards, tools and publications sit side by side where they fit), so these steps are used only where
    the whole page changes.
 
@@ -20,14 +20,18 @@
    Heights. Phones turned sideways and short laptop windows (1366×768 and 1536×864 screens leave 620–730 px of page)
    are handled without steps: what is sized by the screen's height (the hero, the cards of the stack, the CTA card, the
    pinned logos) is capped by it directly (vh), so it shrinks smoothly with the window.
+   The steps are written in em: an em in a media query is the browser's own text size (16px unless the visitor has
+   changed it), so with the usual setting they are exactly the px widths above, and a visitor who has made the text
+   bigger (20 or 24px) gets the layout of a narrower screen, with room for that text, instead of the same layout
+   crammed with it.
    One height condition: --sideways, a phone turned sideways (or a window as short and narrow as one): the navbar
    hides while scrolling down (scripts/nav.js) and the card stack sticks to the top of the screen instead of under it. */
-@custom-media --desktop (width >= 1440px);
-@custom-media --wide (width >= 1920px);
-@custom-media --tablet (width < 1024px);
-@custom-media --phone (width < 768px);
-@custom-media --narrow (width < 390px);
+@custom-media --desktop (width >= 90em);       /* 1440px */
+@custom-media --wide (width >= 120em);         /* 1920px */
+@custom-media --tablet (width < 64em);         /* 1024px */
+@custom-media --phone (width < 48em);          /* 768px */
+@custom-media --narrow (width < 24.375em);     /* 390px */
 @custom-media --portrait (orientation: portrait);
-@custom-media --sideways (width < 1024px) and (height < 500px) and (orientation: landscape);
+@custom-media --sideways (width < 64em) and (height < 31.25em) and (orientation: landscape);   /* 1024 × 500px */
 @custom-media --mouse (hover: hover) and (pointer: fine);
 @custom-media --calm (prefers-reduced-motion: reduce);
