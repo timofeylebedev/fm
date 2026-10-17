@@ -24,7 +24,7 @@ const CONFIG = {
   perspective: 3000,     // lower = stronger 3D distortion
   cornerRadius: 24,
   backFade: 6,           // how much the backs of the covers fade to the colour below: 0 (not at all) to 10 (solid colour)
-  backFadeColor: "#ffffff",
+  backFadeColor: "var(--paper)",
   background: "transparent",
 
   // Scroll. Progress runs from the block entering the viewport to it leaving.

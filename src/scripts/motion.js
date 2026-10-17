@@ -121,6 +121,18 @@ export function initMotion() {
   items.forEach(watch);
   prepareNear();
   lean();
+  // whatever the keyboard reaches is there at once: a card that gets the focus (and the block it is in) is shown
+  // without waiting for its beat, so the focus ring never lands on something still invisible
+  document.addEventListener("focusin", (e) => {
+    for (let n = e.target; n && n !== document.body; n = n.parentElement) if (n.fmItem && n.fmItem.state !== "done") finish(n.fmItem);
+  });
+}
+
+// A jump to a section (a link of the navbar or the menu): everything in it is shown at once, so it is all there when
+// the scroll arrives, instead of coming in one by one after it (main.js calls this)
+export function reveal(section) {
+  if (!live || !section) return;
+  items.filter((it) => it.state !== "done" && section.contains(it.el)).forEach(finish);
 }
 
 // where a tilt card starts, and where it lands (from there it slides on to y 0 and its own angle).
@@ -202,6 +214,7 @@ function dropPose(o, t, T) {
   return { x: X * g * (1 - v), y: Y * g * (1 - v), s: 1, r: b.rotation + (o.rest - b.rotation) * w };
 }
 function dealX(it) {
+  if (it.el.closest(".is-deck")) return (it.dealt = 0);    // a deck (deck.js): the cards are meant to lie on one another
   const T = dropTimes(), D = T.D, tf = D.land * D.fade, t0 = now();
   const centre = (o) => {                                    // where the card lies, without any of its movement
     const r = o.el.getBoundingClientRect();

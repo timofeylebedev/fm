@@ -15,7 +15,7 @@ import { calm } from "./motion.js";
 // The three stat cards. The colour of their dots is --dots in the styles (.stat--orange, .stat--blue, .stat--green).
 /* STIPPLE:START */
 const STIPPLE = {
-  background: "#F7F7F7",   // colour between the dots (the cards' own grey on the white page)
+  background: "var(--mist)",   // colour between the dots (the cards' own grey on the white page)
   density: 0,              // 0…100: how far up the dots reach
   scale: 45,               // % size of the dot grid
   dotTop: 10,              // % size of a dot at the top
@@ -66,9 +66,9 @@ const STIPPLE = {
 // "top" means the inner end of the dots (towards the middle of the card), "bottom" means the border.
 /* STIPPLE_CTA:START */
 const STIPPLE_CTA = {
-  background: "#B596FF",   // colour between the dots
-  color: "#884DFF",        // colour of the dots
-  accent: "#FFFFFF",       // colour of glint and crest
+  background: "var(--purple-light)",   // colour between the dots
+  color: "var(--purple)",              // colour of the dots
+  accent: "var(--paper)",              // colour of glint and crest
   reach: 36,               // % of the card's shorter side: how far in from the border the dots go
   invert: 0,               // 1 = the other way round: dense in the middle, thinning out towards the border
   density: 0,              // 0…100: how far in the dots reach
@@ -142,6 +142,9 @@ function target(c, seed, i, t) {
 
 function color(s, fallback) {
   s = (s || "").trim();
+  // a colour of the site by its name, "var(--mist)": read from the styles (tokens.gen.css), so it follows the palette
+  const v = /^var\((--[\w-]+)\)$/.exec(s);
+  if (v) s = getComputedStyle(document.documentElement).getPropertyValue(v[1]).trim();
   let m = /^#([\da-f]{3}|[\da-f]{6})$/i.exec(s);
   if (m) {
     let h = m[1]; if (h.length === 3) h = h.replace(/./g, "$&$&");

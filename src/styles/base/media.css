@@ -1,10 +1,30 @@
 /* The screen widths and conditions the styles are written for (custom media: replaced by the build, nothing of this
-   file is left in the output). Every stylesheet that uses them imports this file. */
-/* Screen widths (the same steps as the design in Taptop): */
-@custom-media --lg (width >= 1280px);     /* large computers */
-@custom-media --xl (width >= 1440px);     /* the widest */
-@custom-media --tablet (width <= 991px);  /* tablets and phones: the burger menu */
-@custom-media --phone (width <= 767px);   /* phones, and phones turned sideways */
-@custom-media --narrow (width <= 479px);  /* phones held upright */
+   file is left in the output). Every stylesheet that uses them imports this file.
+
+   Widths. The base styles are the laptop (1024–1439); the media below change them for wider and for narrower screens.
+   The steps come from what visitors have (StatCounter, Russia, September 2026): phones are 360–384 px wide (about a
+   fifth of mobile visits) or 390–430 (about a quarter), tablets 686–834 upright and 1024–1280 sideways, computers
+   mostly 1366–1920. Between the steps, sizes do not jump: most of them grow in a straight line from one step to the
+   next (the fluid values of tokens.gen.css), and blocks that can arrange themselves by their own width do so
+   (container queries: the ID cards become a deck below a 600px column, the features go from two columns to four,
+   the royalty cards, tools and publications sit side by side where they fit), so these steps are used only where
+   the whole page changes.
+
+        320–389   narrow phones                 --narrow   two columns of logos (three on other phones)
+        390–767   phones, and phones sideways   --phone    the contacts centred, the grey notes in one column (upright)
+        768–1023  tablets upright               --tablet   the burger menu
+       1024–1439  laptops, tablets sideways      (base)    the links of the navbar
+       1440–      computers                     --desktop
+       1920–      the widest                    --wide     where the fluid values stop growing
+
+   Heights. Phones turned sideways and short laptop windows (1366×768 and 1536×864 screens leave 620–730 px of page)
+   are handled without steps: what is sized by the screen's height (the hero, the cards of the stack, the CTA card, the
+   pinned logos) is capped by it directly (vh), so it shrinks smoothly with the window. */
+@custom-media --desktop (width >= 1440px);
+@custom-media --wide (width >= 1920px);
+@custom-media --tablet (width < 1024px);
+@custom-media --phone (width < 768px);
+@custom-media --narrow (width < 390px);
+@custom-media --portrait (orientation: portrait);
 @custom-media --mouse (hover: hover) and (pointer: fine);
 @custom-media --calm (prefers-reduced-motion: reduce);

@@ -4,6 +4,8 @@
 // A change is { collection, name, field: "type"|"value"|"web"|"description", mode?, type, value } (value null = removed).
 
 const CHANGES = /*CHANGES*/[];
+// collections whose modes differ from Figma's: { collection: { modes: [the code's modes], rename: { old: new } } }
+const MODES = /*MODES*/{};
 
 const TYPES = { color: "COLOR", number: "FLOAT", string: "STRING", boolean: "BOOLEAN" };
 // what a new variable may be applied to in Figma (by its name), so it does not show up in every picker
@@ -38,6 +40,19 @@ const toFigma = async (type, value) => {
 };
 
 const done = [], skipped = [];
+// modes first: renamed (frames that use a mode keep it, under its new name), then the missing ones added. Modes the code
+// no longer has are removed at the very end, once every value has been written.
+for (const [name, m] of Object.entries(MODES)) {
+  const col = cols.find((c) => c.name === name);
+  if (!col) { skipped.push(`modes: no collection "${name}" in Figma`); continue; }
+  for (const [from, to] of Object.entries(m.rename || {})) {
+    const mode = col.modes.find((x) => x.name === from);
+    if (mode && !col.modes.some((x) => x.name === to)) { col.renameMode(mode.modeId, to); done.push(`${name}: mode ${from} → ${to}`); }
+  }
+  for (const mode of m.modes) {
+    if (!col.modes.some((x) => x.name === mode)) { col.addMode(mode); done.push(`${name}: mode ${mode} added`); }
+  }
+}
 // variables that are new in the code: create them first
 for (const ch of CHANGES.filter((c) => c.field === "type" && c.value !== null)) {
   const key = ch.collection + "/" + ch.name;
@@ -70,6 +85,13 @@ for (const ch of CHANGES) {
   } else if (ch.field === "description") {
     v.description = ch.value ?? "";
     done.push(`${key}: description`);
+  }
+}
+for (const [name, m] of Object.entries(MODES)) {
+  const col = cols.find((c) => c.name === name);
+  if (!col) continue;
+  for (const mode of col.modes.slice()) {
+    if (!m.modes.includes(mode.name)) { col.removeMode(mode.modeId); done.push(`${name}: mode ${mode.name} removed`); }
   }
 }
 return { changed: done.length, done, skipped };

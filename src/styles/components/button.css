@@ -7,6 +7,7 @@
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   flex: none;
   height: var(--button-height); padding: 9px var(--button-pad-x);
+  border: 1px solid transparent;                     /* invisible, except in Windows high-contrast mode, where it keeps the pill's shape */
   border-radius: var(--round);
   font-size: var(--type-button); line-height: normal; white-space: nowrap;
   color: var(--paper); background-color: var(--purple);

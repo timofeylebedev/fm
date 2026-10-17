@@ -1,13 +1,15 @@
-/* The footer: contacts, then the legal line. Sizes from Figma variables footer/*, type/footer* (tokens.gen.css). */
+/* The footer: contacts, then the legal line. Sizes from Figma variables footer/*, type/footer* (tokens.gen.css).
+   The legal notes: in a row on computers, in two columns on tablets and phones turned sideways, one under another
+   (centred, like the contacts above them) on phones held upright. */
 
 .footer { display: flex; flex-direction: column; background: var(--mist); }
 .footer__contact {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: var(--footer-contact-y) 24px;
+  padding: var(--footer-contact-y) var(--gutter);
 }
 .footer__row {
   display: flex; align-items: center; justify-content: space-between;
-  width: 100%; max-width: 1024px;
+  width: 100%; max-width: var(--column-max);
   @media (--phone) { flex-direction: column-reverse; gap: 24px; }
 }
 .footer__ask {
@@ -19,22 +21,27 @@
 }
 .footer__mail {
   font-size: var(--type-footer); color: var(--ink-60);
+  padding-block: 4px; margin-block: -4px;                   /* a taller target to tap, the same line */
   transition: color var(--hover-out) var(--ease-out);
 }
 .footer__legal {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: var(--footer-legal-y) 24px;
+  padding: var(--footer-legal-y) var(--gutter);
   border-top: 1px solid var(--ink-10);
 }
 .footer__legal-row {
   display: flex; column-gap: 24px;
-  width: 100%; max-width: 1024px;
+  width: 100%; max-width: var(--column-max);
   @media (--tablet) { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; row-gap: 4px; }
+  @media (--phone) and (--portrait) { display: flex; flex-direction: column; align-items: center; row-gap: 6px; text-align: center; }
 }
 .footer__note {
   font-size: var(--type-footer-note); color: var(--ink-40);
 }
-.footer__link { transition: color var(--hover-out) var(--ease-out); }
+.footer__link {
+  padding-block: 6px; margin-block: -6px;                   /* 24px to tap at the smallest size */
+  transition: color var(--hover-out) var(--ease-out);
+}
 @media (--mouse) {
   .footer__mail:hover, .footer__link:hover { color: var(--ink); transition-duration: var(--hover-in); }
 }

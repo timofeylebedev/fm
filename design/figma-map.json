@@ -8,26 +8,70 @@
     "$about": "Which screen widths each mode of a multi-mode collection stands for. The base mode goes in :root; each layer overrides it inside a custom media of src/styles/base/media.css, where it differs from the mode in effect around it (parent).",
     "Breakpoint": {
       "base": "1024",
+      "renamed": {
+        "480": "390"
+      },
       "layers": [
-        { "mode": "1280", "media": "--lg", "parent": "1024" },
-        { "mode": "1440", "media": "--xl", "parent": "1280" },
-        { "mode": "768", "media": "--tablet", "parent": "1024" },
-        { "mode": "480", "media": "--phone", "parent": "768" },
-        { "mode": "320", "media": "--narrow", "parent": "480" }
+        {
+          "mode": "1440",
+          "media": "--desktop",
+          "parent": "1024"
+        },
+        {
+          "mode": "1920",
+          "media": "--wide",
+          "parent": "1440"
+        },
+        {
+          "mode": "768",
+          "media": "--tablet",
+          "parent": "1024"
+        },
+        {
+          "mode": "390",
+          "media": "--phone",
+          "parent": "768"
+        },
+        {
+          "mode": "320",
+          "media": "--narrow",
+          "parent": "390"
+        }
       ]
     }
   },
   "sections": {
     "footer": {
       "html": "src/index.html → <footer class=\"footer\">",
-      "css": ["src/styles/sections/footer.css", "src/styles/components/button.css"],
+      "css": [
+        "src/styles/sections/footer.css",
+        "src/styles/components/button.css"
+      ],
       "figma": {
         "component": "22:106",
-        "variants": { "Desktop": "22:60", "Tablet": "22:74", "Phone": "22:90" }
+        "variants": {
+          "Desktop": "22:60",
+          "Tablet": "22:74",
+          "Phone": "22:90"
+        }
       },
-      "tokens": ["Breakpoint/footer/contact-y", "Breakpoint/footer/legal-y", "Breakpoint/type/footer", "Breakpoint/type/footer-note",
-                 "Breakpoint/button/height", "Breakpoint/button/pad-x", "Breakpoint/button/pad-x-alt", "Breakpoint/type/button",
-                 "Color/surface/mist", "Color/ink/100", "Color/ink/60", "Color/ink/40", "Color/ink/10", "Color/brand/purple", "Color/surface/paper"],
+      "tokens": [
+        "Breakpoint/footer/contact-y",
+        "Breakpoint/footer/legal-y",
+        "Breakpoint/type/footer",
+        "Breakpoint/type/footer-note",
+        "Breakpoint/button/height",
+        "Breakpoint/button/pad-x",
+        "Breakpoint/button/pad-x-alt",
+        "Breakpoint/type/button",
+        "Color/surface/mist",
+        "Color/ink/100",
+        "Color/ink/60",
+        "Color/ink/40",
+        "Color/ink/10",
+        "Color/brand/purple",
+        "Color/surface/paper"
+      ],
       "wired": true
     }
   }
