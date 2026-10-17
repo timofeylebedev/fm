@@ -102,7 +102,9 @@ const len = (v, rem) => (v === 0 ? "0px" : rem ? `${r4(v / 16)}rem` : `${v}px`);
 function fluidValue(v0, w0, v1, w1, rem) {
   if (v1 === undefined || v0 === v1) return len(v0, rem);
   const slope = r4((v1 - v0) / (w1 - w0));
-  return `clamp(${len(Math.min(v0, v1), rem)}, calc(${len(v0, rem)} + (100vw - ${w0}px) * ${slope}), ${len(Math.max(v0, v1), rem)})`;
+  // the screen width it starts from in rem, as the steps of media.css are in em: the same at the usual 16px, and with
+  // bigger text the line starts where its step does, so sizes still do not jump from one step to the next
+  return `clamp(${len(Math.min(v0, v1), rem)}, calc(${len(v0, rem)} + (100vw - ${r4(w0 / 16)}rem) * ${slope}), ${len(Math.max(v0, v1), rem)})`;
 }
 function cssValue(type, v, rem) {
   if (type === "number") return v === 0 ? "0" : rem ? len(v, true) : `${v}px`;

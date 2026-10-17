@@ -14,8 +14,9 @@ permissions:
   pages: write
   id-token: write
 
+# one run at a time per branch or pull request: a push to a pull request never cancels a deploy of main
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

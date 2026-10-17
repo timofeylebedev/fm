@@ -144,6 +144,7 @@
   grid-area: 1 / 1; position: relative;
   &:not(.is-split) { visibility: hidden; }                             /* until the script has split it into lines */
   & .fm-line { white-space: nowrap; }
+  html.lines-rest & .fm-line { white-space: normal; }                 /* see motion.css */
 }
 .stack-on .card.is-asleep .card__art > .art { display: none; }        /* far from its turn: its drawings let go of their memory */
 .stack-on .card.is-off { visibility: hidden; }                        /* nothing of it is seen: not under the navbar either */

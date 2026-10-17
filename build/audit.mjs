@@ -7,16 +7,20 @@
 //     hero's chips and the sliding strip of logos are left out: they are cut off on purpose);
 //   · text under 12px as it is drawn (scaling included), outside the drawings;
 //   · a link or button smaller than 24×24px to tap (WCAG 2.2, 2.5.8);
-//   · axe-core rules (accessibility), at a phone and a computer size.
+//   · axe-core rules (accessibility), at a phone and a computer size;
+//   · all of the above but axe with the browser's text made bigger (24px), at a phone and a short laptop.
 // Known exceptions are listed in ACCEPTED below, each with its reason; anything else is a failure.
 //
 // Browser: Playwright's Chromium (`npx playwright install chromium` once), or the one in PLAYWRIGHT_CHROMIUM.
+// Other engines: FM_ENGINE=firefox or FM_ENGINE=webkit (`npx playwright install firefox webkit`). They have no phone
+// emulation of Chromium's kind (Firefox none at all), so there the phone sizes are plain windows of that size. The
+// bigger text is set in Chromium through DevTools and in Firefox through its settings; WebKit leaves those sizes out.
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { resolve, extname, join } from "node:path";
 import { createRequire } from "node:module";
-import { chromium } from "playwright";
+import * as playwright from "playwright";
 
 const root = resolve(import.meta.dirname, "..");
 const dist = join(root, "dist");
@@ -24,7 +28,10 @@ const AXE = await readFile(createRequire(import.meta.url).resolve("axe-core/axe.
 
 const SIZES = [
   { w: 320, h: 568, touch: true, axe: true }, { w: 390, h: 844, touch: true }, { w: 768, h: 1024, touch: true },
-  { w: 844, h: 390, touch: true }, { w: 1024, h: 768, touch: true }, { w: 1366, h: 650 }, { w: 1920, h: 1080, axe: true }
+  { w: 844, h: 390, touch: true }, { w: 1024, h: 768, touch: true }, { w: 1366, h: 650 }, { w: 1920, h: 1080, axe: true },
+  // the browser's text made bigger (Settings → Appearance → Font size: "Very large" is 24px): the rem sizes grow, and
+  // the em steps of media.css give the layout of a narrower screen. Nothing may then scroll sideways or be cut off.
+  { w: 390, h: 844, touch: true, font: 24 }, { w: 1366, h: 650, font: 24 }
 ];
 // decided on purpose, not to be reported again (the rule, what it is about, why)
 const ACCEPTED = [
@@ -81,12 +88,21 @@ function measure() {
   return out;
 }
 
-const executablePath = process.env.PLAYWRIGHT_CHROMIUM || (existsSync("/opt/pw-browsers/chromium-1194/chrome-linux/chrome") ? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" : undefined);
-const browser = await chromium.launch({ executablePath, args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
+const ENGINE = process.env.FM_ENGINE || "chromium";
+if (!["chromium", "firefox", "webkit"].includes(ENGINE)) { console.error(`audit: unknown FM_ENGINE ${ENGINE}`); process.exit(2); }
+const chrome = ENGINE === "chromium";
+const executablePath = chrome ? process.env.PLAYWRIGHT_CHROMIUM || (existsSync("/opt/pw-browsers/chromium-1194/chrome-linux/chrome") ? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" : undefined) : undefined;
+const browser = await playwright[ENGINE].launch(chrome ? { executablePath, args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] } : {});
+console.log(`engine: ${ENGINE} ${browser.version()}`);
 const failures = [];
+// Firefox: its text size is a setting of the browser, so a second browser is started with it
+const big = ENGINE === "firefox" && SIZES.some((s) => s.font)
+  ? await playwright.firefox.launch({ firefoxUserPrefs: { "font.size.variable.x-cyrillic": 24, "font.size.variable.x-western": 24 } }) : null;
 for (const s of SIZES) {
-  const ctx = await browser.newContext({ viewport: { width: s.w, height: s.h }, hasTouch: !!s.touch, isMobile: !!s.touch, bypassCSP: true });
+  if (s.font && !chrome && !big) continue;            // WebKit: no way to set the text size
+  const ctx = await (s.font && big ? big : browser).newContext({ viewport: { width: s.w, height: s.h }, hasTouch: !!s.touch, isMobile: !!s.touch && ENGINE !== "firefox", bypassCSP: true });
   const page = await ctx.newPage();
+  if (s.font) { const cdp = await ctx.newCDPSession(page); await cdp.send("Page.enable"); await cdp.send("Page.setFontSizes", { fontSizes: { standard: s.font, fixed: Math.round(s.font * 13 / 16) } }); }
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   await page.goto(url, { waitUntil: "networkidle" });
@@ -108,7 +124,7 @@ for (const s of SIZES) {
       for (const k of Object.keys(found)) m[k].forEach((x) => found[k].add(x));
     }
   }
-  const tag = `${s.w}×${s.h}`;
+  const tag = `${s.w}×${s.h}` + (s.font ? ` (text ${s.font}px)` : "");
   if (overflow > 0) failures.push(`${tag}: the page scrolls sideways by ${overflow}px`);
   for (const [k, label] of [["clipped", "text cut off"], ["small", "text under 12px"], ["targets", "target under 24px"]]) found[k].forEach((x) => failures.push(`${tag}: ${label}: ${x}`));
   errors.forEach((e) => failures.push(`${tag}: script error: ${e}`));
@@ -124,6 +140,7 @@ for (const s of SIZES) {
   await ctx.close();
 }
 await browser.close();
+if (big) await big.close();
 server.close();
 if (failures.length) { console.log(`\n${failures.length} problem(s):`); failures.forEach((f) => console.log("  " + f)); process.exitCode = 1; }
 else console.log("\nAll checks passed.");

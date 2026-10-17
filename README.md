@@ -39,7 +39,7 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
 - **A colour, or a size shared with Figma** (footer, buttons so far): `design/tokens.json`, the same values as the Figma
   variables; `npm run tokens:sync` moves changes both ways. See `design/README.md`.
 - **A font, a curve:** `src/styles/base/tokens.css`. The screen widths are in `src/styles/base/media.css` (with the data behind them).
-- **Checking the page:** `npm run build && npm run audit` — sideways scroll, cut-off text, text under 12px, small tap targets and axe-core at seven screen sizes, in Chromium (`npx playwright install chromium` once).
+- **Checking the page:** `npm run build && npm run audit` — sideways scroll, cut-off text, text under 12px, small tap targets and axe-core at nine screen sizes (two of them with the browser's text at 24px), in Chromium (`npx playwright install chromium` once; `FM_ENGINE=firefox` or `webkit` for the other engines). It also runs on every pull request (`.github/workflows/audit.yml`).
 - **A picture:** put the new original into `assets-src/img/` under the same name, run `npm run images`, commit the new files.
   The list in `build/images.mjs` says what is made from each original (sizes and formats: AVIF and WebP).
 - **A font:** `assets-src/fonts/`, then `npm run fonts` (needs Python with `pip install fonttools brotli`).

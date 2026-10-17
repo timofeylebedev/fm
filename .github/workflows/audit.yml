@@ -1,0 +1,54 @@
+# Checks every pull request in real browsers: `npm run audit` (build/audit.mjs)
+# loads the built page at nine screen sizes (phones, tablets, a phone turned sideways, laptops, a large screen, and
+# a phone and a laptop with the browser's text made bigger) and fails on sideways scroll, cut-off text, text under
+# 12px, tap targets under 24px, script errors and accessibility (axe-core) rules. Decided exceptions are listed in
+# build/audit.mjs (ACCEPTED), each with its reason.
+#
+# Three engines: Chromium (Chrome, Edge, Yandex Browser, Android) fails its check when a problem is found. Firefox and
+# WebKit (Safari, every browser on iPhone) run too, but only warn (their check stays green, the problems are in its
+# summary): they were added without a first run to compare with. Once they have come back clean a few times, delete
+# the `continue-on-error` line of the Audit step to make them fail too.
+# To make a failing check stop a merge: Settings → Rules → Rulesets → New branch ruleset for main → Require status
+# checks to pass → add "audit (chromium)". Without that the check informs, but does not block.
+name: Responsive audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: audit (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.engine }}
+      - run: npm run build
+      - name: Audit
+        continue-on-error: ${{ matrix.engine != 'chromium' }}
+        env:
+          FM_ENGINE: ${{ matrix.engine }}
+        run: |
+          set -o pipefail
+          npm run audit 2>&1 | tee audit.log || { [ "$FM_ENGINE" = chromium ] || echo "::warning title=Audit (${FM_ENGINE})::problems found, see the summary"; exit 1; }
+      - name: Summary
+        if: always()
+        run: |
+          { echo "### Responsive audit · ${{ matrix.engine }}"; echo; echo '```'; tail -n 60 audit.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
