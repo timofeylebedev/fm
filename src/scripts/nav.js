@@ -161,14 +161,17 @@ export function initCap(nav) {
    down, and the card stack sticks to the top: stack.css); nav-away says it is out of sight. */
 export function initHide(nav) {
   const MOVE = 12;                                          // px of scrolling up that bring it back
-  const mode = matchMedia("(width < 1024px) and (height < 500px) and (orientation: landscape)");
+  // whether the mode is on is read from the styles (nav.css sets --nav-hides under --sideways), so the screen sizes are
+  // written in one place only, media.css
+  const hides = () => getComputedStyle(nav).getPropertyValue("--nav-hides").trim() === "1";
+  let on = hides();
   const root = document.documentElement;
   const menu = document.querySelector("[data-menu]");
   let last = scrollY, turn = scrollY, away = false;
   const set = (v) => { if (v !== away) { away = v; root.classList.toggle("nav-away", v); } };
   const onScroll = () => {
     const y = scrollY, h = nav.offsetHeight;
-    if (!mode.matches || y <= h || (menu && menu.classList.contains("is-open")) || nav.contains(document.activeElement)) {
+    if (!on || y <= h || (menu && menu.classList.contains("is-open")) || nav.contains(document.activeElement)) {
       set(false); last = turn = y; return;
     }
     if ((y > last) !== (last > turn)) turn = last;         // the way turned: count from here
@@ -176,8 +179,8 @@ export function initHide(nav) {
     else if (y < last && turn - y >= MOVE) set(false);
     last = y;
   };
-  const check = () => { root.classList.toggle("nav-hides", mode.matches); onScroll(); };
-  mode.addEventListener("change", check);
+  const check = () => { on = hides(); root.classList.toggle("nav-hides", on); onScroll(); };
+  addEventListener("resize", check);                        // a phone turned, a window made shorter
   addEventListener("scroll", onScroll, { passive: true });
   nav.addEventListener("focusin", () => set(false));
   check();
