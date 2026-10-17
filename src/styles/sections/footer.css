@@ -30,10 +30,11 @@
   border-top: 1px solid var(--ink-10);
 }
 .footer__legal-row {
-  display: flex; flex-wrap: wrap; column-gap: 24px; row-gap: 4px;
+  display: flex; flex-wrap: wrap; column-gap: 24px; row-gap: 10px;
   width: 100%; max-width: var(--column-max);
-  @media (--tablet) { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; row-gap: 4px; }
-  @media (--phone) and (--portrait) { display: flex; flex-direction: column; align-items: center; row-gap: 6px; text-align: center; }
+  @media (--tablet) { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; row-gap: 10px; }
+  /* row gaps: 10px, the two links' extra tap height together (.footer__link), so one link never covers the other */
+  @media (--phone) and (--portrait) { display: flex; flex-direction: column; align-items: center; row-gap: 10px; text-align: center; }
 }
 .footer__note {
   font-size: var(--type-footer-note); color: var(--ink-40);
@@ -42,7 +43,10 @@
   @media not (--tablet) { white-space: nowrap; }
 }
 .footer__link {
-  padding-block: 6px; margin-block: -6px;                   /* 24px to tap at the smallest size */
+  /* a taller target to tap, the same line: at least 24px (25px for a 12px note, on the narrowest phones). Where two
+     links are one under another (tablets, phones) the rows are 10px apart: the extra height of one (5px) never reaches
+     over the other's */
+  padding-block: 5px; margin-block: -5px;
   transition: color var(--hover-out) var(--ease-out);
 }
 @media (--mouse) {
