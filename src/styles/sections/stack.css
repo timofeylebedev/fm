@@ -177,3 +177,5 @@
   @media (--calm) { transition: none; }
 }
 .card__tag.is-done > .card__tag-done { opacity: 1; }
+
+@media (forced-colors: active) { .card { outline: 1px solid CanvasText; outline-offset: -1px; } }

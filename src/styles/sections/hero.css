@@ -10,8 +10,10 @@
        but never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of the width
        tall) and never taller than 540px. It never gets shorter than 168px (or that 40.8%, on phones): on a short
        laptop the team still shows on the first screen, a little smaller;
-     · the space that is left is shared out as flex grow: 70% to the picture (until it is at its biggest), 10% above
-       the heading, 20% between the button and the heads.
+     · the space that is left is shared out as flex grow 1 : 2 : 7: 70% to the picture until it is at its biggest,
+       10% above the heading, 20% between the button and the heads; once the picture has stopped, all the rest goes to
+       the two gaps, 1 : 2 (the factors add up to more than 1, so flexbox hands out all of it: with 0.1, 0.2 and 0.7
+       a stopped picture left 70% of the space unused, under the table).
    The screen's height is 100svh: the visible height with the browser's bars shown. On phones and tablets scripts/boot.js
    keeps it steady (--fm-svh) and reads it again only when the phone is turned, so the section does not change its
    height when the bars of an app's browser collapse while scrolling. */
@@ -25,12 +27,12 @@
   overflow: hidden;
   background-color: var(--sand);
 
-  &::before { content: ""; flex: 0.1 1 0px; }       /* the air above the heading */
+  &::before { content: ""; flex: 1 1 0px; }         /* the air above the heading */
 }
 
 .hero__inner {
   position: relative; z-index: 1;
-  flex: 0.2 1 auto;                                   /* grows below its text: the air between the button and the heads */
+  flex: 2 1 auto;                                     /* grows below its text: the air between the button and the heads */
   display: flex; flex-direction: column; align-items: center;
   padding: calc(var(--nav-pad-y) * 2 + 32px + min(clamp(16px, 4vw, 48px), 4vh)) var(--gutter) min(32px, 3vh);
 }
@@ -60,7 +62,7 @@
    its own: the chips' shadows multiply into the table and nothing else. */
 .hero__stage {
   --pic-min: min(40.8vw, 168px);
-  flex: 0.7 1 var(--pic-min);
+  flex: 7 1 var(--pic-min);
   min-height: var(--pic-min);
   max-height: min(40.8vw, 540px);
   position: relative;

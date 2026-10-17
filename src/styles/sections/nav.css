@@ -10,7 +10,7 @@
   background-color: rgb(238 234 233 / 0.7);
   -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px);
 }
-.nav__row { display: flex; justify-content: space-between; width: 100%; max-width: 1440px; }
+.nav__row { display: flex; justify-content: space-between; width: 100%; max-width: 1920px; }   /* as wide as the stack's cards at most */
 .nav__start, .nav__end { display: flex; width: 100%; }
 .nav__end {
   align-items: center; justify-content: flex-end; gap: var(--nav-end-gap);

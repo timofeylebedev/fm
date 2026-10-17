@@ -26,7 +26,24 @@ reaches the CSS without anyone touching the stylesheet.
 
 A variable reaches the CSS when its **Web code syntax** in Figma (the `web` field) is `var(--name)`. Then it is written
 as `--name` in `tokens.gen.css`: the 1024 mode in `:root`, the other modes inside the custom media of `media.css`
-(`--lg`, `--xl`, `--tablet`, `--phone`, `--narrow`), only where they differ. Variables without it stay Figma-only.
+(`--desktop`, `--wide`, `--tablet`, `--phone`, `--narrow`), only where they differ. Variables without it stay Figma-only.
+
+### Breakpoint modes and fluid values
+
+The modes of the Breakpoint collection are screen widths: **320, 390, 768, 1024, 1440, 1920** (since Oct 17, 2026;
+before: 320, 480, 768, 1024, 1280, 1440). Each one is where a range of the site starts (`media.css` explains why
+these widths). A mode's value is the value **at exactly that width**.
+
+Most size variables are **fluid** (`"fluid": true` in `tokens.json`, a field of the code only, never sent to Figma):
+between two modes the site draws them in a straight line from one value to the next, so nothing jumps at a
+breakpoint. A Figma frame 390 wide and the site at 390 px show the same size; at 600 px the site shows the size
+in between. Type sizes (`type/*`) are written in rem, so they follow the text size a visitor chose in the browser.
+Variables without `fluid` (button height, the footer's paddings) change in steps, at the modes.
+
+**Figma still has the old modes** until the next push. `npm run tokens:sync` notices the difference and the push
+script it writes renames 480 → 390 (frames that use 480 keep their mode under the new name; `renamed` in
+`figma-map.json`), adds 1920, writes the values, and removes 1280 last. Frames 1280 wide should be moved to 1440
+or 1024 before that push.
 
 ## Recipes
 
@@ -65,7 +82,12 @@ variants (layers, text, bindings to variables) from the built page, and leaves t
 | Colours (whole site) | the 22 colours with a Web code syntax | — |
 | Footer | `footer/contact-y`, `footer/legal-y`, `type/footer`, `type/footer-note` | Footer `22:106` |
 | Buttons (whole site) | `button/height`, `button/pad-x`, `button/pad-x-alt`, `type/button` | Button |
+| Type (whole site) | `type/hero`, `type/h2`, `type/card-title`, `type/card-tag`, `type/lead`, `type/royalty`, `type/feature`, `type/card-heading`, `type/body-m`, `type/body-s` (fluid) | — |
+| Layout (whole site) | `section/pad-x` (the gutter), `section/pad-y`, `section/gap`, `stack/pad` (the inset of full-bleed cards), `radius/s`, `radius/m`, `radius/l` (fluid) | — |
+| Navbar | `nav/pad-y`, `nav/pad-left`, `nav/pad-right`, `nav/end-gap` | — |
+| Card stack | `card/text-pad`, `card/tag-pad-y`, `card/tag-pad-x`, `type/card-tag` (the card's radius is derived: half the label's height + `card/text-pad`) | — |
 
-Next sections to wire, in order of value: nav, section paddings (`section/*`), headings (`type/h2*`, `type/hero`),
-cards. For each: replace the hard-coded px with the variables, give them a Web code syntax, add the section to
-`figma-map.json`, and check that the page is pixel-identical at the six widths.
+The Figma-only measurements (`hero/*`, `card/height`, `logos/*`, `cta/height` and the like) still hold the values of
+the old layout, mapped to the nearest new mode; they describe the page, the code does not read them.
+
+Next: the Figma side of the new modes (see above), then the sections' structure (`figma-map.json`) one by one.
