@@ -13,12 +13,15 @@ export default defineConfig({
   plugins: [inlineScripts(src), icons(resolve(src, "assets/icons")), typograph(), minifyPages(), csp(), precompress(dist)],
   css: {
     transformer: "lightningcss",
-    lightningcss: { drafts: { customMedia: true } }
+    // the same browsers as build.target below, given to Lightning CSS itself: without them Vite gives it its own
+    // baseline (Safari 16.4), which drops what older iPhones need: the vh line before an svh one, and
+    // -webkit-text-size-adjust (without it iOS enlarges the text of a phone turned sideways)
+    lightningcss: { drafts: { customMedia: true }, targets: { chrome: 100 << 16, safari: 15 << 16, ios_saf: 15 << 16, firefox: 100 << 16, edge: 100 << 16 } }
   },
   build: {
     outDir: dist,
     emptyOutDir: true,
-    target: ["chrome100", "safari15", "firefox100", "edge100"],   // iPhones from iOS 15; the CSS is written down to that (nesting, ranges)
+    target: ["chrome100", "safari15", "ios15", "firefox100", "edge100"],   // iPhones from iOS 15; the CSS is written down to that (nesting, ranges)
     cssMinify: "lightningcss",
     // small pictures of the drawings go inside their script; everything else stays a file of its own (cached, and not
     // repeated in the page where it is used more than once)
