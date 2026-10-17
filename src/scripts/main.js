@@ -85,5 +85,19 @@ addEventListener("load", () => (window.requestIdleCallback || ((fn) => setTimeou
   document.body.appendChild(s);
 }, { timeout: 3000 }));
 
+// ── the lines of split texts may wrap again once the page is at rest (motion.css, .fm-line) ──
+// While fonts arrive and while the window is being resized, a line made by SplitText keeps to one line (it may stick
+// out by a few px for a moment, until it is split again, rather than make the text jump by a line). At rest, the lines
+// have been split in the font and the width that show, so they fit: there a line wraps only if someone needs more
+// room between the letters and words (WCAG 1.4.12, text spacing: a reading tool or the visitor's own style sheet),
+// instead of being cut off by its card.
+{
+  let timer = 0;
+  const rest = (on) => root.classList.toggle("lines-rest", on);
+  const later = () => { clearTimeout(timer); timer = setTimeout(() => rest(true), 700); };
+  document.addEventListener("fm:ready", () => document.fonts.ready.then(later), { once: true });
+  addEventListener("resize", () => { if (root.classList.contains("lines-rest") || timer) { rest(false); later(); } });
+}
+
 // iOS shows :active (the press of a button, see button.css) only on pages that listen to touches
 document.addEventListener("touchstart", () => {}, { passive: true });

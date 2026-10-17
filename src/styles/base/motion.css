@@ -13,6 +13,9 @@ html.js:not(.motion) :is([data-reveal], .stack .card) { animation: failsafe 0s l
 /* a line made by SplitText never wraps by itself: if the font changes after the split, a line may stick out by a few px
    until SplitText splits again, instead of breaking the text onto one more line */
 .fm-line { white-space: nowrap; }
+/* …but once the page is at rest (scripts/main.js) a line may wrap: it then fits anyway, unless the visitor has asked
+   for more space between letters and words (WCAG 1.4.12), and then it wraps instead of being cut off */
+html.lines-rest .fm-line { white-space: normal; }
 
 /* a link that opens from anywhere on its card (scripts/link-cards.js) */
 [data-linkcard] { cursor: pointer; }
