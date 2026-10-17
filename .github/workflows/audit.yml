@@ -1,0 +1,52 @@
+# Checks every pull request in real browsers before it can reach the live site: `npm run audit` (build/audit.mjs)
+# loads the built page at nine screen sizes (phones, tablets, a phone turned sideways, laptops, a large screen, and
+# a phone and a laptop with the browser's text made bigger) and fails on sideways scroll, cut-off text, text under
+# 12px, tap targets under 24px, script errors and accessibility (axe-core) rules. Decided exceptions are listed in
+# build/audit.mjs (ACCEPTED), each with its reason.
+#
+# Three engines: Chromium (Chrome, Edge, Yandex Browser, Android) must pass. Firefox and WebKit (Safari, every browser
+# on iPhone) run too and report on the pull request, but do not block it yet: they were added without a first run to
+# compare with. Once they have come back clean a few times, delete `continue-on-error` below to make them block too.
+# The check shows on the pull request; its log and the run's summary list every problem with its screen size.
+name: Responsive audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: audit (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    continue-on-error: ${{ matrix.engine != 'chromium' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.engine }}
+      - run: npm run build
+      - name: Audit
+        env:
+          FM_ENGINE: ${{ matrix.engine }}
+        run: |
+          set -o pipefail
+          npm run audit 2>&1 | tee audit.log
+      - name: Summary
+        if: always()
+        run: |
+          { echo "### Responsive audit · ${{ matrix.engine }}"; echo; echo '```'; tail -n 60 audit.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
