@@ -13,7 +13,7 @@ body { display: flex; flex-direction: column; }
 }
 .lost-nav__logo { width: 184px; height: 40px; @media (--phone) { width: 147.2px; height: 32px; } }
 .lost {
-  flex: 1; min-height: 100vh;
+  flex: 1; min-height: 100svh;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
   padding: 40px 40px 120px;
 }
