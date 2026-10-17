@@ -151,3 +151,34 @@ export function initCap(nav) {
   if (window.visualViewport) visualViewport.addEventListener("resize", place);
   new ResizeObserver(later).observe(document.body);
 }
+
+/* ── hide: on phones turned sideways the navbar slides away while the page is scrolled down ──
+   A screen 320–430px tall cannot spare a strip of 56px for the navbar the whole time. So there (--sideways in
+   media.css: narrower than 1024px, shorter than 500px, wider than tall) the navbar slides up out of sight once the page
+   has been scrolled down by more than its own height, and slides back as soon as it is scrolled up by MOVE px or more.
+   It stays while the menu is open, near the top of the page, and while the keyboard is in it.
+   The class nav-hides on <html> says the mode is on (scroll.js then lands a block at the top of the screen on the way
+   down, and the card stack sticks to the top: stack.css); nav-away says it is out of sight. */
+export function initHide(nav) {
+  const MOVE = 12;                                          // px of scrolling up that bring it back
+  const mode = matchMedia("(width < 1024px) and (height < 500px) and (orientation: landscape)");
+  const root = document.documentElement;
+  const menu = document.querySelector("[data-menu]");
+  let last = scrollY, turn = scrollY, away = false;
+  const set = (v) => { if (v !== away) { away = v; root.classList.toggle("nav-away", v); } };
+  const onScroll = () => {
+    const y = scrollY, h = nav.offsetHeight;
+    if (!mode.matches || y <= h || (menu && menu.classList.contains("is-open")) || nav.contains(document.activeElement)) {
+      set(false); last = turn = y; return;
+    }
+    if ((y > last) !== (last > turn)) turn = last;         // the way turned: count from here
+    if (y > last && y - turn > 2) set(true);
+    else if (y < last && turn - y >= MOVE) set(false);
+    last = y;
+  };
+  const check = () => { root.classList.toggle("nav-hides", mode.matches); onScroll(); };
+  mode.addEventListener("change", check);
+  addEventListener("scroll", onScroll, { passive: true });
+  nav.addEventListener("focusin", () => set(false));
+  check();
+}

@@ -3,11 +3,22 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
+  /* what the browser scrolls to by itself (the focus, a #link in the address) stops right under the navbar, not behind it;
+     the links of the page have their own scroll (scripts/scroll.js) with the same rule */
+  scroll-padding-top: calc(var(--nav-pad-y) * 2 + 32px);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
+  /* Past the ends of the page (pulled down at the top, or up at the bottom, where the browser lets the page spring
+     back) the colours of the first and the last section go on, instead of white: the hero's sand above, the footer's
+     grey below. Two ways, for the browsers that do one or the other:
+       · the root's background, fixed to the screen: its top half sand, its bottom half grey (computers; the page
+         itself, white, covers it everywhere else);
+       · a block of sand above the top of the page (body::before), which a phone shows when the page is pulled down
+         (phones do not fix backgrounds to the screen: there the grey below comes from the colour of the root). */
+  background: var(--mist) linear-gradient(var(--sand) 50%, var(--mist) 50%) no-repeat fixed;
 }
 
 body {
@@ -20,6 +31,12 @@ body {
   /* the page grows and shrinks while its scripts lay it out (the ring, the pinned logos, the card stack):
      the browser must not move the scroll to keep something in place */
   overflow-anchor: none;
+  position: relative;
+
+  &::before {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 100vh;
+    background: var(--sand); pointer-events: none;
+  }
 }
 
 h1, h2, h3, p, ul, dl, dd, figure { margin: 0; }

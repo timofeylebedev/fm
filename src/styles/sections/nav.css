@@ -1,6 +1,8 @@
 /* The navbar: fixed at the top, frosted. Its colour follows the section behind it (scripts/nav.js), and the
    outline of the current link slides from link to link (scripts/nav-pill.js). Below 1024px (--tablet) the links give
-   way to a burger and a menu of pills (scripts/menu.js). Paddings: the nav/* tokens. */
+   way to a burger and a menu of pills (scripts/menu.js). Paddings: the nav/* tokens.
+   On phones turned sideways (--sideways: a short, wide screen) it slides away while the page is scrolled down and
+   comes back as soon as it is scrolled up (scripts/nav.js, "hide"): there the screen is too short to give it a strip. */
 
 .nav {
   position: fixed; inset: 0 0 auto; z-index: 200;
@@ -8,8 +10,10 @@
   padding: var(--nav-pad-y) var(--nav-pad-right) var(--nav-pad-y) var(--nav-pad-left);
   overflow: hidden;
   background-color: rgb(238 234 233 / 0.7);
-  -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
+  transition: translate 0.35s var(--ease-out);
 }
+html.nav-away .nav { translate: 0 calc(-100% - 1px); transition-timing-function: cubic-bezier(0.4, 0, 1, 1); }
 .nav__row { display: flex; justify-content: space-between; width: 100%; max-width: 1920px; }   /* as wide as the stack's cards at most */
 .nav__start, .nav__end { display: flex; width: 100%; }
 .nav__end {
@@ -68,7 +72,7 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-30); }
   height: 36px; padding: 0 18px;
   border-radius: var(--round);
   font-size: 14px; color: var(--ink-60); white-space: nowrap;
-  background: var(--paper); box-shadow: 0 8px 16px rgb(0 0 0 / 0.1);
+  background: var(--paper); box-shadow: 0 4px 16px rgb(0 0 0 / 0.1);
 }
 .menu__item--demo {
   background: var(--purple); color: var(--paper);

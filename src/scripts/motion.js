@@ -25,7 +25,10 @@
      · what is inside a card starts once the card itself has started (0.2s later), with the same beats;
      · a thing that is above the screen when its turn comes (after a reload further down the page, or a jump with a
        menu link), or that cannot be seen at all, is simply shown, and does not hold up the others;
-     · other parts of the page can join a group with motion.cue (the hero's table and chips do). A thing that comes in
+     · other parts of the page can join a group with motion.cue (the hero's people and chips do, and the first card of
+       the stack joins the hero's group, so it comes after the hero). A cue can take its turn at the place of another
+       element (at: the people start with the heading), in another section's group (group), and from another line
+       (line: the first card as soon as any of it is on screen). A thing that comes in
        gets the class fm-showing when it starts and fm-shown when it has arrived.
    Hover colours and the press of buttons are done by the styles (button.css). "Reduce motion": everything is simply
    shown, nothing leans.
@@ -84,8 +87,8 @@ const groups = new Map();                                   // the block of a gr
 let booted = false, live = false;
 const waiting = [];                                         // cues added before the start
 
-function groupFor(el) {
-  const key = (el.parentElement && el.parentElement.closest(OWNER)) || document.body;
+function groupFor(el, owner) {
+  const key = owner || (el.parentElement && el.parentElement.closest(OWNER)) || document.body;
   let g = groups.get(key);
   if (!g) groups.set(key, (g = { el: key, owner: null, open: true, free: 0, queue: [], busy: false }));
   return g;
@@ -267,8 +270,9 @@ function watch(it) {
   const box = it.el.getBoundingClientRect();
   if (!box.width && !box.height) { finish(it); return; }   // not on the page at this screen width
   if (box.bottom <= 0) { finish(it); return; }               // above the screen already
-  if (box.top < innerHeight * M.LINE) { due(it); return; }   // on screen now
-  it.trigger = ScrollTrigger.create({ trigger: it.el, start: "top " + M.LINE * 100 + "%", once: true, onEnter: () => due(it) });
+  const line = it.line || M.LINE;
+  if (box.top < innerHeight * line) { due(it); return; }     // on screen now
+  it.trigger = ScrollTrigger.create({ trigger: it.el, start: "top " + line * 100 + "%", once: true, onEnter: () => due(it) });
 }
 
 // things that became due together are sorted into their groups at once
@@ -293,7 +297,11 @@ function flush() {
   const list = [...fresh];
   fresh.clear();
   const touched = new Set();
-  list.forEach((it) => { it.box = it.el.getBoundingClientRect(); it.group.queue.push(it); touched.add(it.group); });
+  list.forEach((it) => {
+    it.box = (it.at || it.el).getBoundingClientRect();
+    if (it.at) it.box = { top: it.box.top, left: it.box.left - 0.5 };   // a cue placed at an element goes right before it
+    it.group.queue.push(it); touched.add(it.group);
+  });
   touched.forEach((g) => {
     g.queue.sort((a, b) => (Math.abs(a.box.top - b.box.top) > 8 ? a.box.top - b.box.top : a.box.left - b.box.left));
     pump(g);
@@ -335,7 +343,7 @@ function seen(it) {
 // how soon the next thing of its group may start
 function lead(it) {
   if (it.lead != null) return it.lead;
-  if (it.kind === "chars") { const [lo, part, hi] = M.BEAT.chars; return Math.min(hi, Math.max(lo, it.targets.length * M.chars.stagger * part)); }
+  if (it.kind === "chars") { const [lo, part, hi] = M.BEAT.chars; return Math.min(hi, Math.max(lo, shownOf(it.targets).length * M.chars.stagger * part)); }
   if (it.kind === "lines") return (it.targets.length - 1) * M.lines.stagger + M.BEAT.lines;
   return it.kind === "tilt" ? M.BEAT.drop : M.BEAT.block;
 }
@@ -360,14 +368,19 @@ const began = (it) => {
   if (it.tween && it.el.getBoundingClientRect().bottom < 0) Promise.resolve().then(() => { if (it.tween) it.tween.progress(1); });
 };
 const ended = (it) => { it.state = "done"; it.tween = null; it.el.classList.add("fm-shown"); };
+// the letters that are shown at this screen width (a heading can have a part for some widths only: the hero's title on
+// the narrowest phones); the others are simply put in place, so they do not hold up the letters that are seen
+const shownOf = (parts) => parts.filter((p) => p.getClientRects().length);
 // the animation of a thing, starting after a delay
 function build(it, delay) {
   const el = it.el, on = { delay, onStart: () => began(it), onComplete: () => ended(it) };
   if (it.kind === "chars") {
+    const seen = shownOf(it.targets);
+    if (seen.length < it.targets.length) gsap.set(it.targets.filter((p) => seen.indexOf(p) < 0), { yPercent: 0, opacity: 1 });
     const kf = {};
     M.chars.wave.forEach(([t, y, o]) => { kf[Math.round(t * 100) + "%"] = o == null ? { yPercent: y } : { yPercent: y, opacity: o }; });
     kf.easeEach = "fm-wave";
-    return gsap.to(it.targets, Object.assign({ keyframes: kf, duration: M.chars.time, stagger: M.chars.stagger }, on));
+    return gsap.to(seen, Object.assign({ keyframes: kf, duration: M.chars.time, stagger: M.chars.stagger }, on));
   }
   if (it.kind === "lines") {
     return gsap.fromTo(it.targets, { yPercent: M.lines.rise, opacity: 0 },
@@ -444,6 +457,9 @@ function prepare(it) {
   it.preparing = true;
   const lines = it.kind === "lines";
   const font = lines ? Promise.race([fontOf(it.el), new Promise((go) => { it.hurry = () => setTimeout(go, M.FONT * 1000); })]) : Promise.resolve();
+  // the label screen readers hear: SplitText writes the heading's text; a heading with parts for some widths only (the
+  // hero's) says in data-label what it reads as
+  const label = it.el.dataset.label;
   font.then(() => {
     tidy(it.el);
     SplitText.create(it.el, {
@@ -456,6 +472,7 @@ function prepare(it) {
       aria: /^H\d$/.test(it.el.tagName) ? "auto" : "none",
       onSplit(self) {
         const parts = lines ? self.lines : self.chars;
+        if (label) it.el.setAttribute("aria-label", label);
         const first = !it.targets;
         it.targets = parts;
         if (it.state === "done") gsap.set(parts, { yPercent: 0, opacity: 1 });
@@ -482,15 +499,15 @@ function ready(it) {
 // play(true): it is shown without its way in. Returns false when there is no way in ("reduce motion"):
 // the caller then plays it itself.
 export function cue(el, opts) {
-  const c = { el, play: opts.play, whenReady: opts.whenReady, lead: opts.lead != null ? opts.lead : 0 };
+  const c = { el, play: opts.play, whenReady: opts.whenReady, lead: opts.lead != null ? opts.lead : 0, at: opts.at || null, owner: opts.group || null, line: opts.line || 0 };
   if (!booted) { waiting.push(c); return true; }
   if (!live) return false;
   enlist(c);
   return true;
 }
 function enlist(c) {
-  const it = add(c.el, "cue", { play: c.play, lead: c.lead, ready: false });
-  it.group = groupFor(it.el);
+  const it = add(c.el, "cue", { play: c.play, lead: c.lead, at: c.at, line: c.line, ready: false });
+  it.group = groupFor(it.el, c.owner);
   c.whenReady(() => ready(it));
   watch(it);
 }

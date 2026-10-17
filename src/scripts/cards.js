@@ -18,24 +18,27 @@
    once the card is SET.artAt of its full height.
 
    How it moves, so that it stays smooth on phones: the browser moves the cards itself, with the page, like any other
-   block (see stack.css): nothing is moved by the script, so nothing can lag behind the page or shake. The script sets
-   the sizes of the blocks the browser moves (on every measuring of the page), and on scroll only decides what is shown:
-   which title (with its own timed animation, by lines), whose turn it is among the drawings, the white label, the
-   progress in the label, and which drawings can be put to sleep.
+   block (see stack.css): nothing is moved by the script, so nothing can lag behind the page or shake. Even the sizes
+   of the blocks the browser moves are written in the styles (from the tokens and the screen's height), so they follow
+   a change of the window's size in the same frame. The script makes those blocks, measures the cards (for its own
+   sums), and on scroll only decides what is shown: which title (with its own timed animation, by lines), whose turn it
+   is among the drawings, the white label, the progress in the label, and which drawings can be put to sleep.
+   The first card comes in once the hero has come in (it takes its turn in the hero's group of motion.js), fading in
+   and rising a little, without a bounce.
    To try values in the console: fmCards.settings.step = 0.5, then fmCards.update(). ?fmcards=debug shows what the
    script measures (see debug.js). */
 import { gsap, ScrollTrigger, SplitText, refreshSoon } from "./gsap.js";
-import { calm, tidy } from "./motion.js";
+import { calm, tidy, cue } from "./motion.js";
 
 const SET = {
   step: 0.7,             // scroll for one step of a card (a title and its drawing), in screen heights
   artAt: 0.5,            // a card shows its drawing once it is this tall (0…1 of its full height)
   artWake: 0.3,          // a card that leaves lets its drawing go below this height (0…1); one that comes is made ready at once
-  title: { in: 0.75, out: 0.35, stagger: 0.08, rise: 70, lift: 45 }  // the titles: seconds, and how far the lines travel (% of a line)
+  title: { in: 0.75, out: 0.35, stagger: 0.08, rise: 70, lift: 45 },  // the titles: seconds, and how far the lines travel (% of a line)
+  enter: { time: 0.9, rise: 32 }                         // the first card's way in: seconds, px it rises (no bounce: fm-out)
 };
 const clamp = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const n2 = (v) => +(+v).toFixed(2);
-const px = (v) => n2(v) + "px";
 
 export function initCards() {
   const section = document.querySelector("[data-stack]");
@@ -45,10 +48,10 @@ export function initCards() {
   const div = (cls) => { const n = document.createElement("div"); n.className = cls; n.setAttribute("aria-hidden", "true"); return n; };
 
   // ── the cards, and the blocks the browser moves (see stack.css) ──
-  //   frame   one screen tall, sticky at the top of the screen; it holds mask, the strip at the bottom of the screen
   //   slot    one per card, around it: the card is sticky in it, so the slot's height is how long the card stays
   //   collar  above every card but the first: the gap over it and the rounded bottom corners of the card it covers;
   //           the last one (end) is at the bottom of the section, above the section after the stack
+  //   veil    in every slot, drawn under its card: the card's bottom edge while it comes up (sticky at the bottom)
   //   cap     under every card but the first, sticky with it: the page colour around its top corners
   const cards = [...stage.querySelectorAll(".card")].map((el, i) => {
     const tag = el.querySelector(".card__tag");
@@ -66,20 +69,15 @@ export function initCards() {
     tag.appendChild(c.done);
     c.slot = document.createElement("div");
     c.slot.className = "stack__slot";
+    c.slot.style.setProperty("--steps", c.steps);
     el.before(c.slot);
     c.slot.appendChild(el);
-    if (i) {
-      c.cap = div("stack__cap");
-      c.collar = div("stack__collar");
-      c.slot.prepend(c.collar, c.cap);
-    }
+    c.slot.prepend(...(i ? [div("stack__collar"), div("stack__veil"), div("stack__cap")] : [div("stack__veil")]));
     return c;
   });
   if (!cards.length) return;
-  const frame = div("stack__frame"), mask = div("stack__collar stack__mask"), end = div("stack__collar stack__collar-end");
-  frame.appendChild(mask);
-  stage.prepend(frame);
-  stage.appendChild(end);
+  stage.appendChild(div("stack__collar stack__collar-end"));
+  section.style.setProperty("--stack-step", SET.step);
   section.classList.add("stack-on");
   // the colour of the page (the strips are painted in it); the section after the stack comes up over the last card,
   // which stays whole under it: it needs a background of its own, and must be drawn above the section of the cards
@@ -124,17 +122,13 @@ export function initCards() {
     }
   }
 
-  // the cards start right under the navbar: its own height and its "top", not where the browser shows it right now
-  // (on iPhones that can be off by the part of the screen Safari's bars cover while they collapse or come back)
-  const navBottom = () => {
-    if (!nav) return 0;
-    const s = getComputedStyle(nav);
-    if (s.position !== "fixed" && s.position !== "sticky") return Math.max(0, Math.round(nav.getBoundingClientRect().bottom));
-    return Math.max(0, Math.round((parseFloat(s.top) || 0) + nav.offsetHeight));
-  };
+  // where the cards stick (--stack-nav in stack.css: under the navbar, or a gap under the top of the screen where the
+  // navbar hides), as the styles have it
+  // (read from a card's "top", which the browser gives in px)
+  const navBottom = () => parseFloat(getComputedStyle(stage.querySelector(".card")).top) || 0;
 
   // ── measuring (whenever ScrollTrigger measures the page) ──
-  let V = 0, gap = 0, navH = 0, fontsDone = 0;
+  let V = 0, gap = 0, navH = 0, padTop = 0, fontsDone = 0;
   const offsetIn = (el, root) => {                           // where el is inside root, as laid out (transforms do not count)
     let x = 0, y = 0;
     for (let n = el; n && n !== root; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
@@ -155,12 +149,8 @@ export function initCards() {
   }
   function measure() {
     gap = parseFloat(getComputedStyle(stage).paddingBottom) || 0;   // between two cards while they trade places
-    section.style.setProperty("--stack-gap", gap + "px");
-    // where the cards stick: under the navbar and the same gap as below and at the sides, so a card that fills the
-    // stage has even space all round (the stage starts there: every "under the navbar" below means under that gap too)
-    navH = navBottom() + gap;
-    section.style.setProperty("--stack-nav", navH + "px");
-    V = frame.offsetHeight;
+    padTop = parseFloat(getComputedStyle(stage).paddingTop) || 0;   // the first card comes up this far under the hero
+    navH = navBottom();                                      // where the cards stick
     cards.forEach((c) => {
       const el = c.el, m = c.m;
       m.A = el.offsetHeight;
@@ -170,6 +160,7 @@ export function initCards() {
       m.ph = Math.min(m.tagH + 2 * m.padY, m.A);             // the smallest card: the label with the card's top padding above and below it
       c.titles.forEach((title) => { title.size = null; });
     });
+    V = cards[0].m.A + navH + gap;                           // the screen (a card is the screen less those two)
     // where each card fills the stage: positions in px of scroll since the stage was pinned
     let at = V;                                              // the first card fills it once the section above has gone (one screen)
     cards.forEach((c, i) => {
@@ -181,48 +172,15 @@ export function initCards() {
     layOut();
   }
 
-  // The sizes of the slots, the strips and the section, so that the browser moves every card exactly as state()
-  // below describes it (A: the height of a card, --stack-a in stack.css; ph: its smallest height):
+  // The sizes of the slots, the strips and the section are in stack.css (they follow the screen by themselves). They
+  // make the browser move every card exactly as state() below describes it (A: the height of a card, ph: its smallest):
   //   · a slot is A (the card) + the scroll of its steps + A - ph: the card stays until only ph of it is left uncovered,
   //     then its slot ends and it goes on up with the page;
   //   · every slot but the first is pulled up by A - ph, less the gap: the next card comes up under the old one's
   //     smallest size, the gap between them. The section after the stack is pulled up the same way under the last card.
-  // In --fm-vh, like the cards, so all of it follows the steady screen height without being measured again.
+  // The first time, the section has just taken its new height: everything on the page is measured again (once).
   let laid = false;
-  function layOut() {
-    const place = (strip, c, top, height) => {               // as wide as the card (1px more on each side), its corners
-      const box = strip.offsetParent;
-      const x = c.el.getBoundingClientRect().left - (box ? box.getBoundingClientRect().left + box.clientLeft : 0);
-      strip.style.left = px(x - 1);
-      strip.style.width = px(c.el.offsetWidth + 2);
-      strip.style.setProperty("--r", px(c.m.R));
-      if (top !== null) strip.style.top = top;
-      if (height !== null) strip.style.height = height;
-    };
-    cards.forEach((c, i) => {
-      const prev = cards[i - 1];
-      c.slot.style.height = "calc(2 * var(--stack-a) + " + (c.steps * SET.step * 100).toFixed(3) + " * var(--fm-vh, 1vh) - " + px(c.m.ph) + ")";
-      c.slot.style.marginTop = prev ? "calc(" + px(gap + prev.m.ph) + " - var(--stack-a))" : "";
-      // from the old card's corners down under the new card's: the new card is drawn over it, its corners are not
-      if (c.collar) place(c.collar, prev, px(-(gap + prev.m.R)), px(gap + prev.m.R + c.m.R));
-      if (c.cap) {                                           // in the flow, centred like the card, 1px wider on each side
-        c.cap.style.width = px(c.el.offsetWidth + 2);
-        c.cap.style.marginLeft = px(c.el.offsetLeft - 1);
-        c.cap.style.height = px(c.m.R);
-        c.cap.style.marginBottom = px(-c.m.R);
-        c.cap.style.setProperty("--r", px(c.m.R));
-      }
-      // the smallest card, as a cut of the card (see is-pill in draw), with its corners
-      c.el.style.setProperty("--stack-pill", "inset(0px 0px calc(var(--stack-a) - " + px(c.m.ph) + ") 0px round " + px(Math.min(c.m.R, c.m.ph / 2)) + ")");
-    });
-    const last = cards[cards.length - 1];
-    place(mask, cards[0], null, null);
-    place(end, last, "auto", px(gap + last.m.R));            // (the section after the stack has no corners to fill)
-    end.style.bottom = "calc(var(--stack-a) - " + px(last.m.ph) + ")";
-    section.style.marginBottom = "calc(" + px(last.m.ph) + " - var(--stack-a))";
-    // the first time, the section has just taken its new height: everything on the page is measured again (once)
-    if (!laid) { laid = true; refreshSoon(); }
-  }
+  function layOut() { if (!laid) { laid = true; refreshSoon(); } }
 
   // ── one moment: where a card is, at p px of scroll since the stage was pinned ──
   // y: where its top is (from the top of its own box, which starts under the navbar), h: how tall it is open. Its bottom
@@ -255,22 +213,16 @@ export function initCards() {
 
   // ── on scroll: what is shown ──
   const flag = (c, key, cls, on, el) => { if (c[key] !== on) { c[key] = on; (el || c.el).classList.toggle(cls, on); } };
-  let dir = 1, pillOn = null, fills = new Map(), onDraw = null;
-  // p = 0 when the section's top is one screen below the top of the screen
-  const target = () => V - section.getBoundingClientRect().top;
+  let dir = 1, fills = new Map(), onDraw = null;
+  // p = V when the first card has come up to where it sticks (its top padding above it: padTop)
+  const target = () => V - section.getBoundingClientRect().top - (padTop - navH);
   function draw(p) {
     if (onDraw) onDraw(p);
-    let pill = false;
     cards.forEach((c, i) => {
       const s = state(c, i, p), g = s.g, m = c.m;
       const fill = "inset(0 " + n2(100 - s.fill * 100) + "% 0 0)";
       if (fills.get(c) !== fill) { fills.set(c, fill); c.fill.style.clipPath = fill; }
       flag(c, "off", "is-off", !g.seen);                     // nothing of it is seen
-      // a card that comes up and is still the smallest card is cut to that size itself (is-pill), and the strip at the
-      // bottom of the screen is hidden meanwhile (stack-rising), so it comes up whole instead of being cut by the strip
-      const isPill = g.seen && !g.leaving && p < c.from && g.y > m.A - m.ph + 0.5;
-      flag(c, "pill", "is-pill", isPill);
-      if (isPill) pill = true;
       flag(c, "white", "is-done", s.white, c.tag);           // the colour change itself is a transition in stack.css
       // a title is shown while the open part of the card reaches below it (and the card's padding under it)
       const now = c.titles[s.step];
@@ -283,7 +235,6 @@ export function initCards() {
       // not seen, or leaving and small: hidden, so its drawings let go of their memory
       flag(c, "asleep", "is-asleep", !g.seen || (g.leaving && g.h < SET.artWake * m.A));
     });
-    if (pill !== pillOn) { pillOn = pill; section.classList.toggle("stack-rising", pill); }
   }
 
   // measured with every card at its full size (nothing is drawn in between). The titles are split into lines again
@@ -306,8 +257,24 @@ export function initCards() {
     onRefresh: refresh
   });
   refresh();
+  addEventListener("resize", () => { if (V) { measure(); draw(target()); } });   // at once, not only at the next measuring
   // the label and the titles are measured in the font that shows: once a font has arrived, measure again
   document.fonts.addEventListener("loadingdone", () => { fontsDone++; refresh(); });
+
+  // the first card comes in after the hero (see the top): it waits, hidden, for its turn in the hero's group
+  const hero = section.previousElementSibling, first = cards[0].slot;
+  if (hero && !calm) {
+    gsap.set(first, { opacity: 0 });
+    cue(first, {
+      group: hero,
+      line: 0.999,                                         // as soon as any of it shows below the hero
+      whenReady: (done) => done(),
+      play(instant) {
+        if (instant) gsap.set(first, { clearProps: "opacity,transform" });
+        else gsap.fromTo(first, { opacity: 0, y: SET.enter.rise }, { opacity: 1, y: 0, duration: SET.enter.time, ease: "fm-out", clearProps: "opacity,transform" });
+      }
+    });
+  }
 
   window.fmCards = { settings: SET, cards, update() { ScrollTrigger.refresh(); } };
   if (/[?&]fmcards=debug\b/.test(location.search)) {

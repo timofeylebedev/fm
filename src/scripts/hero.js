@@ -1,7 +1,8 @@
 /* The hero: the chips that float over the table («Весь лейбл — на одной волне»). The table picture is in the HTML
    (see hero.css, where the look of the chips is too). The chips travel over the table from right to left, each at its
-   own depth, floating a little. They are the last part of the hero's way in: once the heading, its text and the button
-   have started, the picture fades in and the chips rise from the table one after another, like the letters. */
+   own depth, floating a little. The hero's way in: the team at the table fades in together with the letters of the
+   heading; then come its text and the button, and last the chips rise from the table one after another, like the
+   letters. (The first card of the stack comes after them: cards.js.) */
 import { pace } from "./pace.js";
 import { M, calm, cue } from "./motion.js";
 
@@ -49,7 +50,7 @@ const HERO = {
   fade: 50,           // px over which a chip fades in and out where the table ends (on screens wider than the picture)
   shadow: 1,          // how dark the shadows are (0 … 1.5)
   // the way in: the chips that are on screen rise from the table one after another, like the letters of the heading
-  enterDelay: 0.35,   // seconds after the picture has started to fade in
+  enterDelay: 0.1,    // seconds after their turn has come (right after the button's: see "motion" below)
   enterTime: 1.1,     // seconds for one chip (the same as the letters of a heading: fmMotion.M.chars.time)
   enterStagger: 0.08  // seconds between two chips, from left to right
 };
@@ -217,9 +218,10 @@ function init(section, picture) {
   const light = () => layer.classList.toggle("is-light", pace.slow);
   light(); pace.onChange(light);
 
-  // The picture and the chips are the last part of the hero's way in (see "motion" at the top): once the heading, its
-  // text and the button have started, the picture fades in (the class fm-hero-in on <html>, see the styles) and the
-  // chips rise from the table. They wait for the picture to load; without the motion system they come in as soon as it has.
+  // The way in (see "motion" at the top). Both parts take their turn in the hero's group of motion.js: the team (the
+  // picture fades in: the class hero-in on <html>, see the styles) at the heading's turn, so it starts with its
+  // letters; the chips at their own place, after the button. Neither waits for the picture: a turn that comes before
+  // it has loaded is played once it has (so the heading never waits for a picture).
   let loaded = false;
   const onLoad = [];
   function begin() {                                     // the picture has loaded
@@ -229,10 +231,10 @@ function init(section, picture) {
     measure();
     onLoad.splice(0).forEach((fn) => fn());
   }
-  function enter(instant) {                              // the picture fades in, the chips rise
+  const people = () => document.documentElement.classList.add("hero-in");
+  function rise(instant) {                               // the chips rise
     if (started) return;
     started = true;
-    document.documentElement.classList.add("hero-in");
     measure();
     // the chips that are on screen now rise in one after another, from left to right; the others are simply there
     items.map((it) => [xOf(it), it])
@@ -243,7 +245,11 @@ function init(section, picture) {
     start();
   }
   const whenLoaded = (fn) => (loaded ? fn() : onLoad.push(fn));
-  if (!cue(picture, { whenReady: whenLoaded, play: enter })) whenLoaded(() => enter(false));
+  const now = (done) => done();
+  const title = section.querySelector("h1");
+  const timed = cue(picture, { at: title, whenReady: now, play: () => whenLoaded(people) })
+    && cue(layer, { lead: HERO.enterTime * 0.7, whenReady: now, play: (instant) => whenLoaded(() => rise(instant)) });
+  if (!timed) whenLoaded(() => { people(); rise(false); });
   const img = picture.querySelector("img");
   const loadedNow = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(begin);
   if (img.complete) loadedNow(); else { img.addEventListener("load", loadedNow); img.addEventListener("error", begin); }

@@ -41,19 +41,35 @@
   width: 100%;
 }
 .hero__copy { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+/* The heading and its text on a short screen (a laptop window made short, a phone turned sideways): the heading gives
+   room to the team as the screen gets shorter (8.5% of its height), but never gets smaller than 30px (or its own size,
+   where that is smaller), and the text under it follows it down once the heading would no longer be clearly the
+   bigger of the two (the text is at most 55% of the heading). So the two keep their order at every height. */
+.hero {
+  /* …and on the narrowest phones it is never so big that its longest line (9.3 em) would not fit between the air at
+     its sides: the title keeps its two lines */
+  --hero-title: min(clamp(min(var(--type-hero), 30px), var(--screen-s) * 0.085, var(--type-hero)), (100vw - 2 * var(--gutter) - 2 * var(--center-air)) / 9.35);
+  --hero-lead: min(var(--type-lead), var(--hero-title) * 0.55);
+}
 .hero__title {
-  max-width: 10em;
+  max-width: 10em; padding-inline: var(--center-air);
   font-family: var(--font-display); font-weight: 700; line-height: 1; text-align: center;
-  font-size: min(var(--type-hero), 8.5vh);           /* on a short screen (a laptop at 1366×768) the team gets the room */
+  font-size: var(--hero-title);
 
   /* an invisible dash in front balances the dash at the end of the first line, so the line looks centred
      (hidden, not transparent: in Windows high-contrast mode a transparent colour is overridden and the dash would show) */
-  &::before { content: "— "; visibility: hidden; }
+  & .t-wide:first-child::before { content: "— "; visibility: hidden; }
+  /* the narrowest phones read «Весь лейбл. На одной волне»: the dash would not fit there with air at the sides */
+  & .t-narrow { display: none; }
+  @media (--narrow) {
+    & .t-wide { display: none; }
+    & .t-narrow { display: inline; }
+  }
 }
 .hero__lead-box { display: flex; justify-content: center; width: 100%; }
 .hero__lead {
   max-width: 24em;
-  font-size: var(--type-lead); line-height: 1.3; text-align: center; color: var(--ink-60);
+  font-size: var(--hero-lead); line-height: 1.3; text-align: center; color: var(--ink-60);
   text-wrap: balance;
 }
 
