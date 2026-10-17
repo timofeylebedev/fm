@@ -13,6 +13,12 @@
 //
 // A variable is used by the code when its "web" (Figma: code syntax → Web) is var(--name): then it is written into the
 // CSS as --name. Colours and numbers only; font names stay in tokens.css with their fallbacks.
+//
+// Fluid values ("fluid": true, a field of the code only, never sent to Figma). The modes of a multi-mode collection are
+// screen widths (design/figma-map.json). A fluid number holds, at each of those widths, exactly its value there, and
+// in between it grows in a straight line from one to the next (below the narrowest and above the widest it stays put).
+// So a Figma frame at 390 px and the site at 390 px show the same size, and the site has no jumps between frames.
+// Type sizes (type/*) are written in rem, so they follow the size the visitor chose for text in the browser.
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
@@ -50,11 +56,13 @@ function flatten(doc) {
       } else flat.set(k("value"), norm(t.type, t.value));
       if (t.web !== undefined) flat.set(k("web"), t.web);
       if (t.description) flat.set(k("description"), t.description);
+      // "fluid" is the code's own business (how the CSS reads the value): it is not merged with Figma
     }
   }
   return flat;
 }
-function unflatten(flat, collections, order) {
+// code: the code's tokens.json, whose code-only fields ("fluid") are put back on the variables that are still there
+function unflatten(flat, collections, order, code) {
   const doc = { collections, tokens: {} };
   const keys = [...flat.keys()].sort((a, b) => (order.get(a.split(SEP).slice(0, 2).join(SEP)) ?? 1e9) - (order.get(b.split(SEP).slice(0, 2).join(SEP)) ?? 1e9));
   for (const key of keys) {
@@ -63,19 +71,22 @@ function unflatten(flat, collections, order) {
     if (field === "value" && mode !== undefined) (t.value ??= {})[mode] = flat.get(key);
     else t[field] = flat.get(key);
   }
+  if (code) for (const [col, vars] of Object.entries(doc.tokens)) for (const [name, t] of Object.entries(vars)) {
+    if (code.tokens?.[col]?.[name]?.fluid) t.fluid = true;
+  }
   return doc;
 }
 
 // tokens.json is written one variable per line, so a change shows up in git as one line
-function format(doc) {
+export function format(doc) {
   const lines = ["{", `  "collections": ${JSON.stringify(doc.collections)},`, `  "tokens": {`];
   const cols = Object.entries(doc.tokens);
   cols.forEach(([col, vars], i) => {
     lines.push(`    ${JSON.stringify(col)}: {`);
     const entries = Object.entries(vars);
     entries.forEach(([name, t], j) => {
-      const { type, value, web, description } = t;                    // fixed field order
-      const o = { type, value, ...(web !== undefined && { web }), ...(description && { description }) };
+      const { type, value, web, fluid, description } = t;             // fixed field order
+      const o = { type, value, ...(web !== undefined && { web }), ...(fluid && { fluid }), ...(description && { description }) };
       lines.push(`      ${JSON.stringify(name)}: ${JSON.stringify(o)}${j < entries.length - 1 ? "," : ""}`);
     });
     lines.push(`    }${i < cols.length - 1 ? "," : ""}`);
@@ -85,8 +96,16 @@ function format(doc) {
 }
 
 // ── CSS ───────────────────────────────────────────────────────────────────────────────────────────────────────────
-function cssValue(type, v) {
-  if (type === "number") return v === 0 ? "0" : `${v}px`;
+const r4 = (n) => Math.round(n * 10000) / 10000;
+const len = (v, rem) => (v === 0 ? "0px" : rem ? `${r4(v / 16)}rem` : `${v}px`);
+// a fluid number between two screen widths: v0 at w0, v1 at w1, a straight line in between, constant outside
+function fluidValue(v0, w0, v1, w1, rem) {
+  if (v1 === undefined || v0 === v1) return len(v0, rem);
+  const slope = r4((v1 - v0) / (w1 - w0));
+  return `clamp(${len(Math.min(v0, v1), rem)}, calc(${len(v0, rem)} + (100vw - ${w0}px) * ${slope}), ${len(Math.max(v0, v1), rem)})`;
+}
+function cssValue(type, v, rem) {
+  if (type === "number") return v === 0 ? "0" : rem ? len(v, true) : `${v}px`;
   const h = normColor(v).slice(1);
   if (h.length === 6) return "#" + h;
   const [r, g, b, a] = [0, 2, 4, 6].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -101,14 +120,21 @@ export function generate(doc = read(TOKENS), map = read(MAP)) {
       const m = /^var\((--[\w-]+)\)$/.exec(t.web || "");
       if (!m) continue;
       if (t.type !== "color" && t.type !== "number") { skipped.push(`${col}/${name}`); continue; }
-      const prop = m[1];
-      if (modes.length <= 1) { rootDecls.push(`  ${prop}: ${cssValue(t.type, t.value)};`); continue; }
+      const prop = m[1], rem = t.type === "number" && name.startsWith("type/");
+      if (modes.length <= 1) { rootDecls.push(`  ${prop}: ${cssValue(t.type, t.value, rem)};`); continue; }
       if (!cfg) throw new Error(`design/figma-map.json has no screen widths for the modes of "${col}"`);
-      rootDecls.push(`  ${prop}: ${cssValue(t.type, t.value[cfg.base])};`);
+      // what a mode's media holds: its value, or (fluid) the line from its width to the next wider mode's width
+      const widths = modes.map(Number).sort((a, b) => a - b);
+      const at = (mode) => {
+        if (!(t.fluid && t.type === "number")) return cssValue(t.type, t.value[mode], rem);
+        const w0 = Number(mode), w1 = widths.find((w) => w > w0);
+        return fluidValue(t.value[mode], w0, w1 === undefined ? undefined : t.value[String(w1)], w1, rem);
+      };
+      rootDecls.push(`  ${prop}: ${at(cfg.base)};`);
       for (const l of cfg.layers) {
-        if (same(t.value[l.mode], t.value[l.parent])) continue;
+        if (at(l.mode) === at(l.parent)) continue;
         if (!layers.has(l.media)) layers.set(l.media, []);
-        layers.get(l.media).push(`    ${prop}: ${cssValue(t.type, t.value[l.mode])};`);
+        layers.get(l.media).push(`    ${prop}: ${at(l.mode)};`);
       }
     }
   }
@@ -148,9 +174,19 @@ function sync(figmaFile, prefer) {
     const id = col + SEP + n; if (!order.has(id)) order.set(id, order.size);
   }
   const collections = { ...figmaDoc.collections, ...code.collections };
-  writeFileSync(TOKENS, format(unflatten(merged, collections, order)));
-  writeFileSync(LOCK, format(unflatten(lock, { ...base.collections, ...collections }, order)));
+  writeFileSync(TOKENS, format(unflatten(merged, collections, order, code)));
+  // the lock records the modes Figma holds: once a push has made Figma's modes match the code's, they are recorded too
+  const lockCollections = { ...base.collections, ...figmaDoc.collections };
+  writeFileSync(LOCK, format(unflatten(lock, lockCollections, order)));
   const gen = generate();
+
+  // modes the code has and Figma does not (or the other way): the push adds them, renames them (design/figma-map.json
+  // "renamed": old name → new name, so frames that use a mode keep it under its new name) and removes the old ones
+  const map = read(MAP), modes = {};
+  for (const [col, c] of Object.entries(code.collections)) {
+    const f = figmaDoc.collections?.[col]?.modes || [];
+    if (!same(c.modes, f)) modes[col] = { modes: c.modes, rename: map.modes?.[col]?.renamed || {} };
+  }
 
   // the push script: only what changed in the code
   const changes = report.pushed.map(([k, , v]) => {
@@ -158,13 +194,15 @@ function sync(figmaFile, prefer) {
     const type = merged.get([collection, name, "type"].join(SEP));
     return { collection, name, field, mode, type, value: v === undefined ? null : v };
   });
-  if (changes.length) writeFileSync(PUSH, readFileSync(PUSH_TPL, "utf8").replace("/*CHANGES*/[]", JSON.stringify(changes, null, 1)));
+  if (changes.length || Object.keys(modes).length) writeFileSync(PUSH, readFileSync(PUSH_TPL, "utf8")
+    .replace("/*MODES*/{}", JSON.stringify(modes, null, 1)).replace("/*CHANGES*/[]", JSON.stringify(changes, null, 1)));
   else if (existsSync(PUSH)) writeFileSync(PUSH, "// nothing to push: Figma already holds every value of design/tokens.json\nreturn { changed: 0 };\n");
 
   const show = (k) => k.split(SEP).filter((x, i) => i !== 2 || x !== "value").join(" › ").replace(/ › (\d+)$/, " @$1");
   const val = (v) => (v === undefined ? "—" : JSON.stringify(v));
   console.log(`Figma → code: ${report.pulled.length} value(s)`);
   for (const [k, a, b] of report.pulled) console.log(`  ${show(k)}: ${val(a)} → ${val(b)}`);
+  for (const [col, m] of Object.entries(modes)) console.log(`Modes of ${col}: Figma ${JSON.stringify(figmaDoc.collections?.[col]?.modes || [])} → code ${JSON.stringify(m.modes)} (the push changes them)`);
   console.log(`Code → Figma: ${report.pushed.length} value(s)${changes.length ? "  → run design/figma/push.gen.js with use_figma, then pull and sync again" : ""}`);
   for (const [k, a, b] of report.pushed) console.log(`  ${show(k)}: ${val(a)} → ${val(b)}`);
   if (report.conflicts.length) {

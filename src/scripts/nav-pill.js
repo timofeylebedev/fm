@@ -9,7 +9,7 @@
    the bottom of the screen. At the very bottom of the page the last section with a link is reached whatever its size.
    After a click on a link, the outline goes straight there and waits until the page has stopped scrolling, instead of
    stopping at every section on the way. With "reduce motion" it jumps instead of sliding.
-   The current link has aria-current (screen readers say which section is on screen; the styles colour it). */
+   The current link has aria-current (screen readers say which section is on screen; the outline is its only mark). */
 import { css as curves } from "./motion.js";
 
 const MIN = 250, MAX = 650;          // ms: the shortest move, and a move across the whole row

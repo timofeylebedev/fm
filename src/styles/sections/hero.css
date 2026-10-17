@@ -1,123 +1,88 @@
 /* The first section, «Весь лейбл — на одной волне»: the heading, and the team at the table with chips floating over it
    (the chips are made and moved by scripts/hero.js).
 
-   The picture keeps its proportions (3531×900), so its width is --hero-h × 3.923. Its people are at its very top.
-   The height of the section follows the height of the screen: the screen less 40px (so the top of what comes next
-   shows below it), but never less than --hero-min and never more than --hero-max. The extra height (above --hero-min)
-   is shared out:
-     · most of it (--hero-grow) makes the picture taller, so the team and the table grow with the screen. But the picture
-       never gets so wide that the five people would not fit: they take at most 94% of the screen's width (40.8vw);
-     · the rest is empty space: a part of it (--hero-lift) above the heading, the other part between the button and
-       the heads, so the text stays in the middle of the space above the team rather than stuck under the navbar.
-   On tall and narrow screens the picture soon reaches that width, and from there on the section grows by at most
-   --hero-air px more; below it the next section simply shows more.
-   The chips grow with the picture, a little more slowly (--hero-chip-grow: 1 = just as much as the picture).
-   At --hero-min, --hero-h0 is the picture's height and --hero-k0 the size of the chips (1 = their full size, 56px tall).
-   The screen's height is 100svh: the visible height with the browser's bars shown. On phones and tablets
-   scripts/boot.js keeps it steady (--fm-svh) and reads it again only when the phone is turned, so the section does
-   not change its height when the bars of an app's browser collapse while scrolling.
-   A browser that does not know svh keeps the section at --hero-min. */
+   One rule for every screen, wide or narrow, tall or short:
+     · the section is as tall as the screen less 40px (so the top of the next section shows), but no taller than its
+       content can use: the picture at its biggest plus some air (about 440px on phones, up to 640px on computers), and
+       never more than 1080px. On a screen too short for the content (a phone turned sideways) it simply takes what the
+       content needs, and the page scrolls;
+     · the picture (3531×900, the people at its top) sits at the bottom, in .hero__stage. It is as tall as the stage,
+       but never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of the width
+       tall) and never taller than 540px. It never gets shorter than 168px (or that 40.8%, on phones): on a short
+       laptop the team still shows on the first screen, a little smaller;
+     · the space that is left is shared out as flex grow 1 : 2 : 7: 70% to the picture until it is at its biggest,
+       10% above the heading, 20% between the button and the heads; once the picture has stopped, all the rest goes to
+       the two gaps, 1 : 2 (the factors add up to more than 1, so flexbox hands out all of it: with 0.1, 0.2 and 0.7
+       a stopped picture left 70% of the space unused, under the table).
+   The screen's height is 100svh: the visible height with the browser's bars shown. On phones and tablets scripts/boot.js
+   keeps it steady (--fm-svh) and reads it again only when the phone is turned, so the section does not change its
+   height when the bars of an app's browser collapse while scrolling. */
 
 .hero {
-  --hero-min: 740; --hero-max: 960;                   /* 992–1439px */
-  --hero-h0: 330; --hero-k0: 0.86;
-  --hero-grow: 0.7; --hero-chip-grow: 0.75; --hero-lift: 0.35; --hero-air: 100;
-  --hero-h: calc(var(--hero-h0) * 1px);
-  --hero-u: calc(var(--hero-k0) * 1px);               /* the length of one px of a chip at its full size */
-
+  --hero-air: clamp(440px, 360px + 20vw, 640px);
   position: relative;
   isolation: isolate;                                 /* the shadows of the chips blend with the table, and only with what is in this section */
-  display: flex; flex-direction: column; align-items: center;
-  height: calc(var(--hero-min) * 1px);
+  display: flex; flex-direction: column;
+  min-height: min(var(--screen-s) - 40px, 40.8vw + var(--hero-air), 1080px);
   overflow: hidden;
   background-color: var(--sand);
 
-  @media (--xl) { --hero-min: 860; --hero-max: 1080; --hero-h0: 412; --hero-k0: 1; }
-  @media (--tablet) { --hero-min: 620; --hero-max: 880; --hero-h0: 252; --hero-k0: 0.76; }
-  @media (--phone) { --hero-min: 520; --hero-max: 760; --hero-h0: 196; --hero-k0: 0.68; }
-}
-@supports (height: 1svh) {
-  @media (width >= 480px) {
-    .hero {
-      /* the extra height: 0 … max − min, and no more than the picture can use (until it is 40.8vw tall) + --hero-air */
-      --hero-x: clamp(0px, min(100 * var(--fm-svh, 1svh) - 40px - var(--hero-min) * 1px,
-                               max(0px, 40.8vw - var(--hero-h0) * 1px) / var(--hero-grow) + var(--hero-air) * 1px),
-                      (var(--hero-max) - var(--hero-min)) * 1px);
-      --hero-h: max(var(--hero-h0) * 1px, min(var(--hero-h0) * 1px + var(--hero-grow) * var(--hero-x), 40.8vw));
-      --hero-u: calc(var(--hero-k0) * 1px + (var(--hero-h) - var(--hero-h0) * 1px) * (var(--hero-chip-grow) * var(--hero-k0) / var(--hero-h0)));
-      height: calc(var(--hero-min) * 1px + var(--hero-x));
-      padding-top: calc(var(--hero-lift) * (var(--hero-x) - (var(--hero-h) - var(--hero-h0) * 1px)));
-    }
-  }
-}
-/* Phones: the five people are fitted to the width of the screen, so the picture cannot grow; the section takes the
-   height it needs (the text, then 88px, then the picture), or the screen less 40px if that is more, but at most
-   40.8vw + 450px: about --hero-air more than it needs. The space that is left is shared as above: --hero-lift of it
-   above the heading (::before), the rest above the picture (::after). */
-@media (--narrow) {
-  .hero {
-    --hero-h: 40.8vw;                                 /* the five people take 94% of the screen's width */
-    --hero-u: 0.62px;
-    height: auto;
-    padding-bottom: calc(var(--hero-h) + 88px);
-  }
-  @supports (height: 1svh) {
-    .hero { min-height: min(100 * var(--fm-svh, 1svh) - 40px, 40.8vw + 450px); }
-    .hero::before, .hero::after { content: ""; display: block; flex: var(--hero-lift) 1 0px; pointer-events: none; }
-    .hero::after { flex-grow: calc(1 - var(--hero-lift)); }
-  }
+  &::before { content: ""; flex: 1 1 0px; }         /* the air above the heading */
 }
 
 .hero__inner {
   position: relative; z-index: 1;
+  flex: 2 1 auto;                                     /* grows below its text: the air between the button and the heads */
   display: flex; flex-direction: column; align-items: center;
-  width: 100%; padding-top: 64px;
-  @media (--phone) { padding-top: 56px; }
+  padding: calc(var(--nav-pad-y) * 2 + 32px + min(clamp(16px, 4vw, 48px), 4vh)) var(--gutter) min(32px, 3vh);
 }
 .hero__text {
-  display: flex; flex-direction: column; align-items: center; gap: 24px;
-  width: 100%; max-width: 580px; padding: 40px 15px 0;
-
-  @media (--lg) { max-width: 720px; }
-  @media (--xl) { padding-top: 56px; }
-  @media (--tablet) { max-width: 440px; }
-  @media (--phone) { max-width: 400px; gap: 20px; padding-top: 32px; }
+  display: flex; flex-direction: column; align-items: center; gap: clamp(20px, 2vw, 24px);
+  width: 100%;
 }
 .hero__copy { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
 .hero__title {
-  width: 100%;
-  font-family: var(--font-display); font-weight: 700; font-size: 48px; line-height: 1; text-align: center;
+  max-width: 10em;
+  font-family: var(--font-display); font-weight: 700; line-height: 1; text-align: center;
+  font-size: min(var(--type-hero), 8.5vh);           /* on a short screen (a laptop at 1366×768) the team gets the room */
 
-  /* an invisible dash in front balances the dash at the end of the first line, so the line looks centred */
-  &::before { content: "— "; color: transparent; }
-
-  @media (--lg) { font-size: 56px; }
-  @media (--tablet) { font-size: 40px; }
-  @media (--phone) { font-size: 32px; }
+  /* an invisible dash in front balances the dash at the end of the first line, so the line looks centred
+     (hidden, not transparent: in Windows high-contrast mode a transparent colour is overridden and the dash would show) */
+  &::before { content: "— "; visibility: hidden; }
 }
-.hero__lead-box {
-  display: flex; justify-content: center; width: 100%; max-width: 480px;
-  @media (--tablet) { max-width: 400px; }
-  @media (--phone) { max-width: 360px; }
-  @media (--narrow) { max-width: 300px; }
-}
+.hero__lead-box { display: flex; justify-content: center; width: 100%; }
 .hero__lead {
-  width: 100%;
-  font-size: 20px; line-height: 1.3; text-align: center; color: var(--ink-50);
-  @media (--tablet) { font-size: 18px; }
-  @media (--phone) { font-size: 16px; }
+  max-width: 24em;
+  font-size: var(--type-lead); line-height: 1.3; text-align: center; color: var(--ink-60);
+  text-wrap: balance;
 }
 
-/* the table picture: pinned to the bottom of the section and centred. On narrow screens its sides are cut off by
-   the section; on screens wider than the picture, the table fades into the background by itself (the picture does that).
+/* the stage of the picture: the rest of the section's height, within the limits above. It is a size container, so the
+   picture and the chips size themselves by it (cqh, cqw). Its layout containment also makes it a stacking context of
+   its own: the chips' shadows multiply into the table and nothing else. */
+.hero__stage {
+  --pic-min: min(40.8vw, 168px);
+  flex: 7 1 var(--pic-min);
+  min-height: var(--pic-min);
+  max-height: min(40.8vw, 540px);
+  position: relative;
+  container-type: size;
+  pointer-events: none;
+  /* the picture's height (its width is 3.923 times that), and the length of one px of a chip at its full size:
+     1 when the picture is 412px tall, a little less than the picture shrinks, never under 0.62 */
+  --hero-h: min(100cqh, 40.8cqw);
+  --hero-u: calc(1px * clamp(0.62, 0.3 + 0.7 * tan(atan2(var(--hero-h), 412px)), 1.2));
+}
+
+/* the table picture: at the bottom of the stage and centred. On narrow screens its sides are cut off by the section;
+   on screens wider than the picture, the table fades into the background by itself (the picture does that).
    It fades in once it has loaded and its turn has come, after the heading, the text and the button: scripts/boot.js
    adds the class hero-loaded to <html> when it has loaded, scripts/hero.js hero-in when its turn comes. */
 .hero__table {
   position: absolute; left: 50%; bottom: 0;
   width: calc(var(--hero-h) * 3.92333); height: var(--hero-h);
-  margin-left: calc(var(--hero-h) * -1.961665);
+  translate: -50% 0;
   opacity: 0; transition: opacity 0.9s var(--ease-out);
-  pointer-events: none;
 
   & picture, & img { width: 100%; height: 100%; }
   @media (--calm) { transition: none; }
@@ -125,7 +90,7 @@
 html.hero-in .hero__table,
 html.hero-loaded:not(.motion) .hero__table { opacity: 1; }
 
-/* the chips: scripts/hero.js puts them into .hero-chips, a layer as high as the picture, along the bottom of the section.
+/* the chips: scripts/hero.js puts them into .hero-chips, a layer as high as the picture, along the bottom of the stage.
    Every size here is a number of --u: one px of a chip at its full size (see --hero-u above). A chip is laid out at
    its full size and only ever made smaller by the script (further away = smaller), so its text stays sharp.
    The layer has no z-index on purpose: with one, it would be a world of its own, and the shadows could not blend with the table. */
@@ -142,10 +107,10 @@ html.hero-loaded:not(.motion) .hero__table { opacity: 1; }
   height: calc(56 * var(--u));
   padding: 0 calc(18 * var(--u)) 0 calc(8 * var(--u));
   border-radius: calc(16 * var(--u));
-  background: rgb(255 255 255 / 0.7);
+  background: var(--paper-70);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   /* a thin light rim, like the edge of frosted glass, and a hairline of shade right under it */
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55), 0 1px 1px rgb(90 60 30 / 0.06);
+  box-shadow: inset 0 0 0 1px var(--paper-55), 0 1px 1px rgb(90 60 30 / 0.06);
   transform-origin: 50% 100%;
   will-change: transform, opacity;
   font-size: calc(15 * var(--u)); line-height: 1.15; white-space: nowrap;
@@ -169,4 +134,4 @@ html.hero-loaded:not(.motion) .hero__table { opacity: 1; }
    the table, as a real shadow darkens the wood under it: the grain and the warm colour of the wood stay, only darker. */
 .hero-chip-shadow { mix-blend-mode: multiply; will-change: transform, opacity; }
 /* the lighter mode for weak devices (see scripts/pace.js): no frosted glass, a little more white instead */
-.hero-chips.is-light .hero-chip { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgb(255 255 255 / 0.86); }
+.hero-chips.is-light .hero-chip { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--paper-86); }

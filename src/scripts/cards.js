@@ -85,8 +85,9 @@ export function initCards() {
   // which stays whole under it: it needs a background of its own, and must be drawn above the section of the cards
   const page = getComputedStyle(document.body).backgroundColor || "#fff";
   section.style.setProperty("--stack-page", page);
-  const after = section.nextElementSibling;
-  if (after) {
+  // every section after the stack, not only the next one: the last card stays whole under them while it gives room,
+  // so a section shorter than a card (two royalty cards side by side, say) would let the card show below it
+  for (let after = section.nextElementSibling; after; after = after.nextElementSibling) {
     const b = getComputedStyle(after).backgroundColor;
     if (!b || b === "transparent" || /rgba\(.*,\s*0\)$/.test(b)) after.style.backgroundColor = page;
     if (getComputedStyle(after).position === "static") after.style.position = "relative";
@@ -97,7 +98,7 @@ export function initCards() {
   const settle = (title) => {
     title.size = null;                                       // measured again (see sizeOf)
     gsap.set(title.lines, { yPercent: 0, opacity: title.on ? 1 : 0 });
-    title.el.style.visibility = "visible";
+    title.el.classList.add("is-split");                     // shown (stack.css): as visible as its card, no more
   };
   cards.forEach((c) => c.titles.forEach((title) => {
     tidy(title.el);
@@ -153,10 +154,12 @@ export function initCards() {
     return (title.size = { y: at.y + top, h: bottom - top });
   }
   function measure() {
-    navH = navBottom();
-    section.style.setProperty("--stack-nav", navH + "px");
     gap = parseFloat(getComputedStyle(stage).paddingBottom) || 0;   // between two cards while they trade places
     section.style.setProperty("--stack-gap", gap + "px");
+    // where the cards stick: under the navbar and the same gap as below and at the sides, so a card that fills the
+    // stage has even space all round (the stage starts there: every "under the navbar" below means under that gap too)
+    navH = navBottom() + gap;
+    section.style.setProperty("--stack-nav", navH + "px");
     V = frame.offsetHeight;
     cards.forEach((c) => {
       const el = c.el, m = c.m;

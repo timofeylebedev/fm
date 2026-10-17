@@ -2,63 +2,90 @@
    How it moves is described in scripts/cards.js. Without the script the cards simply stand one under another.
 
      .stack            the section
-       .stack__stage   the space around the cards and between them (its bottom padding is the gap)
-         .card         one per subject: its colour is --card-bg; it fills the stage, up to 1440px wide
-           .card__text   the label (.card__tag) and the titles (.card__title, one per step), on the left
-           .card__art    the drawings (.art), one per step, on the right                                  */
+       .stack__stage   the space around the cards and between them (--inset on every side, the gap between two cards)
+         .card         one per subject: its colour is --card-bg; it fills the stage, up to 1920px wide
+           .card__text   the label (.card__tag) and the titles (.card__title, one per step)
+           .card__art    the drawings (.art), one per step
+
+   The card arranges itself by its own shape (it is a size container, @container card), not by the screen:
+     · a wide card (at least 1.3 times as wide as tall: laptops, computers, tablets and phones turned sideways): the text
+       on the left, the drawing on the right as a square as tall as the card (at most 58% of its width), a little past
+       its right edge (the drawings have air of their own around them);
+     · a tall card (phones, tablets upright, a narrow window): the text on top, the drawing in all the room below it.
+   So the drawing always takes the card's room, on a tall screen as on a short one.
+
+   The label and the corners: the label is as tall as its line plus its padding (--tag-h), the card's padding is the
+   same on its left and above it (--card-pad), and the card's corner radius is half the label's height plus that
+   padding. The space around the label is even on both sides, the two curves are concentric, and the smallest card
+   (cards.js: the label with the padding above and below it) is a perfect pill at every size. */
 
 .stack { position: relative; }
 .stack__stage {
-  display: flex; flex-direction: column; gap: 16px;
-  padding: 0 16px 16px;
-  @media (--lg) { gap: 24px; padding: 0 24px 24px; }
-  @media (--phone) { gap: 8px; padding: 0 8px 8px; }
+  display: flex; flex-direction: column; gap: var(--inset);
+  padding: var(--inset);
 }
 
 .card {
+  --tag-h: calc(var(--type-card-tag) * 1.2 + 2 * var(--card-tag-pad-y) + 4px);
+  --card-r: calc(var(--tag-h) / 2 + var(--card-pad));
   position: relative;
-  width: 100%; max-width: 1440px;
+  display: flex; flex-direction: column;
+  width: 100%; max-width: 1920px; margin-inline: auto;
+  /* one screen less the navbar and the gaps (cards.js sets the exact height while it runs: --stack-a below) */
+  height: calc(var(--screen) - var(--nav-pad-y) * 2 - 32px - 2 * var(--inset));
+  min-height: 280px;
   overflow: hidden;
-  border-radius: 43.5px;
+  border-radius: var(--card-r);
   background-color: var(--card-bg);
-  @media (--lg) { border-radius: 66px; }
+  container: card / size;
 }
 .card__text {
   position: relative; z-index: 1;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
-  width: 50%; max-width: 480px; padding: 24px 0 0 24px;
-
-  @media (--lg) { gap: 24px; max-width: 620px; padding: 40px 0 0 40px; }
-  @media (--tablet) { max-width: 440px; }
-  @media (--phone) { width: 100%; padding-right: 24px; }
+  display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--card-pad) * 0.6);
+  /* beside the drawing: the room the drawing leaves (its square, less the part past the edge) */
+  width: calc(100cqw - min(58cqw, 100cqh) + min(58cqw, 100cqh) * 0.06);
+  padding: var(--card-pad) 0 0 var(--card-pad);
 }
 .card__tag {
   position: relative;
-  padding: 8px 16px;
-  border: 2px solid rgb(255 255 255 / 0.3); border-radius: var(--round);
-  @media (--lg) { padding: 12px 24px; }
+  display: flex; align-items: center;
+  height: var(--tag-h);
+  padding: 0 var(--card-tag-pad-x);
+  border: 2px solid var(--paper-30); border-radius: var(--round);
 }
 .card__tag-label {
   display: block;
-  font-weight: 500; line-height: normal; letter-spacing: 0.1rem; text-transform: uppercase; color: var(--paper);
-  @media (--lg) { font-size: 20px; }
+  font-size: var(--type-card-tag); font-weight: 500; line-height: 1.2; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--paper);
 }
-.card__titles { width: 100%; height: 100%; }
+/* the titles are counted in their own letters: about 12.5 of them wide, so they break into three or four lines
+   of a similar length at every size (text-wrap evens them out) */
+.card__titles { width: min(100%, 12.5em); font-size: var(--type-card-title); }
 .card__title {
-  font-family: var(--font-display); font-weight: 700; font-size: 36px; line-height: 1; color: var(--paper);
-  @media (--lg) { font-size: 48px; }
-  @media (--tablet) { font-size: 28px; }
+  font-family: var(--font-display); font-weight: 700; font-size: 1em; line-height: 1; color: var(--paper);
+  text-wrap: balance;
 }
+/* the drawing's room: on the right, a square as tall as the card (at most 58% of its width), 6% of it past the edge */
 .card__art {
-  position: absolute; top: 0; bottom: 0; right: -60px;
-  width: 520px;
-
-  @media (--lg) { width: 760px; }
-  @media (--xl) { width: 1000px; right: -120px; }
-  @media (--tablet) { width: 460px; }
-  @media (--phone) { width: 100%; top: 35%; left: 0; right: 0; }
-
+  --s: min(58cqw, 100cqh);
+  position: absolute; top: 0; bottom: 0; right: calc(var(--s) * -0.06);
+  width: var(--s);
   & > .art { position: absolute; inset: 0; }
+}
+/* a tall card: the text on top (the whole width), the drawing in all the room below it, as big as fits, centred */
+@container card (aspect-ratio < 1.3) {
+  .card__text { width: 100%; padding-right: var(--card-pad); }
+  .card__titles { width: min(100%, 14em); }
+  .card__art {
+    position: relative; inset: auto;
+    flex: 1 1 0; min-height: 0; width: 100%;
+    container-type: size;
+    & > .art {
+      --s: min(100cqw * 1.08, 100cqh * 1.04);
+      inset: auto; left: 50%; top: 50%; width: var(--s); height: var(--s);
+      translate: -50% -50%;
+    }
+  }
 }
 
 /* ── while the script runs (stack-on) ──
@@ -69,10 +96,11 @@
    with the card's corners cut out of it. The same strip stands at the bottom of the screen (.stack__mask, in
    .stack__frame: one screen tall and sticky), so a card that comes up ends the gap above the bottom of the screen.
    All heights are in --fm-vh, the steady screen height of phones (see scripts/boot.js), so they follow it by themselves.
-     · --stack-a is the height of a card: one screen, less the navbar and the gap at the bottom (--stack-gap);
+     · --stack-nav is where the cards stick: under the navbar and the gap (the same gap as on the sides and below);
+     · --stack-a is the height of a card: one screen, less that and the gap at the bottom (--stack-gap);
      · the section cuts off what reaches outside it (overflow: clip, which keeps sticky working). */
 .stack.stack-on {
-  --stack-a: calc(100 * var(--fm-vh, 1vh) - var(--stack-nav, 64px) - var(--stack-gap, 8px));
+  --stack-a: calc(var(--screen) - var(--stack-nav, 64px) - var(--stack-gap, 8px));
   isolation: isolate; overflow: clip; pointer-events: none;
 }
 /* the stage: its top padding is the navbar (the cards start under it; it also keeps the frame's negative margin
@@ -81,17 +109,16 @@
 .stack-on .stack__slot { position: relative; }
 .stack-on .card {
   position: sticky; top: var(--stack-nav, 64px);
-  display: block; height: var(--stack-a); margin: 0 auto;
+  height: var(--stack-a); min-height: 0; margin: 0 auto;
   visibility: visible;
 }
-.stack-on .card__text { z-index: 1; }
 .stack-on .card__titles { display: grid; }
 .stack-on .card__title {
   grid-area: 1 / 1; position: relative;
-  visibility: hidden;                                                  /* until the script has split it into lines */
+  &:not(.is-split) { visibility: hidden; }                             /* until the script has split it into lines */
   & .fm-line { white-space: nowrap; }
 }
-.stack-on .card.is-asleep .card__art { display: none; }               /* far from its turn: its drawings let go of their memory */
+.stack-on .card.is-asleep .card__art > .art { display: none; }        /* far from its turn: its drawings let go of their memory */
 .stack-on .card.is-off { visibility: hidden; }                        /* nothing of it is seen: not under the navbar either */
 /* a card that comes up while it is still the smallest card: cut to that size by itself (--stack-pill, written by the
    script), and the strip at the bottom of the screen is hidden meanwhile (stack-rising), so it comes up whole */
@@ -105,8 +132,8 @@
    bars after it), only the mask in it is seen. Above the cards. */
 .stack-on .stack__frame {
   position: sticky; top: 0; z-index: 1; display: block;
-  height: calc(100 * var(--fm-vh, 1vh));
-  margin: calc(-100 * var(--fm-vh, 1vh) - var(--stack-nav, 64px)) 0 var(--stack-nav, 64px);
+  height: var(--screen);
+  margin: calc(-1 * var(--screen) - var(--stack-nav, 64px)) 0 var(--stack-nav, 64px);
   visibility: hidden; pointer-events: none;
 }
 .stack__collar {
@@ -140,7 +167,7 @@
    Both are made by the script. */
 .stack-on .card__tag { isolation: isolate; overflow: visible; }
 .card__tag-fill, .card__tag-done { position: absolute; pointer-events: none; border-radius: inherit; }
-.card__tag-fill { inset: 0; z-index: -1; background: rgb(255 255 255 / 0.3); clip-path: inset(0 100% 0 0); }
+.card__tag-fill { inset: 0; z-index: -1; background: var(--paper-30); clip-path: inset(0 100% 0 0); }
 .card__tag-done {
   inset: -2px; z-index: 1;
   display: flex; align-items: center; justify-content: center;
@@ -150,3 +177,5 @@
   @media (--calm) { transition: none; }
 }
 .card__tag.is-done > .card__tag-done { opacity: 1; }
+
+@media (forced-colors: active) { .card { outline: 1px solid CanvasText; outline-offset: -1px; } }

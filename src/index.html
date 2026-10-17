@@ -75,6 +75,7 @@
 
   <nav class="menu" id="menu" aria-label="Меню" data-menu>
     <a class="menu__item" href="#product">Продукт</a>
+    <a class="menu__item" href="#clients">Клиенты</a>
     <a class="menu__item" href="#tools">Инструменты</a>
     <a class="menu__item" href="#publications">Публикации</a>
     <a class="menu__item" href="#contacts">Контакты</a>
@@ -95,18 +96,20 @@
           <a class="btn btn--purple" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo data-reveal="block">Запланировать демо</a>
         </div>
       </div>
-      <div class="hero__table" data-hero-table>
-        <picture>
-          <source type="image/avif" sizes="160vw" srcset="./assets/img/hero-table-900.avif 900w, ./assets/img/hero-table-1400.avif 1400w, ./assets/img/hero-table-1800.avif 1800w, ./assets/img/hero-table-2600.avif 2600w, ./assets/img/hero-table-3531.avif 3531w">
-          <img class="hero__img" src="./assets/img/hero-table-1800.webp" sizes="160vw" srcset="./assets/img/hero-table-900.webp 900w, ./assets/img/hero-table-1400.webp 1400w, ./assets/img/hero-table-1800.webp 1800w, ./assets/img/hero-table-2600.webp 2600w, ./assets/img/hero-table-3531.webp 3531w" width="3531" height="900" alt="Команда лейбла работает за общим столом" fetchpriority="high">
-        </picture>
+      <div class="hero__stage">
+        <div class="hero__table" data-hero-table>
+          <picture>
+            <source type="image/avif" sizes="min(160vw, 2120px)" srcset="./assets/img/hero-table-900.avif 900w, ./assets/img/hero-table-1400.avif 1400w, ./assets/img/hero-table-1800.avif 1800w, ./assets/img/hero-table-2600.avif 2600w, ./assets/img/hero-table-3531.avif 3531w">
+            <img class="hero__img" src="./assets/img/hero-table-1800.webp" sizes="min(160vw, 2120px)" srcset="./assets/img/hero-table-900.webp 900w, ./assets/img/hero-table-1400.webp 1400w, ./assets/img/hero-table-1800.webp 1800w, ./assets/img/hero-table-2600.webp 2600w, ./assets/img/hero-table-3531.webp 3531w" width="3531" height="900" alt="Команда лейбла работает за общим столом" fetchpriority="high">
+          </picture>
+        </div>
       </div>
     </section>
 
     <!-- ── Card stack: Управление, Документы, Финансы (scripts/cards.js) ── -->
     <section class="stack" aria-label="Возможности Flow Medium" data-stack>
       <div class="stack__stage">
-        <article class="card" style="--card-bg: #004de5">
+        <article class="card" style="--card-bg: var(--blue)">
           <div class="card__text">
             <h2 class="card__tag"><span class="card__tag-label">Управление</span></h2>
             <div class="card__titles">
@@ -121,7 +124,7 @@
             <div class="art" data-art="s1-3"></div>
           </div>
         </article>
-        <article class="card" style="--card-bg: #f56e00">
+        <article class="card" style="--card-bg: var(--orange)">
           <div class="card__text">
             <h2 class="card__tag"><span class="card__tag-label">Документы</span></h2>
             <div class="card__titles">
@@ -134,7 +137,7 @@
             <div class="art" data-art="s2-2"></div>
           </div>
         </article>
-        <article class="card" style="--card-bg: #009929">
+        <article class="card" style="--card-bg: var(--green)">
           <div class="card__text">
             <h2 class="card__tag"><span class="card__tag-label">Финансы</span></h2>
             <div class="card__titles">
@@ -170,7 +173,7 @@
     <!-- ── Access rights: three ID cards ── -->
     <section class="access">
       <div class="head"><h2 class="head__title" data-reveal="chars">Гибкая настройка прав доступа</h2></div>
-      <div class="access__stage">
+      <div class="access__stage" data-deck role="group" aria-roledescription="стопка карточек" aria-label="Сотрудники с разными правами доступа">
         <ul class="access__cards" role="list">
           <li class="access__slot access__slot--1">
             <div class="idcard" data-reveal="tilt" style="--rest: -5deg">
@@ -219,6 +222,7 @@
           </li>
         </ul>
       </div>
+      <div class="access__dots" data-deck-dots hidden></div>
     </section>
 
     <!-- ── Releases: the ring of covers (scripts/ring.js) and four features ── -->

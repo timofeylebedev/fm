@@ -1,6 +1,7 @@
-/* The menu of phones and tablets (up to 991px): the burger turns into a cross, and the pills of the menu pop in from
-   its corner one after another, lower ones starting smaller. Closing is a little faster than opening. It closes after
-   a tap on a link, a tap outside it, or Escape; and at once if the screen grows past 991px while it is open. */
+/* The menu of phones and tablets (below 1024px, where the styles show the burger): the burger turns into a cross, and
+   the pills of the menu pop in from its corner one after another, lower ones starting smaller. Closing is a little
+   faster than opening. It closes after a tap on a link, a tap outside it, or Escape; and at once if the screen grows
+   so wide that the burger is gone (the width lives in the styles only: media.css). */
 import { gsap, CustomEase } from "./gsap.js";
 import { calm } from "./motion.js";
 
@@ -55,8 +56,8 @@ export function initMenu() {
   items.forEach((item) => item.addEventListener("click", () => { if (isOpen) closeMenu(); }));
   document.addEventListener("click", (e) => { if (isOpen && !menu.contains(e.target) && !btn.contains(e.target)) closeMenu(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen) { closeMenu(); btn.focus(); } });
-  matchMedia("(min-width: 992px)").addEventListener("change", (e) => {
-    if (e.matches && isOpen) {
+  addEventListener("resize", () => {
+    if (isOpen && getComputedStyle(btn).display === "none") {
       isOpen = false;
       tl.pause(0);
       menu.classList.remove("is-open");

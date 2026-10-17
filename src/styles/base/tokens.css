@@ -1,8 +1,15 @@
-/* Design tokens written by hand: fonts, curves, timings, shapes. The colours and the sizes shared with Figma are in
-   tokens.gen.css (generated from design/tokens.json; see design/README.md). */
+/* Design tokens written by hand: fonts, curves, timings, shapes, and what is worked out from the shared values.
+   The colours and the sizes shared with Figma are in tokens.gen.css (generated from design/tokens.json; see
+   design/README.md): type sizes (--type-*), the gutter, the section rhythm, the radii. */
 
 :root {
-  /* colours: in tokens.gen.css, written from design/tokens.json (the Figma variables). Change them there. */
+  /* colours: in tokens.gen.css, written from design/tokens.json (the Figma variables). Change them there.
+     White at the strengths the site uses on colour (the ink ladder, --ink-*, is the same for black) */
+  --paper-86: rgb(255 255 255 / 0.86);
+  --paper-80: rgb(255 255 255 / 0.8);
+  --paper-70: rgb(255 255 255 / 0.7);
+  --paper-55: rgb(255 255 255 / 0.55);
+  --paper-30: rgb(255 255 255 / 0.3);
 
   /* fonts (see fonts.css; the fallbacks are sized like the fonts, so nothing moves when they arrive) */
   --font: "Golos Text", "Golos Fallback", Arial, sans-serif;
@@ -10,7 +17,6 @@
 
   /* curves and timings (scripts/motion.js has the same curves for GSAP) */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);     /* arriving: quick, then a long soft landing */
-  --ease-move: cubic-bezier(0.65, 0, 0.25, 1);    /* travelling from one place to another */
   /* blocks settle: about a fifth past their place and back (the "settle" curve of motion.js; exact below) */
   --ease-settle: cubic-bezier(0.34, 1.56, 0.64, 1);
   --hover-in: 0.2s;
@@ -18,6 +24,15 @@
 
   /* shapes */
   --round: 999px;
+
+  /* the layout: the content column is at most 1024 px wide, centred, and never closer to the screen edge than the
+     gutter. --column is how wide it is now (for blocks that size themselves by it). */
+  --column-max: 1024px;
+  --column: min(var(--column-max), 100vw - 2 * var(--gutter));
+
+  /* the screen's height: steady on phones (scripts/boot.js), the browser's own elsewhere */
+  --screen: calc(100 * var(--fm-vh, 1vh));
+  --screen-s: calc(100 * var(--fm-svh, 1svh));
 }
 
 /* the "settle" curve of motion.js written out point by point, where the browser can draw it */

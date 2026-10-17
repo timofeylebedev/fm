@@ -1,63 +1,62 @@
-/* The sections between the card stack and the footer, in page order. */
+/* The sections between the card stack and the footer, in page order.
 
-/* ── Royalty: two magenta cards with drawings (art/royalty.js) ── */
-.royalty {
-  display: flex; flex-direction: column; align-items: center; gap: 48px;
-  padding: 72px 40px 48px;
-  @media (--lg) { gap: 64px; padding: 104px 120px 64px; }
-  @media (--phone) { padding: 72px 32px 40px; }
+   Every one of them is a column at most 1024px wide (--column-max), centred, never closer to the screen edge than the
+   gutter (--gutter). Their rhythm comes from tokens.gen.css: --section-y above and below the content, --section-gap
+   from the heading to what follows it. The blocks inside arrange themselves by the width they get (container
+   queries), not by the screen, so each one changes its layout where it runs out of room. */
+
+.royalty, .access, .releases, .clients, .tools, .pubs {
+  display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
+  padding: var(--section-y) var(--gutter);
 }
+
+/* ── Royalty: two magenta cards with drawings (art/royalty.js) ──
+   Square cards. One column while two would be cramped (each card at most 416px wide, centred: it never stretches
+   into a long strip); side by side from a 576px column on. The drawing is the whole square (its Figma frame is
+   square too), the text lies over its lower part. */
+.royalty { padding-top: calc(var(--section-y) * 1.6); container: royalty / inline-size; }
 .royalty__cards {
-  display: flex; gap: 12px; width: 100%; max-width: 1024px;
-  @media (--phone) { flex-direction: column; }
+  display: grid; grid-template-columns: 1fr; justify-items: center; gap: 12px;
+  width: 100%; max-width: var(--column-max);
 }
 .royalty__card {
   position: relative;
   display: flex; align-items: flex-end;
-  width: 50%; aspect-ratio: 1; padding: 32px;
-  overflow: hidden; border-radius: 32px;
+  width: 100%; max-width: 26rem; aspect-ratio: 1;
+  padding: var(--radius-m);
+  overflow: hidden; border-radius: var(--radius-m);
   background: var(--magenta);
 
-  @media (--lg) { height: 506px; padding: 40px; border-radius: 40px; }
-  @media (--phone) { width: 100%; height: 300px; padding: 20px; border-radius: 24px; }
-
-  & > .art {
-    position: absolute; top: 0; left: 0; right: 0;
-    width: 100%; height: 100%; aspect-ratio: 1;
-    @media (--tablet) { height: 85%; }
-    @media (--phone) { height: 344px; }
-    @media (--narrow) { height: 100%; }
-  }
+  & > .art { position: absolute; inset: 0; }
+}
+@container royalty (width >= 36rem) {
+  .royalty__cards { grid-template-columns: 1fr 1fr; }
+  .royalty__card { max-width: none; }
 }
 .royalty__text {
-  position: relative; width: 100%;
-  font-size: 24px; font-weight: 600; color: var(--paper);
-  @media (--lg) { font-size: 32px; }
-  @media (--phone) { max-width: 416px; font-size: 18px; }
+  position: relative; width: 100%; max-width: 15em;
+  font-size: var(--type-royalty); font-weight: 600; line-height: 1.2; color: var(--paper);
+  text-wrap: balance;
 }
 
 /* ── Access rights: three ID cards, dropped onto the page (motion.js, "tilt") ──
-   The cards are laid out at their size in the design and the whole row is scaled to the screen. */
-.access {
-  display: flex; flex-direction: column; align-items: center; gap: 48px;
-  padding: 48px 40px 96px;
-  overflow: hidden;
-  @media (--lg) { gap: 64px; padding: 64px 120px 128px; }
-  @media (--phone) { padding: 40px 32px 80px; }
-}
+   The cards keep the size they have in the design (240×345: their text stays readable); the room decides how they lie.
+     · a row, where it fits at 92% of that size or more (the text of the cards then stays at 12px or more): side by side, closer together as the room gets narrower
+       (by at most 24px each: the air around a card, so no card ever covers the text of the one under it), then
+       scaled down a little;
+     · below a 728px column (phones, tablets up to 768px upright, narrow windows): a deck, one card on top of the others,
+       which you swipe from right to left (scripts/deck.js). The deck is scaled down only below a 300px column.
+   The section is the container: 100cqw is its column. */
+.access { container: access / inline-size; overflow: hidden; padding-bottom: calc(var(--section-y) * 1.6); }
 .access__stage {
-  position: relative; aspect-ratio: 2.195;
-  @media (--tablet) { width: 684px; height: 312px; }
-  @media (--phone) { width: 100%; height: 216.7px; }
-  @media (--narrow) { width: 100vw; height: 67.93vw; }
+  --o: clamp(-24px, (100cqw - 837px) / 2, 0px);                         /* each card's step towards the next */
+  --k: min(1, tan(atan2(100cqw, 789px)));                               /* the row's scale, below a 789px column */
+  position: relative;
+  width: 100%; height: calc(392px * var(--k));
 }
 .access__cards {
   display: flex; justify-content: center; align-items: flex-start; gap: 16px;
-  transform-origin: 50% 0;
-  @media (--tablet) { transform: scale(0.833); }
-  @media (--phone) { transform: scale(0.579); }
-  /* upright phones: the row grows with the screen from 320px on (tan(atan2(a, b)) is a / b as a plain number) */
-  @media (--narrow) { transform: scale(calc(0.579 * tan(atan2(100vw, 320px)))); }
+  transform: scale(var(--k)); transform-origin: 50% 0;
 }
 .access__slot {
   position: relative;
@@ -67,7 +66,44 @@
 .access__slot--1 { width: 270px; height: 365px; margin-top: 8px; }
 .access__slot--2 { width: 249px; height: 352px; margin-top: 24px; }
 .access__slot--3 { width: 286px; height: 376px; }
-.access__slot--1, .access__slot--2 { @media (--phone) { margin-right: -70px; } }
+.access__slot--1, .access__slot--2 { margin-right: var(--o); }
+.access__dots { display: none; }
+
+@container access (width < 728px) {
+  .access__stage {
+    --k: min(1, tan(atan2(100cqw, 300px)));
+    --deck: 1;                                                          /* read by scripts/deck.js */
+    height: calc(424px * var(--k));
+    touch-action: pan-y;                                                /* the page scrolls up and down; sideways is the deck's */
+    user-select: none; -webkit-user-select: none;
+  }
+  .access__cards { display: block; position: relative; height: 392px; }
+  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) is set by the script */
+  .access__slot {
+    position: absolute; left: 50%; top: 8px;
+    width: 270px; height: 376px; margin: 0 0 0 -135px !important;
+    z-index: calc(3 - var(--d, 0));
+    translate: calc(var(--d, 0) * 13px) calc(var(--d, 0) * -7px);
+    scale: calc(1 - var(--d, 0) * 0.045);
+    transition: translate 0.45s var(--ease-out), scale 0.45s var(--ease-out);
+  }
+  .access__slot--2 { --d: 1; }
+  .access__slot--3 { --d: 2; }
+  .access__stage.is-dragging .access__slot { transition: none; }
+  .access__dots {
+    display: flex; justify-content: center; gap: 4px;
+    margin-top: 4px;
+  }
+}
+/* the dots under the deck: which card is on top; a tap brings that card up (each is a 24px target round a 8px dot) */
+.access__dot {
+  display: grid; place-items: center; width: 24px; height: 24px;
+  &::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-30);
+    transition: background-color var(--hover-out) var(--ease-out), scale var(--hover-out) var(--ease-out);
+  }
+  &[aria-current="true"]::before { background: var(--ink); scale: 1.25; }
+}
 
 .idcard {
   position: relative;
@@ -100,54 +136,47 @@
   & + & { border-top: 1px solid var(--line); }
 }
 
-/* ── Releases: the ring of covers (scripts/ring.js) and four features ── */
-.releases {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 0 40px 48px;
-  @media (--lg) { padding: 0 120px 64px; }
-  @media (--phone) { padding: 0 32px 40px; }
-}
-.ring { position: relative; flex: none; width: 100%; max-width: 1024px; margin: 0 auto; overflow: hidden; }
+/* ── Releases: the ring of covers (scripts/ring.js) and four features ──
+   The features stay in two columns down to the narrowest phone, and become a row of four once each would be at
+   least about 170px wide (a 736px column). Never three: four cards would leave one alone on a row. */
+.releases { padding-top: 0; container: releases / inline-size; }
+.ring { position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto; overflow: hidden; }
 .features {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-  width: 100%; max-width: 1024px;
-  @media (--phone) { grid-template-columns: 1fr 1fr; }
-  @media (--narrow) { grid-template-columns: 1fr; row-gap: 8px; }
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.2vw, 12px);
+  width: 100%; max-width: var(--column-max);
 }
+@container releases (width >= 46rem) { .features { grid-template-columns: repeat(4, 1fr); } }
 .feature {
-  display: flex; flex-direction: column; gap: 40px;
-  padding: 24px 24px 32px;
-  border-radius: 24px; background: var(--tint);
-  @media (--tablet) { gap: 32px; padding: 16px 16px 24px; }
-  @media (--phone) { border-radius: 16px; }
+  display: flex; flex-direction: column; justify-content: space-between; gap: clamp(24px, 3vw, 40px);
+  padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);
+  border-radius: var(--radius-s); background: var(--tint);
 }
 .feature__icon { width: 40px; height: 40px; color: var(--purple); }
 .feature__text { display: flex; flex-direction: column; gap: 8px; }
-.feature__title, .feature__desc {
-  font-size: 16px; font-weight: 500; line-height: 1.2;
-  @media (--lg) { font-size: 18px; }
-  @media (--tablet) { font-size: 14px; }
-}
+.feature__title, .feature__desc { font-size: var(--type-feature); font-weight: 500; line-height: 1.2; }
 .feature__desc { color: var(--ink-60); }
 
 /* ── Clients: the strip of logos and numbers ──
-   The window shows 4 columns (3 on phones); the strip has 8 columns × 2 rows and slides from left-aligned to
-   right-aligned while the section is pinned (scripts/logos.js). Sizes are in --u, the side of one card
-   (the design: 247px at 1024px). */
+   The window shows 4 columns (3 on phones, 2 on the narrowest); the strip has 8 columns × 2 rows and slides from
+   left-aligned to right-aligned while the section is pinned (scripts/logos.js). Sizes are in --u, the side of one
+   card (the design: 247px at 1024px). The section is pinned in the middle of the screen, so it must fit the screen:
+   on a short one (a laptop at 1366×768, a phone turned sideways) the cards are as big as its height allows, and the
+   window then shows more columns. A tap on a logo shows its name (scripts/logos.js), as hovering does. */
 .clients {
-  display: flex; flex-direction: column; align-items: center; gap: 48px;
-  padding: 48px 40px;
   overflow: hidden;
-  @media (--lg) { gap: 64px; padding: 64px 120px; }
-  @media (--phone) { padding: 40px 32px; }
+  /* on a short screen the section's own spacing gives way first, so the cards can stay big enough to read */
+  padding-block: min(var(--section-y), 6vh); gap: min(var(--section-gap), 6vh);
 }
-.logos { width: 100%; max-width: 1024px; container-type: inline-size; }
+.logos { width: 100%; max-width: var(--column-max); container-type: inline-size; }
 .logos__track {
   --gap: clamp(8px, 1.2cqw, 12px);
-  --u: calc((100cqw - 3 * var(--gap)) / 4);
+  --cols: 4;
+  --by-height: calc((var(--screen) - 2 * min(var(--section-y), 6vh) - min(var(--section-gap), 6vh) - var(--type-h2) - var(--nav-pad-y) * 2 - 32px - var(--gap)) / 2);
+  --u: max(100px, min((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols), var(--by-height)));
   display: grid; grid-template-columns: repeat(8, var(--u)); grid-template-rows: repeat(2, var(--u)); gap: var(--gap);
-  width: max-content;
-  @media (--phone) { --u: calc((100cqw - 2 * var(--gap)) / 3); }
+  width: max-content; margin-inline: auto;            /* centred when it fits its window whole; from the left otherwise */
+  @media (--phone) { --cols: 3; }
+  @media (--narrow) { --cols: 2; }
 }
 .logo-card, .stat {
   position: relative; min-width: 0; border-radius: calc(var(--u) * 0.1); background: var(--tint);
@@ -155,13 +184,11 @@
 .logo-card__img { width: 100%; height: 100%; }
 .logo-card__name {
   position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 0 16px 16px;
-  font-size: 14px; line-height: 1; text-align: center; color: var(--ink-50);
+  padding: 0 8% 8%;
+  font-size: max(12px, var(--u) * 14 / 247); line-height: 1.1; text-align: center; color: var(--ink-60);
   opacity: 0; transition: opacity var(--hover-out) var(--ease-out);
-  @media (--tablet) { font-size: 12px; }
-  @media (--phone) { font-size: 11px; }
-  @media (--narrow) { font-size: 9px; }
 }
+.logo-card.is-named .logo-card__name { opacity: 1; transition-duration: var(--hover-in); }
 @media (--mouse) { .logo-card:hover .logo-card__name { opacity: 1; transition-duration: var(--hover-in); } }
 .stat {
   grid-column: span 2;
@@ -170,8 +197,8 @@
   overflow: hidden;
   color: var(--paper);
 }
-.stat__number { position: relative; z-index: 1; font-size: calc(var(--u) * 64 / 247); font-weight: 600; line-height: 1; }
-.stat__label { position: relative; z-index: 1; font-size: calc(var(--u) * 24 / 247); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+.stat__number { position: relative; z-index: 1; font-size: calc(var(--u) * 64 / 247); font-weight: 600; line-height: 1; overflow-wrap: anywhere; }
+.stat__label { position: relative; z-index: 1; font-size: max(12px, var(--u) * 24 / 247); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
 /* the colour of the dots (scripts/stipple.js); without WebGL2 the card fades into it instead */
 .stat--orange { --dots: var(--orange); }
 .stat--blue { --dots: var(--blue); }
@@ -180,24 +207,23 @@
 .dots { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
 .no-dots > .dots { visibility: hidden; }
 
-/* ── Call to action: the purple card, with dots along its border (scripts/stipple.js) and a strip of words ── */
+/* ── Call to action: the purple card, with dots along its border (scripts/stipple.js) and a strip of words ──
+   As wide as the column (on phones nearly the whole screen, like the card stack: --inset), and about three quarters
+   of the screen's height (at most 680px): on a short screen it never needs scrolling through, on a tall one it never
+   becomes a tower. Its content sets the least it can be. */
 .cta {
   display: flex; flex-direction: column; align-items: center;
-  padding: 48px 24px 72px;
-  @media (--lg) { padding: 64px 24px 80px; }
-  @media (--phone) { padding: 40px 8px 72px; }
+  padding: var(--section-y) var(--inset) calc(var(--section-y) * 1.4);
+  @media not (--phone) { padding-inline: var(--gutter); }
 }
 .cta__card {
   position: relative; isolation: isolate;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 100%; max-width: 1024px; height: 560px; padding: 0 40px 24px;
-  overflow: hidden; border-radius: 40px;
+  width: 100%; max-width: var(--column-max);
+  min-height: min(0.72 * var(--screen), 680px);
+  padding: calc(var(--section-y) * 0.8) clamp(24px, 5vw, 48px) calc(65px + var(--section-y) * 0.6);
+  overflow: hidden; border-radius: var(--radius-l);
   background-color: var(--purple);
-
-  @media (--lg) { height: 680px; border-radius: 56px; }
-  @media (--tablet) { height: 456px; }
-  @media (--phone) { height: 640px; padding-bottom: 40px; border-radius: 32px; }
-  @media (--narrow) { padding-inline: 24px; }
 
   /* the dots are drawn behind the content (the card is a world of its own) */
   & > .dots { z-index: -1; }
@@ -205,30 +231,20 @@
 .cta__content {
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center; gap: 24px;
-  width: 100%; max-width: 580px;
-  @media (--lg) { max-width: 720px; }
-  @media (--tablet) { max-width: 440px; }
-  @media (--phone) { max-width: 400px; }
+  width: 100%;
 }
 .cta__copy { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
 .cta__title {
-  width: 100%;
-  font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1; text-align: center; color: var(--paper);
-  @media (--lg) { font-size: 56px; }
-  @media (--tablet) { font-size: 32px; }
-  @media (--phone) { font-size: 28px; }
+  max-width: 13em;
+  font-family: var(--font-display); font-weight: 700; line-height: 1; text-align: center; color: var(--paper);
+  font-size: min(var(--type-h2), 9vh);               /* a phone turned sideways: the card still fits the screen */
+  text-wrap: balance;
 }
-.cta__lead-box {
-  display: flex; justify-content: center; width: 100%; max-width: 480px;
-  @media (--lg) { max-width: 560px; }
-  @media (--tablet) { max-width: 400px; }
-  @media (--phone) { max-width: 360px; }
-}
+.cta__lead-box { display: flex; justify-content: center; width: 100%; }
 .cta__lead {
-  width: 100%;
-  font-size: 20px; line-height: 1.3; text-align: center; color: rgb(255 255 255 / 0.8);
-  @media (--tablet) { font-size: 18px; }
-  @media (--phone) { font-size: 16px; }
+  max-width: 26em;
+  font-size: var(--type-lead); line-height: 1.3; text-align: center; color: var(--paper);
+  text-wrap: balance;
 }
 /* the strip of words along the bottom: one picture (marquee.svg, a word list 714px long and a 24px gap) repeated,
    sliding left by one picture every 15 seconds */
@@ -246,114 +262,92 @@
 }
 @keyframes marquee { to { transform: translateX(-738px); } }
 
-/* ── Tools: two white cards ── */
-.tools {
-  display: flex; flex-direction: column; align-items: center; gap: 48px;
-  padding: 72px 40px;
-  background: var(--mist);
-  @media (--lg) { gap: 80px; padding: 80px 40px; }
-  @media (--phone) { padding: 72px 32px; }
-}
+/* ── Tools: two white cards ──
+   Side by side (text | picture) when the column has room for both halves (704px); otherwise the text, then the
+   picture under it. The cards are as wide as the column at every size. */
+.tools { background: var(--mist); }
 .tools__list {
-  display: flex; flex-direction: column; gap: 24px;
-  width: 100%; max-width: 1024px;
-  @media (--phone) { max-width: 360px; }
+  display: flex; flex-direction: column; gap: clamp(16px, 2vw, 24px);
+  width: 100%; max-width: var(--column-max);
+  container-type: inline-size;
 }
 .tool {
-  display: grid; grid-template-columns: 1fr 1fr;
-  grid-template-rows: minmax(0, 1fr);       /* the picture fits the card's height, it does not stretch it */
-  height: 480px;
-  border-radius: 40px; background: var(--paper);
-  @media (--tablet) { grid-template-rows: auto; height: auto; border-radius: 32px; }
-  @media (--phone) { grid-template-columns: 1fr; }
+  --pad: clamp(24px, 6cqw, 64px);
+  display: grid; grid-template-columns: 1fr;
+  overflow: hidden; border-radius: var(--radius-m); background: var(--paper);
 }
 .tool__body {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 32px;
-  padding: 64px 32px 64px 64px;
-  @media (--tablet) { gap: 24px; padding: 40px 24px 40px 40px; }
-  @media (--phone) { padding: 32px; }
+  display: flex; flex-direction: column; align-items: flex-start; gap: clamp(24px, 3cqw, 32px);
+  padding: var(--pad) var(--pad) clamp(16px, 4cqw, 24px);
 }
-.tool__copy {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
-  @media (--tablet) { gap: 12px; }
-}
+.tool__copy { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(12px, 1.6cqw, 16px); }
 .tool__brand { display: flex; align-items: center; }
-.tool__logo { height: 28px; @media (--tablet) { height: 20px; } }
-.tool__logo--litmus { width: 214px; color: var(--teal); @media (--tablet) { width: 153.71px; } }
-.tool__logo--lens { width: 187px; color: var(--orange); @media (--tablet) { width: 133.71px; } }
-.tool__title {
-  font-size: 32px; font-weight: 600; line-height: 1.1;
-  @media (--tablet) { font-size: 24px; }
-  @media (--phone) { font-size: 20px; }
-}
-.tool__desc {
-  font-size: 18px; line-height: 1.3; color: var(--ink-60);
-  @media (--tablet) { font-size: 14px; }
-}
+.tool__logo { --h: clamp(20px, 2.8cqw, 28px); height: var(--h); }
+.tool__logo--litmus { width: calc(var(--h) * 7.643); color: var(--teal); }
+.tool__logo--lens { width: calc(var(--h) * 6.679); color: var(--orange); }
+.tool__title { font-size: var(--type-card-heading); font-weight: 600; line-height: 1.1; text-wrap: balance; }
+.tool__desc { max-width: 28em; font-size: var(--type-body-m); line-height: 1.3; color: var(--ink-60); }
 .tool__media {
-  padding: 32px 24px 0;
-  @media (--tablet) { padding-top: 40px; }
-  @media (--phone) { padding-top: 8px; }
-  @media (--narrow) { padding-inline: 32px; }
-
-  & picture { height: 100%; @media (--tablet) { height: 320px; } @media (--phone) { height: 220px; } @media (--narrow) { height: auto; aspect-ratio: 1 / 1.093; } }
+  position: relative;
+  height: min(72cqw, 360px);
+  padding: 0 var(--pad);
+  & picture { position: absolute; inset: 0 var(--pad); }
+}
+@container (width >= 44rem) {
+  .tool { grid-template-columns: 1fr 1fr; min-height: clamp(400px, 47cqw, 480px); }
+  .tool__body { padding: var(--pad) calc(var(--pad) / 2) var(--pad) var(--pad); }
+  .tool__media { height: auto; & picture { inset: 32px 24px 0; } }
 }
 .tool__img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 
-/* ── Publications: four grey cards, links to articles and a video ── */
-.pubs {
-  display: flex; flex-direction: column; align-items: center; gap: 48px;
-  padding: 72px 24px 144px;
-  @media (--lg) { gap: 80px; padding-top: 80px; }
-}
+/* ── Publications: four grey cards, links to articles and a video ──
+   Two columns once each card would be at least 336px wide; one column, as wide as the column, below that. */
+.pubs { padding-bottom: calc(var(--section-y) * 2); }
 .pubs__grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
-  width: 100%; max-width: 1024px;
-  @media (--tablet) { gap: 16px; }
-  @media (--phone) { grid-template-columns: 1fr; justify-items: center; max-width: 360px; }
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: clamp(16px, 2vw, 24px);
+  width: 100%; max-width: var(--column-max);
 }
 .pub, .pub__cover {
   display: flex; flex-direction: column; justify-content: space-between;
-  width: 100%; padding: 40px;
-  border-radius: 40px; background: var(--tint);
+  width: 100%; padding: var(--radius-m);
+  border-radius: var(--radius-m); background: var(--tint);
   transition: background-color var(--hover-out) var(--ease-out);
-  @media (--tablet) { padding: 32px; border-radius: 32px; }
 }
-.pub-video { position: relative; display: flex; width: 100%; }
-.pub__body { display: flex; flex-direction: column; gap: 8px; padding-bottom: 64px; }
+.pub-video { position: relative; display: flex; width: 100%; container-type: inline-size; }
+.pub__body { display: flex; flex-direction: column; gap: 8px; padding-bottom: clamp(40px, 5vw, 64px); }
 .pub__author {
   display: flex; align-items: center; gap: 8px;
-  font-size: 16px; line-height: 1.3; color: var(--ink-60);
-  @media (--tablet) { font-size: 14px; }
+  font-size: var(--type-body-s); line-height: 1.3; color: var(--ink-60);
 }
 .pub__avatar { flex: none; width: 24px; height: 24px; border-radius: var(--round); }
 .pub__copy { display: flex; flex-direction: column; gap: 10px; }
-.pub__title {
-  font-size: 32px; font-weight: 600; line-height: 1.1;
-  @media (--tablet) { font-size: 24px; }
-  @media (--phone) { font-size: 20px; }
-}
-.pub__desc {
-  font-size: 16px; line-height: 1.3; color: var(--ink-60);
-  @media (--tablet) { font-size: 14px; }
-}
-.pub__foot {
-  display: flex; align-items: center; justify-content: space-between;
-  @media (--tablet) { height: 32px; }
-}
+.pub__title { font-size: var(--type-card-heading); font-weight: 600; line-height: 1.1; text-wrap: balance; }
+.pub__desc { max-width: 34em; font-size: var(--type-body-s); line-height: 1.3; color: var(--ink-60); }
+.pub__foot { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
 .pub__source { width: 153.88px; height: 24px; object-fit: cover; }
-.pub__source--mark { display: none; width: 76px; @media (--narrow) { display: block; } }
-.pub__source--full { @media (--narrow) { display: none; } }
+/* the video card: its watch buttons sit where the full logo would end; in a narrow card the short mark is shown */
+.pub__source--mark { display: none; width: 76px; }
+@container (width < 400px) {
+  .pub__source--mark { display: block; }
+  .pub__source--full { display: none; }
+}
 .pub__arrow { width: 24px; height: 24px; color: var(--ink); opacity: 0.3; transition: opacity var(--hover-out) var(--ease-out); }
 .pub__watch {
-  position: absolute; right: 32px; bottom: 32px; z-index: 2;
+  position: absolute; right: var(--radius-m); bottom: var(--radius-m); z-index: 2;
   display: flex; gap: 16px;
-  @media (--tablet) { right: 24px; bottom: 24px; }
 }
-.pub__platform { display: flex; transition: opacity var(--hover-out) var(--ease-out); }
+.pub__platform {
+  position: relative; display: flex; transition: opacity var(--hover-out) var(--ease-out);
+  &::after { content: ""; position: absolute; inset: -6px; }        /* 44px to tap, though it looks 32 */
+}
 .pub__platform img { width: 32px; height: 32px; }
 @media (--mouse) {
   .pub:hover, .pub__cover:hover { background-color: var(--tint-hover); transition-duration: var(--hover-in); }
   .pub:hover .pub__arrow { opacity: 0.5; transition-duration: var(--hover-in); }
   .pub__platform:hover { opacity: 0.7; transition-duration: var(--hover-in); }
+}
+
+/* Windows high-contrast mode replaces the backgrounds: an outline in the system's text colour keeps every card's edge */
+@media (forced-colors: active) {
+  .royalty__card, .idcard__face, .feature, .logo-card, .stat, .cta__card, .tool, .pub, .pub__cover { outline: 1px solid CanvasText; outline-offset: -1px; }
 }

@@ -115,7 +115,7 @@ function init(section, picture) {
     + CHIPS.map(() => '<canvas class="hero-chip-shadow"></canvas>').join("")
     + CHIPS.map((c) => '<div class="hero-chip"><i class="' + (c.shape ? "is-" + c.shape : "") + '" style="background-position:' + (c.icon / 11 * 100).toFixed(4) + '% 0"></i>'
       + "<span><b>" + c.title + "</b><span>" + dot(c) + c.text + "</span></span></div>").join("");
-  section.appendChild(layer);
+  picture.parentElement.appendChild(layer);              // into the picture's stage (hero.css): as tall as the picture, along its bottom
 
   const unit = layer.querySelector(".hero-unit");
   const shadows = Array.from(layer.querySelectorAll(".hero-chip-shadow"));

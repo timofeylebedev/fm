@@ -1,20 +1,16 @@
-/* The heading of a section: on the left (most sections), or centred (head--center). */
+/* The heading of a section: on the left (most sections), or centred (head--center). Its size is the type/h2 token,
+   which grows with the screen; its width is counted in its own letters (em), so it breaks into lines of about the
+   same length at every size, and text-wrap: balance evens them out. The longest word of any heading (инструменты,
+   7.8 em) fits the narrowest column at the smallest size. */
 
-.head { width: 100%; max-width: 1024px; }
+.head { width: 100%; max-width: var(--column-max); }
 .head__title {
-  max-width: 640px;
-  font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1;
-
-  @media (--lg) { max-width: 800px; font-size: 56px; }
-  @media (--phone) { max-width: 480px; font-size: 32px; }
+  max-width: 14.5em;
+  font-family: var(--font-display); font-weight: 700; font-size: var(--type-h2); line-height: 1;
+  text-wrap: balance;
 }
 
 .head--center {
   display: flex; flex-direction: column; align-items: center;
-
-  & .head__title {
-    width: 100%; max-width: 800px; text-align: center;
-    @media (--tablet) { max-width: 640px; font-size: 32px; }
-    @media (--phone) { max-width: 440px; font-size: 28px; }
-  }
+  & .head__title { width: 100%; text-align: center; }
 }

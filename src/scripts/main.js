@@ -1,6 +1,6 @@
 /* The scripts of the page, started in order. Each part is described in its own file. */
 import { ScrollTrigger, refreshSoon } from "./gsap.js";
-import { initMotion } from "./motion.js";
+import { initMotion, reveal } from "./motion.js";
 import { initMenu } from "./menu.js";
 import { initTint, initCap } from "./nav.js";
 import { initPill } from "./nav-pill.js";
@@ -9,6 +9,7 @@ import { initLinkCards } from "./link-cards.js";
 import { initHero } from "./hero.js";
 import { initRing } from "./ring.js";
 import { initLogos } from "./logos.js";
+import { initDeck } from "./deck.js";
 
 const root = document.documentElement;
 root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
@@ -20,6 +21,7 @@ window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
 // held up (the ring and the pinned logos are far below). When all of it is in place, "fm:ready" tells boot.js that the
 // page has its final height (a reload then scrolls back to where the visitor was).
 const nav = document.querySelector("[data-nav]");
+initDeck();                                      // before the motion: it decides how the ID cards fall (onto a deck or into a row)
 initMotion();
 if (nav) initTint(nav);
 initCards();
@@ -59,6 +61,7 @@ document.addEventListener("click", (e) => {
   const target = id === "top" ? document.body : document.getElementById(id);
   if (!target) return;
   e.preventDefault();
+  if (id !== "top") reveal(target);
   scrollTo({ top: id === "top" ? 0 : target.getBoundingClientRect().top + scrollY, behavior: calm.matches ? "instant" : "smooth" });
   history.pushState(null, "", id === "top" ? location.pathname + location.search : "#" + id);
   if (id === "top") return;
