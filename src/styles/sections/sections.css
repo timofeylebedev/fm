@@ -41,10 +41,10 @@
 
 /* ── Access rights: three ID cards, dropped onto the page (motion.js, "tilt") ──
    The cards keep the size they have in the design (240×345: their text stays readable); the room decides how they lie.
-     · a row, where it fits at 86% of that size or more: side by side, closer together as the room gets narrower
+     · a row, where it fits at 92% of that size or more (the text of the cards then stays at 12px or more): side by side, closer together as the room gets narrower
        (by at most 24px each: the air around a card, so no card ever covers the text of the one under it), then
        scaled down a little;
-     · below a 680px column (phones, tablets of 686px upright, narrow windows): a deck, one card on top of the others,
+     · below a 728px column (phones, tablets up to 768px upright, narrow windows): a deck, one card on top of the others,
        which you swipe from right to left (scripts/deck.js). The deck is scaled down only below a 300px column.
    The section is the container: 100cqw is its column. */
 .access { container: access / inline-size; overflow: hidden; padding-bottom: calc(var(--section-y) * 1.6); }
@@ -69,7 +69,7 @@
 .access__slot--1, .access__slot--2 { margin-right: var(--o); }
 .access__dots { display: none; }
 
-@container access (width < 680px) {
+@container access (width < 728px) {
   .access__stage {
     --k: min(1, tan(atan2(100cqw, 300px)));
     --deck: 1;                                                          /* read by scripts/deck.js */

@@ -6,7 +6,7 @@
    fifth of mobile visits) or 390–430 (about a quarter), tablets 686–834 upright and 1024–1280 sideways, computers
    mostly 1366–1920. Between the steps, sizes do not jump: most of them grow in a straight line from one step to the
    next (the fluid values of tokens.gen.css), and blocks that can arrange themselves by their own width do so
-   (container queries: the ID cards become a deck below a 600px column, the features go from two columns to four,
+   (container queries: the ID cards become a deck below a 728px column, the features go from two columns to four,
    the royalty cards, tools and publications sit side by side where they fit), so these steps are used only where
    the whole page changes.
 

@@ -1,5 +1,5 @@
 /* The ID cards of «Гибкая настройка прав доступа» as a deck, where the room is too narrow for a row (sections.css:
-   a column below 600px, which is every phone held upright). The cards lie one on top of the other, whole and at
+   a column below 728px: every phone, and tablets up to 768px held upright). The cards lie one on top of the other, whole and at
    their own size; the one on top is read, the two under it show their edges.
 
      · swipe the top card to the left (or flick it: a short quick move counts too) and it goes off to the left, then
