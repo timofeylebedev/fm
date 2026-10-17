@@ -13,6 +13,7 @@ npm run dev          # the site at http://localhost:5173, reloads on every chang
 npm run build        # the finished site in dist/
 npm run preview      # dist/ at http://localhost:4173, as it will be on the server
 npm run check        # validates the HTML of dist/
+npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figma variables (design/README.md)
 ```
 
 ## Where things are
@@ -35,7 +36,9 @@ npm run check        # validates the HTML of dist/
 
 - **A text:** in `src/index.html`. Non-breaking spaces for Russian («в&nbsp;доме», «10&nbsp;000», «Лейбл&nbsp;—») are put in
   by the build (`build/typograph.js`), so the text can be written normally.
-- **A colour, a font, a curve:** `src/styles/base/tokens.css`. The screen widths are in `src/styles/base/media.css`.
+- **A colour, or a size shared with Figma** (footer, buttons so far): `design/tokens.json`, the same values as the Figma
+  variables; `npm run tokens:sync` moves changes both ways. See `design/README.md`.
+- **A font, a curve:** `src/styles/base/tokens.css`. The screen widths are in `src/styles/base/media.css`.
 - **A picture:** put the new original into `assets-src/img/` under the same name, run `npm run images`, commit the new files.
   The list in `build/images.mjs` says what is made from each original (sizes and formats: AVIF and WebP).
 - **A font:** `assets-src/fonts/`, then `npm run fonts` (needs Python with `pip install fonttools brotli`).

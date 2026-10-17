@@ -1,6 +1,7 @@
 /* All the styles of the site, in the order they apply. Built into one file by Vite (Lightning CSS). */
 @import "./base/media.css";
 @import "./base/tokens.css";
+@import "./base/tokens.gen.css";
 @import "./base/fonts.css";
 @import "./base/base.css";
 @import "./base/motion.css";

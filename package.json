@@ -3,12 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node build/tokens.mjs",
     "dev": "vite",
+    "prebuild": "node build/tokens.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "images": "node build/images.mjs",
     "fonts": "python3 build/fonts.py",
-    "check": "html-validate dist/index.html dist/404.html"
+    "check": "html-validate dist/index.html dist/404.html",
+    "tokens": "node build/tokens.mjs",
+    "tokens:sync": "node build/tokens.mjs sync design/figma/export.json"
   },
   "dependencies": {
     "gsap": "3.15.0"

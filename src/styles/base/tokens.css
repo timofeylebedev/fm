@@ -1,29 +1,8 @@
-/* Design tokens: the colours, fonts, curves and screen widths of the site. Everything else takes them from here. */
+/* Design tokens written by hand: fonts, curves, timings, shapes. The colours and the sizes shared with Figma are in
+   tokens.gen.css (generated from design/tokens.json; see design/README.md). */
 
 :root {
-  /* colours */
-  --ink: #000;
-  --ink-70: rgb(0 0 0 / 0.7);
-  --ink-60: rgb(0 0 0 / 0.6);
-  --ink-50: rgb(0 0 0 / 0.5);
-  --ink-40: rgb(0 0 0 / 0.4);
-  --ink-30: rgb(0 0 0 / 0.3);
-  --ink-10: rgb(0 0 0 / 0.1);
-  --tint: rgb(0 0 0 / 0.03);          /* the light grey of cards on white */
-  --tint-hover: rgb(0 0 0 / 0.05);
-  --paper: #fff;
-  --mist: #f7f7f7;                    /* grey sections */
-  --sand: #eeeae9;                    /* the hero */
-  --purple: #884dff;
-  --purple-hover: #7733ff;
-  --purple-light: #b596ff;
-  --orange: #f56e00;
-  --orange-hover: #eb6400;
-  --teal: #009fbf;
-  --teal-hover: #008bab;
-  --blue: #004de5;
-  --green: #009929;
-  --magenta: #990063;
+  /* colours: in tokens.gen.css, written from design/tokens.json (the Figma variables). Change them there. */
 
   /* fonts (see fonts.css; the fallbacks are sized like the fonts, so nothing moves when they arrive) */
   --font: "Golos Text", "Golos Fallback", Arial, sans-serif;
