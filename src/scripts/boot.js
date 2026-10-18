@@ -9,7 +9,8 @@
      Safari puts a reloaded page back in place only after everything has loaded, so for a moment it shows the top. Here
      the browser is told not to do it (scrollRestoration = "manual"). The position is remembered here and scrolled to
      once the page's scripts have built it (the card stack and the pinned logos add height), right before the first
-     frame is shown. Until then the page is invisible: on a reload that looks like the usual blank moment. */
+     frame is shown. Until then the page is hidden under a white cover (base.css): on a reload that looks like the usual
+     blank moment. */
   if ("scrollRestoration" in history) {
     history.scrollRestoration = "manual";
     var KEY = "fm-scroll:" + location.pathname;

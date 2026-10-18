@@ -51,7 +51,7 @@ export function initCards() {
   //   slot    one per card, around it: the card is sticky in it, so the slot's height is how long the card stays
   //   collar  above every card but the first: the gap over it and the rounded bottom corners of the card it covers;
   //           the last one (end) is at the bottom of the section, above the section after the stack
-  //   veil    in every slot, drawn under its card: the card's bottom edge while it comes up (sticky at the bottom)
+  //   veil    in every slot, drawn over its card: the card's bottom edge while it comes up (sticky at the bottom)
   //   cap     under every card but the first, sticky with it: the page colour around its top corners
   const cards = [...stage.querySelectorAll(".card")].map((el, i) => {
     const tag = el.querySelector(".card__tag");
@@ -72,7 +72,8 @@ export function initCards() {
     c.slot.style.setProperty("--steps", c.steps);
     el.before(c.slot);
     c.slot.appendChild(el);
-    c.slot.prepend(...(i ? [div("stack__collar"), div("stack__veil"), div("stack__cap")] : [div("stack__veil")]));
+    if (i) c.slot.prepend(div("stack__collar"), div("stack__cap"));
+    c.slot.appendChild(div("stack__veil"));                 // over its own card: it shapes the card's bottom edge
     return c;
   });
   if (!cards.length) return;

@@ -41,51 +41,67 @@ straight line; outside, it stays at the end value. In CSS:
 `clamp(least, value at 320 + (screen size − 320) × slope, most)`, with the slope = (value at 1440 − value at 320) / 1120.
 Example: `section/pad-y` is 40 → 80, so at 880px it is 40 + 560 × 0.0357 = 60px.
 
-**The screen's size is not only its width.** It is the width, or twice the height minus 400 if that is smaller
-(`--vp: min(100vw, 2 × screen height − 400px)`): every pixel of height a screen lacks counts as two of width. So a
-phone turned sideways (844 × 390 → 380) gets the phone sizes, and a short laptop window (1366 × 650 → 900) the sizes
-of a narrower screen — all of them together, so their ratios stay. Blocks that must
-fit a screen (the hero, the stack cards, the CTA card, the pinned logos) are also sized by the height directly.
+**The screen's size is not only its width.** A screen counts as only as big as its height allows (`range.height`
+in `scale.json`): a screen 360px tall gets the sizes of a 320 screen, one 920px tall the sizes of a 1440 screen, in a
+straight line in between. That is `--vp: min(100vw, 2 × screen height − 400px)`: every pixel of height a screen lacks
+counts as two of width (the 2 and the 400 are worked out from the two heights). So a phone turned sideways
+(844 × 390 → 380) gets the phone sizes, and a short laptop window (1366 × 650 → 900) the sizes of a narrower screen —
+all of them together, so their ratios stay. Blocks that must fit a screen (the hero, the stack cards, the CTA card,
+the pinned logos) are also sized by the height directly.
 
-**Type is a ladder.** One base (16px) and one ratio (1.18 on a 320 screen, 1.2 on a 1440 one). Step n is
-16 × ratioⁿ. A text role is two step numbers, its step on a phone and its step on a computer:
+**One ladder for every size.** Type and space alike end on `0 2 4 … 24` (steps of 2), `28 32 … 64` (4), `72 80 … 128`
+(8) — `ladder` in `scale.json`. `npm run tokens` stops if a role's end is off the ladder (sizes of blocks, marked
+`size`, excepted). So no size ends on a value like 36.6 or 31.
 
-| Role | Steps | 320 → 1440 | Used by |
-|---|---|---|---|
-| `type/hero` | 5 → 8 | 36.6 → 68.8 | the hero title |
-| `type/h2` | 4 → 7 | 31.0 → 57.3 | section headings, the CTA title |
-| `type/card-title` | 3 → 6 | 26.3 → 47.8 | the card stack titles |
-| `type/card-heading` | 2 → 4 | 22.3 → 33.2 | tool, publication and royalty titles |
-| `type/lead` | 1 → 1 | 18.9 → 19.2 | under the hero and CTA titles |
-| `type/card-tag` | 0 → 1 | 16 → 19.2 | the stack labels |
-| `type/body` | 0 → 0 | 16 | running text, features, buttons, the footer |
-| `type/ui` | −1 → −1 | 13.6 → 13.3 | navbar, menu, footer notes, bylines |
+**Type.** A text role is two sizes from the ladder, on a 320 and on a 1440 screen:
 
-On a phone the levels sit one step apart, on a computer they spread. Neighbouring text levels are always at least
-×1.18 apart (the stack label is a label, set apart by uppercase and weight, and steps from body to lead size): the ratio of two straight lines can only move from its value at one end to its value at the other, so
-checking the two ends checks every size in between. Line heights follow the size: 1 for display, 1.1 for headings,
-1.3 for text (`--lh-*`); labels are tracked 0.05em (`--tracking-label`).
+| Role | 320 → 1440 | Used by |
+|---|---|---|
+| `type/hero` | 36 → 64 | the hero title |
+| `type/h2` | 28 → 52 | section headings, the CTA title, the card stack titles |
+| `type/card-heading` | 24 → 32 | tool, publication and royalty titles |
+| `type/lead` | 16 → 20 | under the hero and CTA titles |
+| `type/card-tag` | 14 → 18 | the stack labels (a label: set apart by uppercase and weight) |
+| `type/body-m` | 16 → 18 | the text of the tool cards |
+| `type/body` | 16 | running text, buttons, the footer |
+| `type/body-s` | 14 → 16 | the features, the bylines |
+| `type/ui` | 14 | navbar, menu, footer notes |
 
-**Space is a ladder too.** Every spacing and radius is two numbers from
-`0 2 4 6 8 10 12 14 16 18 20 24 28 32 36 40 48 56 64 72 80 96 112 128` — `section/pad-y` 40 → 80,
-`space/gap-cards` 16 → 24, `radius/l` 32 → 56 and so on (the list is in `scale.json`, each with what it is for).
-Roles marked `size` are measures of a block (the tool card's least height), not spacing.
+The levels keep their order and their distance: every pair in `type.relations` (hero/h2, h2/card-heading,
+card-heading/lead, card-heading/body-m, body/ui) is at least ×1.125 apart at both ends, and so at every size in between
+(the ratio of two straight lines can only move from its value at one end to its value at the other). `npm run tokens`
+stops otherwise. On phones some levels meet on purpose: lead = body = body-m = 16, body-s = ui = 14. Line heights
+follow the size: 1 for display, 1.1 for headings, 1.2 for short text in small tiles, 1.3 for text (`--lh-*`); labels
+are tracked 0.05em (`--tracking-label`).
+
+**Space.** Every spacing and radius is two numbers from the ladder — `section/pad-y` 40 → 80, `space/gap-cards`
+16 → 24, `radius/l` 32 → 56 and so on (the list is in `scale.json`, each with what it is for). Roles marked `size` are
+measures of a block (the tool card's least height), not spacing. A role with `per` follows the width of its own block
+instead of the screen: `tool/pad` is 28 → 64px over a card 288 → 600px wide (`100cqi` in the CSS), so a tool card on a
+phone keeps a wide enough column of text.
 
 **What is derived, not set** (written once, in `tokens.css` or the component): the navbar's height
 (`--nav-h` = its padding × 2 + the 32px controls), a card's padding = its radius (concentric corners and text),
-the tool cards' padding one ladder step above their radius (`--pad-l`, a decision), the ID card's table half a
-radius in with the other half as its radius, the stack card's radius = half its label + its padding.
+the ID card's table half a radius in with the other half as its radius, the stack card's radius = half its label +
+its padding, the hero's height = the screen less twice the gap above the first stack card.
+
+**Layout steps.** Blocks change their layout by the width of their column (container queries), together, at three
+shared steps: **S 22rem** (a 390 screen: features 1 → 2, logos 2 → 3), **M 44rem** (a 768 screen: logos 3 → 4;
+royalty, publications and tools 1 → 2), **L 60rem** (a 1024 screen: features 2 → 4). The ID cards' deck (35rem) is
+the one exception: an object of a fixed size. Cards that arrange themselves by their own shape: the stack cards
+(vertical below 1.3 : 1, and on screens 1440px tall), the royalty cards (side by side from a 32rem card).
 
 **What follows a block, not the screen**: sizes inside a logo or stat tile (relative to the tile, `--u`), the hero's
 chips (relative to the picture), the ID cards (a fixed-size object, scaled as a whole), the drawings.
 
-**What changes in steps**: whole layouts — the navbar's links → burger, the footer's columns, the number of columns
-of a grid — by container queries where a block decides by its own width, by `media.css` where the whole page does.
+**What changes in steps**: whole layouts — the navbar's links → burger, the footer's columns (`media.css`, where the
+whole page changes), the number of columns of a grid (the layout steps above).
 
 **Changing a size:** edit `design/scale.json`, run `npm run tokens`. A value changed in Figma for a scale variable is
 reported by the sync and not taken: the scale decides (change it there).
 
-**Decisions** that depart from a rule on purpose (a contrast kept as designed, the tool cards' extra air…) are in
+**Decisions** that depart from a rule on purpose (a contrast kept as designed, the tool cards' extra air, the type
+ladder, the layout steps…) are in
 `design/decisions.json`, with who decided when and why. `npm run audit` prints them on every run with what it measured.
 
 **Figma still has the old modes** until the next push. `npm run tokens:sync` notices the difference and the push

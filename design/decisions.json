@@ -6,65 +6,146 @@
   ],
   "decisions": [
     {
-      "id": "cta-light-middle", "kind": "exception",
+      "id": "cta-light-middle",
+      "kind": "exception",
       "what": "CTA card: the white title, the white text and the focus ring of the white button sit on the light purple between the dots (#b596ff, STIPPLE_CTA.background in scripts/stipple.js)",
       "rule": "WCAG 1.4.3 text contrast (3 : 1 large, 4.5 : 1 text), 1.4.11 focus indicator 3 : 1",
       "measured": "text 2.39 : 1, focus ring 1.93 : 1 (Oct 17, 2026)",
       "decided": "Tim, 2026-10-18 — kept for now",
       "why": "the look of the card: purple dots on a lighter purple",
       "fix": "swap the two colours of the dots (purple between them: white text 4.61 : 1), or a darker middle; the focus ring can be ink on this card (8.8 : 1)",
-      "audit": { "pixels": [".cta__title", ".cta__lead"] }
+      "audit": {
+        "pixels": [
+          ".cta__title",
+          ".cta__lead"
+        ]
+      }
     },
     {
-      "id": "stack-and-stat-colours", "kind": "exception",
+      "id": "stack-and-stat-colours",
+      "kind": "exception",
       "what": "White text on the colours of the card stack and the stats: the orange «Документы» and green «Финансы» cards, their labels (also over the progress fill), the orange, green and blue stats",
       "rule": "WCAG 1.4.3 text contrast: the labels are 500, not bold, so they need 4.5 : 1",
       "measured": "labels on orange 2.95 (over the fill 2.17), on green 3.76 (2.52); stat labels 2.8 (orange) – 3.6 (green); stat numbers 2.3 (orange) – 2.8 (green) on the dots (Oct 17, 2026)",
       "decided": "Tim, 2026-10-17 (orange) and 2026-10-18 (green, the progress fill)",
       "why": "the brand colours of the subjects",
       "fix": "text-safe shades for text-bearing surfaces: orange #c25700, green #008a25 (4.5 : 1)",
-      "audit": { "axe": "color-contrast", "target": "card__tag|card__title|stat__", "pixels": [".stat__number", ".stat__label"] }
+      "audit": {
+        "axe": "color-contrast",
+        "target": "card__tag|card__title|stat__",
+        "pixels": [
+          ".stat__number",
+          ".stat__label"
+        ]
+      }
     },
     {
-      "id": "teal-orange-buttons", "kind": "exception",
+      "id": "teal-orange-buttons",
+      "kind": "exception",
       "what": "White text on the teal (Telegram-бот) and orange (FM Lens demo) buttons",
       "rule": "WCAG 1.4.3 text contrast 4.5 : 1",
       "measured": "teal 3.13 : 1, orange 2.95 : 1",
-      "decided": "Tim, 2026-10-17", "why": "the brand colours of the two tools", "fix": "teal #00819b, orange #c25700",
-      "audit": { "axe": "color-contrast", "target": "btn--teal|btn--orange" }
+      "decided": "Tim, 2026-10-17",
+      "why": "the brand colours of the two tools",
+      "fix": "teal #00819b, orange #c25700",
+      "audit": {
+        "axe": "color-contrast",
+        "target": "btn--teal|btn--orange"
+      }
     },
     {
-      "id": "footer-notes", "kind": "exception",
-      "what": "The grey notes of the footer (ink 40% on the footer grey)",
+      "id": "footer-notes",
+      "kind": "exception",
+      "what": "The grey notes of the footer (ink 50% on the footer grey)",
       "rule": "WCAG 1.4.3 text contrast 4.5 : 1",
-      "measured": "2.82 : 1",
-      "decided": "Tim, 2026-10-17", "why": "a quiet legal line", "fix": "ink 60% (5.6 : 1)",
-      "audit": { "axe": "color-contrast", "target": "footer__note|tim_lebedev|privacy_policy" }
+      "measured": "about 3.8 : 1 (ink 50%, Oct 18, 2026; was 2.82 at ink 40%)",
+      "decided": "Tim, 2026-10-17; ink 50% on 2026-10-18",
+      "why": "a quiet legal line",
+      "fix": "ink 60% (5.6 : 1)",
+      "audit": {
+        "axe": "color-contrast",
+        "target": "footer__note|tim_lebedev|privacy_policy"
+      }
     },
     {
-      "id": "tool-card-air", "kind": "decision",
-      "what": "Tool cards are padded one ladder step above their radius (--pad-l: 40 → 64px with radius/l 32 → 56px); every other card is padded by its radius",
-      "decided": "Tim, 2026-10-18", "why": "extra air: a big two-column card with a picture"
+      "id": "tool-card-air",
+      "kind": "decision",
+      "what": "Tool cards are padded by their own width (--tool-pad: 28px on a 288px card, about 40 on a 384px one, 64 from a 600px card), above their radius (radius/l, 32 → 56) on every card wider than about 330px; every other card is padded by its radius. Under the text, above the picture, at least --pad-l (40 → 64)",
+      "decided": "Tim, 2026-10-18 (the air); the padding by the card's width on 2026-10-18 (28–32 on a 320 phone, 40 on a 420 one)",
+      "why": "extra air on a big two-column card with a picture, without a narrow column of text on a phone"
     },
     {
-      "id": "hero-three-lines", "kind": "decision",
+      "id": "hero-three-lines",
+      "kind": "decision",
       "what": "Where two lines of the hero title do not fit (about under 430px), it takes three: «Весь лейбл. / На одной / волне». Chosen by fit (a container query in the title's em), not by a screen width",
-      "decided": "Tim, 2026-10-18", "why": "keeps the hero a scale step above the section headings on phones (37 vs 31px at 320, instead of 29 vs 28)"
+      "decided": "Tim, 2026-10-18",
+      "why": "keeps the hero a size above the section headings on phones (36 vs 28px at 320)"
     },
     {
-      "id": "logo-whole-columns", "kind": "decision",
-      "what": "The logo strip shows whole columns (2, 3, 4, chosen by its own width). Adding a column makes the tiles smaller at once (−33% from 2 to 3, −25% from 3 to 4); the steps are placed where the tiles stay big enough after the drop (≥ 128 and ≥ 160px)",
-      "decided": "Tim, 2026-10-18", "why": "whole columns preferred over a fluid tile with a partly shown column"
+      "id": "logo-whole-columns",
+      "kind": "decision",
+      "what": "The logo strip shows whole columns (2, 3, 4, chosen by its own width). Adding a column makes the tiles smaller at once (−33% from 2 to 3, −25% from 3 to 4); the steps are the shared steps S and M, where the features above change too (tiles ≥ 112 and ≥ 168px)",
+      "decided": "Tim, 2026-10-18 (whole columns; 3 columns down to a 390 screen, in step with the features)",
+      "why": "whole columns preferred over a fluid tile with a partly shown column"
     },
     {
-      "id": "id-card-object", "kind": "decision",
-      "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck; only their corners follow the screen (the tile radius, the table half a radius in)",
-      "decided": "2026-10-18", "why": "their text stays readable at one size; the corners match the tiles around them"
+      "id": "id-card-object",
+      "kind": "decision",
+      "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck; only their corners follow the screen (radius/m, the radius of the royalty and publication cards; the table half a radius in). Their deck starts below a 35rem column, their own step: the row needs that room",
+      "decided": "2026-10-18; radius/m on 2026-10-18 (Tim)",
+      "why": "their text stays readable at one size; the corners match the cards around them"
     },
     {
-      "id": "body-16", "kind": "decision",
-      "what": "Running text is 16px at every screen width (type/body = 1rem; the scale's base)",
-      "decided": "Tim, 2026-10-18", "why": "readable text on phones (was 14–15px)"
+      "id": "body-16",
+      "kind": "decision",
+      "what": "Running text is 16px at every screen width (type/body); short text in small cards (the features, the bylines) is type/body-s, 14 → 16; the text of the tool cards type/body-m, 16 → 18",
+      "decided": "Tim, 2026-10-18; body-s and body-m on 2026-10-18",
+      "why": "readable text on phones, and room in the small tiles (two features in a row down to a 390 screen)"
+    },
+    {
+      "id": "type-on-the-ladder",
+      "kind": "decision",
+      "what": "Every text size ends on the ladder (steps of 2 up to 24, 4 up to 64, 8 up to 128) at 320 and 1440: hero 36 → 64, h2 28 → 52 (also the stack card titles), card-heading 24 → 32, lead 16 → 20, card-tag 14 → 18, body-m 16 → 18, body 16, body-s 14 → 16, ui 14. No modular ratio any more: the levels keep their order and distance by type.relations (at least ×1.125 apart at both ends), checked by build/tokens.mjs",
+      "decided": "Tim, 2026-10-18",
+      "why": "round end values, sizes chosen by eye (hero 60–64 on a computer, lead 20, h2 = card title)",
+      "costs": "lead = body on phones (16), body-m = body = 16 and body-s = ui = 14 on phones"
+    },
+    {
+      "id": "layout-steps",
+      "kind": "decision",
+      "what": "Blocks change their layout together, at three shared column widths: S 22rem (a 390 screen: features 1 → 2, logos 2 → 3), M 44rem (a 768 screen: logos 3 → 4; royalty, publications, tools 1 → 2), L 60rem (a 1024 screen: features 2 → 4). The ID cards' deck is the one exception (35rem)",
+      "decided": "Tim, 2026-10-18",
+      "why": "things on the page change at the same moments, not each at its own width"
+    },
+    {
+      "id": "royalty-by-shape",
+      "kind": "decision",
+      "what": "The royalty cards fill their column and arrange themselves by their own shape: narrow — the drawing on top, the title from 70% of the card's width; wide (from a 32rem card) — the title left, the drawing right. Titles at most 12em wide (three short lines)",
+      "decided": "Tim, 2026-10-18",
+      "why": "no title over the drawing at any width (it was, between 621 and 890px), no capped card on a phone"
+    },
+    {
+      "id": "stack-tall-screens",
+      "kind": "decision",
+      "what": "A stack card is laid out vertically (text on top, the drawing below) when it is less than 1.3 times as wide as tall, and on every screen about 1440px tall or taller (a card 83rem tall), whatever its width; the drawing grows up to 1080px with its room",
+      "decided": "Tim, 2026-10-18",
+      "why": "on a tall monitor the horizontal card left a small drawing in a lot of air"
+    },
+    {
+      "id": "endless-motion",
+      "kind": "exception",
+      "what": "Things that move by themselves without end and have no pause switch: the CTA's strip of words, the hero chips, the ring's idle spin, the dots of the stats and the CTA, the loops in the drawings. They all stop for visitors who turned on \"reduce motion\"",
+      "rule": "WCAG 2.2.2 Pause, Stop, Hide (moving content that lasts more than 5 seconds can be paused)",
+      "decided": "Tim, 2026-10-18 — no pause switch, the strip keeps its loop",
+      "why": "the look of the page; reduce motion covers the visitors who need it",
+      "fix": "a site-wide pause switch (remembered), or the strip moved by the scroll"
+    },
+    {
+      "id": "menu-pills",
+      "kind": "decision",
+      "what": "The burger menu's pills open with the settle curve, from 20% to 117% and back to 100%, 0.8s in all, and close by playing the same backwards",
+      "decided": "Tim, 2026-10-18 — kept as designed",
+      "why": "the character of the menu"
     }
   ]
 }

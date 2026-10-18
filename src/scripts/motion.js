@@ -285,7 +285,7 @@ function due(it) {
   if (!flushing) { flushing = true; Promise.resolve().then(flush); }
 }
 function flush() {
-  // After a reload further down the page, the page is kept invisible (the class restoring on <html>, see boot.js)
+  // After a reload further down the page, the page is kept hidden (the class restoring on <html>, see boot.js)
   // until it has been scrolled back to where the visitor was. Nothing starts before the page is shown.
   const html = document.documentElement;
   if (html.classList.contains("restoring")) {

@@ -5,7 +5,7 @@
     "url": "https://www.figma.com/design/JTfxQeW8liN3knCO3GWtns/website-2.0"
   },
   "modes": {
-    "$about": "Which screen widths each mode of a multi-mode collection stands for. The base mode goes in :root; each layer overrides it inside a custom media of src/styles/base/media.css, where it differs from the mode in effect around it (parent).",
+    "$about": "Which screen widths each mode of a multi-mode collection stands for. The base mode goes in :root; each layer overrides it inside a media condition (a custom media of src/styles/base/media.css, or the condition itself), where it differs from the mode in effect around it (parent).",
     "Breakpoint": {
       "base": "1024",
       "renamed": {
@@ -14,12 +14,12 @@
       "layers": [
         {
           "mode": "1440",
-          "media": "--desktop",
+          "media": "width >= 90em",
           "parent": "1024"
         },
         {
           "mode": "1920",
-          "media": "--wide",
+          "media": "width >= 120em",
           "parent": "1440"
         },
         {
@@ -34,7 +34,7 @@
         },
         {
           "mode": "320",
-          "media": "--narrow",
+          "media": "width < 24.375em",
           "parent": "390"
         }
       ]

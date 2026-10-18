@@ -83,5 +83,9 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
   @media not (--phone) { display: none; }
 }
 
-/* the strip above the navbar in the browsers built into apps (scripts/nav.js, "cap") */
+/* the strip above the navbar in the browsers built into apps (scripts/nav.js, "cap"). It reaches a little under the
+   navbar (more while scrolling down): when the navbar slides away (a phone turned sideways), that part is cut off with
+   it, a little faster than the navbar moves, so no white band is left at the top of the screen */
 @keyframes nav-cap { from { transform: translateY(0); } to { transform: translateY(var(--cap-max, 0px)); } }
+.nav-cap { transition: clip-path 0.35s var(--ease-out); @media (--calm) { transition: none; } }
+html.nav-away .nav-cap { clip-path: inset(0 0 calc(var(--nav-h) + 48px) 0); }

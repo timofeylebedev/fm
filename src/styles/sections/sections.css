@@ -3,12 +3,17 @@
    Every one of them is a column at most 1024px wide (--column-max), centred, never closer to the screen edge than the
    gutter (--gutter). Their rhythm comes from the scale (design/scale.json): --section-y above and below the content,
    --section-gap from the heading to what follows it; every size here is a role of the scale or derived from one.
-   The blocks inside arrange themselves by the width they get (container queries, auto-fit grids), not by the screen,
-   so each one changes its layout where it runs out of room.
-   The cards share one grammar: tiles (features, logos, stats, ID cards) have --radius-s and --gap-tiles between them,
-   half-column cards (royalty, publications) --radius-m and --gap-cards, full-column cards (tools, CTA) --radius-l.
-   A card's padding is its radius (the corners and the text are concentric), except the tool cards, whose padding is
-   one ladder step more (--pad-l: their extra air, design/decisions.json). */
+   The blocks inside arrange themselves by the width they get (container queries on their column), not by the screen,
+   and they change together, at three shared column widths:
+       S  22rem   (a 390 screen)    features 1 → 2 columns, logos 2 → 3
+       M  44rem   (a 768 screen)    logos 3 → 4; royalty, publications and tools 1 → 2
+       L  60rem   (a 1024 screen)   features 2 → 4
+   The ID cards are the one exception (a deck below a 35rem column): an object of a fixed size, its row needs that room.
+   The cards share one grammar: tiles (features, logos, stats) have --radius-s and --gap-tiles between them,
+   half-column cards (royalty, publications) and the ID cards --radius-m and --gap-cards, full-column cards (tools, CTA)
+   --radius-l. A card's padding is its radius (the corners and the text are concentric), except the tool cards, padded
+   by their own width (--tool-pad: their extra air, design/decisions.json), and the CTA, whose centred text has
+   --radius-m at its sides and generous air above and below (--cta-air). */
 
 .royalty, .access, .releases, .clients, .tools, .pubs {
   display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
@@ -16,40 +21,55 @@
 }
 
 /* ── Royalty: two magenta cards with drawings (art/royalty.js) ──
-   Half-column cards, made like the publications: the same gap, radius, padding and title. Square: the drawing is the
-   whole square (its Figma frame is square too), the text lies over its lower part. Because they are square they sit
-   side by side sooner than the publications (from a 36rem column: two squares of at least 17.5rem), and a card alone
-   is at most 26rem wide, centred, so a square never becomes a tower on a tablet or a phone turned sideways. */
+   Half-column cards, made like the publications: the same gap, radius, padding, title and steps (one column, two from
+   step M). Each card fills its column and arranges itself by its own shape (a container, like the stack cards):
+     · narrow (phones, and two side by side): the drawing on top, as a square as wide as the card, the title under it.
+       The drawing takes the upper 62% of its square (the Figma frame is square, its lower part is air or fades into
+       the card's colour), so the title starts at 70% of the card's width and never lies over the drawing (only over the faded ends of the reports): the card is
+       that and the title tall, about square on a computer, a little taller on a phone;
+     · wide (from a 32rem card: one card in a row on a small tablet or a phone turned sideways): the title on the left,
+       the drawing on the right as a square half the card's width, its empty lower part cut off (the card is at least
+       39% of its width tall).
+   The title is at most 12em wide: three short lines, never two long ones across a wide card. */
 .royalty { padding-top: calc(var(--section-y) * 1.6); container: royalty / inline-size; }
 .royalty__cards {
-  display: grid; grid-template-columns: 1fr; justify-items: center; gap: var(--gap-cards);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
+@container royalty (width >= 44rem) { .royalty__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .royalty__card {
   position: relative;
-  display: flex; align-items: flex-end;
-  width: 100%; max-width: 26rem; aspect-ratio: 1;
+  display: flex; flex-direction: column; justify-content: flex-end;
   padding: var(--radius-m);
   overflow: hidden; border-radius: var(--radius-m);
   background: var(--magenta);
+  container: royalty-card / inline-size;
 
-  & > .art { position: absolute; inset: 0; }
+  & > .art { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1; }
 }
-@container royalty (width >= 36rem) {
-  .royalty__cards { grid-template-columns: 1fr 1fr; }
-  .royalty__card { max-width: none; }
-}
+/* sizes by the card's width: --w (100cqi is the width inside the card's padding) */
 .royalty__text {
-  position: relative; width: 100%; max-width: 15em;
+  --w: calc(100cqi + 2 * var(--radius-m));
+  position: relative; max-width: 12em;
+  margin-top: calc(0.7 * var(--w) - var(--radius-m));                  /* under the drawing */
   font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); color: var(--paper);
   text-wrap: balance;
+}
+@container royalty-card (width >= 32rem) {
+  .royalty__card > .art { left: auto; right: 0; width: 50%; }
+  .royalty__text {
+    display: flex; align-items: flex-end;
+    max-width: min(12em, 0.5 * var(--w) - 1.5 * var(--radius-m));     /* beside the drawing, with half a padding to it */
+    min-height: calc(0.39 * var(--w) - 2 * var(--radius-m));            /* the card: at least 39% of its width tall */
+    margin-top: 0;
+  }
 }
 
 /* ── Access rights: three ID cards, dropped onto the page (motion.js, "tilt") ──
    The cards keep the size they have in the design (240×345: their text stays readable); the room decides how they lie.
      · a row: side by side, closer together as the room gets narrower (by at most 40px each: the cards then just
        overlap at their edges, never over the text of the one under it), then scaled down a little;
-     · below a 560px column (phones held upright, narrow windows): a deck, one card on top of the others, which you
+     · below a 35rem (560px) column (phones held upright, narrow windows): a deck, one card on top of the others, which you
        swipe away to either side (scripts/deck.js). The deck is scaled down only below a 300px column. Phones turned
        sideways and tablets held upright have a row, a little smaller.
    The section is the container: 100cqw is its column. It cuts off what goes past its sides (a card swiped away), but
@@ -80,7 +100,7 @@
 .access__slot--3 { width: 286px; height: 376px; }
 .access__slot--1, .access__slot--2 { margin-right: var(--o); }
 
-@container access (width < 560px) {
+@container access (width < 35rem) {
   .access__stage {
     --k: min(1, tan(atan2(100cqw, 300px)));
     --deck: 1;                                                          /* read by scripts/deck.js */
@@ -105,10 +125,10 @@
 }
 
 .idcard {
-  /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are a
-     tile's (--radius-s); the table inside sits half a radius in, with the other half as its own radius, so the two
-     curves are concentric */
-  --id-r: var(--radius-s);
+  /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are
+     those of the royalty and publication cards (--radius-m); the table inside sits half a radius in, with the other
+     half as its own radius, so the two curves are concentric */
+  --id-r: var(--radius-m);
   --id-inset: calc(var(--id-r) / 2);
   position: relative;
   width: 240px; height: 345px;
@@ -154,18 +174,24 @@
 }
 
 /* ── Releases: the ring of covers (scripts/ring.js) and four features ──
-   The features: one column, two, then a row of four (never three: four cards would leave one alone on a row), each
-   step once every tile has room for the longest unbreakable piece of its text («не накладывались», 9.3 em of
-   type/body with its non-breaking space) inside its padding: two from a 24rem column, four from 50rem. */
+   The features: one column, two from step S, then a row of four from step L (never three: four cards would leave one
+   alone on a row). At S every tile already has room for the longest unbreakable piece of its text («не накладывались»,
+   9.3em of type/body-s with its non-breaking space) inside its padding; four in a row wait for L, so a tile's text is
+   never a narrow column of six or seven lines.
+   The ring's block is as tall as the ring seen level (scripts/ring.js); while it tilts, its covers reach a little past
+   the block, into the section's gaps (overflow: visible up and down, cut at the sides). */
 .releases { container: releases / inline-size; }
-.ring { position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto; overflow: hidden; }
+.ring {
+  position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto;
+  overflow: hidden; overflow: clip visible;                             /* old browsers: hidden */
+}
 /* In rem, so a visitor with bigger text gets fewer, wider cards. minmax(0, 1fr): a long word never widens its card. */
 .features {
   display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-tiles);
   width: 100%; max-width: var(--column-max);
 }
-@container releases (width >= 24rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@container releases (width >= 50rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@container releases (width >= 22rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container releases (width >= 60rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .feature {
   display: flex; flex-direction: column; justify-content: space-between; gap: var(--feature-gap);
   padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);
@@ -173,13 +199,12 @@
 }
 .feature__icon { width: 40px; height: 40px; color: var(--purple); }
 .feature__text { display: flex; flex-direction: column; gap: 8px; }
-.feature__title, .feature__desc { font-size: var(--type-body); font-weight: 500; line-height: var(--lh-text); }
+.feature__title, .feature__desc { font-size: var(--type-body-s); font-weight: 500; line-height: var(--lh-compact); }
 .feature__desc { color: var(--ink-60); }
 
 /* ── Clients: the strip of logos and numbers ──
-   The window shows whole columns: 2, 3 or 4, chosen by the strip's own width (container queries), each only once its
-   tiles would still be big enough after the change: 3 from a 25rem window (tiles ≥ 128px, so the numbers' labels stay
-   above their 12px floor), 4 from 42rem (tiles ≥ 160px). The strip has 8 columns × 2 rows and slides from left-aligned
+   The window shows whole columns: 2, 3 or 4, chosen by the strip's own width (container queries), at the shared steps
+   S and M, where the features above change too: 3 from a 22rem window (tiles ≥ 112px), 4 from 44rem (tiles ≥ 168px). The strip has 8 columns × 2 rows and slides from left-aligned
    to right-aligned while the section is pinned (scripts/logos.js). Sizes inside a tile are in --u, the side of one
    tile (the design: 247px). The section is pinned in the middle of the screen, so it must fit the screen: on a short
    one (a laptop at 1366×768, a phone turned sideways) the tiles are as big as its height allows, and the window then
@@ -198,8 +223,8 @@
   display: grid; grid-template-columns: repeat(8, var(--u)); grid-template-rows: repeat(2, var(--u)); gap: var(--gap);
   width: max-content; margin-inline: auto;            /* centred when it fits its window whole; from the left otherwise */
 }
-@container logos (width >= 25rem) { .logos__track { --cols: 3; } }
-@container logos (width >= 42rem) { .logos__track { --cols: 4; } }
+@container logos (width >= 22rem) { .logos__track { --cols: 3; } }
+@container logos (width >= 44rem) { .logos__track { --cols: 4; } }
 .logo-card, .stat {
   position: relative; min-width: 0; border-radius: var(--radius-s); background: var(--tint);
 }
@@ -239,9 +264,10 @@
 /* ── Call to action: the purple card, with dots along its border (scripts/stipple.js) and a strip of words ──
    As wide as the column (on phones nearly the whole screen, like the card stack: --inset), and about three quarters
    of the screen's height (at most 680px): on a short screen it never needs scrolling through, on a tall one it never
-   becomes a tower. Its content sets the least it can be. On phones held upright its shape comes from its width
-   instead: 1.15 to 1.4 times as tall as wide, within that by the screen's height. A tall phone no longer stretches
-   it into a column, a short one no longer squashes it. */
+   becomes a tower. Its content sets the least it can be, with generous air above and below it at every size
+   (--cta-air, 64 → 128px; under the content also the strip of words): the card keeps the look it has on a computer,
+   a short phone makes it taller rather than crowded. On phones held upright its shape comes from its width
+   instead: 1.15 to 1.4 times as tall as wide, within that by the screen's height. */
 .cta {
   display: flex; flex-direction: column; align-items: center;
   padding: var(--section-y) var(--inset) calc(var(--section-y) * 1.4);
@@ -257,7 +283,7 @@
     --w: calc(100vw - 2 * var(--inset));
     min-height: clamp(var(--w) * 1.15, 0.72 * var(--screen), var(--w) * 1.4);
   }
-  padding: calc(var(--section-y) * 0.8) var(--radius-l) calc(65px + var(--section-y) * 0.6);
+  padding: var(--cta-air) var(--radius-m) calc(var(--cta-air) + 65px);
   overflow: hidden; border-radius: var(--radius-l);
   background-color: var(--purple);
 
@@ -277,10 +303,11 @@
   text-wrap: balance;
 }
 .cta__lead-box { display: flex; justify-content: center; width: 100%; }
+/* the same text style as the hero's lead (hero.css): its size, filled lines */
 .cta__lead {
   max-width: 26em;
   font-size: var(--type-lead); line-height: var(--lh-text); text-align: center; color: var(--paper);
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 /* the strip of words along the bottom: one picture (marquee.svg, a word list 714px long and a 24px gap) repeated,
    sliding left by one picture every 15 seconds */
@@ -299,9 +326,11 @@
 @keyframes marquee { to { transform: translateX(-738px); } }
 
 /* ── Tools: two white cards ──
-   Side by side (text | picture) when the column has room for both halves (704px); otherwise the text, then the
-   picture under it. The cards are as wide as the column at every size: full-column cards, with --radius-l and the
-   extra air of --pad-l (one ladder step above the radius) at every size, phones included. */
+   Side by side (text | picture) from step M; otherwise the text, then the picture under it, exactly as wide as the
+   text (its top part: the bottom of the phone goes past the card's edge, as it does beside the text). The cards are as
+   wide as the column at every size: full-column cards, with --radius-l. Their padding follows the card's own width
+   (--tool-pad: 28px on a phone, about 40 on a 420 one, 64 from a 600px card, their extra air), so a phone keeps a
+   wide enough column of text; under the text, above the picture, the air stays generous (--pad-l at least). */
 .tools { background: var(--mist); }
 .tools__list {
   display: flex; flex-direction: column; gap: var(--gap-cards);
@@ -309,13 +338,13 @@
   container-type: inline-size;
 }
 .tool {
-  --pad: var(--pad-l);
+  --pad: var(--tool-pad);
   display: grid; grid-template-columns: 1fr;
   overflow: hidden; border-radius: var(--radius-l); background: var(--paper);
 }
 .tool__body {
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--tool-gap);
-  padding: var(--pad);                                                   /* the picture comes after the same air */
+  padding: var(--pad) var(--pad) max(var(--pad), var(--pad-l));
 }
 .tool__copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--text-gap); }
 .tool__brand { display: flex; align-items: center; }
@@ -323,27 +352,33 @@
 .tool__logo--litmus { width: calc(var(--h) * 7.643); color: var(--teal); }
 .tool__logo--lens { width: calc(var(--h) * 6.679); color: var(--orange); }
 .tool__title { font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); text-wrap: balance; }
-.tool__desc { max-width: 28em; font-size: var(--type-body); line-height: var(--lh-text); color: var(--ink-60); }
+.tool__desc { max-width: 28em; font-size: var(--type-body-m); line-height: var(--lh-text); color: var(--ink-60); }
 .tool__media {
   position: relative;
-  height: min(72cqw, 360px);
-  padding: 0 var(--pad);
-  & picture { position: absolute; inset: 0 var(--pad); }
+  margin: 0 var(--pad);
+  aspect-ratio: 820 / 640;                                              /* the top 71% of the picture */
+  & picture { position: absolute; inset: 0; }
+  & .tool__img { object-fit: cover; object-position: 50% 0; }
 }
 @container (width >= 44rem) {
   .tool { grid-template-columns: 1fr 1fr; min-height: var(--tool-min-h); }
   .tool__body { padding: var(--pad) calc(var(--pad) / 2) var(--pad) var(--pad); }
-  .tool__media { height: auto; & picture { inset: 32px 24px 0; } }
+  .tool__media {
+    margin: 0; aspect-ratio: auto;
+    & picture { inset: 32px 24px 0; }
+    & .tool__img { object-fit: contain; object-position: 50% 100%; }
+  }
 }
 .tool__img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 
 /* ── Publications: four grey cards, links to articles and a video ──
-   Two columns once each card would be at least 336px wide; one column, as wide as the column, below that. */
-.pubs { padding-bottom: calc(var(--section-y) * 2); }
+   Two columns from step M; one column, as wide as the column, below that. */
+.pubs { padding-bottom: calc(var(--section-y) * 2); container: pubs / inline-size; }
 .pubs__grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min)), 1fr)); gap: var(--gap-cards);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
+@container pubs (width >= 44rem) { .pubs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pub, .pub__cover {
   display: flex; flex-direction: column; justify-content: space-between;
   width: 100%; padding: var(--radius-m);
@@ -354,7 +389,7 @@
 .pub__body { display: flex; flex-direction: column; gap: 8px; padding-bottom: var(--pub-air); }
 .pub__author {
   display: flex; align-items: center; gap: 8px;
-  font-size: var(--type-ui); line-height: var(--lh-text); color: var(--ink-60);
+  font-size: var(--type-body-s); line-height: var(--lh-text); color: var(--ink-60);
 }
 .pub__avatar { flex: none; width: 24px; height: 24px; border-radius: var(--round); }
 .pub__copy { display: flex; flex-direction: column; gap: var(--text-gap); }

@@ -37,7 +37,7 @@
   @media (--phone) and (--portrait) { display: flex; flex-direction: column; align-items: center; row-gap: 10px; text-align: center; }
 }
 .footer__note {
-  font-size: var(--type-ui); color: var(--ink-40);
+  font-size: var(--type-ui); color: var(--ink-50);
   /* a note is never broken in two: where the row has no room for all of them, a whole note goes to the next line
      (in the columns of tablets and phones a note may wrap, so only in the row) */
   @media not (--tablet) { white-space: nowrap; }
