@@ -2,7 +2,7 @@
   "$about": [
     "Design decisions that depart from a rule on purpose, so nobody 'fixes' them by accident and everyone can see them (and reconsider them). Read by build/audit.mjs: an exception with an 'audit' entry is not reported as a failure, but it is measured and printed under 'Kept as designed' on every run, with the value of that run.",
     "kind: exception = it fails a check (contrast, …) and is kept; decision = a deliberate choice the system's general rule does not make by itself.",
-    "audit.axe: the axe rule and the elements it may fail on (a regular expression on the target). audit.pixels: texts drawn over a canvas (axe cannot see the canvas): their contrast is measured from the pixels behind them."
+    "audit.axe: the axe rule and the elements it may fail on (a regular expression on the target). audit.pixels: which texts drawn over a canvas this exception covers. The audit finds every text over a canvas by itself (axe cannot see a canvas) and measures it from the pixels behind it; one that fails and is not covered here is a failure."
   ],
   "decisions": [
     {

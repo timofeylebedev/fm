@@ -17,8 +17,8 @@
 // Sizes come from design/scale.json (the size system: one range, a type ladder, a space ladder). `npm run tokens` first
 // writes every size of the scale into tokens.json, at each Breakpoint mode (its value on a screen of that width), so
 // Figma holds the same numbers; then it writes the CSS, where each size is one formula: its value on a 320px screen,
-// its value on a 1440px one, a straight line in between, on the screen's size (--vp: the width, or 1.6 times the
-// height if that is smaller). Those variables carry "scale": true in tokens.json (a field of the code only): Figma
+// its value on a 1440px one, a straight line in between, on the screen's size (--vp: the width, or twice the height
+// minus 400px if that is smaller). Those variables carry "scale": true in tokens.json (a field of the code only): Figma
 // does not change them — a different value there is reported by the sync and the scale's value is kept.
 // Type sizes (type/*) are written in rem, so they follow the size the visitor chose for text in the browser.
 
@@ -168,8 +168,9 @@ export function applyScale(doc = read(TOKENS), sc = read(SCALE)) {
 export function generate(doc = read(TOKENS), map = read(MAP), sc = read(SCALE)) {
   const rootDecls = [], layers = new Map(), skipped = [];
   const roles = new Map(scaleRoles(sc).map((r) => [r.name, r]));
-  rootDecls.push(`  /* the screen's size for every size below: its width, or ${sc.range.heightRatio} × its height if that is smaller (design/scale.json) */`);
-  rootDecls.push(`  --vp: min(100vw, var(--screen) * ${sc.range.heightRatio});`);
+  const { times, minus } = sc.range.height;
+  rootDecls.push(`  /* the screen's size for every size below: its width, or ${times} × its height − ${minus}px if that is smaller (design/scale.json) */`);
+  rootDecls.push(`  --vp: min(100vw, var(--screen) * ${times} - ${r4(minus / 16)}rem);`);
   for (const [k, v] of Object.entries(sc.type.lineHeight)) rootDecls.push(`  --lh-${k}: ${v};`);
   for (const [k, v] of Object.entries(sc.type.tracking)) rootDecls.push(`  --tracking-${k}: ${v};`);
   for (const [col, vars] of Object.entries(doc.tokens)) {
@@ -179,6 +180,7 @@ export function generate(doc = read(TOKENS), map = read(MAP), sc = read(SCALE)) 
       const m = /^var\((--[\w-]+)\)$/.exec(t.web || "");
       if (!m) continue;
       if (t.type !== "color" && t.type !== "number") { skipped.push(`${col}/${name}`); continue; }
+      if (t.value && typeof t.value === "object" && "alias" in t.value) { skipped.push(`${col}/${name}`); continue; }   // an alias: Figma only
       const prop = m[1], rem = t.type === "number" && name.startsWith("type/");
       if (t.scale && roles.has(name)) { rootDecls.push(`  ${prop}: ${scaleCss(roles.get(name), sc.range)};`); continue; }
       if (modes.length <= 1) { rootDecls.push(`  ${prop}: ${cssValue(t.type, t.value, rem)};`); continue; }
@@ -216,14 +218,18 @@ function sync(figmaFile, prefer) {
   const code = read(TOKENS), figmaDoc = read(figmaFile);
   const base = existsSync(LOCK) ? read(LOCK) : { collections: {}, tokens: {} };
   const C = flatten(code), F = flatten(figmaDoc), B = flatten(base);
+  const ALIASES = new Set(Object.keys(read(SCALE).type.aliases || {}).filter((n) => !n.startsWith("$")));
   const merged = new Map(), lock = new Map(B), report = { pulled: [], pushed: [], conflicts: [] };
   const keys = new Set([...C.keys(), ...F.keys(), ...B.keys()]);
   for (const k of keys) {
     const c = C.get(k), f = F.get(k), b = B.get(k);
     const put = (m, v) => (v === undefined ? m.delete(k) : m.set(k, v));
     const [kc, kn, kf] = k.split(SEP);
-    if (kf === "value" && code.tokens?.[kc]?.[kn]?.scale && !same(c, f)) {     // a size of the scale: the scale decides
-      put(merged, c); report.pushed.push([k, f, c]); (report.scaleKept ??= []).push([k, f, c]); continue;
+    // a size of the scale, or an alias the scale keeps for the Figma text styles: written by design/scale.json, so the
+    // code decides every field of it. A value Figma has for a mode the code holds as one alias is dropped (the alias
+    // is pushed for every mode instead)
+    if ((code.tokens?.[kc]?.[kn]?.scale || ALIASES.has(kn)) && !same(c, f)) {
+      put(merged, c); if (c !== undefined) report.pushed.push([k, f, c]); (report.scaleKept ??= []).push([k, f, c]); continue;
     }
     if (same(c, f)) { put(merged, c); put(lock, c); }
     else if (same(c, b)) { put(merged, f); put(lock, f); report.pulled.push([k, c, f]); }

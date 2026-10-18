@@ -75,6 +75,10 @@ for (const ch of CHANGES) {
   const col = cols.find((c) => c.id === v.variableCollectionId);
   if (ch.field === "value") {
     if (ch.value === null) { skipped.push(`${key}: no value to remove`); continue; }
+    if (ch.mode === undefined && ch.value && typeof ch.value === "object" && "alias" in ch.value) {   // one alias for every mode
+      for (const m of col.modes) v.setValueForMode(m.modeId, await toFigma(ch.type, ch.value));
+      done.push(`${key} (every mode) → ${ch.value.alias}`); continue;
+    }
     const mode = ch.mode === undefined ? col.modes[0] : col.modes.find((m) => m.name === ch.mode);
     if (!mode) { skipped.push(`${key}: no mode "${ch.mode}"`); continue; }
     v.setValueForMode(mode.modeId, await toFigma(ch.type, ch.value));

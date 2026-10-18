@@ -16,23 +16,28 @@
 }
 
 /* ── Royalty: two magenta cards with drawings (art/royalty.js) ──
-   Half-column cards, made like the publications: the same grid (two in a row once each is at least --card-min wide),
-   the same gap, radius, padding and title. Square: the drawing is the whole square (its Figma frame is square too),
-   the text lies over its lower part. */
-.royalty { padding-top: calc(var(--section-y) * 1.6); }
+   Half-column cards, made like the publications: the same gap, radius, padding and title. Square: the drawing is the
+   whole square (its Figma frame is square too), the text lies over its lower part. Because they are square they sit
+   side by side sooner than the publications (from a 36rem column: two squares of at least 17.5rem), and a card alone
+   is at most 26rem wide, centred, so a square never becomes a tower on a tablet or a phone turned sideways. */
+.royalty { padding-top: calc(var(--section-y) * 1.6); container: royalty / inline-size; }
 .royalty__cards {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min)), 1fr)); gap: var(--gap-cards);
+  display: grid; grid-template-columns: 1fr; justify-items: center; gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
 .royalty__card {
   position: relative;
   display: flex; align-items: flex-end;
-  width: 100%; aspect-ratio: 1;
+  width: 100%; max-width: 26rem; aspect-ratio: 1;
   padding: var(--radius-m);
   overflow: hidden; border-radius: var(--radius-m);
   background: var(--magenta);
 
   & > .art { position: absolute; inset: 0; }
+}
+@container royalty (width >= 36rem) {
+  .royalty__cards { grid-template-columns: 1fr 1fr; }
+  .royalty__card { max-width: none; }
 }
 .royalty__text {
   position: relative; width: 100%; max-width: 15em;
@@ -150,7 +155,7 @@
 /* ── Releases: the ring of covers (scripts/ring.js) and four features ──
    The features: one column, two, then a row of four (never three: four cards would leave one alone on a row), each
    step once every tile has room for the longest unbreakable piece of its text («не накладывались», 9.3 em of
-   type/body with its non-breaking space) inside its padding: two from a 24rem column, four from 50rem. 
+   type/body with its non-breaking space) inside its padding: two from a 24rem column, four from 50rem. */
 .releases { container: releases / inline-size; }
 .ring { position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto; overflow: hidden; }
 /* In rem, so a visitor with bigger text gets fewer, wider cards. minmax(0, 1fr): a long word never widens its card. */

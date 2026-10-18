@@ -3,8 +3,8 @@
    Every size: clamp(least, its value at 320 + (screen size − 320) × slope, most), the screen size being --vp. */
 
 :root {
-  /* the screen's size for every size below: its width, or 1.6 × its height if that is smaller (design/scale.json) */
-  --vp: min(100vw, var(--screen) * 1.6);
+  /* the screen's size for every size below: its width, or 2 × its height − 400px if that is smaller (design/scale.json) */
+  --vp: min(100vw, var(--screen) * 2 - 25rem);
   --lh-display: 1;
   --lh-heading: 1.1;
   --lh-text: 1.3;

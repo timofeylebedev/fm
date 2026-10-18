@@ -41,7 +41,7 @@ const SIZES = [
 const DECISIONS = JSON.parse(readFileSync(join(root, "design/decisions.json"), "utf8")).decisions;
 const EXCEPTIONS = DECISIONS.filter((d) => d.kind === "exception");
 const ACCEPTED = EXCEPTIONS.filter((d) => d.audit?.axe).map((d) => ({ rule: d.audit.axe, target: new RegExp(d.audit.target), id: d.id }));
-const PIXELS = [...new Set(EXCEPTIONS.flatMap((d) => d.audit?.pixels || []).concat([".stat__number", ".stat__label", ".cta__title", ".cta__lead"]))];
+const OWNED = EXCEPTIONS.flatMap((d) => (d.audit?.pixels || []).map((sel) => ({ sel, id: d.id })));
 const kept = new Map();                               // decision id → what was measured on this run
 
 // ── a tiny static server for dist/ ──
@@ -111,17 +111,17 @@ async function canvasContrast(page, sel) {
       if (r.width < 4 || r.height < 4 || r.top < 0 || r.bottom > innerHeight || r.left < 0 || r.right > innerWidth) return null;
       const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10), color = cs.color;   // read before hiding it
       e.style.setProperty("color", "transparent", "important");
-      return { x: r.left, y: r.top, w: r.width, h: r.height, color, large: size >= 24 || (size >= 18.66 && weight >= 700), text: e.textContent.trim().slice(0, 24) };
+      return { x: r.left, y: r.top, w: r.width, h: r.height, color, large: size >= 24 || (size >= 18.66 && weight >= 700), text: e.textContent.trim().slice(0, 24), owner: e.dataset.auditOwner || "" };
     });
     if (!info) continue;
-    await page.waitForTimeout(60);
-    const png = await page.screenshot({ clip: { x: info.x, y: info.y, width: info.w, height: info.h } });
-    await el.evaluate((e) => e.style.removeProperty("color"));
+    let png;
+    try { await page.waitForTimeout(60); png = await page.screenshot({ clip: { x: info.x, y: info.y, width: info.w, height: info.h } }); }
+    finally { await el.evaluate((e) => e.style.removeProperty("color")); }
     const { data, info: m } = await sharp(png).raw().toBuffer({ resolveWithObject: true });
     const [tr, tg, tb] = info.color.match(/[\d.]+/g).map(Number), lt = lum(tr, tg, tb), ratios = [];
     for (let p = 0; p < data.length; p += m.channels) { const lb = lum(data[p], data[p + 1], data[p + 2]); ratios.push((Math.max(lt, lb) + 0.05) / (Math.min(lt, lb) + 0.05)); }
     ratios.sort((a, b) => a - b);
-    out.push({ text: info.text, median: ratios[ratios.length >> 1], need: info.large ? 3 : 4.5 });
+    out.push({ text: info.text, median: ratios[ratios.length >> 1], need: info.large ? 3 : 4.5, owner: info.owner });
   }
   return out;
 }
@@ -181,11 +181,30 @@ for (const s of SIZES) {
       else note(a.id, `${tag}: axe ${x.id} on ${t.split(" ").pop()}`);
     }
   }
-  if (s.axe) for (const sel of PIXELS) for (const r of await canvasContrast(page, sel)) {
-    const owner = EXCEPTIONS.find((d) => d.audit?.pixels?.includes(sel));
-    const line = `${tag}: ${sel} «${r.text}» ${r.median.toFixed(2)} : 1 over the canvas (needs ${r.need})`;
-    if (r.median >= r.need) continue;
-    if (owner) note(owner.id, line); else failures.push(`text over a canvas: ${line}`);
+  if (s.axe) {
+    // every text drawn over a canvas (the blocks that hold one: the stats, the CTA card, …), found in the page itself
+    const n = await page.evaluate((owned) => {
+      let i = 0;
+      const blocks = new Set([...document.querySelectorAll("canvas")].map((c) => c.parentElement));
+      for (const box of blocks) {
+        const texts = [...box.querySelectorAll("h1, h2, h3, p, a")].filter((e) => e.textContent.trim() && !e.closest("[aria-hidden='true']"));
+        for (const e of texts) {
+          if (texts.some((o) => o !== e && e.contains(o))) continue;                     // the innermost text block only
+          const bg = getComputedStyle(e).backgroundColor.match(/[\d.]+/g);
+          if (bg && bg.length === 4 ? +bg[3] > 0.5 : bg && bg.length === 3) continue;     // it has a background of its own (a button)
+          e.dataset.auditPx = i++; e.dataset.auditOwner = owned.find((o) => e.matches(o.sel))?.id || "";
+        }
+      }
+      return i;
+    }, OWNED);
+    let measured = 0;
+    for (let i = 0; i < n; i++) for (const r of await canvasContrast(page, `[data-audit-px="${i}"]`)) {
+      measured++;
+      if (r.median >= r.need) continue;
+      const line = `${tag}: «${r.text}» ${r.median.toFixed(2)} : 1 over the canvas (needs ${r.need})`;
+      if (r.owner) note(r.owner, line); else failures.push(`text over a canvas: ${line}`);
+    }
+    console.log(`${tag}: text over canvases: ${measured} of ${n} measured (the others are outside the screen or the logo window)`);
   }
   console.log(`${tag}: ${overflow ? "sideways scroll" : "ok"}; ${found.clipped.size} cut, ${found.small.size} small, ${found.targets.size} targets`);
   await ctx.close();

@@ -41,9 +41,10 @@ straight line; outside, it stays at the end value. In CSS:
 `clamp(least, value at 320 + (screen size − 320) × slope, most)`, with the slope = (value at 1440 − value at 320) / 1120.
 Example: `section/pad-y` is 40 → 80, so at 880px it is 40 + 560 × 0.0357 = 60px.
 
-**The screen's size is not only its width.** It is the width, or 1.6 × the height if that is smaller
-(`--vp: min(100vw, 1.6 × screen height)`). So a short laptop window (1366 × 650 → 1040) or a phone turned sideways
-(844 × 390 → 624) gets the sizes of a narrower screen — all of them together, so their ratios stay. Blocks that must
+**The screen's size is not only its width.** It is the width, or twice the height minus 400 if that is smaller
+(`--vp: min(100vw, 2 × screen height − 400px)`): every pixel of height a screen lacks counts as two of width. So a
+phone turned sideways (844 × 390 → 380) gets the phone sizes, and a short laptop window (1366 × 650 → 900) the sizes
+of a narrower screen — all of them together, so their ratios stay. Blocks that must
 fit a screen (the hero, the stack cards, the CTA card, the pinned logos) are also sized by the height directly.
 
 **Type is a ladder.** One base (16px) and one ratio (1.18 on a 320 screen, 1.2 on a 1440 one). Step n is

@@ -19,7 +19,7 @@
 
    Heights. Phones turned sideways and short laptop windows (1366×768 and 1536×864 screens leave 620–730 px of page)
    are handled without steps: every size of the scale takes the screen's height into account (the screen's size is
-   its width, or 1.6 × its height if that is smaller), and what is sized by the screen's height (the hero, the cards of
+   its width, or twice its height minus 400px if that is smaller), and what is sized by the screen's height (the hero, the cards of
    the stack, the CTA card, the pinned logos) is capped by it directly (vh), so it shrinks smoothly with the window.
    The steps are written in em: an em in a media query is the browser's own text size (16px unless the visitor has
    changed it), so with the usual setting they are exactly the px widths above, and a visitor who has made the text

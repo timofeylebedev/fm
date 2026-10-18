@@ -34,7 +34,7 @@
   --nav-control: 32px;
   --nav-h: calc(2 * var(--nav-pad-y) + var(--nav-control));
 
-  /* the cards that sit two in a row (royalty, publications): two once each would be at least this wide, one before */
+  /* the publications: two in a row once each would be at least this wide, one before */
   --card-min: 21rem;
 
   /* the screen's height: steady on phones (scripts/boot.js), the browser's own elsewhere */

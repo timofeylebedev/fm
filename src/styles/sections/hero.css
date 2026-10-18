@@ -40,8 +40,8 @@
   width: 100%;
 }
 /* The title is type/hero, a step of the scale: on a short screen (a laptop window made short, a phone turned sideways)
-   it gets smaller with every other size of the page (design/scale.json: the screen's size is its height × 1.6 when
-   that is less than its width), so it stays a step above the section headings at every width and height.
+   it gets smaller with every other size of the page (design/scale.json: the screen's size is twice its height minus 400px
+   when that is less than its width), so it stays a step above the section headings at every width and height.
    Two lines or three: the copy is a size container whose letters are the title's (font-size), so the query below
    measures its width in the title's own em. Two lines need 9.35 em (the longest, «на одной волне», with the air at
    the sides); where there is less, the title takes three lines (the longest, «Весь лейбл.», is 7.1 em).
