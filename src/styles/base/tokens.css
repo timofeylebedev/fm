@@ -17,8 +17,9 @@
 
   /* curves and timings (scripts/motion.js has the same curves for GSAP) */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);     /* arriving: quick, then a long soft landing */
-  /* blocks settle: about a fifth past their place and back (the "settle" curve of motion.js; exact below) */
-  --ease-settle: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* blocks settle: about a fifth past their place and back (the "settle" curve of motion.js; exact below where the
+     browser can draw it, this cubic as close as one can be: peak 1.18 instead of 1.22) */
+  --ease-settle: cubic-bezier(0.05, 2, 0.45, 0.8);
   --hover-in: 0.2s;
   --hover-out: 0.45s;
 

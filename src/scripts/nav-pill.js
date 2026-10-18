@@ -11,7 +11,7 @@
    stopping at every section on the way. A click on another link while it slides sends it on from where it is, at the
    speed it has (glide.js), instead of stopping it and starting again. With "reduce motion" it jumps instead of sliding.
    The current link has aria-current (screen readers say which section is on screen; the outline is its only mark). */
-import { M } from "./motion.js";
+import { M, css } from "./motion.js";
 import { bezier, glider } from "./glide.js";
 
 const MIN = 250, MAX = 650;          // ms: the shortest move, and a move across the whole row
@@ -65,21 +65,21 @@ export function initPill() {
   function go(a, now) {
     if (a === cur && !now) return;
     mark(a);
-    if (!a) { cancelAnimationFrame(raf); raf = 0; pill.style.transition = "opacity 0.25s ease"; pill.style.opacity = "0"; cur = box = null; return; }
+    if (!a) { cancelAnimationFrame(raf); raf = 0; pill.style.transition = "opacity 0.25s " + css.out; pill.style.opacity = "0"; cur = box = null; return; }
     const b = measure(a);
     if (now || !box || calm.matches) {
       // it was not shown: it appears in place (fading in), it does not slide in from somewhere
       const appear = !box && !now && !calm.matches && pill.style.opacity !== "1";
       pill.style.transition = "none";
       place(b);
-      if (appear) { pill.style.opacity = "0"; void pill.offsetWidth; pill.style.transition = "opacity 0.25s ease"; }
+      if (appear) { pill.style.opacity = "0"; void pill.offsetWidth; pill.style.transition = "opacity 0.25s " + css.out; }
       pill.style.opacity = "1";
     } else {
       // the time by the way it has to go from where it is now (it may be on its way somewhere else)
       const [x, y, w, h] = motion.at(clock()).p;
       const far = Math.hypot(b.x + b.w / 2 - (x + w / 2), b.y + b.h / 2 - (y + h / 2));
       const ms = Math.round(MIN + (MAX - MIN) * Math.min(1, far / span));
-      pill.style.transition = "opacity 0.25s ease";
+      pill.style.transition = "opacity 0.25s " + css.out;
       slide(b, ms / 1000);
       pill.style.opacity = "1";
     }
