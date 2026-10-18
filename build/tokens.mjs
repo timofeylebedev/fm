@@ -14,10 +14,12 @@
 // A variable is used by the code when its "web" (Figma: code syntax → Web) is var(--name): then it is written into the
 // CSS as --name. Colours and numbers only; font names stay in tokens.css with their fallbacks.
 //
-// Fluid values ("fluid": true, a field of the code only, never sent to Figma). The modes of a multi-mode collection are
-// screen widths (design/figma-map.json). A fluid number holds, at each of those widths, exactly its value there, and
-// in between it grows in a straight line from one to the next (below the narrowest and above the widest it stays put).
-// So a Figma frame at 390 px and the site at 390 px show the same size, and the site has no jumps between frames.
+// Sizes come from design/scale.json (the size system: one range, a type ladder, a space ladder). `npm run tokens` first
+// writes every size of the scale into tokens.json, at each Breakpoint mode (its value on a screen of that width), so
+// Figma holds the same numbers; then it writes the CSS, where each size is one formula: its value on a 320px screen,
+// its value on a 1440px one, a straight line in between, on the screen's size (--vp: the width, or 1.6 times the
+// height if that is smaller). Those variables carry "scale": true in tokens.json (a field of the code only): Figma
+// does not change them — a different value there is reported by the sync and the scale's value is kept.
 // Type sizes (type/*) are written in rem, so they follow the size the visitor chose for text in the browser.
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -25,7 +27,7 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const at = (p) => resolve(root, p);
-const TOKENS = at("design/tokens.json"), LOCK = at("design/tokens.lock.json"), MAP = at("design/figma-map.json");
+const SCALE = at("design/scale.json"), TOKENS = at("design/tokens.json"), LOCK = at("design/tokens.lock.json"), MAP = at("design/figma-map.json");
 const CSS = at("src/styles/base/tokens.gen.css"), PUSH = at("design/figma/push.gen.js"), PUSH_TPL = at("design/figma/push.js");
 
 const read = (f) => JSON.parse(readFileSync(f, "utf8"));
@@ -56,7 +58,7 @@ function flatten(doc) {
       } else flat.set(k("value"), norm(t.type, t.value));
       if (t.web !== undefined) flat.set(k("web"), t.web);
       if (t.description) flat.set(k("description"), t.description);
-      // "fluid" is the code's own business (how the CSS reads the value): it is not merged with Figma
+      // "fluid" and "scale" are the code's own business (how the CSS reads the value): they are not merged with Figma
     }
   }
   return flat;
@@ -73,6 +75,7 @@ function unflatten(flat, collections, order, code) {
   }
   if (code) for (const [col, vars] of Object.entries(doc.tokens)) for (const [name, t] of Object.entries(vars)) {
     if (code.tokens?.[col]?.[name]?.fluid) t.fluid = true;
+    if (code.tokens?.[col]?.[name]?.scale) t.scale = true;
   }
   return doc;
 }
@@ -85,8 +88,8 @@ export function format(doc) {
     lines.push(`    ${JSON.stringify(col)}: {`);
     const entries = Object.entries(vars);
     entries.forEach(([name, t], j) => {
-      const { type, value, web, fluid, description } = t;             // fixed field order
-      const o = { type, value, ...(web !== undefined && { web }), ...(fluid && { fluid }), ...(description && { description }) };
+      const { type, value, web, fluid, scale, description } = t;      // fixed field order
+      const o = { type, value, ...(web !== undefined && { web }), ...(fluid && { fluid }), ...(scale && { scale }), ...(description && { description }) };
       lines.push(`      ${JSON.stringify(name)}: ${JSON.stringify(o)}${j < entries.length - 1 ? "," : ""}`);
     });
     lines.push(`    }${i < cols.length - 1 ? "," : ""}`);
@@ -113,8 +116,62 @@ function cssValue(type, v, rem) {
   const [r, g, b, a] = [0, 2, 4, 6].map((i) => parseInt(h.slice(i, i + 2), 16));
   return `rgb(${r} ${g} ${b} / ${Math.round((a / 255) * 100) / 100})`;
 }
-export function generate(doc = read(TOKENS), map = read(MAP)) {
+
+// ── the scale (design/scale.json) ─────────────────────────────────────────────────────────────────────────────────
+// Every role of the scale as two numbers: its value on a screen of range.from and on one of range.to (px).
+export function scaleRoles(sc = read(SCALE)) {
+  const roles = [];
+  const { base, ratio } = sc.type;
+  for (const [name, r] of Object.entries(sc.type.roles)) {
+    const [s0, s1] = r.steps;
+    roles.push({ name, kind: "type", steps: r.steps, from: base * ratio.from ** s0, to: base * ratio.to ** s1,
+      css: r.css || "--" + name.replace("/", "-"), use: r.use });
+  }
+  for (const [name, r] of Object.entries(sc.space.roles)) {
+    roles.push({ name, kind: r.size ? "size" : "space", from: r.px[0], to: r.px[1], css: r.css, use: r.use });
+  }
+  return roles;
+}
+// a role's value on a screen of size vp (px): a straight line between the two ends, constant outside
+export const scaleAt = (role, vp, range) => {
+  const k = Math.min(1, Math.max(0, (vp - range.from) / (range.to - range.from)));
+  return role.from + (role.to - role.from) * k;
+};
+// the CSS: clamp(least, value at the start + (screen size − start) × slope, most); the range in rem (see media.css)
+function scaleCss(role, range) {
+  const rem = role.kind === "type";
+  const v0 = role.from, v1 = role.to;
+  if (Math.abs(v1 - v0) < 1e-6) return len(r4(v0), rem);
+  const slope = r4((v1 - v0) / (range.to - range.from));
+  const L = (v) => len(rem ? v : r4(v), rem);
+  return `clamp(${L(Math.min(v0, v1))}, calc(${L(v0)} + (var(--vp) - ${r4(range.from / 16)}rem) * ${slope}), ${L(Math.max(v0, v1))})`;
+}
+// writes the scale into tokens.json (Breakpoint: the value at each mode's width); returns true when it changed
+export function applyScale(doc = read(TOKENS), sc = read(SCALE)) {
+  const col = "Breakpoint", vars = doc.tokens[col], modes = doc.collections[col].modes;
+  const before = format(doc);
+  for (const role of scaleRoles(sc)) {
+    const old = vars[role.name] || {};
+    const value = Object.fromEntries(modes.map((m) => [m, Math.round(scaleAt(role, Number(m), sc.range) * 100) / 100]));
+    const description = role.use ? role.use + (role.kind === "type" ? ` (scale steps ${role.steps[0]} → ${role.steps[1]})` : ` (${role.from} → ${role.to})`) : old.description;
+    vars[role.name] = { type: "number", value, web: `var(${role.css})`, scale: true, ...(description && { description }) };
+  }
+  for (const [alias, target] of Object.entries(sc.type.aliases || {})) {
+    if (alias.startsWith("$")) continue;
+    vars[alias] = { type: "number", value: { alias: target }, description: `the same as ${target} (kept for the Figma text styles; the site uses ${target})` };
+  }
+  const changed = format(doc) !== before;
+  if (changed) writeFileSync(TOKENS, format(doc));
+  return changed;
+}
+
+export function generate(doc = read(TOKENS), map = read(MAP), sc = read(SCALE)) {
   const rootDecls = [], layers = new Map(), skipped = [];
+  const roles = new Map(scaleRoles(sc).map((r) => [r.name, r]));
+  rootDecls.push(`  /* the screen's size for every size below: its width, or ${sc.range.heightRatio} × its height if that is smaller (design/scale.json) */`);
+  rootDecls.push(`  --vp: min(100vw, var(--screen) * ${sc.range.heightRatio});`);
+  for (const [k, v] of Object.entries(sc.type.lineHeight)) rootDecls.push(`  --lh-${k}: ${v};`);
+  for (const [k, v] of Object.entries(sc.type.tracking)) rootDecls.push(`  --tracking-${k}: ${v};`);
   for (const [col, vars] of Object.entries(doc.tokens)) {
     const modes = doc.collections[col]?.modes || [];
     const cfg = map.modes[col];
@@ -123,6 +180,7 @@ export function generate(doc = read(TOKENS), map = read(MAP)) {
       if (!m) continue;
       if (t.type !== "color" && t.type !== "number") { skipped.push(`${col}/${name}`); continue; }
       const prop = m[1], rem = t.type === "number" && name.startsWith("type/");
+      if (t.scale && roles.has(name)) { rootDecls.push(`  ${prop}: ${scaleCss(roles.get(name), sc.range)};`); continue; }
       if (modes.length <= 1) { rootDecls.push(`  ${prop}: ${cssValue(t.type, t.value, rem)};`); continue; }
       if (!cfg) throw new Error(`design/figma-map.json has no screen widths for the modes of "${col}"`);
       // what a mode's media holds: its value, or (fluid) the line from its width to the next wider mode's width
@@ -142,9 +200,9 @@ export function generate(doc = read(TOKENS), map = read(MAP)) {
   }
   const order = Object.entries(map.modes).filter(([k]) => !k.startsWith("$")).map(([, c]) => c).flatMap((c) => c.layers.map((l) => l.media));
   const out = [
-    "/* GENERATED by build/tokens.mjs from design/tokens.json: do not edit here. Change design/tokens.json (or the variable",
-    "   in Figma and sync), then `npm run tokens`. The build runs it too. Variables reach this file when their Web code",
-    "   syntax is var(--name). */",
+    "/* GENERATED by build/tokens.mjs from design/scale.json (sizes) and design/tokens.json (colours): do not edit here.",
+    "   Change those files (colours also in Figma, then sync), then `npm run tokens`; the build runs it too.",
+    "   Every size: clamp(least, its value at 320 + (screen size − 320) × slope, most), the screen size being --vp. */",
     "", ":root {", ...rootDecls, "}",
   ];
   for (const media of order) if (layers.has(media)) out.push("", `@media (${media}) {`, "  :root {", ...layers.get(media), "  }", "}");
@@ -163,6 +221,10 @@ function sync(figmaFile, prefer) {
   for (const k of keys) {
     const c = C.get(k), f = F.get(k), b = B.get(k);
     const put = (m, v) => (v === undefined ? m.delete(k) : m.set(k, v));
+    const [kc, kn, kf] = k.split(SEP);
+    if (kf === "value" && code.tokens?.[kc]?.[kn]?.scale && !same(c, f)) {     // a size of the scale: the scale decides
+      put(merged, c); report.pushed.push([k, f, c]); (report.scaleKept ??= []).push([k, f, c]); continue;
+    }
     if (same(c, f)) { put(merged, c); put(lock, c); }
     else if (same(c, b)) { put(merged, f); put(lock, f); report.pulled.push([k, c, f]); }
     else if (same(f, b)) { put(merged, c); report.pushed.push([k, f, c]); }
@@ -207,6 +269,7 @@ function sync(figmaFile, prefer) {
   for (const [col, m] of Object.entries(modes)) console.log(`Modes of ${col}: Figma ${JSON.stringify(figmaDoc.collections?.[col]?.modes || [])} → code ${JSON.stringify(m.modes)} (the push changes them)`);
   console.log(`Code → Figma: ${report.pushed.length} value(s)${changes.length ? "  → run design/figma/push.gen.js with use_figma, then pull and sync again" : ""}`);
   for (const [k, a, b] of report.pushed) console.log(`  ${show(k)}: ${val(a)} → ${val(b)}`);
+  if (report.scaleKept?.length) console.log(`Sizes of the scale (design/scale.json) that differ in Figma: ${report.scaleKept.length}. The scale's value is kept and pushed; to change a size, change design/scale.json.`);
   if (report.conflicts.length) {
     console.log(`CONFLICTS: ${report.conflicts.length} (changed on both sides; tokens.json keeps the code's value, nothing pushed). Settle with --prefer figma|code, or edit tokens.json and sync again.`);
     for (const [k, b, c, f] of report.conflicts) console.log(`  ${show(k)}: was ${val(b)}, code ${val(c)}, Figma ${val(f)}`);
@@ -218,8 +281,10 @@ function sync(figmaFile, prefer) {
 const [cmd, file, flag, prefer] = process.argv.slice(2);
 if (cmd === "sync") {
   if (!file) throw new Error("usage: node build/tokens.mjs sync design/figma/export.json [--prefer figma|code]");
+  applyScale();
   sync(resolve(file), flag === "--prefer" ? prefer : undefined);
 } else if (!cmd || cmd === "css") {
+  const changed = applyScale();
   const r = generate();
-  console.log(`tokens: ${r.vars} CSS variables → src/styles/base/tokens.gen.css`);
+  console.log(`tokens: ${r.vars} CSS variables → src/styles/base/tokens.gen.css${changed ? " (design/tokens.json updated from design/scale.json)" : ""}`);
 } else throw new Error(`unknown command "${cmd}"`);

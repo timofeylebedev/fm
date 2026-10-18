@@ -1,4 +1,4 @@
-/* The footer: contacts, then the legal line. Sizes from Figma variables footer/*, type/footer* (tokens.gen.css).
+/* The footer: contacts, then the legal line. Paddings: footer/* of design/scale.json; text: type/body, notes type/ui.
    The legal notes: in a row on computers (each on one line), in two columns on tablets and phones turned sideways, one under another
    (centred, like the contacts above them) on phones held upright. */
 
@@ -17,10 +17,10 @@
   @media (--phone) { align-items: center; text-align: center; }
 }
 .footer__question {
-  width: 100%; font-size: var(--type-footer); line-height: 1.2;
+  width: 100%; font-size: var(--type-body); line-height: var(--lh-text);
 }
 .footer__mail {
-  font-size: var(--type-footer); color: var(--ink-60);
+  font-size: var(--type-body); color: var(--ink-60);
   padding-block: 4px; margin-block: -4px;                   /* a taller target to tap, the same line */
   transition: color var(--hover-out) var(--ease-out);
 }
@@ -37,7 +37,7 @@
   @media (--phone) and (--portrait) { display: flex; flex-direction: column; align-items: center; row-gap: 10px; text-align: center; }
 }
 .footer__note {
-  font-size: var(--type-footer-note); color: var(--ink-40);
+  font-size: var(--type-ui); color: var(--ink-40);
   /* a note is never broken in two: where the row has no room for all of them, a whole note goes to the next line
      (in the columns of tablets and phones a note may wrap, so only in the row) */
   @media not (--tablet) { white-space: nowrap; }

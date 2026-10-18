@@ -1,9 +1,14 @@
 /* The sections between the card stack and the footer, in page order.
 
    Every one of them is a column at most 1024px wide (--column-max), centred, never closer to the screen edge than the
-   gutter (--gutter). Their rhythm comes from tokens.gen.css: --section-y above and below the content, --section-gap
-   from the heading to what follows it. The blocks inside arrange themselves by the width they get (container
-   queries), not by the screen, so each one changes its layout where it runs out of room. */
+   gutter (--gutter). Their rhythm comes from the scale (design/scale.json): --section-y above and below the content,
+   --section-gap from the heading to what follows it; every size here is a role of the scale or derived from one.
+   The blocks inside arrange themselves by the width they get (container queries, auto-fit grids), not by the screen,
+   so each one changes its layout where it runs out of room.
+   The cards share one grammar: tiles (features, logos, stats, ID cards) have --radius-s and --gap-tiles between them,
+   half-column cards (royalty, publications) --radius-m and --gap-cards, full-column cards (tools, CTA) --radius-l.
+   A card's padding is its radius (the corners and the text are concentric), except the tool cards, whose padding is
+   one ladder step more (--pad-l: their extra air, design/decisions.json). */
 
 .royalty, .access, .releases, .clients, .tools, .pubs {
   display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
@@ -11,31 +16,27 @@
 }
 
 /* ── Royalty: two magenta cards with drawings (art/royalty.js) ──
-   Square cards. One column while two would be cramped (each card at most 416px wide, centred: it never stretches
-   into a long strip); side by side from a 576px column on. The drawing is the whole square (its Figma frame is
-   square too), the text lies over its lower part. */
-.royalty { padding-top: calc(var(--section-y) * 1.6); container: royalty / inline-size; }
+   Half-column cards, made like the publications: the same grid (two in a row once each is at least --card-min wide),
+   the same gap, radius, padding and title. Square: the drawing is the whole square (its Figma frame is square too),
+   the text lies over its lower part. */
+.royalty { padding-top: calc(var(--section-y) * 1.6); }
 .royalty__cards {
-  display: grid; grid-template-columns: 1fr; justify-items: center; gap: 12px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min)), 1fr)); gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
 .royalty__card {
   position: relative;
   display: flex; align-items: flex-end;
-  width: 100%; max-width: 26rem; aspect-ratio: 1;
+  width: 100%; aspect-ratio: 1;
   padding: var(--radius-m);
   overflow: hidden; border-radius: var(--radius-m);
   background: var(--magenta);
 
   & > .art { position: absolute; inset: 0; }
 }
-@container royalty (width >= 36rem) {
-  .royalty__cards { grid-template-columns: 1fr 1fr; }
-  .royalty__card { max-width: none; }
-}
 .royalty__text {
   position: relative; width: 100%; max-width: 15em;
-  font-size: var(--type-royalty); font-weight: 600; line-height: 1.2; color: var(--paper);
+  font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); color: var(--paper);
   text-wrap: balance;
 }
 
@@ -46,8 +47,14 @@
      · below a 560px column (phones held upright, narrow windows): a deck, one card on top of the others, which you
        swipe away to either side (scripts/deck.js). The deck is scaled down only below a 300px column. Phones turned
        sideways and tablets held upright have a row, a little smaller.
-   The section is the container: 100cqw is its column. */
-.access { container: access / inline-size; overflow: hidden; padding-bottom: calc(var(--section-y) * 1.6); }
+   The section is the container: 100cqw is its column. It cuts off what goes past its sides (a card swiped away), but
+   not above and below: the shadows of the cards reach into the next section (it is drawn over it, z-index), so the
+   section keeps the same padding as every other one. */
+.access {
+  container: access / inline-size;
+  position: relative; z-index: 1;
+  overflow: hidden; overflow: clip visible;                             /* old browsers: hidden */
+}
 .access__stage {
   --o: clamp(-40px, (100cqw - 837px) / 2, 0px);                         /* each card's step towards the next */
   --k: min(1, tan(atan2(100cqw, 757px)));                               /* the row's scale, below a 757px column */
@@ -92,9 +99,14 @@
 }
 
 .idcard {
+  /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are a
+     tile's (--radius-s); the table inside sits half a radius in, with the other half as its own radius, so the two
+     curves are concentric */
+  --id-r: var(--radius-s);
+  --id-inset: calc(var(--id-r) / 2);
   position: relative;
   width: 240px; height: 345px;
-  border-radius: 28px;
+  border-radius: var(--id-r);
   rotate: var(--rest);
 }
 /* The card's face. Its colour is a layer of its own (::before) with the slot for the clip cut right through it, so
@@ -104,7 +116,7 @@
   position: relative; isolation: isolate;
   display: flex; flex-direction: column;
   width: 240px; height: 345px;
-  border-radius: 28px;
+  border-radius: var(--id-r);
   box-shadow: 0 24px 24px -16px rgb(0 0 0 / 0.4), 0 0 16px rgb(0 0 0 / 0.02), 0 24px 56px rgb(0 0 0 / 0.1);
   color: var(--paper);
 
@@ -116,16 +128,19 @@
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
   }
 }
-.idcard__face--1 { --line: #999; --face: #666; }
-.idcard__face--2 { --line: #808080; --face: #4d4d4d; }
-.idcard__face--3 { --line: #666; --face: #333; }
+.idcard__face--1 { --line: var(--idcard-line-1); --face: var(--idcard-face-1); }
+.idcard__face--2 { --line: var(--idcard-line-2); --face: var(--idcard-face-2); }
+.idcard__face--3 { --line: var(--idcard-line-3); --face: var(--idcard-face-3); }
 .idcard__who {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
   width: 100%; height: 100%; padding: 28px 34px 0;
 }
 .idcard__photo { width: 80px; height: 80px; border-radius: var(--round); }
 .idcard__name { font-size: 24px; font-weight: 500; line-height: 1.1; text-align: center; }
-.idcard__table { flex: none; width: calc(100% - 32px); margin: 0 16px 16px; border: 1px solid var(--line); border-radius: 12px; }
+.idcard__table {
+  flex: none; width: calc(100% - 2 * var(--id-inset)); margin: 0 var(--id-inset) var(--id-inset);
+  border: 1px solid var(--line); border-radius: calc(var(--id-r) - var(--id-inset));
+}
 .idcard__row {
   display: flex; gap: 3px; padding: 10px;
   font-size: 13px; line-height: 1.2;
@@ -133,53 +148,54 @@
 }
 
 /* ── Releases: the ring of covers (scripts/ring.js) and four features ──
-   The features are in two columns on phones (one in a column under 350px: the narrowest phones), and become a row of
-   four once each would be at least about 170px wide (a 736px column). Never three: four cards would leave one alone on a row. */
-.releases { padding-top: 0; container: releases / inline-size; }
+   The features: one column, two, then a row of four (never three: four cards would leave one alone on a row), each
+   step once every tile has room for the longest unbreakable piece of its text («не накладывались», 9.3 em of
+   type/body with its non-breaking space) inside its padding: two from a 24rem column, four from 50rem. 
+.releases { container: releases / inline-size; }
 .ring { position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto; overflow: hidden; }
-/* one card a row in a column under 350px (the narrowest phones: two would leave about 130px each, four or five words a
-   line, cut short), two from there, four from 736px. In rem, so a visitor with bigger text gets fewer, wider cards
-   (with the browser's text at 24px, a 390px phone shows one a row). minmax(0, 1fr): a long word never widens its card. */
+/* In rem, so a visitor with bigger text gets fewer, wider cards. minmax(0, 1fr): a long word never widens its card. */
 .features {
-  display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(8px, 1.2vw, 12px);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-tiles);
   width: 100%; max-width: var(--column-max);
 }
-@container releases (width >= 21.875rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@container releases (width >= 46rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@container releases (width >= 24rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container releases (width >= 50rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .feature {
-  display: flex; flex-direction: column; justify-content: space-between; gap: clamp(24px, 3vw, 40px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: var(--feature-gap);
   padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);
   border-radius: var(--radius-s); background: var(--tint);
 }
 .feature__icon { width: 40px; height: 40px; color: var(--purple); }
 .feature__text { display: flex; flex-direction: column; gap: 8px; }
-.feature__title, .feature__desc { font-size: var(--type-feature); font-weight: 500; line-height: 1.2; }
+.feature__title, .feature__desc { font-size: var(--type-body); font-weight: 500; line-height: var(--lh-text); }
 .feature__desc { color: var(--ink-60); }
 
 /* ── Clients: the strip of logos and numbers ──
-   The window shows 4 columns (3 on phones, 2 on the narrowest); the strip has 8 columns × 2 rows and slides from
-   left-aligned to right-aligned while the section is pinned (scripts/logos.js). Sizes are in --u, the side of one
-   card (the design: 247px at 1024px). The section is pinned in the middle of the screen, so it must fit the screen:
-   on a short one (a laptop at 1366×768, a phone turned sideways) the cards are as big as its height allows, and the
-   window then shows more columns. A tap on a logo shows its name (scripts/logos.js), as hovering does. */
+   The window shows whole columns: 2, 3 or 4, chosen by the strip's own width (container queries), each only once its
+   tiles would still be big enough after the change: 3 from a 25rem window (tiles ≥ 128px, so the numbers' labels stay
+   above their 12px floor), 4 from 42rem (tiles ≥ 160px). The strip has 8 columns × 2 rows and slides from left-aligned
+   to right-aligned while the section is pinned (scripts/logos.js). Sizes inside a tile are in --u, the side of one
+   tile (the design: 247px). The section is pinned in the middle of the screen, so it must fit the screen: on a short
+   one (a laptop at 1366×768, a phone turned sideways) the tiles are as big as its height allows, and the window then
+   shows more columns. A tap on a logo shows its name (scripts/logos.js), as hovering does. */
 .clients {
   overflow: hidden;
   /* on a short screen the section's own spacing gives way first, so the cards can stay big enough to read */
   padding-block: min(var(--section-y), 6vh); gap: min(var(--section-gap), 6vh);
 }
-.logos { width: 100%; max-width: var(--column-max); container-type: inline-size; }
+.logos { width: 100%; max-width: var(--column-max); container: logos / inline-size; }
 .logos__track {
-  --gap: clamp(8px, 1.2cqw, 12px);
-  --cols: 4;
-  --by-height: calc((var(--screen) - 2 * min(var(--section-y), 6vh) - min(var(--section-gap), 6vh) - var(--type-h2) - var(--nav-pad-y) * 2 - 32px - var(--gap)) / 2);
+  --gap: var(--gap-tiles);
+  --cols: 2;
+  --by-height: calc((var(--screen) - 2 * min(var(--section-y), 6vh) - min(var(--section-gap), 6vh) - var(--type-h2) - var(--nav-h) - var(--gap)) / 2);
   --u: max(100px, min((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols), var(--by-height)));
   display: grid; grid-template-columns: repeat(8, var(--u)); grid-template-rows: repeat(2, var(--u)); gap: var(--gap);
   width: max-content; margin-inline: auto;            /* centred when it fits its window whole; from the left otherwise */
-  @media (--phone) { --cols: 3; }
-  @media (--narrow) { --cols: 2; }
 }
+@container logos (width >= 25rem) { .logos__track { --cols: 3; } }
+@container logos (width >= 42rem) { .logos__track { --cols: 4; } }
 .logo-card, .stat {
-  position: relative; min-width: 0; border-radius: calc(var(--u) * 0.1); background: var(--tint);
+  position: relative; min-width: 0; border-radius: var(--radius-s); background: var(--tint);
 }
 .logo-card__img { width: 100%; height: 100%; }
 .logo-card__name {
@@ -204,7 +220,7 @@
   color: var(--paper);
 }
 .stat__number { position: relative; z-index: 1; font-size: calc(var(--u) * 64 / 247); font-weight: 600; line-height: 1; overflow-wrap: anywhere; }
-.stat__label { position: relative; z-index: 1; font-size: max(12px, var(--u) * 24 / 247); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+.stat__label { position: relative; z-index: 1; font-size: max(12px, var(--u) * 24 / 247); font-weight: 500; letter-spacing: var(--tracking-label); text-transform: uppercase; }
 /* the colour of the dots (scripts/stipple.js); without WebGL2 the card fades into it instead */
 .stat--orange { --dots: var(--orange); }
 .stat--blue { --dots: var(--blue); }
@@ -225,7 +241,7 @@
   @media not (--phone) { padding-inline: var(--gutter); }
 }
 .cta__card {
-  --cta-title: clamp(min(var(--type-h2), 26px), var(--screen) * 0.09, var(--type-h2));
+  --cta-title: var(--type-h2);
   position: relative; isolation: isolate;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   width: 100%; max-width: var(--column-max);
@@ -234,7 +250,7 @@
     --w: calc(100vw - 2 * var(--inset));
     min-height: clamp(var(--w) * 1.15, 0.72 * var(--screen), var(--w) * 1.4);
   }
-  padding: calc(var(--section-y) * 0.8) clamp(24px, 5vw, 48px) calc(65px + var(--section-y) * 0.6);
+  padding: calc(var(--section-y) * 0.8) var(--radius-l) calc(65px + var(--section-y) * 0.6);
   overflow: hidden; border-radius: var(--radius-l);
   background-color: var(--purple);
 
@@ -243,22 +259,20 @@
 }
 .cta__content {
   position: relative; z-index: 1;
-  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: var(--action-gap);
   width: 100%;
 }
-.cta__copy { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+.cta__copy { display: flex; flex-direction: column; align-items: center; gap: var(--text-gap); width: 100%; }
 .cta__title {
   max-width: 13em; padding-inline: var(--center-air);
-  font-family: var(--font-display); font-weight: 700; line-height: 1; text-align: center; color: var(--paper);
-  /* a phone turned sideways: the card still fits the screen; but never under 26px, and the text under it keeps
-     smaller than it (as in the hero) */
+  font-family: var(--font-display); font-weight: 700; line-height: var(--lh-display); text-align: center; color: var(--paper);
   font-size: var(--cta-title);
   text-wrap: balance;
 }
 .cta__lead-box { display: flex; justify-content: center; width: 100%; }
 .cta__lead {
   max-width: 26em;
-  font-size: min(var(--type-lead), var(--cta-title) * 0.6); line-height: 1.3; text-align: center; color: var(--paper);
+  font-size: var(--type-lead); line-height: var(--lh-text); text-align: center; color: var(--paper);
   text-wrap: balance;
 }
 /* the strip of words along the bottom: one picture (marquee.svg, a word list 714px long and a 24px gap) repeated,
@@ -279,29 +293,30 @@
 
 /* ── Tools: two white cards ──
    Side by side (text | picture) when the column has room for both halves (704px); otherwise the text, then the
-   picture under it. The cards are as wide as the column at every size. */
+   picture under it. The cards are as wide as the column at every size: full-column cards, with --radius-l and the
+   extra air of --pad-l (one ladder step above the radius) at every size, phones included. */
 .tools { background: var(--mist); }
 .tools__list {
-  display: flex; flex-direction: column; gap: clamp(16px, 2vw, 24px);
+  display: flex; flex-direction: column; gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
   container-type: inline-size;
 }
 .tool {
-  --pad: clamp(24px, 6cqw, 64px);
+  --pad: var(--pad-l);
   display: grid; grid-template-columns: 1fr;
-  overflow: hidden; border-radius: var(--radius-m); background: var(--paper);
+  overflow: hidden; border-radius: var(--radius-l); background: var(--paper);
 }
 .tool__body {
-  display: flex; flex-direction: column; align-items: flex-start; gap: clamp(24px, 3cqw, 32px);
-  padding: var(--pad) var(--pad) clamp(16px, 4cqw, 24px);
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--tool-gap);
+  padding: var(--pad);                                                   /* the picture comes after the same air */
 }
-.tool__copy { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(12px, 1.6cqw, 16px); }
+.tool__copy { display: flex; flex-direction: column; align-items: flex-start; gap: var(--text-gap); }
 .tool__brand { display: flex; align-items: center; }
-.tool__logo { --h: clamp(20px, 2.8cqw, 28px); height: var(--h); }
+.tool__logo { --h: var(--tool-logo-h); height: var(--h); }
 .tool__logo--litmus { width: calc(var(--h) * 7.643); color: var(--teal); }
 .tool__logo--lens { width: calc(var(--h) * 6.679); color: var(--orange); }
-.tool__title { font-size: var(--type-card-heading); font-weight: 600; line-height: 1.1; text-wrap: balance; }
-.tool__desc { max-width: 28em; font-size: var(--type-body-m); line-height: 1.3; color: var(--ink-60); }
+.tool__title { font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); text-wrap: balance; }
+.tool__desc { max-width: 28em; font-size: var(--type-body); line-height: var(--lh-text); color: var(--ink-60); }
 .tool__media {
   position: relative;
   height: min(72cqw, 360px);
@@ -309,7 +324,7 @@
   & picture { position: absolute; inset: 0 var(--pad); }
 }
 @container (width >= 44rem) {
-  .tool { grid-template-columns: 1fr 1fr; min-height: clamp(400px, 47cqw, 480px); }
+  .tool { grid-template-columns: 1fr 1fr; min-height: var(--tool-min-h); }
   .tool__body { padding: var(--pad) calc(var(--pad) / 2) var(--pad) var(--pad); }
   .tool__media { height: auto; & picture { inset: 32px 24px 0; } }
 }
@@ -319,7 +334,7 @@
    Two columns once each card would be at least 336px wide; one column, as wide as the column, below that. */
 .pubs { padding-bottom: calc(var(--section-y) * 2); }
 .pubs__grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: clamp(16px, 2vw, 24px);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min)), 1fr)); gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
 .pub, .pub__cover {
@@ -329,15 +344,15 @@
   transition: background-color var(--hover-out) var(--ease-out);
 }
 .pub-video { position: relative; display: flex; width: 100%; container-type: inline-size; }
-.pub__body { display: flex; flex-direction: column; gap: 8px; padding-bottom: clamp(40px, 5vw, 64px); }
+.pub__body { display: flex; flex-direction: column; gap: 8px; padding-bottom: var(--pub-air); }
 .pub__author {
   display: flex; align-items: center; gap: 8px;
-  font-size: var(--type-body-s); line-height: 1.3; color: var(--ink-60);
+  font-size: var(--type-ui); line-height: var(--lh-text); color: var(--ink-60);
 }
 .pub__avatar { flex: none; width: 24px; height: 24px; border-radius: var(--round); }
-.pub__copy { display: flex; flex-direction: column; gap: 10px; }
-.pub__title { font-size: var(--type-card-heading); font-weight: 600; line-height: 1.1; text-wrap: balance; }
-.pub__desc { max-width: 34em; font-size: var(--type-body-s); line-height: 1.3; color: var(--ink-60); }
+.pub__copy { display: flex; flex-direction: column; gap: var(--text-gap); }
+.pub__title { font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); text-wrap: balance; }
+.pub__desc { max-width: 34em; font-size: var(--type-body); line-height: var(--lh-text); color: var(--ink-60); }
 .pub__foot { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
 .pub__source { width: 153.88px; height: 24px; object-fit: cover; }
 /* the video card: its watch buttons sit where the full logo would end; in a narrow card the short mark is shown */

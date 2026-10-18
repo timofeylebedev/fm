@@ -1,4 +1,5 @@
-/* The page for an address that does not exist (404.html): the logo, and a link home in the middle of the screen. */
+/* The page for an address that does not exist (404.html): the logo, and a link home in the middle of the screen.
+   The same navbar and the same scale as the page (design/scale.json): the title is type/card-heading, the link type/lead. */
 @import "./base/media.css";
 @import "./base/tokens.css";
 @import "./base/tokens.gen.css";
@@ -8,26 +9,21 @@
 body { display: flex; flex-direction: column; }
 .lost-nav {
   position: fixed; inset: 0 0 auto; z-index: 1;
-  padding: 12px 24px;
-  @media (--phone) { padding-inline: 12px; }
+  padding: var(--nav-pad-y) var(--nav-pad-right) var(--nav-pad-y) var(--nav-pad-left);
 }
-.lost-nav__logo { width: 184px; height: 40px; @media (--phone) { width: 147.2px; height: 32px; } }
+.lost-nav__logo { width: calc(var(--nav-control) * 4.6); height: var(--nav-control); }
 .lost {
   flex: 1; min-height: 100vh; min-height: 100svh;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-  padding: 40px 40px 120px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--text-gap);
+  padding: var(--section-y) var(--gutter) calc(var(--section-y) * 2);
 }
 .lost__title {
-  font-size: 32px; font-weight: 600; line-height: 1.1; text-align: center;
-  @media (--desktop) { font-size: 40px; }
-  @media (--tablet) { font-size: 24px; }
+  font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); text-align: center;
 }
 .lost__home {
   display: flex; align-items: center; gap: 8px;
-  font-size: 20px; line-height: 1.3; opacity: 0.6;
+  font-size: var(--type-lead); line-height: var(--lh-text); opacity: 0.6;
   transition: opacity var(--hover-out) var(--ease-out);
-  @media (--desktop) { font-size: 24px; }
-  @media (--tablet) { gap: 6px; font-size: 18px; }
   @media (--mouse) { &:hover { opacity: 1; transition-duration: var(--hover-in); } }
 }
 .lost__arrow { width: 8px; height: 20px; }

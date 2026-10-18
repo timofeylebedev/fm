@@ -4,11 +4,11 @@
    Widths. The base styles are the laptop (1024–1439); the media below change them for wider and for narrower screens.
    The steps come from what visitors have (StatCounter, Russia, September 2026): phones are 360–384 px wide (about a
    fifth of mobile visits) or 390–430 (about a quarter), tablets 686–834 upright and 1024–1280 sideways, computers
-   mostly 1366–1920. Between the steps, sizes do not jump: most of them grow in a straight line from one step to the
-   next (the fluid values of tokens.gen.css), and blocks that can arrange themselves by their own width do so
-   (container queries: the ID cards become a deck below a 560px column, the features go from one column to two and four,
-   the royalty cards, tools and publications sit side by side where they fit), so these steps are used only where
-   the whole page changes.
+   mostly 1366–1920. No size uses these steps: every size follows design/scale.json, one straight line from a 320 to
+   a 1440 screen (tokens.gen.css). Blocks that can arrange themselves by their own width do so (container queries:
+   the ID cards become a deck below a 560px column, the features go from one column to two and four, the logos show
+   2, 3 or 4 columns, the hero title takes two lines or three; auto-fit grids: royalty, publications). So these steps
+   are used only where the whole page changes: the navbar, the menu, the footer.
 
         320–389   narrow phones                 --narrow   two columns of logos (three on other phones)
         390–767   phones, and phones sideways   --phone    the contacts centred, the grey notes in one column (upright)
@@ -18,14 +18,17 @@
        1920–      the widest                    --wide     where the fluid values stop growing
 
    Heights. Phones turned sideways and short laptop windows (1366×768 and 1536×864 screens leave 620–730 px of page)
-   are handled without steps: what is sized by the screen's height (the hero, the cards of the stack, the CTA card, the
-   pinned logos) is capped by it directly (vh), so it shrinks smoothly with the window.
+   are handled without steps: every size of the scale takes the screen's height into account (the screen's size is
+   its width, or 1.6 × its height if that is smaller), and what is sized by the screen's height (the hero, the cards of
+   the stack, the CTA card, the pinned logos) is capped by it directly (vh), so it shrinks smoothly with the window.
    The steps are written in em: an em in a media query is the browser's own text size (16px unless the visitor has
    changed it), so with the usual setting they are exactly the px widths above, and a visitor who has made the text
    bigger (20 or 24px) gets the layout of a narrower screen, with room for that text, instead of the same layout
    crammed with it.
    One height condition: --sideways, a phone turned sideways (or a window as short and narrow as one): the navbar
    hides while scrolling down (scripts/nav.js) and the card stack sticks to the top of the screen instead of under it. */
+/* --desktop, --wide and --narrow are not used by any rule now (every size is fluid); they stay as the names of the
+   Figma Breakpoint modes and of the screens the audit checks */
 @custom-media --desktop (width >= 90em);       /* 1440px */
 @custom-media --wide (width >= 120em);         /* 1920px */
 @custom-media --tablet (width < 64em);         /* 1024px */

@@ -1,4 +1,4 @@
-/* Buttons: a pill with a colour of its own. Height, side padding and type size from Figma variables button/*, type/button.
+/* Buttons: a pill with a colour of its own. Height and side padding: button/* of design/scale.json; text: type/body.
    With a mouse, the colour deepens while the mouse is over it (quick in, a little slower out).
    Pressed (mouse or finger), it gives in to 97% and springs back past its size and settles. */
 
@@ -9,7 +9,7 @@
   height: var(--button-height); padding: 9px var(--button-pad-x);
   border: 1px solid transparent;                     /* invisible, except in Windows high-contrast mode, where it keeps the pill's shape */
   border-radius: var(--round);
-  font-size: var(--type-button); line-height: normal; white-space: nowrap;
+  font-size: var(--type-body); line-height: normal; white-space: nowrap;
   color: var(--paper); background-color: var(--purple);
   transition: background-color var(--hover-out) var(--ease-out), color var(--hover-out) var(--ease-out);
   user-select: none; -webkit-user-select: none;
@@ -20,12 +20,12 @@
 .btn--teal { --btn-hover: var(--teal-hover); background-color: var(--teal); padding: 9px var(--button-pad-x-alt) 9px 10px; }
 .btn--white { background-color: var(--paper); color: var(--purple); }
 /* the small one in the navbar */
-.btn--nav { height: 32px; padding: 9px 16px; font-size: 14px; }
+.btn--nav { height: var(--nav-control); padding: 9px 16px; font-size: var(--type-ui); }
 .btn__icon { flex: none; width: 20px; height: 20px; }
 
 @media (--mouse) {
   .btn:hover, [data-linkcard]:hover .btn { background-color: var(--btn-hover); transition-duration: var(--hover-in); }
-  .btn--white:hover, [data-linkcard]:hover .btn--white { background-color: var(--paper); color: rgb(136 77 255 / 0.8); }
+  .btn--white:hover, [data-linkcard]:hover .btn--white { background-color: var(--paper); color: var(--purple-hover); }
 }
 
 @media (prefers-reduced-motion: no-preference) {

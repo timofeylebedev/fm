@@ -19,11 +19,10 @@
    height when the bars of an app's browser collapse while scrolling. */
 
 .hero {
-  --hero-air: clamp(440px, 360px + 20vw, 640px);
   position: relative;
   isolation: isolate;                                 /* the shadows of the chips blend with the table, and only with what is in this section */
   display: flex; flex-direction: column;
-  min-height: min(var(--screen-s) - 40px, 40.8vw + var(--hero-air), 1080px);
+  min-height: min(var(--screen-s) - 40px, 40.8vw + var(--hero-room), 1080px);
   overflow: hidden;
   background-color: var(--sand);
 
@@ -34,42 +33,44 @@
   position: relative; z-index: 1;
   flex: 2 1 auto;                                     /* grows below its text: the air between the button and the heads */
   display: flex; flex-direction: column; align-items: center;
-  padding: calc(var(--nav-pad-y) * 2 + 32px + min(clamp(16px, 4vw, 48px), 4vh)) var(--gutter) min(32px, 3vh);
+  padding: calc(var(--nav-h) + var(--hero-air-top)) var(--gutter) var(--hero-air-bottom);
 }
 .hero__text {
-  display: flex; flex-direction: column; align-items: center; gap: clamp(20px, 2vw, 24px);
+  display: flex; flex-direction: column; align-items: center; gap: var(--action-gap);
   width: 100%;
 }
-.hero__copy { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
-/* The heading and its text on a short screen (a laptop window made short, a phone turned sideways): the heading gives
-   room to the team as the screen gets shorter (8.5% of its height), but never gets smaller than 30px (or its own size,
-   where that is smaller), and the text under it follows it down once the heading would no longer be clearly the
-   bigger of the two (the text is at most 55% of the heading). So the two keep their order at every height. */
-.hero {
-  /* …and on the narrowest phones it is never so big that its longest line (9.3 em) would not fit between the air at
-     its sides: the title keeps its two lines */
-  --hero-title: min(clamp(min(var(--type-hero), 30px), var(--screen-s) * 0.085, var(--type-hero)), (100vw - 2 * var(--gutter) - 2 * var(--center-air)) / 9.35);
-  --hero-lead: min(var(--type-lead), var(--hero-title) * 0.55);
+/* The title is type/hero, a step of the scale: on a short screen (a laptop window made short, a phone turned sideways)
+   it gets smaller with every other size of the page (design/scale.json: the screen's size is its height × 1.6 when
+   that is less than its width), so it stays a step above the section headings at every width and height.
+   Two lines or three: the copy is a size container whose letters are the title's (font-size), so the query below
+   measures its width in the title's own em. Two lines need 9.35 em (the longest, «на одной волне», with the air at
+   the sides); where there is less, the title takes three lines (the longest, «Весь лейбл.», is 7.1 em).
+   On screens narrower than the scale's range (under 320px) the title gets smaller still, so those three lines fit. */
+.hero__copy {
+  --hero-title: min(var(--type-hero), (100vw - 2 * var(--gutter) - 2 * var(--center-air)) / 7.2);
+  container: hero-copy / inline-size;
+  display: flex; flex-direction: column; align-items: center; gap: var(--text-gap); width: 100%;
+  font-size: var(--hero-title);
 }
 .hero__title {
   max-width: 10em; padding-inline: var(--center-air);
-  font-family: var(--font-display); font-weight: 700; line-height: 1; text-align: center;
-  font-size: var(--hero-title);
+  font-family: var(--font-display); font-weight: 700; line-height: var(--lh-display); text-align: center;
+  font-size: 1em;
 
   /* an invisible dash in front balances the dash at the end of the first line, so the line looks centred
      (hidden, not transparent: in Windows high-contrast mode a transparent colour is overridden and the dash would show) */
   & .t-wide:first-child::before { content: "— "; visibility: hidden; }
-  /* the narrowest phones read «Весь лейбл. На одной волне»: the dash would not fit there with air at the sides */
+  /* three lines read «Весь лейбл. / На одной / волне»: the dash would not fit with the air at the sides */
   & .t-narrow { display: none; }
-  @media (--narrow) {
-    & .t-wide { display: none; }
-    & .t-narrow { display: inline; }
-  }
+}
+@container hero-copy (width < 10em) {
+  .hero__title .t-wide { display: none; }
+  .hero__title .t-narrow { display: inline; }
 }
 .hero__lead-box { display: flex; justify-content: center; width: 100%; }
 .hero__lead {
   max-width: 24em;
-  font-size: var(--hero-lead); line-height: 1.3; text-align: center; color: var(--ink-60);
+  font-size: var(--type-lead); line-height: var(--lh-text); text-align: center; color: var(--ink-60);
   text-wrap: balance;
 }
 

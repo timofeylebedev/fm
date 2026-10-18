@@ -1,0 +1,72 @@
+{
+  "$about": [
+    "The size system of the site: every fluid size comes from this file. build/tokens.mjs reads it (npm run tokens, and before every dev/build), writes each size's value at every Figma Breakpoint mode into design/tokens.json (so Figma gets the same numbers) and one CSS formula per size into src/styles/base/tokens.gen.css. Explained with charts in design/README.md.",
+    "One range for everything: a size has its 'from' value on a 320px screen and its 'to' value on a 1440px screen, and goes in a straight line in between (constant outside). Not the screen's width alone: the screen's size is its width, or 1.6 times its height if that is smaller (heightRatio). So a short laptop window or a phone turned sideways gets the sizes of a narrower screen, and every size shrinks together: the ratios between them stay.",
+    "Type: a ladder of steps on one base (16px) and one ratio (1.18 on a 320 screen, 1.2 on a 1440 one). A role is two step numbers: its step at 320 and its step at 1440. On phones the levels sit one step apart; on computers they spread. Neighbouring levels are always at least ×1.18 apart, at every size in between (the ratio of two straight lines can only move from its value at one end to its value at the other).",
+    "Space: every spacing and radius is two numbers from the ladder below (its value at 320 and at 1440). Roles marked size are measures of a block, not spacing, and need not be on the ladder.",
+    "Sizes are written in rem in the CSS (type) or px with the range in rem (space): with the browser's text made bigger, the whole system behaves as on a narrower screen, like the em steps of media.css."
+  ],
+  "range": { "from": 320, "to": 1440, "heightRatio": 1.6 },
+
+  "type": {
+    "base": 16,
+    "ratio": { "from": 1.18, "to": 1.2 },
+    "roles": {
+      "type/hero":         { "steps": [5, 8], "use": "the hero title" },
+      "type/h2":           { "steps": [4, 7], "use": "section headings, the CTA title" },
+      "type/card-title":   { "steps": [3, 6], "use": "the titles of the card stack" },
+      "type/card-heading": { "steps": [2, 4], "use": "titles of cards: tools, publications, royalty; the 404 title" },
+      "type/lead":         { "steps": [1, 1], "use": "the text under the hero and the CTA titles" },
+      "type/card-tag":     { "steps": [0, 1], "use": "the labels of the card stack (uppercase, 500)" },
+      "type/body":         { "steps": [0, 0], "use": "running text, feature texts, buttons, the footer" },
+      "type/ui":           { "steps": [-1, -1], "use": "navbar links and button, menu, skip link, footer notes, bylines" }
+    },
+    "aliases": {
+      "$about": "Figma variables the text styles still use, now the same as a role (the site uses only the roles)",
+      "type/royalty": "type/card-heading", "type/feature": "type/body", "type/body-m": "type/body", "type/body-s": "type/body",
+      "type/button": "type/body", "type/footer": "type/body", "type/footer-note": "type/ui"
+    },
+    "lineHeight": { "display": 1, "heading": 1.1, "text": 1.3 },
+    "tracking": { "label": "0.05em" }
+  },
+
+  "space": {
+    "ladder": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128],
+    "roles": {
+      "section/pad-x":   { "px": [16, 40], "css": "--gutter", "use": "side gutter of every section: the content column starts here" },
+      "stack/pad":       { "px": [8, 24], "css": "--inset", "use": "inset of the full-bleed cards (stack, CTA) from the screen edge, and the gap between stack cards" },
+      "section/pad-y":   { "px": [40, 80], "css": "--section-y", "use": "space above and below a section's content (two sections in a row: twice this between them)" },
+      "section/gap":     { "px": [32, 64], "css": "--section-gap", "use": "from a section heading to its content" },
+      "space/gap-tiles": { "px": [8, 12], "css": "--gap-tiles", "use": "between tiles: features, logos and stats" },
+      "space/gap-cards": { "px": [16, 24], "css": "--gap-cards", "use": "between cards: royalty, tools, publications" },
+      "radius/s":        { "px": [16, 24], "css": "--radius-s", "use": "tiles: features, logos, stats, ID cards (about 130–250px wide)" },
+      "radius/m":        { "px": [24, 40], "css": "--radius-m", "use": "half-column cards: publications, royalty; the padding of the stack cards" },
+      "radius/l":        { "px": [32, 56], "css": "--radius-l", "use": "full-column cards: the CTA card (also its side padding), tool cards" },
+      "space/pad-l":     { "px": [40, 64], "css": "--pad-l", "use": "padding of the tool cards: one ladder step above their radius (radius/l) — their extra air (design/decisions.json)" },
+      "card/text-pad":   { "px": [24, 40], "css": "--card-pad", "use": "padding of a stack card (= radius/m)" },
+      "card/text-gap":   { "px": [16, 24], "css": "--card-text-gap", "use": "a stack card's label → its title" },
+      "card/tag-pad-y":  { "px": [8, 12], "css": "--card-tag-pad-y" },
+      "card/tag-pad-x":  { "px": [16, 24], "css": "--card-tag-pad-x" },
+      "space/text-gap":  { "px": [12, 16], "css": "--text-gap", "use": "a heading → its text: hero, CTA, tools, publications" },
+      "space/action-gap": { "px": [20, 24], "css": "--action-gap", "use": "a block of text → its button: hero, CTA" },
+      "tool/gap":        { "px": [24, 32], "css": "--tool-gap", "use": "a tool card's text → its button" },
+      "feature/gap":     { "px": [24, 40], "css": "--feature-gap", "use": "a feature's icon → its text (at least)" },
+      "pub/air":         { "px": [40, 64], "css": "--pub-air", "use": "a publication's text → its footer (at least)" },
+      "hero/air-top":    { "px": [16, 48], "css": "--hero-air-top", "use": "under the navbar, above the hero title (at least)" },
+      "hero/air-bottom": { "px": [16, 32], "css": "--hero-air-bottom", "use": "under the hero button, above the team (at least)" },
+      "space/center-air": { "px": [8, 0], "css": "--center-air", "use": "air at the sides of a centred heading, so a line of big letters is not pressed against the gutter on phones" },
+      "nav/pad-y":       { "px": [10, 12], "css": "--nav-pad-y" },
+      "nav/pad-left":    { "px": [12, 24], "css": "--nav-pad-left" },
+      "nav/pad-right":   { "px": [10, 24], "css": "--nav-pad-right", "use": "a little less than the left on phones: the burger's lines have air of their own" },
+      "nav/end-gap":     { "px": [16, 32], "css": "--nav-end-gap" },
+      "button/height":   { "px": [36, 40], "css": "--button-height" },
+      "button/pad-x":    { "px": [18, 20], "css": "--button-pad-x" },
+      "button/pad-x-alt": { "px": [18, 16], "css": "--button-pad-x-alt", "use": "orange and teal buttons" },
+      "footer/contact-y": { "px": [40, 32], "css": "--footer-contact-y", "use": "more air on phones, where the contacts stand in a column" },
+      "footer/legal-y":  { "px": [24, 16], "css": "--footer-legal-y" },
+      "tool/logo-h":     { "px": [20, 28], "css": "--tool-logo-h" },
+      "tool/min-h":      { "px": [400, 480], "css": "--tool-min-h", "size": true, "use": "a tool card's least height when text and picture sit side by side" },
+      "hero/room":       { "px": [440, 640], "css": "--hero-room", "size": true, "use": "the hero is never taller than the team picture plus this (its text and air)" }
+    }
+  }
+}

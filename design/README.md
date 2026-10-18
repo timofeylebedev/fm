@@ -24,21 +24,68 @@ reaches the CSS without anyone touching the stylesheet.
 - `build/tokens.mjs` — writes `src/styles/base/tokens.gen.css` (runs before every `npm run dev` / `build`) and does the sync.
 - `src/styles/base/tokens.gen.css` — generated, don't edit.
 
-A variable reaches the CSS when its **Web code syntax** in Figma (the `web` field) is `var(--name)`. Then it is written
-as `--name` in `tokens.gen.css`: the 1024 mode in `:root`, the other modes inside the custom media of `media.css`
-(`--desktop`, `--wide`, `--tablet`, `--phone`, `--narrow`), only where they differ. Variables without it stay Figma-only.
+A variable reaches the CSS when its **Web code syntax** in Figma (the `web` field) is `var(--name)`. Colours are
+written as they are; every size comes from the size system below. Variables without a Web code syntax stay Figma-only.
 
-### Breakpoint modes and fluid values
+## The size system (`design/scale.json`)
 
-The modes of the Breakpoint collection are screen widths: **320, 390, 768, 1024, 1440, 1920** (since Oct 17, 2026;
-before: 320, 480, 768, 1024, 1280, 1440). Each one is where a range of the site starts (`media.css` explains why
-these widths). A mode's value is the value **at exactly that width**.
+Every fluid size of the site — type, spacing, radii, paddings — is defined in one file, `design/scale.json`, and
+nowhere else. `npm run tokens` (and every `dev` / `build`) turns it into:
 
-Most size variables are **fluid** (`"fluid": true` in `tokens.json`, a field of the code only, never sent to Figma):
-between two modes the site draws them in a straight line from one value to the next, so nothing jumps at a
-breakpoint. A Figma frame 390 wide and the site at 390 px show the same size; at 600 px the site shows the size
-in between. Type sizes (`type/*`) are written in rem, so they follow the text size a visitor chose in the browser.
-Variables without `fluid` (button height, the footer's paddings) change in steps, at the modes.
+- `design/tokens.json`: each size's value at each Breakpoint mode (**320, 390, 768, 1024, 1440, 1920**), so the
+  Figma frames show exactly what the site shows at those widths (these variables carry `"scale": true`);
+- `src/styles/base/tokens.gen.css`: one formula per size. No breakpoints: nothing in the tokens jumps.
+
+**One range.** A size has two numbers: its value on a 320px screen and on a 1440px screen. In between it goes in a
+straight line; outside, it stays at the end value. In CSS:
+`clamp(least, value at 320 + (screen size − 320) × slope, most)`, with the slope = (value at 1440 − value at 320) / 1120.
+Example: `section/pad-y` is 40 → 80, so at 880px it is 40 + 560 × 0.0357 = 60px.
+
+**The screen's size is not only its width.** It is the width, or 1.6 × the height if that is smaller
+(`--vp: min(100vw, 1.6 × screen height)`). So a short laptop window (1366 × 650 → 1040) or a phone turned sideways
+(844 × 390 → 624) gets the sizes of a narrower screen — all of them together, so their ratios stay. Blocks that must
+fit a screen (the hero, the stack cards, the CTA card, the pinned logos) are also sized by the height directly.
+
+**Type is a ladder.** One base (16px) and one ratio (1.18 on a 320 screen, 1.2 on a 1440 one). Step n is
+16 × ratioⁿ. A text role is two step numbers, its step on a phone and its step on a computer:
+
+| Role | Steps | 320 → 1440 | Used by |
+|---|---|---|---|
+| `type/hero` | 5 → 8 | 36.6 → 68.8 | the hero title |
+| `type/h2` | 4 → 7 | 31.0 → 57.3 | section headings, the CTA title |
+| `type/card-title` | 3 → 6 | 26.3 → 47.8 | the card stack titles |
+| `type/card-heading` | 2 → 4 | 22.3 → 33.2 | tool, publication and royalty titles |
+| `type/lead` | 1 → 1 | 18.9 → 19.2 | under the hero and CTA titles |
+| `type/card-tag` | 0 → 1 | 16 → 19.2 | the stack labels |
+| `type/body` | 0 → 0 | 16 | running text, features, buttons, the footer |
+| `type/ui` | −1 → −1 | 13.6 → 13.3 | navbar, menu, footer notes, bylines |
+
+On a phone the levels sit one step apart, on a computer they spread. Neighbouring levels are always at least
+×1.18 apart: the ratio of two straight lines can only move from its value at one end to its value at the other, so
+checking the two ends checks every size in between. Line heights follow the size: 1 for display, 1.1 for headings,
+1.3 for text (`--lh-*`); labels are tracked 0.05em (`--tracking-label`).
+
+**Space is a ladder too.** Every spacing and radius is two numbers from
+`0 2 4 6 8 10 12 14 16 18 20 24 28 32 36 40 48 56 64 72 80 96 112 128` — `section/pad-y` 40 → 80,
+`space/gap-cards` 16 → 24, `radius/l` 32 → 56 and so on (the list is in `scale.json`, each with what it is for).
+Roles marked `size` are measures of a block (the tool card's least height), not spacing.
+
+**What is derived, not set** (written once, in `tokens.css` or the component): the navbar's height
+(`--nav-h` = its padding × 2 + the 32px controls), a card's padding = its radius (concentric corners and text),
+the tool cards' padding one ladder step above their radius (`--pad-l`, a decision), the ID card's table half a
+radius in with the other half as its radius, the stack card's radius = half its label + its padding.
+
+**What follows a block, not the screen**: sizes inside a logo or stat tile (relative to the tile, `--u`), the hero's
+chips (relative to the picture), the ID cards (a fixed-size object, scaled as a whole), the drawings.
+
+**What changes in steps**: whole layouts — the navbar's links → burger, the footer's columns, the number of columns
+of a grid — by container queries where a block decides by its own width, by `media.css` where the whole page does.
+
+**Changing a size:** edit `design/scale.json`, run `npm run tokens`. A value changed in Figma for a scale variable is
+reported by the sync and not taken: the scale decides (change it there).
+
+**Decisions** that depart from a rule on purpose (a contrast kept as designed, the tool cards' extra air…) are in
+`design/decisions.json`, with who decided when and why. `npm run audit` prints them on every run with what it measured.
 
 **Figma still has the old modes** until the next push. `npm run tokens:sync` notices the difference and the push
 script it writes renames 480 → 390 (frames that use 480 keep their mode under the new name; `renamed` in
@@ -70,7 +117,7 @@ variants (layers, text, bindings to variables) from the built page, and leaves t
 
 ## What is not synced, on purpose
 
-- Values the site computes (fluid sizes): `stat/*`, `logos/*`, `hero/table-*`, `card/height`, `ring/height` and the like
+- Values the site computes from a block: `stat/*`, `logos/*`, `hero/table-*`, `card/height`, `ring/height` and the like
   are measurements of the page at each width. They have no Web code syntax; the code does not read them.
 - Font stacks: Figma has the family names, `tokens.css` keeps them with their size-matched fallbacks.
 - Curves, timings and motion: code only (`tokens.css`, `scripts/motion.js`).
@@ -80,10 +127,10 @@ variants (layers, text, bindings to variables) from the built page, and leaves t
 | Section | Variables the CSS reads | Figma component |
 |---|---|---|
 | Colours (whole site) | the 22 colours with a Web code syntax | — |
-| Footer | `footer/contact-y`, `footer/legal-y`, `type/footer`, `type/footer-note` | Footer `22:106` |
-| Buttons (whole site) | `button/height`, `button/pad-x`, `button/pad-x-alt`, `type/button` | Button |
-| Type (whole site) | `type/hero`, `type/h2`, `type/card-title`, `type/card-tag`, `type/lead`, `type/royalty`, `type/feature`, `type/card-heading`, `type/body-m`, `type/body-s` (fluid) | — |
-| Layout (whole site) | `section/pad-x` (the gutter), `section/pad-y`, `section/gap`, `stack/pad` (the inset of full-bleed cards), `radius/s`, `radius/m`, `radius/l` (fluid) | — |
+| Footer | `footer/contact-y`, `footer/legal-y`, `type/body`, `type/ui` | Footer `22:106` |
+| Buttons (whole site) | `button/height`, `button/pad-x`, `button/pad-x-alt`, `type/body` | Button |
+| Type (whole site) | the eight roles of `design/scale.json`; `type/royalty`, `type/feature`, `type/body-m`, `type/body-s`, `type/button`, `type/footer`, `type/footer-note` are now Figma aliases of a role | — |
+| Layout (whole site) | `section/pad-x` (the gutter), `section/pad-y`, `section/gap`, `stack/pad`, `space/gap-tiles`, `space/gap-cards`, `space/text-gap`, `space/action-gap`, `space/pad-l`, `radius/s`, `radius/m`, `radius/l` | — |
 | Navbar | `nav/pad-y`, `nav/pad-left`, `nav/pad-right`, `nav/end-gap` | — |
 | Card stack | `card/text-pad`, `card/tag-pad-y`, `card/tag-pad-x`, `type/card-tag` (the card's radius is derived: half the label's height + `card/text-pad`) | — |
 

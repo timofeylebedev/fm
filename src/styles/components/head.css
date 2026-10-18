@@ -6,7 +6,7 @@
 .head { width: 100%; max-width: var(--column-max); }
 .head__title {
   max-width: 14.5em;
-  font-family: var(--font-display); font-weight: 700; font-size: var(--type-h2); line-height: 1;
+  font-family: var(--font-display); font-weight: 700; font-size: var(--type-h2); line-height: var(--lh-display);
   text-wrap: balance;
 }
 
