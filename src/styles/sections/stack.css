@@ -64,9 +64,10 @@
 }
 /* the titles are counted in their own letters: about 12.5 of them wide, so they break into three or four lines
    of a similar length at every size (text-wrap evens them out) */
-/* the size of the section headings; on screens narrower than the scale's range (under 320px) a little smaller still,
-   with the card, so the longest word («настраиваются») fits (9.25% of the card: 28px on a 304px card, at 320) */
-.card__titles { --card-title: min(var(--type-h2), 9.25cqw); width: min(100%, 12.5em); font-size: var(--card-title); }
+/* the size of the section headings, but never so big that the longest unbreakable run of a title (9.7em: «без
+   уточнений —», joined by the typograph's non-breaking spaces) is wider than the card's text: on phones under about
+   350px that is a little less than h2 (26px at 320, 24px at 300) */
+.card__titles { --card-title: min(var(--type-h2), (100cqw - 2 * var(--card-pad)) / 9.8); width: min(100%, 12.5em); font-size: var(--card-title); }
 .card__title {
   font-family: var(--font-display); font-weight: 700; font-size: 1em; line-height: var(--lh-display); color: var(--paper);
   text-wrap: balance;
@@ -166,8 +167,9 @@
        are cut out where the smallest card ends, and it is sticky at the bottom of the stage: so the card comes up from
        the bottom of the screen as the smallest card (a pill), until that reaches the bottom of the stage; from then on
        its bottom edge stays there and only its top keeps coming up, and the card grows. It covers the card before
-       below that edge too. It is only as tall as the gap under the stage and the smallest card: where the slot ends it
-       is pushed up with it, and by then the next card has come up over it. */
+       below that edge too. It is only as tall as the gap under the stage, the smallest card and 15vh (in case the
+       screen is taller for a moment than --screen, while an app's bars collapse): where the slot ends it is pushed up
+       with it, and by then the next card has come up over it. */
 .stack__collar, .stack__cap, .stack__veil { --r: var(--card-r); display: block; visibility: visible; pointer-events: none; }
 .stack__collar, .stack__veil {
   background:
@@ -187,7 +189,7 @@
 .stack__veil {
   position: sticky; top: calc(var(--screen) - var(--stack-gap) - var(--r));
   width: var(--stack-w); margin-inline: calc((100% - var(--stack-w)) / 2);
-  height: calc(var(--stack-gap) + var(--stack-ph));
+  height: calc(var(--stack-gap) + var(--stack-ph) + 15vh);         /* 15vh more: the browser's bars may make the screen taller for a moment */
   margin-top: calc(var(--stack-ph) - var(--r) - var(--stack-a));     /* after the card in the slot: back up over it */
 }
 /* the cap: under a card, sticky with it (it takes no room: its bottom margin), the page colour outside its two top

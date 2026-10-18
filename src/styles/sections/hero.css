@@ -3,9 +3,8 @@
 
    One rule for every screen, wide or narrow, tall or short:
      · the section is as tall as the screen less twice the gap above the first card (--inset: the gap, then as much
-       of the card shows), but no taller than its content can use: the picture at its biggest plus some air (about 440px on phones, up to 640px on computers), and
-       never more than 1080px. On a screen too short for the content (a phone turned sideways) it simply takes what the
-       content needs, and the page scrolls;
+       of the card shows, the top of its pill), on every screen. On a screen too short for the content (a phone turned
+       sideways) it simply takes what the content needs, and the page scrolls;
      · the picture (3531×900, the people at its top) sits at the bottom, in .hero__stage. It is as tall as the stage,
        but never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of the width
        tall) and never taller than 540px. It never gets shorter than 168px (or that 40.8%, on phones): on a short
@@ -22,7 +21,7 @@
   position: relative;
   isolation: isolate;                                 /* the shadows of the chips blend with the table, and only with what is in this section */
   display: flex; flex-direction: column;
-  min-height: min(var(--screen-s) - 2 * var(--inset), 40.8vw + var(--hero-room), 1080px);
+  min-height: calc(var(--screen-s) - 2 * var(--inset));
   overflow: hidden;
   background-color: var(--sand);
 

@@ -84,7 +84,7 @@
     {
       "id": "logo-whole-columns",
       "kind": "decision",
-      "what": "The logo strip shows whole columns (2, 3, 4, chosen by its own width). Adding a column makes the tiles smaller at once (−33% from 2 to 3, −25% from 3 to 4); the steps are the shared steps S and M, where the features above change too (tiles ≥ 112 and ≥ 168px)",
+      "what": "The logo strip shows whole columns (2, 3, 4, chosen by its own width). Adding a column makes the tiles smaller at once (−33% from 2 to 3, −25% from 3 to 4); the steps are the shared steps S and M, where the features above change too (tiles ≥ 112 and ≥ 164px)",
       "decided": "Tim, 2026-10-18 (whole columns; 3 columns down to a 390 screen, in step with the features)",
       "why": "whole columns preferred over a fluid tile with a partly shown column"
     },
@@ -113,7 +113,7 @@
     {
       "id": "layout-steps",
       "kind": "decision",
-      "what": "Blocks change their layout together, at three shared column widths: S 22rem (a 390 screen: features 1 → 2, logos 2 → 3), M 44rem (a 768 screen: logos 3 → 4; royalty, publications, tools 1 → 2), L 60rem (a 1024 screen: features 2 → 4). The ID cards' deck is the one exception (35rem)",
+      "what": "Blocks change their layout together, at three shared column widths: S 22rem (a 390 screen: features 1 → 2, logos 2 → 3), M 43rem (a 768 window, also with a classic scrollbar: logos 3 → 4; royalty, publications, tools 1 → 2), L 58rem (a 1024 window, also with a scrollbar: features 2 → 4). The ID cards' deck is the one exception (35rem)",
       "decided": "Tim, 2026-10-18",
       "why": "things on the page change at the same moments, not each at its own width"
     },

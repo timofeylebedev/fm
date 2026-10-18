@@ -29,7 +29,7 @@
     },
     "aliases": {
       "$about": "Figma variables the text styles still use, now the same as a role (the site uses only the roles)",
-      "type/card-title": "type/h2", "type/royalty": "type/card-heading", "type/feature": "type/body-s",
+      "type/card-title": "type/h2", "type/h2-center": "type/h2", "type/royalty": "type/card-heading", "type/feature": "type/body-s",
       "type/button": "type/body", "type/footer": "type/body", "type/footer-note": "type/ui"
     },
     "lineHeight": { "display": 1, "heading": 1.1, "compact": 1.2, "text": 1.3 },
@@ -72,8 +72,7 @@
       "footer/contact-y": { "px": [40, 32], "css": "--footer-contact-y", "use": "more air on phones, where the contacts stand in a column" },
       "footer/legal-y":  { "px": [24, 16], "css": "--footer-legal-y" },
       "tool/logo-h":     { "px": [20, 28], "css": "--tool-logo-h" },
-      "tool/min-h":      { "px": [400, 480], "css": "--tool-min-h", "size": true, "use": "a tool card's least height when text and picture sit side by side" },
-      "hero/room":       { "px": [440, 640], "css": "--hero-room", "size": true, "use": "the hero is never taller than the team picture plus this (its text and air)" }
+      "tool/min-h":      { "px": [400, 480], "css": "--tool-min-h", "size": true, "use": "a tool card's least height when text and picture sit side by side" }
     }
   }
 }

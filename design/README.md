@@ -83,13 +83,14 @@ phone keeps a wide enough column of text.
 **What is derived, not set** (written once, in `tokens.css` or the component): the navbar's height
 (`--nav-h` = its padding × 2 + the 32px controls), a card's padding = its radius (concentric corners and text),
 the ID card's table half a radius in with the other half as its radius, the stack card's radius = half its label +
-its padding, the hero's height = the screen less twice the gap above the first stack card.
+its padding, the hero's height = the screen less twice the gap above the first stack card (on every screen).
 
 **Layout steps.** Blocks change their layout by the width of their column (container queries), together, at three
-shared steps: **S 22rem** (a 390 screen: features 1 → 2, logos 2 → 3), **M 44rem** (a 768 screen: logos 3 → 4;
-royalty, publications and tools 1 → 2), **L 60rem** (a 1024 screen: features 2 → 4). The ID cards' deck (35rem) is
-the one exception: an object of a fixed size. Cards that arrange themselves by their own shape: the stack cards
-(vertical below 1.3 : 1, and on screens 1440px tall), the royalty cards (side by side from a 32rem card).
+shared steps: **S 22rem** (a 390 phone: features 1 → 2, logos 2 → 3), **M 43rem** (a 768 window: logos 3 → 4;
+royalty, publications and tools 1 → 2), **L 58rem** (a 1024 window: features 2 → 4). M and L leave room for a classic
+scrollbar (about 15px of the column), so a 768 or 1024 window gets its layout with one too. The ID cards' deck (35rem)
+is the one exception: an object of a fixed size. Cards that arrange themselves by their own shape: the stack cards
+(vertical below 1.3 : 1, and on screens 1440px tall), the royalty cards (side by side from 32rem inside the card).
 
 **What follows a block, not the screen**: sizes inside a logo or stat tile (relative to the tile, `--u`), the hero's
 chips (relative to the picture), the ID cards (a fixed-size object, scaled as a whole), the drawings.

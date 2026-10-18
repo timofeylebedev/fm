@@ -5,9 +5,10 @@
    --section-gap from the heading to what follows it; every size here is a role of the scale or derived from one.
    The blocks inside arrange themselves by the width they get (container queries on their column), not by the screen,
    and they change together, at three shared column widths:
-       S  22rem   (a 390 screen)    features 1 → 2 columns, logos 2 → 3
-       M  44rem   (a 768 screen)    logos 3 → 4; royalty, publications and tools 1 → 2
-       L  60rem   (a 1024 screen)   features 2 → 4
+       S  22rem   (a 390 phone)                    features 1 → 2 columns, logos 2 → 3
+       M  43rem   (a 768 window, even with a scrollbar)   logos 3 → 4; royalty, publications and tools 1 → 2
+       L  58rem   (a 1024 window, even with a scrollbar)  features 2 → 4
+   (a classic scrollbar takes about 15px of the column: M and L leave room for it; phones have none)
    The ID cards are the one exception (a deck below a 35rem column): an object of a fixed size, its row needs that room.
    The cards share one grammar: tiles (features, logos, stats) have --radius-s and --gap-tiles between them,
    half-column cards (royalty, publications) and the ID cards --radius-m and --gap-cards, full-column cards (tools, CTA)
@@ -27,16 +28,16 @@
        The drawing takes the upper 62% of its square (the Figma frame is square, its lower part is air or fades into
        the card's colour), so the title starts at 70% of the card's width and never lies over the drawing (only over the faded ends of the reports): the card is
        that and the title tall, about square on a computer, a little taller on a phone;
-     · wide (from a 32rem card: one card in a row on a small tablet or a phone turned sideways): the title on the left,
-       the drawing on the right as a square half the card's width, its empty lower part cut off (the card is at least
-       39% of its width tall).
+     · wide (from 32rem inside the card's padding, a card of about 560px: one card in a row on a column of about 560
+       to 690px, a small tablet or a small phone turned sideways): the title on the left, the drawing on the right as a
+       square half the card's width, its empty lower part cut off (the card is at least 39% of its width tall).
    The title is at most 12em wide: three short lines, never two long ones across a wide card. */
 .royalty { padding-top: calc(var(--section-y) * 1.6); container: royalty / inline-size; }
 .royalty__cards {
   display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
-@container royalty (width >= 44rem) { .royalty__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container royalty (width >= 43rem) { .royalty__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .royalty__card {
   position: relative;
   display: flex; flex-direction: column; justify-content: flex-end;
@@ -78,8 +79,9 @@
 .access {
   container: access / inline-size;
   position: relative; z-index: 1;
-  overflow: hidden; overflow: clip visible;                             /* old browsers: hidden */
+  overflow: hidden;
 }
+@supports (overflow: clip) { .access { overflow: clip visible; } }     /* older browsers (iOS 15): hidden */
 .access__stage {
   --o: clamp(-40px, (100cqw - 837px) / 2, 0px);                         /* each card's step towards the next */
   --k: min(1, tan(atan2(100cqw, 757px)));                               /* the row's scale, below a 757px column */
@@ -178,20 +180,19 @@
    alone on a row). At S every tile already has room for the longest unbreakable piece of its text («не накладывались»,
    9.3em of type/body-s with its non-breaking space) inside its padding; four in a row wait for L, so a tile's text is
    never a narrow column of six or seven lines.
-   The ring's block is as tall as the ring seen level (scripts/ring.js); while it tilts, its covers reach a little past
-   the block, into the section's gaps (overflow: visible up and down, cut at the sides). */
+   The ring's block is as tall as the ring needs while it is nearly level (scripts/ring.js); tilted further, on its way
+   in and out, its covers reach a little past the block into the section's gaps (overflow visible up and down, cut at
+   the sides). */
 .releases { container: releases / inline-size; }
-.ring {
-  position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto;
-  overflow: hidden; overflow: clip visible;                             /* old browsers: hidden */
-}
+.ring { position: relative; flex: none; width: 100%; max-width: var(--column-max); margin: 0 auto; overflow: hidden; }
+@supports (overflow: clip) { .ring { overflow: clip visible; } }       /* older browsers (iOS 15): hidden */
 /* In rem, so a visitor with bigger text gets fewer, wider cards. minmax(0, 1fr): a long word never widens its card. */
 .features {
   display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-tiles);
   width: 100%; max-width: var(--column-max);
 }
 @container releases (width >= 22rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@container releases (width >= 60rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@container releases (width >= 58rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .feature {
   display: flex; flex-direction: column; justify-content: space-between; gap: var(--feature-gap);
   padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);
@@ -204,7 +205,7 @@
 
 /* ── Clients: the strip of logos and numbers ──
    The window shows whole columns: 2, 3 or 4, chosen by the strip's own width (container queries), at the shared steps
-   S and M, where the features above change too: 3 from a 22rem window (tiles ≥ 112px), 4 from 44rem (tiles ≥ 168px). The strip has 8 columns × 2 rows and slides from left-aligned
+   S and M, where the features above change too: 3 from a 22rem window (tiles ≥ 112px), 4 from 43rem (tiles ≥ 164px). The strip has 8 columns × 2 rows and slides from left-aligned
    to right-aligned while the section is pinned (scripts/logos.js). Sizes inside a tile are in --u, the side of one
    tile (the design: 247px). The section is pinned in the middle of the screen, so it must fit the screen: on a short
    one (a laptop at 1366×768, a phone turned sideways) the tiles are as big as its height allows, and the window then
@@ -224,7 +225,7 @@
   width: max-content; margin-inline: auto;            /* centred when it fits its window whole; from the left otherwise */
 }
 @container logos (width >= 22rem) { .logos__track { --cols: 3; } }
-@container logos (width >= 44rem) { .logos__track { --cols: 4; } }
+@container logos (width >= 43rem) { .logos__track { --cols: 4; } }
 .logo-card, .stat {
   position: relative; min-width: 0; border-radius: var(--radius-s); background: var(--tint);
 }
@@ -265,8 +266,8 @@
    As wide as the column (on phones nearly the whole screen, like the card stack: --inset), and about three quarters
    of the screen's height (at most 680px): on a short screen it never needs scrolling through, on a tall one it never
    becomes a tower. Its content sets the least it can be, with generous air above and below it at every size
-   (--cta-air, 64 → 128px; under the content also the strip of words): the card keeps the look it has on a computer,
-   a short phone makes it taller rather than crowded. On phones held upright its shape comes from its width
+   (--cta-air, 64 → 128px, at most 10% of the screen's height so a phone turned sideways still sees the whole card;
+   under the content also the strip of words): it keeps the look it has on a computer. On phones held upright its shape comes from its width
    instead: 1.15 to 1.4 times as tall as wide, within that by the screen's height. */
 .cta {
   display: flex; flex-direction: column; align-items: center;
@@ -275,6 +276,7 @@
 }
 .cta__card {
   --cta-title: var(--type-h2);
+  --air: min(var(--cta-air), 10vh);                                     /* on a phone turned sideways the card still fits the screen */
   position: relative; isolation: isolate;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   width: 100%; max-width: var(--column-max);
@@ -283,7 +285,7 @@
     --w: calc(100vw - 2 * var(--inset));
     min-height: clamp(var(--w) * 1.15, 0.72 * var(--screen), var(--w) * 1.4);
   }
-  padding: var(--cta-air) var(--radius-m) calc(var(--cta-air) + 65px);
+  padding: var(--air) var(--radius-m) calc(var(--air) + 65px);
   overflow: hidden; border-radius: var(--radius-l);
   background-color: var(--purple);
 
@@ -360,7 +362,7 @@
   & picture { position: absolute; inset: 0; }
   & .tool__img { object-fit: cover; object-position: 50% 0; }
 }
-@container (width >= 44rem) {
+@container (width >= 43rem) {
   .tool { grid-template-columns: 1fr 1fr; min-height: var(--tool-min-h); }
   .tool__body { padding: var(--pad) calc(var(--pad) / 2) var(--pad) var(--pad); }
   .tool__media {
@@ -378,7 +380,7 @@
   display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
-@container pubs (width >= 44rem) { .pubs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container pubs (width >= 43rem) { .pubs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pub, .pub__cover {
   display: flex; flex-direction: column; justify-content: space-between;
   width: 100%; padding: var(--radius-m);
