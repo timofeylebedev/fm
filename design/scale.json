@@ -2,7 +2,7 @@
   "$about": [
     "The size system of the site: every fluid size comes from this file. build/tokens.mjs reads it (npm run tokens, and before every dev/build), writes each size's value at every Figma Breakpoint mode into design/tokens.json (so Figma gets the same numbers) and one CSS formula per size into src/styles/base/tokens.gen.css. Explained with charts in design/README.md.",
     "One range for everything: a size has its 'from' value on a 320px screen and its 'to' value on a 1440px screen, and goes in a straight line in between (constant outside). Not the screen's width alone: the screen's size is its width, or 1.6 times its height if that is smaller (heightRatio). So a short laptop window or a phone turned sideways gets the sizes of a narrower screen, and every size shrinks together: the ratios between them stay.",
-    "Type: a ladder of steps on one base (16px) and one ratio (1.18 on a 320 screen, 1.2 on a 1440 one). A role is two step numbers: its step at 320 and its step at 1440. On phones the levels sit one step apart; on computers they spread. Neighbouring levels are always at least ×1.18 apart, at every size in between (the ratio of two straight lines can only move from its value at one end to its value at the other).",
+    "Type: a ladder of steps on one base (16px) and one ratio (1.18 on a 320 screen, 1.2 on a 1440 one). A role is two step numbers: its step at 320 and its step at 1440. On phones the levels sit one step apart; on computers they spread. Neighbouring text levels are always at least ×1.18 apart, at every size in between (the ratio of two straight lines can only move from its value at one end to its value at the other). Labels (\"label\": true) are set apart by case and weight, not size, and are left out of that.",
     "Space: every spacing and radius is two numbers from the ladder below (its value at 320 and at 1440). Roles marked size are measures of a block, not spacing, and need not be on the ladder.",
     "Sizes are written in rem in the CSS (type) or px with the range in rem (space): with the browser's text made bigger, the whole system behaves as on a narrower screen, like the em steps of media.css."
   ],
@@ -17,7 +17,7 @@
       "type/card-title":   { "steps": [3, 6], "use": "the titles of the card stack" },
       "type/card-heading": { "steps": [2, 4], "use": "titles of cards: tools, publications, royalty; the 404 title" },
       "type/lead":         { "steps": [1, 1], "use": "the text under the hero and the CTA titles" },
-      "type/card-tag":     { "steps": [0, 1], "use": "the labels of the card stack (uppercase, 500)" },
+      "type/card-tag":     { "steps": [0, 1], "label": true, "use": "the labels of the card stack: a label, set apart by uppercase, weight and its pill, not by size; it steps from body size to lead size" },
       "type/body":         { "steps": [0, 0], "use": "running text, feature texts, buttons, the footer" },
       "type/ui":           { "steps": [-1, -1], "use": "navbar links and button, menu, skip link, footer notes, bylines" }
     },

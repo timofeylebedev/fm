@@ -60,8 +60,8 @@ fit a screen (the hero, the stack cards, the CTA card, the pinned logos) are als
 | `type/body` | 0 → 0 | 16 | running text, features, buttons, the footer |
 | `type/ui` | −1 → −1 | 13.6 → 13.3 | navbar, menu, footer notes, bylines |
 
-On a phone the levels sit one step apart, on a computer they spread. Neighbouring levels are always at least
-×1.18 apart: the ratio of two straight lines can only move from its value at one end to its value at the other, so
+On a phone the levels sit one step apart, on a computer they spread. Neighbouring text levels are always at least
+×1.18 apart (the stack label is a label, set apart by uppercase and weight, and steps from body to lead size): the ratio of two straight lines can only move from its value at one end to its value at the other, so
 checking the two ends checks every size in between. Line heights follow the size: 1 for display, 1.1 for headings,
 1.3 for text (`--lh-*`); labels are tracked 0.05em (`--tracking-label`).
 
