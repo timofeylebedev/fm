@@ -54,8 +54,8 @@ export function glider(ease, start) {
       a = here.p; v = here.v; b = [].concat(target); t0 = now; T = Math.max(0.001, seconds); E = ease;
       if (v.some((x) => Math.abs(x) > 1)) {
         E = step;
-        // short enough not to overshoot, wherever it is already heading the right way (never shorter than 0.2s)
-        a.forEach((ai, i) => { const d = b[i] - ai; if (d * v[i] > 0) T = Math.min(T, Math.max(0.2, 2.6 * Math.abs(d / v[i]))); });
+        // short enough not to overshoot, wherever it is already heading the right way (at least one frame)
+        a.forEach((ai, i) => { const d = b[i] - ai; if (d * v[i] > 0) T = Math.min(T, Math.max(1 / 60, 2.6 * Math.abs(d / v[i]))); });
       }
     },
     jump(target) { a = [].concat(target); b = a.slice(); v = a.map(() => 0); T = 0; },
