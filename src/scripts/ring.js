@@ -42,6 +42,7 @@ const CONFIG = {
 /* CONFIG:END */
 
 const PAD = 2;               // breathing room around the ring, in design px
+const LEVEL = 4;             // degrees of tilt the block's height makes room for (the rest reaches into the gaps)
 const STILL_AT = 0.25;       // the pose shown to visitors who turned on "reduce motion"
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
@@ -50,7 +51,7 @@ const radiusOf = (c, n) => {
   return n > 2 ? w / (2 * Math.tan(Math.PI / n)) : w * 0.6;
 };
 
-// How much room the ring needs on screen, across every rotation and the whole tilt range.
+// How much room the ring needs on screen, across every rotation and the given tilt range.
 // About 13 000 steps: worked out once for a set of settings, not again on every resize.
 const boundsCache = {};
 function boundsOf(c, n) {
@@ -133,10 +134,16 @@ function init(root) {
     root.style.touchAction = c.drag ? "pan-y" : "";
     const W = root.clientWidth;
     if (!W) return;
+    // The width: what the ring needs across the whole tilt. The height: what it needs while nearly level (within
+    // LEVEL° of no tilt), the pose it has around the middle of the screen. Tilted further, on its way in and out, its
+    // covers reach a little past the block (into the section's gaps: its overflow is visible up and down,
+    // sections.css), on the side that is off screen at that moment, never into the heading or the features. The block
+    // used to keep room for the whole tilt, which looked like a gap too big at the moment the ring is seen best.
     const n = c.images.length, b = boundsOf(c, n);
+    const level = boundsOf(Object.assign({}, c, { tiltStart: -Math.min(LEVEL, Math.abs(c.tiltStart)), tiltEnd: Math.min(LEVEL, Math.abs(c.tiltEnd)) }), n);
     const s = (W * c.fill) / (2 * b.halfW);            // design px → screen px
-    const cy = -b.minY * s;                            // where the ring's centre sits inside the block
-    const height = Math.ceil((b.maxY - b.minY) * s);
+    const cy = -level.minY * s;                        // where the ring's centre sits inside the block
+    const height = Math.ceil((level.maxY - level.minY) * s);
     radius = radiusOf(c, n) * s;
     root.style.height = height + "px";
     root.style.perspective = (c.perspective * s) + "px";

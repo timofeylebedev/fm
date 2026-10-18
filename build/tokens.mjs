@@ -14,11 +14,12 @@
 // A variable is used by the code when its "web" (Figma: code syntax → Web) is var(--name): then it is written into the
 // CSS as --name. Colours and numbers only; font names stay in tokens.css with their fallbacks.
 //
-// Sizes come from design/scale.json (the size system: one range, a type ladder, a space ladder). `npm run tokens` first
+// Sizes come from design/scale.json (the size system: one range, one ladder for type and space, the relations of the
+// type levels; checked here: a size off the ladder or two levels too close stop the build). `npm run tokens` first
 // writes every size of the scale into tokens.json, at each Breakpoint mode (its value on a screen of that width), so
 // Figma holds the same numbers; then it writes the CSS, where each size is one formula: its value on a 320px screen,
 // its value on a 1440px one, a straight line in between, on the screen's size (--vp: the width, or twice the height
-// minus 400px if that is smaller). Those variables carry "scale": true in tokens.json (a field of the code only): Figma
+// minus 400px if that is smaller: range.height). Those variables carry "scale": true in tokens.json (a field of the code only): Figma
 // does not change them — a different value there is reported by the sync and the scale's value is kept.
 // Type sizes (type/*) are written in rem, so they follow the size the visitor chose for text in the browser.
 
@@ -121,39 +122,77 @@ function cssValue(type, v, rem) {
 // Every role of the scale as two numbers: its value on a screen of range.from and on one of range.to (px).
 export function scaleRoles(sc = read(SCALE)) {
   const roles = [];
-  const { base, ratio } = sc.type;
   for (const [name, r] of Object.entries(sc.type.roles)) {
-    const [s0, s1] = r.steps;
-    roles.push({ name, kind: "type", steps: r.steps, from: base * ratio.from ** s0, to: base * ratio.to ** s1,
-      css: r.css || "--" + name.replace("/", "-"), use: r.use });
+    roles.push({ name, kind: "type", from: r.px[0], to: r.px[1], label: !!r.label, css: r.css || "--" + name.replace("/", "-"), use: r.use });
   }
   for (const [name, r] of Object.entries(sc.space.roles)) {
-    roles.push({ name, kind: r.size ? "size" : "space", from: r.px[0], to: r.px[1], css: r.css, use: r.use });
+    roles.push({ name, kind: r.size ? "size" : "space", from: r.px[0], to: r.px[1], per: r.per, css: r.css, use: r.use });
   }
   return roles;
 }
+// the ladder every end of a role sits on: [[2, 24], [4, 64], [8, 128]] = 0, 2 … 24, 28 … 64, 72 … 128
+export function ladderOf(sc = read(SCALE)) {
+  const out = [0];
+  for (const [step, upTo] of sc.ladder.steps) for (let v = out[out.length - 1] + step; v <= upTo; v += step) out.push(v);
+  return out;
+}
+// the screen's size, from range.height: a screen height.from px tall counts as range.from wide, height.to as range.to,
+// a straight line in between: size = height × times − minus
+export function heightLine(range) {
+  const times = (range.to - range.from) / (range.height.to - range.height.from);
+  return { times, minus: times * range.height.from - range.from };
+}
+// the width of the content column on a screen of width vp (what a role with "per" follows, for the Figma value)
+const columnAt = (vp, sc) => {
+  const gutter = scaleRoles(sc).find((r) => r.css === "--gutter");
+  return Math.min(1024, vp - 2 * scaleAt(gutter, vp, sc.range));
+};
 // a role's value on a screen of size vp (px): a straight line between the two ends, constant outside
-export const scaleAt = (role, vp, range) => {
-  const k = Math.min(1, Math.max(0, (vp - range.from) / (range.to - range.from)));
+export const scaleAt = (role, vp, range, sc) => {
+  const [a, b] = role.per ? [role.per.from, role.per.to] : [range.from, range.to];
+  const x = role.per ? columnAt(vp, sc) : vp;
+  const k = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return role.from + (role.to - role.from) * k;
 };
-// the CSS: clamp(least, value at the start + (screen size − start) × slope, most); the range in rem (see media.css)
+// the CSS: clamp(least, value at the start + (screen size − start) × change / range, most); the range in rem (see media.css).
+// A role with "per" follows the width of the block it is used in (100cqi: its container) instead of the screen.
 function scaleCss(role, range) {
   const rem = role.kind === "type";
   const v0 = role.from, v1 = role.to;
   if (Math.abs(v1 - v0) < 1e-6) return len(r4(v0), rem);
-  const slope = r4((v1 - v0) / (range.to - range.from));
+  const [a, b, x] = role.per ? [role.per.from, role.per.to, "100cqi"] : [range.from, range.to, "var(--vp)"];
   const L = (v) => len(rem ? v : r4(v), rem);
-  return `clamp(${L(Math.min(v0, v1))}, calc(${L(v0)} + (var(--vp) - ${r4(range.from / 16)}rem) * ${slope}), ${L(Math.max(v0, v1))})`;
+  // the slope as a fraction (24 / 1120), not a rounded decimal: the size reaches its end value exactly at the range's end
+  return `clamp(${L(Math.min(v0, v1))}, calc(${L(v0)} + (${x} - ${r4(a / 16)}rem) * ${r4(v1 - v0)} / ${b - a}), ${L(Math.max(v0, v1))})`;
+}
+// The rules of the scale itself, checked before anything is written: both ends of every role are on the ladder (sizes
+// of blocks, "size": true, excepted), and every pair of type.relations is at least relations.min apart at both ends.
+export function checkScale(sc = read(SCALE)) {
+  const ladder = new Set(ladderOf(sc)), errors = [], roles = new Map(scaleRoles(sc).map((r) => [r.name, r]));
+  for (const r of roles.values()) {
+    if (r.kind === "size") continue;
+    for (const v of [r.from, r.to]) if (!ladder.has(v)) errors.push(`${r.name}: ${v} is not on the ladder`);
+  }
+  const rel = sc.type.relations || { pairs: [] };
+  for (const [a, b] of rel.pairs) {
+    const A = roles.get(a), B = roles.get(b);
+    if (!A || !B) { errors.push(`type.relations: no role ${A ? b : a}`); continue; }
+    for (const end of ["from", "to"]) {
+      const k = A[end] / B[end];
+      if (k < rel.min - 1e-9) errors.push(`${a} / ${b} at ${sc.range[end]}: ×${k.toFixed(3)}, less than ×${rel.min}`);
+    }
+  }
+  if (errors.length) throw new Error("design/scale.json breaks its own rules:\n  " + errors.join("\n  "));
 }
 // writes the scale into tokens.json (Breakpoint: the value at each mode's width); returns true when it changed
 export function applyScale(doc = read(TOKENS), sc = read(SCALE)) {
+  checkScale(sc);
   const col = "Breakpoint", vars = doc.tokens[col], modes = doc.collections[col].modes;
   const before = format(doc);
   for (const role of scaleRoles(sc)) {
     const old = vars[role.name] || {};
-    const value = Object.fromEntries(modes.map((m) => [m, Math.round(scaleAt(role, Number(m), sc.range) * 100) / 100]));
-    const description = role.use ? role.use + (role.kind === "type" ? ` (scale steps ${role.steps[0]} → ${role.steps[1]})` : ` (${role.from} → ${role.to})`) : old.description;
+    const value = Object.fromEntries(modes.map((m) => [m, Math.round(scaleAt(role, Number(m), sc.range, sc) * 100) / 100]));
+    const description = role.use ? role.use + ` (${role.from} → ${role.to}${role.per ? `, by its block's width ${role.per.from} → ${role.per.to}` : ""})` : old.description;
     vars[role.name] = { type: "number", value, web: `var(${role.css})`, scale: true, ...(description && { description }) };
   }
   for (const [alias, target] of Object.entries(sc.type.aliases || {})) {
@@ -168,9 +207,9 @@ export function applyScale(doc = read(TOKENS), sc = read(SCALE)) {
 export function generate(doc = read(TOKENS), map = read(MAP), sc = read(SCALE)) {
   const rootDecls = [], layers = new Map(), skipped = [];
   const roles = new Map(scaleRoles(sc).map((r) => [r.name, r]));
-  const { times, minus } = sc.range.height;
-  rootDecls.push(`  /* the screen's size for every size below: its width, or ${times} × its height − ${minus}px if that is smaller (design/scale.json) */`);
-  rootDecls.push(`  --vp: min(100vw, var(--screen) * ${times} - ${r4(minus / 16)}rem);`);
+  const { times, minus } = heightLine(sc.range);
+  rootDecls.push(`  /* the screen's size for every size below: its width, or ${r4(times)} × its height − ${r4(minus)}px if that is smaller (design/scale.json: a ${sc.range.height.from}px tall screen counts as ${sc.range.from} wide, a ${sc.range.height.to}px one as ${sc.range.to}) */`);
+  rootDecls.push(`  --vp: min(100vw, var(--screen) * ${r4(times)} - ${r4(minus / 16)}rem);`);
   for (const [k, v] of Object.entries(sc.type.lineHeight)) rootDecls.push(`  --lh-${k}: ${v};`);
   for (const [k, v] of Object.entries(sc.type.tracking)) rootDecls.push(`  --tracking-${k}: ${v};`);
   for (const [col, vars] of Object.entries(doc.tokens)) {
@@ -204,7 +243,8 @@ export function generate(doc = read(TOKENS), map = read(MAP), sc = read(SCALE)) 
   const out = [
     "/* GENERATED by build/tokens.mjs from design/scale.json (sizes) and design/tokens.json (colours): do not edit here.",
     "   Change those files (colours also in Figma, then sync), then `npm run tokens`; the build runs it too.",
-    "   Every size: clamp(least, its value at 320 + (screen size − 320) × slope, most), the screen size being --vp. */",
+    "   Every size: clamp(least, its value at 320 + (screen size − 320) × its change / 1120, most), the screen size being --vp;",
+    "   a size that follows its own block (\"per\" in scale.json) uses 100cqi and its own range instead. */",
     "", ":root {", ...rootDecls, "}",
   ];
   for (const media of order) if (layers.has(media)) out.push("", `@media (${media}) {`, "  :root {", ...layers.get(media), "  }", "}");

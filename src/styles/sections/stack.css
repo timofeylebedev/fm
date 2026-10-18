@@ -11,7 +11,8 @@
      · a wide card (at least 1.3 times as wide as tall: laptops, computers, tablets and phones turned sideways): the text
        on the left, the drawing on the right as a square as tall as the card (at most 58% of its width), a little past
        its right edge (the drawings have air of their own around them);
-     · a tall card (phones, tablets upright, a narrow window): the text on top, the drawing in all the room below it.
+     · a tall card (phones, tablets upright, a narrow window), and any card on a screen 1440px tall or taller: the text
+       on top, the drawing in all the room below it.
    So the drawing always takes the card's room, on a tall screen as on a short one.
 
    The label and the corners: the label is as tall as its line plus its padding (--tag-h), the card's padding is the
@@ -63,7 +64,10 @@
 }
 /* the titles are counted in their own letters: about 12.5 of them wide, so they break into three or four lines
    of a similar length at every size (text-wrap evens them out) */
-.card__titles { width: min(100%, 12.5em); font-size: var(--type-card-title); }
+/* the size of the section headings, but never so big that the longest unbreakable run of a title (9.7em: «без
+   уточнений —», joined by the typograph's non-breaking spaces) is wider than the card's text: on phones under about
+   350px that is a little less than h2 (26px at 320, 24px at 300) */
+.card__titles { --card-title: min(var(--type-h2), (100cqw - 2 * var(--card-pad)) / 9.8); width: min(100%, 12.5em); font-size: var(--card-title); }
 .card__title {
   font-family: var(--font-display); font-weight: 700; font-size: 1em; line-height: var(--lh-display); color: var(--paper);
   text-wrap: balance;
@@ -74,10 +78,10 @@
        the edge (the drawings have air of their own around them). On a short screen the drawing does not shrink with the
        card below --art-min: it then reaches past the card's top and bottom edges, which cut its air, not the drawing;
      · a tall card: the room is all the space under the text; the drawing fills it (a little past it: its air), up to
-       --art-max, and stays centred in it when the room is bigger than that (a tall monitor, a tablet held upright). */
+       --art-max (1080px, about the room of a 1440px tall screen), and stays centred in it when the room is bigger. */
 .card__art {
   --art-min: 300px;
-  --art-max: 720px;
+  --art-max: 1080px;
   --s: min(58cqw, 100cqh);
   position: absolute; top: 0; bottom: 0; right: calc(var(--s) * -0.06);
   width: var(--s);
@@ -87,8 +91,10 @@
     translate: -50% -50%;
   }
 }
-/* a tall card: the text on top (the whole width), the drawing in all the room below it, as big as fits, centred */
-@container card (aspect-ratio < 1.3) {
+/* a tall card: the text on top (the whole width), the drawing in all the room below it, as big as fits, centred.
+   Also every card on a screen about 1440px tall or taller (a card 83rem tall), whatever its width: there a wide card
+   (2560 × 1440, where cards stop at 1920 wide) has room enough for the drawing under the text */
+@container card (aspect-ratio < 1.3) or (height >= 83rem) {
   .card__text { width: 100%; padding-right: var(--card-pad); }
   .card__titles { width: min(100%, 14em); }
   .card__art {
@@ -157,11 +163,13 @@
      · .stack__collar, at the top of every slot but the first: the gap above the card and the bottom corners of the
        card it comes up over (and the strip at the end, .stack__collar-end, above the section after the stack);
      · .stack__cap, sticky with the card: the page colour outside its top corners, over the card it covers;
-     · .stack__veil, in every slot, just under the card in the order of drawing: the bottom edge of the card while it
-       comes up. Its top is where the smallest card ends, and it is sticky at the bottom of the stage: so the card
-       comes up from the bottom of the screen whole, as the smallest card, until that reaches the bottom of the stage;
-       from then on its bottom edge stays there and only its top keeps coming up, and the card grows. It covers the
-       card under it below that edge. (Where the slot ends, the veil is pushed up with it, behind its own card.) */
+     · .stack__veil, in every slot, drawn over its card: the bottom edge of the card while it comes up. Its corners
+       are cut out where the smallest card ends, and it is sticky at the bottom of the stage: so the card comes up from
+       the bottom of the screen as the smallest card (a pill), until that reaches the bottom of the stage; from then on
+       its bottom edge stays there and only its top keeps coming up, and the card grows. It covers the card before
+       below that edge too. It is only as tall as the gap under the stage, the smallest card and 15vh (in case the
+       screen is taller for a moment than --screen, while an app's bars collapse): where the slot ends it is pushed up
+       with it, and by then the next card has come up over it. */
 .stack__collar, .stack__cap, .stack__veil { --r: var(--card-r); display: block; visibility: visible; pointer-events: none; }
 .stack__collar, .stack__veil {
   background:
@@ -181,9 +189,8 @@
 .stack__veil {
   position: sticky; top: calc(var(--screen) - var(--stack-gap) - var(--r));
   width: var(--stack-w); margin-inline: calc((100% - var(--stack-w)) / 2);
-  height: calc(var(--stack-a) + var(--stack-gap));
-  margin-top: calc(var(--stack-ph) - var(--r));
-  margin-bottom: calc(var(--r) - var(--stack-ph) - var(--stack-a) - var(--stack-gap));
+  height: calc(var(--stack-gap) + var(--stack-ph) + 15vh);         /* 15vh more: the browser's bars may make the screen taller for a moment */
+  margin-top: calc(var(--stack-ph) - var(--r) - var(--stack-a));     /* after the card in the slot: back up over it */
 }
 /* the cap: under a card, sticky with it (it takes no room: its bottom margin), the page colour outside its two top
    corners. It hides the card before, which is still whole under this one, in those corners. Its quarter circles are a

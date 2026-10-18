@@ -2,10 +2,9 @@
    (the chips are made and moved by scripts/hero.js).
 
    One rule for every screen, wide or narrow, tall or short:
-     · the section is as tall as the screen less 40px (so the top of the next section shows), but no taller than its
-       content can use: the picture at its biggest plus some air (about 440px on phones, up to 640px on computers), and
-       never more than 1080px. On a screen too short for the content (a phone turned sideways) it simply takes what the
-       content needs, and the page scrolls;
+     · the section is as tall as the screen less twice the gap above the first card (--inset: the gap, then as much
+       of the card shows, the top of its pill), on every screen. On a screen too short for the content (a phone turned
+       sideways) it simply takes what the content needs, and the page scrolls;
      · the picture (3531×900, the people at its top) sits at the bottom, in .hero__stage. It is as tall as the stage,
        but never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of the width
        tall) and never taller than 540px. It never gets shorter than 168px (or that 40.8%, on phones): on a short
@@ -22,7 +21,7 @@
   position: relative;
   isolation: isolate;                                 /* the shadows of the chips blend with the table, and only with what is in this section */
   display: flex; flex-direction: column;
-  min-height: min(var(--screen-s) - 40px, 40.8vw + var(--hero-room), 1080px);
+  min-height: calc(var(--screen-s) - 2 * var(--inset));
   overflow: hidden;
   background-color: var(--sand);
 
@@ -40,8 +39,8 @@
   width: 100%;
 }
 /* The title is type/hero, a step of the scale: on a short screen (a laptop window made short, a phone turned sideways)
-   it gets smaller with every other size of the page (design/scale.json: the screen's size is twice its height minus 400px
-   when that is less than its width), so it stays a step above the section headings at every width and height.
+   it gets smaller with every other size of the page (design/scale.json: a screen counts as only as big as its height
+   allows), so it stays a step above the section headings at every width and height.
    Two lines or three: the copy is a size container whose letters are the title's (font-size), so the query below
    measures its width in the title's own em. Two lines need 9.35 em (the longest, «на одной волне», with the air at
    the sides); where there is less, the title takes three lines (the longest, «Весь лейбл.», is 7.1 em).
@@ -68,10 +67,13 @@
   .hero__title .t-narrow { display: inline; }
 }
 .hero__lead-box { display: flex; justify-content: center; width: 100%; }
+/* the lead: as wide as its column allows, up to 24em (about 50 characters a line); its lines are filled (pretty: no
+   word alone on the last line) rather than made even (balance), which on a phone turned two full lines into three
+   short ones. The CTA's lead is the same text style (sections.css). */
 .hero__lead {
   max-width: 24em;
   font-size: var(--type-lead); line-height: var(--lh-text); text-align: center; color: var(--ink-60);
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 
 /* the stage of the picture: the rest of the section's height, within the limits above. It is a size container, so the

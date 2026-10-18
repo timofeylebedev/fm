@@ -61,5 +61,10 @@ button { margin: 0; padding: 0; border: 0; background: none; font: inherit; colo
 .skip:focus-visible { transform: none; }
 /* a section that a link has moved the focus to (scripts/main.js) is not outlined */
 [tabindex="-1"]:focus { outline: none; }
-/* after a reload further down the page, the page stays invisible for a moment, until it is back where the visitor was (boot.js) */
-html.restoring body { opacity: 0 !important; }
+/* after a reload further down the page, the page stays hidden for a moment, until it is back where the visitor was
+   (boot.js): under a white cover, not made transparent itself. With the page itself made transparent and back, Safari
+   (on Mac, iPhone, in Telegram) sometimes left a grey section white under its cards (the tools): a repaint it skipped. */
+html.restoring::after {
+  content: ""; position: fixed; inset: 0; z-index: 2147483647;
+  background: var(--paper); pointer-events: none;
+}
