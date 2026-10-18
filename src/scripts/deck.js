@@ -12,7 +12,7 @@
      · the first time the deck comes on screen, the top card nudges to the left and back once, to show it can be swiped.
    Where the cards stand in a row again (a wider screen, a phone turned), the deck lets go of them.
    How deep each card lies is --d on its slot (0 on top); the styles place and size it by that, with a transition. */
-import { gsap } from "./gsap.js";
+import { gsap, CustomEase } from "./gsap.js";
 import { calm } from "./motion.js";
 
 const SET = {
@@ -30,30 +30,43 @@ export function initDeck() {
   if (slots.length < 2) return;
   const order = slots.map((_, i) => i);                     // order[0]: the card on top
   let on = false, busy = Promise.resolve(), touched = false;
+  let flight = null;                                        // the card change under way (a GSAP tween), if any
 
   const width = () => slots[order[0]].offsetWidth || 270;
   const paint = () => order.forEach((slot, d) => slots[slot].style.setProperty("--d", d));
 
   // one card changes: the top one leaves (way 1) to the left (side -1) or the right (side 1); or the bottom one comes in
-  // from the left (way -1)
-  function step(way, side = -1) {
+  // from the left (way -1). speed: how fast the finger was moving when it let go (px per ms, 0 for the keyboard): the
+  // card leaves at that speed, as a thrown card does, instead of stopping under the finger and setting off again.
+  function step(way, side = -1, speed = 0) {
     busy = busy.then(() => new Promise((done) => {
       const k = 1, gone = { x: side * width() * 1.15, rotation: side * 12 };
       if (calm) {
         if (way > 0) order.push(order.shift()); else order.unshift(order.pop());
         paint(); slots.forEach((s) => gsap.set(s, { x: 0, rotation: 0 })); done(); return;
       }
+      // a tween that is killed (the visitor grabbed the deck again) ends the change as if it had played out, so the
+      // queue never waits for it forever
+      let ended = false;
+      const end = (fn) => () => { if (ended) return; ended = true; flight = null; fn(); done(); };
       if (way > 0) {
         const top = slots[order[0]];
-        gsap.to(top, Object.assign({ duration: SET.out * k, ease: "power2.in", overwrite: true, onComplete() {
-          order.push(order.shift()); paint();                // now at the bottom (its z-index drops at once): it slides back under
+        const D = Math.max(1, Math.abs(gone.x - gsap.getProperty(top, "x")));
+        let ms = SET.out * 1000 * k, ease = "power2.in";
+        if (speed > 0) {
+          if (2 * D / speed <= ms) { ms = Math.max(120, 2 * D / speed); ease = "power1.out"; }
+          else ease = CustomEase.create("deckOut", "M0,0 C0.3," + (0.3 * Math.min(2, speed * ms / D)).toFixed(4) + " 0.7,1 1,1");
+        }
+        const landed = end(() => {
+          order.push(order.shift()); paint();              // now at the bottom (its z-index drops at once): it slides back under
           gsap.to(top, { x: 0, rotation: 0, duration: SET.back * k, ease: "fm-out" });
-          done();
-        } }, gone));
+        });
+        flight = gsap.to(top, Object.assign({ duration: ms / 1000, ease, overwrite: true, onComplete: landed, onInterrupt: landed }, gone));
       } else {
-        order.unshift(order.pop()); paint();                 // the bottom card is on top now, still off to the left
+        order.unshift(order.pop()); paint();               // the bottom card is on top now, still off to the left
         const top = slots[order[0]];
-        gsap.fromTo(top, gone, { x: 0, rotation: 0, duration: SET.back * k, ease: "fm-out", overwrite: true, onComplete: done });
+        const landed = end(() => {});
+        flight = gsap.fromTo(top, gone, { x: 0, rotation: 0, duration: SET.back * k, ease: "fm-out", overwrite: true, onComplete: landed, onInterrupt: landed });
       }
     }));
     return busy;
@@ -63,6 +76,7 @@ export function initDeck() {
   let drag = null;
   stage.addEventListener("pointerdown", (e) => {
     if (!on || (e.pointerType === "mouse" && e.button !== 0)) return;
+    if (flight) flight.progress(1);                          // a card still on its way: put it where it was going, so the finger takes the new top card
     drag = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, side: null, track: [[e.timeStamp, e.clientX]], top: slots[order[0]] };
   });
   stage.addEventListener("pointermove", (e) => {
@@ -89,8 +103,8 @@ export function initDeck() {
     if (!d.side) return;
     const [t0, x0] = d.track[0], v = (e.clientX - x0) / Math.max(1, e.timeStamp - t0);   // px per ms, over the last moves
     const w = width();
-    if (d.dx < -w * SET.far || v < -SET.flick) step(1, -1);
-    else if (d.dx > w * SET.far || v > SET.flick) step(1, 1);
+    if (d.dx < -w * SET.far || v < -SET.flick) step(1, -1, Math.max(0, -v));
+    else if (d.dx > w * SET.far || v > SET.flick) step(1, 1, Math.max(0, v));
     else gsap.to(d.top, { x: 0, rotation: 0, duration: 0.5, ease: "fm-settle" });
   };
   stage.addEventListener("pointerup", release);

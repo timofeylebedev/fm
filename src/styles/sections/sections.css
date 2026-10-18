@@ -97,6 +97,7 @@
     translate: calc(var(--d, 0) * 13px) calc(var(--d, 0) * -7px);
     scale: calc(1 - var(--d, 0) * 0.045);
     transition: translate 0.45s var(--ease-out), scale 0.45s var(--ease-out);
+    @media (--calm) { transition: none; }
   }
   .access__slot--2 { --d: 1; }
   .access__slot--3 { --d: 2; }
@@ -214,6 +215,7 @@
      little slower out), rising a few px into place as it fades in */
   opacity: 0; translate: 0 6px;
   transition: opacity var(--hover-out) var(--ease-out), translate var(--hover-out) var(--ease-out);
+  @media (--calm) { translate: none; }                 /* reduce motion: it only fades */
 }
 .logo-card.is-named .logo-card__name { opacity: 1; translate: none; transition-duration: calc(var(--hover-in) * 2); }
 @media (--mouse) { .logo-card:hover .logo-card__name { opacity: 1; translate: none; transition-duration: calc(var(--hover-in) * 2); } }

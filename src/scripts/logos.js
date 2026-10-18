@@ -1,8 +1,9 @@
 /* The clients: when the section is centred on screen it is pinned, and the strip of logos slides from left-aligned to
-   right-aligned as the page scrolls (1px of scroll = 1px of movement, with a little smoothing). Measured again on every
-   resize, before everything else (it adds height to the page).
+   right-aligned as the page scrolls (1px of scroll = 1px of movement, with a little smoothing; none with "reduce
+   motion"). Measured again on every resize, before everything else (it adds height to the page).
    A tap on a logo shows its name (as hovering does with a mouse); another tap, or a tap elsewhere, hides it. */
 import { gsap } from "./gsap.js";
+import { calm } from "./motion.js";
 
 export function initLogos() {
   const frame = document.querySelector("[data-logos]");
@@ -26,7 +27,7 @@ export function initLogos() {
       start: "center center",
       end: () => "+=" + Math.abs(distance()),
       pin: true,
-      scrub: 0.6,
+      scrub: calm ? true : 0.6,             // with "reduce motion": exactly with the scroll, no glide after it
       invalidateOnRefresh: true,
       refreshPriority: 1
     }
