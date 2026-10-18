@@ -88,8 +88,8 @@
       <div class="hero__inner">
         <div class="hero__text">
           <div class="hero__copy">
-            <!-- on the narrowest phones (--narrow) the title reads «Весь лейбл. На одной волне»: the parts that differ are .t-wide / .t-narrow (hero.css); data-label is what screen readers hear (motion.js) -->
-            <h1 class="hero__title" data-reveal="chars" data-label="Весь лейбл — на одной волне"><span class="t-wide">Весь лейбл —</span><span class="t-narrow">Весь лейбл.</span><br><span class="t-wide">на одной волне</span><span class="t-narrow">На одной волне</span></h1>
+            <!-- where two lines do not fit (phones), the title takes three: «Весь лейбл. / На одной / волне». The parts that differ are .t-wide / .t-narrow (hero.css: chosen by whether two lines fit, not by a screen width); data-label is what screen readers hear (motion.js) -->
+            <h1 class="hero__title" data-reveal="chars" data-label="Весь лейбл — на одной волне"><span class="t-wide">Весь лейбл —</span><span class="t-narrow">Весь лейбл.</span><br><span class="t-wide">на одной волне</span><span class="t-narrow">На одной<br>волне</span></h1>
             <div class="hero__lead-box">
               <p class="hero__lead" data-reveal="lines">Порядок в релизах и проектах, правах и документах, роялти и платежах</p>
             </div>

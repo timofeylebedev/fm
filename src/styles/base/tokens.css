@@ -1,12 +1,12 @@
 /* Design tokens written by hand: fonts, curves, timings, shapes, and what is worked out from the shared values.
-   The colours and the sizes shared with Figma are in tokens.gen.css (generated from design/tokens.json; see
-   design/README.md): type sizes (--type-*), the gutter, the section rhythm, the radii. */
+   Every fluid size is in tokens.gen.css, generated from design/scale.json (the size system: one range, a type ladder,
+   a space ladder; see design/README.md); the colours come from design/tokens.json (the Figma variables).
+   Here: what is derived from those sizes (a relation, written once), and what does not change with the screen. */
 
 :root {
   /* colours: in tokens.gen.css, written from design/tokens.json (the Figma variables). Change them there.
      White at the strengths the site uses on colour (the ink ladder, --ink-*, is the same for black) */
   --paper-86: rgb(255 255 255 / 0.86);
-  --paper-80: rgb(255 255 255 / 0.8);
   --paper-70: rgb(255 255 255 / 0.7);
   --paper-55: rgb(255 255 255 / 0.55);
   --paper-30: rgb(255 255 255 / 0.3);
@@ -26,13 +26,16 @@
   --round: 999px;
 
   /* the layout: the content column is at most 1024 px wide, centred, and never closer to the screen edge than the
-     gutter. --column is how wide it is now (for blocks that size themselves by it). */
+     gutter (--gutter, fluid) */
   --column-max: 1024px;
-  --column: min(var(--column-max), 100vw - 2 * var(--gutter));
 
-  /* the extra air at the sides of a centred heading on narrow phones (8px up to 400px wide, none from 600px):
-     there a centred line of big letters reaches the gutter on both sides and looks pressed against the edges */
-  --center-air: clamp(0px, (600px - 100vw) / 25, 8px);
+  /* the navbar: its controls (logo, links, button, burger) are 32px tall; the bar is that and its padding (fluid), and
+     everything that stops under the navbar uses this one value */
+  --nav-control: 32px;
+  --nav-h: calc(2 * var(--nav-pad-y) + var(--nav-control));
+
+  /* the publications: two in a row once each would be at least this wide, one before */
+  --card-min: 21rem;
 
   /* the screen's height: steady on phones (scripts/boot.js), the browser's own elsewhere */
   --screen: calc(100 * var(--fm-vh, 1vh));

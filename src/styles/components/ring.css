@@ -9,7 +9,7 @@
 .ring .rc-face {
   position: absolute; inset: 0; overflow: hidden; border-radius: var(--rc-corner);
   -webkit-backface-visibility: hidden; backface-visibility: hidden;
-  background: #f0f0f0 center / cover no-repeat;
+  background: var(--mist) center / cover no-repeat;              /* until the cover has loaded */
 }
 /* the back of each cover: the same picture, faded towards the page colour */
 .ring .rc-back { transform: rotateY(180deg); }

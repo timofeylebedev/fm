@@ -8,8 +8,11 @@
 //   · text under 12px as it is drawn (scaling included), outside the drawings;
 //   · a link or button smaller than 24×24px to tap (WCAG 2.2, 2.5.8);
 //   · axe-core rules (accessibility), at a phone and a computer size;
-//   · all of the above but axe with the browser's text made bigger (24px), at a phone and a short laptop.
-// Known exceptions are listed in ACCEPTED below, each with its reason; anything else is a failure.
+//   · all of the above but axe with the browser's text made bigger (24px), at a phone and a short laptop;
+//   · text drawn over a canvas (the dots of the stats and the CTA card), which axe cannot see: its contrast is measured
+//     from the pixels behind it (the text hidden for a moment), at the axe sizes.
+// Decisions taken on purpose are in design/decisions.json, each with who, when and why: an exception listed there is
+// not a failure, but it is measured and printed under "Kept as designed" on every run, so it stays in sight.
 //
 // Browser: Playwright's Chromium (`npx playwright install chromium` once), or the one in PLAYWRIGHT_CHROMIUM.
 // Other engines: FM_ENGINE=firefox or FM_ENGINE=webkit (`npx playwright install firefox webkit`). They have no phone
@@ -17,10 +20,11 @@
 // bigger text is set in Chromium through DevTools and in Firefox through its settings; WebKit leaves those sizes out.
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve, extname, join } from "node:path";
 import { createRequire } from "node:module";
 import * as playwright from "playwright";
+import sharp from "sharp";
 
 const root = resolve(import.meta.dirname, "..");
 const dist = join(root, "dist");
@@ -33,12 +37,12 @@ const SIZES = [
   // the em steps of media.css give the layout of a narrower screen. Nothing may then scroll sideways or be cut off.
   { w: 390, h: 844, touch: true, font: 24 }, { w: 1366, h: 650, font: 24 }
 ];
-// decided on purpose, not to be reported again (the rule, what it is about, why)
-const ACCEPTED = [
-  { rule: "color-contrast", target: /footer__note|tim_lebedev|privacy_policy/, why: "grey footer notes: kept as designed (decision of Oct 17, 2026)" },
-  { rule: "color-contrast", target: /btn--teal|btn--orange/, why: "teal and orange buttons: brand colours kept (decision of Oct 17, 2026)" },
-  { rule: "color-contrast", target: /card__tag|card__title|stat__/, why: "white on the stack and stat colours: large or bold text over pictures, checked by hand" }
-];
+// decided on purpose (design/decisions.json): not failures, but measured and shown on every run
+const DECISIONS = JSON.parse(readFileSync(join(root, "design/decisions.json"), "utf8")).decisions;
+const EXCEPTIONS = DECISIONS.filter((d) => d.kind === "exception");
+const ACCEPTED = EXCEPTIONS.filter((d) => d.audit?.axe).map((d) => ({ rule: d.audit.axe, target: new RegExp(d.audit.target), id: d.id }));
+const OWNED = EXCEPTIONS.flatMap((d) => (d.audit?.pixels || []).map((sel) => ({ sel, id: d.id })));
+const kept = new Map();                               // decision id → what was measured on this run
 
 // ── a tiny static server for dist/ ──
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".webp": "image/webp",
@@ -88,6 +92,40 @@ function measure() {
   return out;
 }
 
+function note(id, line) { if (!kept.has(id)) kept.set(id, []); if (kept.get(id).length < 6) kept.get(id).push(line); }
+
+// The contrast of a text drawn over a canvas: the text is made transparent for a moment, the box behind it is taken
+// from a screenshot, and every pixel is compared with the text's colour. The median is what is reported (the dots move).
+const lum = (r, g, b) => { const f = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+async function canvasContrast(page, sel) {
+  const out = [], n = await page.locator(sel).count();
+  for (let i = 0; i < n; i++) {
+    const el = page.locator(sel).nth(i);
+    await el.evaluate((e) => e.scrollIntoView({ block: "center" })); await page.waitForTimeout(400);
+    const info = await el.evaluate((e) => {
+      const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
+      for (let a = e.parentElement; a; a = a.parentElement) {           // cut off by a window (the sliding strip of logos)?
+        const s = getComputedStyle(a); if (!/(hidden|clip)/.test(s.overflowX)) continue;
+        const q = a.getBoundingClientRect(); if (r.left < q.left - 1 || r.right > q.right + 1) return null;
+      }
+      if (r.width < 4 || r.height < 4 || r.top < 0 || r.bottom > innerHeight || r.left < 0 || r.right > innerWidth) return null;
+      const size = parseFloat(cs.fontSize), weight = parseInt(cs.fontWeight, 10), color = cs.color;   // read before hiding it
+      e.style.setProperty("color", "transparent", "important");
+      return { x: r.left, y: r.top, w: r.width, h: r.height, color, large: size >= 24 || (size >= 18.66 && weight >= 700), text: e.textContent.trim().slice(0, 24), owner: e.dataset.auditOwner || "" };
+    });
+    if (!info) continue;
+    let png;
+    try { await page.waitForTimeout(60); png = await page.screenshot({ clip: { x: info.x, y: info.y, width: info.w, height: info.h } }); }
+    finally { await el.evaluate((e) => e.style.removeProperty("color")); }
+    const { data, info: m } = await sharp(png).raw().toBuffer({ resolveWithObject: true });
+    const [tr, tg, tb] = info.color.match(/[\d.]+/g).map(Number), lt = lum(tr, tg, tb), ratios = [];
+    for (let p = 0; p < data.length; p += m.channels) { const lb = lum(data[p], data[p + 1], data[p + 2]); ratios.push((Math.max(lt, lb) + 0.05) / (Math.min(lt, lb) + 0.05)); }
+    ratios.sort((a, b) => a - b);
+    out.push({ text: info.text, median: ratios[ratios.length >> 1], need: info.large ? 3 : 4.5, owner: info.owner });
+  }
+  return out;
+}
+
 const ENGINE = process.env.FM_ENGINE || "chromium";
 if (!["chromium", "firefox", "webkit"].includes(ENGINE)) { console.error(`audit: unknown FM_ENGINE ${ENGINE}`); process.exit(2); }
 const chrome = ENGINE === "chromium";
@@ -130,11 +168,43 @@ for (const s of SIZES) {
   errors.forEach((e) => failures.push(`${tag}: script error: ${e}`));
   if (s.axe) {
     await page.evaluate(() => scrollTo(0, 0));
+    // the sand above the top of the page (body::before, base.css) is decoration outside the page; while it is there,
+    // axe cannot work out any background and checks the contrast of no text at all, so it is hidden for the check
+    await page.addStyleTag({ content: "body::before { display: none !important; }" });
     await page.addScriptTag({ content: AXE });
-    const v = await page.evaluate(async () => (await axe.run(document, { resultTypes: ["violations"] })).violations.map((x) => ({ id: x.id, nodes: x.nodes.map((n) => n.target.join(" ")) })));
+    const res = await page.evaluate(async () => { const r = await axe.run(document, { resultTypes: ["violations"] }); return { v: r.violations.map((x) => ({ id: x.id, nodes: x.nodes.map((n) => n.target.join(" ")) })), contrast: r.passes.some((x) => x.id === "color-contrast") || r.violations.some((x) => x.id === "color-contrast") }; });
+    const v = res.v;
+    if (!res.contrast) failures.push(`${tag}: axe could not check the contrast of any text (a layer it cannot see through?)`);
     for (const x of v) for (const t of x.nodes) {
-      if (!ACCEPTED.some((a) => a.rule === x.id && a.target.test(t))) failures.push(`${tag}: axe ${x.id}: ${t}`);
+      const a = ACCEPTED.find((a) => a.rule === x.id && a.target.test(t));
+      if (!a) failures.push(`${tag}: axe ${x.id}: ${t}`);
+      else note(a.id, `${tag}: axe ${x.id} on ${t.split(" ").pop()}`);
     }
+  }
+  if (s.axe) {
+    // every text drawn over a canvas (the blocks that hold one: the stats, the CTA card, …), found in the page itself
+    const n = await page.evaluate((owned) => {
+      let i = 0;
+      const blocks = new Set([...document.querySelectorAll("canvas")].map((c) => c.parentElement));
+      for (const box of blocks) {
+        const texts = [...box.querySelectorAll("h1, h2, h3, p, a")].filter((e) => e.textContent.trim() && !e.closest("[aria-hidden='true']"));
+        for (const e of texts) {
+          if (texts.some((o) => o !== e && e.contains(o))) continue;                     // the innermost text block only
+          const bg = getComputedStyle(e).backgroundColor.match(/[\d.]+/g);
+          if (bg && bg.length === 4 ? +bg[3] > 0.5 : bg && bg.length === 3) continue;     // it has a background of its own (a button)
+          e.dataset.auditPx = i++; e.dataset.auditOwner = owned.find((o) => e.matches(o.sel))?.id || "";
+        }
+      }
+      return i;
+    }, OWNED);
+    let measured = 0;
+    for (let i = 0; i < n; i++) for (const r of await canvasContrast(page, `[data-audit-px="${i}"]`)) {
+      measured++;
+      if (r.median >= r.need) continue;
+      const line = `${tag}: «${r.text}» ${r.median.toFixed(2)} : 1 over the canvas (needs ${r.need})`;
+      if (r.owner) note(r.owner, line); else failures.push(`text over a canvas: ${line}`);
+    }
+    console.log(`${tag}: text over canvases: ${measured} of ${n} measured (the others are outside the screen or the logo window)`);
   }
   console.log(`${tag}: ${overflow ? "sideways scroll" : "ok"}; ${found.clipped.size} cut, ${found.small.size} small, ${found.targets.size} targets`);
   await ctx.close();
@@ -142,5 +212,11 @@ for (const s of SIZES) {
 await browser.close();
 if (big) await big.close();
 server.close();
+console.log(`\nKept as designed (design/decisions.json): ${EXCEPTIONS.length} exception(s), not counted as problems`);
+for (const d of EXCEPTIONS) {
+  console.log(`  · ${d.id}: ${d.what}\n      ${d.rule} — ${d.decided}; why: ${d.why}${d.fix ? `; fix if reconsidered: ${d.fix}` : ""}`);
+  const seen = kept.get(d.id);
+  if (seen) seen.forEach((l) => console.log(`      this run: ${l}`)); else if (d.audit) console.log("      this run: not met at the sizes checked");
+}
 if (failures.length) { console.log(`\n${failures.length} problem(s):`); failures.forEach((f) => console.log("  " + f)); process.exitCode = 1; }
 else console.log("\nAll checks passed.");

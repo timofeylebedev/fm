@@ -35,7 +35,7 @@
   display: flex; flex-direction: column;
   width: 100%; max-width: 1920px; margin-inline: auto;
   /* one screen less the navbar and the gaps (cards.js sets the exact height while it runs: --stack-a below) */
-  height: calc(var(--screen) - var(--nav-pad-y) * 2 - 32px - 2 * var(--inset));
+  height: calc(var(--screen) - var(--nav-h) - 2 * var(--inset));
   min-height: 280px;
   overflow: hidden;
   border-radius: var(--card-r);
@@ -44,7 +44,7 @@
 }
 .card__text {
   position: relative; z-index: 1;
-  display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--card-pad) * 0.6);
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--card-text-gap);
   /* beside the drawing: the room the drawing leaves (its square, less the part past the edge) */
   width: calc(100cqw - min(58cqw, 100cqh) + min(58cqw, 100cqh) * 0.06);
   padding: var(--card-pad) 0 0 var(--card-pad);
@@ -58,14 +58,14 @@
 }
 .card__tag-label {
   display: block;
-  font-size: var(--type-card-tag); font-weight: 500; line-height: 1.2; letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: var(--type-card-tag); font-weight: 500; line-height: 1.2; letter-spacing: var(--tracking-label); text-transform: uppercase;
   color: var(--paper);
 }
 /* the titles are counted in their own letters: about 12.5 of them wide, so they break into three or four lines
    of a similar length at every size (text-wrap evens them out) */
 .card__titles { width: min(100%, 12.5em); font-size: var(--type-card-title); }
 .card__title {
-  font-family: var(--font-display); font-weight: 700; font-size: 1em; line-height: 1; color: var(--paper);
+  font-family: var(--font-display); font-weight: 700; font-size: 1em; line-height: var(--lh-display); color: var(--paper);
   text-wrap: balance;
 }
 /* The drawing. It is as big as its room allows, within limits, and centred in that room, the same way on a wide card
@@ -115,7 +115,7 @@
      · the section cuts off what reaches outside it (overflow: clip, which keeps sticky working). */
 .stack.stack-on {
   --stack-gap: var(--inset);
-  --stack-nav: calc(var(--nav-pad-y) * 2 + 32px);
+  --stack-nav: var(--nav-h);
   --stack-a: calc(var(--screen) - var(--stack-nav) - var(--stack-gap));
   --stack-ph: calc(2 * var(--card-r));
   isolation: isolate; overflow: clip; pointer-events: none;
@@ -165,10 +165,10 @@
 .stack__collar, .stack__cap, .stack__veil { --r: var(--card-r); display: block; visibility: visible; pointer-events: none; }
 .stack__collar, .stack__veil {
   background:
-    radial-gradient(circle var(--r) at 100% 0, transparent calc(var(--r) - 0.5px), var(--stack-page, #fff) calc(var(--r) + 0.5px)) 1px 0 / var(--r) var(--r) no-repeat,
-    radial-gradient(circle var(--r) at 0 0, transparent calc(var(--r) - 0.5px), var(--stack-page, #fff) calc(var(--r) + 0.5px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
-    linear-gradient(var(--stack-page, #fff), var(--stack-page, #fff)) 0 var(--r) / 100% 100% no-repeat,
-    linear-gradient(to right, var(--stack-page, #fff) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, #fff) calc(100% - 1px));
+    radial-gradient(circle var(--r) at 100% 0, transparent calc(var(--r) - 0.5px), var(--stack-page, var(--paper)) calc(var(--r) + 0.5px)) 1px 0 / var(--r) var(--r) no-repeat,
+    radial-gradient(circle var(--r) at 0 0, transparent calc(var(--r) - 0.5px), var(--stack-page, var(--paper)) calc(var(--r) + 0.5px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
+    linear-gradient(var(--stack-page, var(--paper)), var(--stack-page, var(--paper))) 0 var(--r) / 100% 100% no-repeat,
+    linear-gradient(to right, var(--stack-page, var(--paper)) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, var(--paper)) calc(100% - 1px));
 }
 .stack__collar {
   position: absolute; left: 50%; translate: -50% 0; width: var(--stack-w);
@@ -193,9 +193,9 @@
   width: var(--stack-w); margin-inline: calc((100% - var(--stack-w)) / 2);
   height: var(--r); margin-bottom: calc(-1 * var(--r));
   background:
-    radial-gradient(circle var(--r) at 100% 100%, transparent calc(var(--r) - 2px), var(--stack-page, #fff) calc(var(--r) - 1px)) 1px 0 / var(--r) var(--r) no-repeat,
-    radial-gradient(circle var(--r) at 0 100%, transparent calc(var(--r) - 2px), var(--stack-page, #fff) calc(var(--r) - 1px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
-    linear-gradient(to right, var(--stack-page, #fff) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, #fff) calc(100% - 1px));
+    radial-gradient(circle var(--r) at 100% 100%, transparent calc(var(--r) - 2px), var(--stack-page, var(--paper)) calc(var(--r) - 1px)) 1px 0 / var(--r) var(--r) no-repeat,
+    radial-gradient(circle var(--r) at 0 100%, transparent calc(var(--r) - 2px), var(--stack-page, var(--paper)) calc(var(--r) - 1px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
+    linear-gradient(to right, var(--stack-page, var(--paper)) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, var(--paper)) calc(100% - 1px));
 }
 
 /* the label: the progress (.card__tag-fill) fills it from the left while the card goes through its steps; the white

@@ -1,0 +1,70 @@
+{
+  "$about": [
+    "Design decisions that depart from a rule on purpose, so nobody 'fixes' them by accident and everyone can see them (and reconsider them). Read by build/audit.mjs: an exception with an 'audit' entry is not reported as a failure, but it is measured and printed under 'Kept as designed' on every run, with the value of that run.",
+    "kind: exception = it fails a check (contrast, …) and is kept; decision = a deliberate choice the system's general rule does not make by itself.",
+    "audit.axe: the axe rule and the elements it may fail on (a regular expression on the target). audit.pixels: which texts drawn over a canvas this exception covers. The audit finds every text over a canvas by itself (axe cannot see a canvas) and measures it from the pixels behind it; one that fails and is not covered here is a failure."
+  ],
+  "decisions": [
+    {
+      "id": "cta-light-middle", "kind": "exception",
+      "what": "CTA card: the white title, the white text and the focus ring of the white button sit on the light purple between the dots (#b596ff, STIPPLE_CTA.background in scripts/stipple.js)",
+      "rule": "WCAG 1.4.3 text contrast (3 : 1 large, 4.5 : 1 text), 1.4.11 focus indicator 3 : 1",
+      "measured": "text 2.39 : 1, focus ring 1.93 : 1 (Oct 17, 2026)",
+      "decided": "Tim, 2026-10-18 — kept for now",
+      "why": "the look of the card: purple dots on a lighter purple",
+      "fix": "swap the two colours of the dots (purple between them: white text 4.61 : 1), or a darker middle; the focus ring can be ink on this card (8.8 : 1)",
+      "audit": { "pixels": [".cta__title", ".cta__lead"] }
+    },
+    {
+      "id": "stack-and-stat-colours", "kind": "exception",
+      "what": "White text on the colours of the card stack and the stats: the orange «Документы» and green «Финансы» cards, their labels (also over the progress fill), the orange, green and blue stats",
+      "rule": "WCAG 1.4.3 text contrast: the labels are 500, not bold, so they need 4.5 : 1",
+      "measured": "labels on orange 2.95 (over the fill 2.17), on green 3.76 (2.52); stat labels 2.8 (orange) – 3.6 (green); stat numbers 2.3 (orange) – 2.8 (green) on the dots (Oct 17, 2026)",
+      "decided": "Tim, 2026-10-17 (orange) and 2026-10-18 (green, the progress fill)",
+      "why": "the brand colours of the subjects",
+      "fix": "text-safe shades for text-bearing surfaces: orange #c25700, green #008a25 (4.5 : 1)",
+      "audit": { "axe": "color-contrast", "target": "card__tag|card__title|stat__", "pixels": [".stat__number", ".stat__label"] }
+    },
+    {
+      "id": "teal-orange-buttons", "kind": "exception",
+      "what": "White text on the teal (Telegram-бот) and orange (FM Lens demo) buttons",
+      "rule": "WCAG 1.4.3 text contrast 4.5 : 1",
+      "measured": "teal 3.13 : 1, orange 2.95 : 1",
+      "decided": "Tim, 2026-10-17", "why": "the brand colours of the two tools", "fix": "teal #00819b, orange #c25700",
+      "audit": { "axe": "color-contrast", "target": "btn--teal|btn--orange" }
+    },
+    {
+      "id": "footer-notes", "kind": "exception",
+      "what": "The grey notes of the footer (ink 40% on the footer grey)",
+      "rule": "WCAG 1.4.3 text contrast 4.5 : 1",
+      "measured": "2.82 : 1",
+      "decided": "Tim, 2026-10-17", "why": "a quiet legal line", "fix": "ink 60% (5.6 : 1)",
+      "audit": { "axe": "color-contrast", "target": "footer__note|tim_lebedev|privacy_policy" }
+    },
+    {
+      "id": "tool-card-air", "kind": "decision",
+      "what": "Tool cards are padded one ladder step above their radius (--pad-l: 40 → 64px with radius/l 32 → 56px); every other card is padded by its radius",
+      "decided": "Tim, 2026-10-18", "why": "extra air: a big two-column card with a picture"
+    },
+    {
+      "id": "hero-three-lines", "kind": "decision",
+      "what": "Where two lines of the hero title do not fit (about under 430px), it takes three: «Весь лейбл. / На одной / волне». Chosen by fit (a container query in the title's em), not by a screen width",
+      "decided": "Tim, 2026-10-18", "why": "keeps the hero a scale step above the section headings on phones (37 vs 31px at 320, instead of 29 vs 28)"
+    },
+    {
+      "id": "logo-whole-columns", "kind": "decision",
+      "what": "The logo strip shows whole columns (2, 3, 4, chosen by its own width). Adding a column makes the tiles smaller at once (−33% from 2 to 3, −25% from 3 to 4); the steps are placed where the tiles stay big enough after the drop (≥ 128 and ≥ 160px)",
+      "decided": "Tim, 2026-10-18", "why": "whole columns preferred over a fluid tile with a partly shown column"
+    },
+    {
+      "id": "id-card-object", "kind": "decision",
+      "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck; only their corners follow the screen (the tile radius, the table half a radius in)",
+      "decided": "2026-10-18", "why": "their text stays readable at one size; the corners match the tiles around them"
+    },
+    {
+      "id": "body-16", "kind": "decision",
+      "what": "Running text is 16px at every screen width (type/body = 1rem; the scale's base)",
+      "decided": "Tim, 2026-10-18", "why": "readable text on phones (was 14–15px)"
+    }
+  ]
+}

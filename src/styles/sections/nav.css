@@ -2,14 +2,15 @@
    outline of the current link slides from link to link (scripts/nav-pill.js). Below 1024px (--tablet) the links give
    way to a burger and a menu of pills (scripts/menu.js). Paddings: the nav/* tokens.
    On phones turned sideways (--sideways: a short, wide screen) it slides away while the page is scrolled down and
-   comes back as soon as it is scrolled up (scripts/nav.js, "hide"): there the screen is too short to give it a strip. */
+   comes back as soon as it is scrolled up (scripts/nav.js, "hide"): there the screen is too short to give it a strip.
+   Its height is --nav-h (tokens.css): the controls (--nav-control, 32px) and the padding. */
 
 .nav {
   position: fixed; inset: 0 0 auto; z-index: 200;
   display: flex; align-items: center; justify-content: center;
   padding: var(--nav-pad-y) var(--nav-pad-right) var(--nav-pad-y) var(--nav-pad-left);
   overflow: hidden;
-  background-color: rgb(238 234 233 / 0.7);
+  background-color: var(--glass-nav);
   -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
   transition: translate 0.35s var(--ease-out);
   @media (--sideways) { --nav-hides: 1; }             /* read by scripts/nav.js: the navbar slides away on the way down */
@@ -21,16 +22,16 @@ html.nav-away .nav { translate: 0 calc(-100% - 1px); transition-timing-function:
   align-items: center; justify-content: flex-end; gap: var(--nav-end-gap);
 }
 .nav__logo { display: inline-flex; align-items: center; color: var(--ink); }
-.nav__logo svg { width: 147.2px; height: 32px; }
+.nav__logo svg { width: calc(var(--nav-control) * 4.6); height: var(--nav-control); }
 
 .nav__links {
   position: relative; isolation: isolate;
   display: flex; align-items: center; gap: 4px;
 }
 .nav__link {
-  display: inline-flex; align-items: center; height: 32px; padding: 0 16px;
+  display: inline-flex; align-items: center; height: var(--nav-control); padding: 0 16px;
   border: 1px solid transparent; border-radius: var(--round);
-  font-size: 14px; white-space: nowrap; color: var(--ink-60);
+  font-size: var(--type-ui); white-space: nowrap; color: var(--ink-60);
   transition: color var(--hover-out) var(--ease-out);
 
   /* the current link is marked by its outline only (the pill below): its text keeps the colour of the others */
@@ -39,17 +40,17 @@ html.nav-away .nav { translate: 0 calc(-100% - 1px); transition-timing-function:
 /* the outline of the current link (moved by scripts/nav-pill.js; until then the current link draws its own) */
 .nav__pill {
   position: absolute; left: 0; top: 0; z-index: -1;
-  border: 1px solid var(--ink-30); border-radius: var(--round);
+  border: 1px solid var(--ink-50); border-radius: var(--round);             /* 3.9 : 1 on the navbar: a state must be seen */
   pointer-events: none; opacity: 0;
 }
-html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-30); }
+html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
 @media (--mouse) { .nav__link:hover { color: var(--ink); transition-duration: var(--hover-in); } }
 
 .nav__cta { @media (--phone) { display: none; } }
 
 .nav__burger {
   display: none; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  width: 32px; height: 32px; border-radius: 8px;
+  width: var(--nav-control); height: var(--nav-control); border-radius: 8px;
   position: relative;
   /* 44 px to tap, though it looks 32 */
   &::after { content: ""; position: absolute; inset: -6px; }
@@ -62,18 +63,18 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-30); }
 .menu {
   position: fixed; top: 0; right: 0; z-index: 199;
   display: none; flex-direction: column; align-items: flex-end; gap: 8px;
-  padding: 68px 76px 0 0;
+  padding: calc(var(--nav-h) + 12px) 76px 0 0;
 
   &.is-open { display: flex; }
-  @media (--phone) { padding: 64px var(--nav-pad-right) 0 0; }
+  @media (--phone) { padding: calc(var(--nav-h) + 12px) var(--nav-pad-right) 0 0; }
   @media not (--tablet) { display: none !important; }
 }
 .menu__item {
   display: flex; align-items: center; justify-content: center;
   height: 36px; padding: 0 18px;
   border-radius: var(--round);
-  font-size: 14px; color: var(--ink-60); white-space: nowrap;
-  background: var(--paper); box-shadow: 0 4px 16px rgb(0 0 0 / 0.1);
+  font-size: var(--type-ui); color: var(--ink-60); white-space: nowrap;
+  background: var(--paper); box-shadow: 0 4px 16px var(--ink-10);
 }
 .menu__item--demo {
   background: var(--purple); color: var(--paper);

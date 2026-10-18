@@ -5,7 +5,7 @@
 html {
   /* what the browser scrolls to by itself (the focus, a #link in the address) stops right under the navbar, not behind it;
      the links of the page have their own scroll (scripts/scroll.js) with the same rule */
-  scroll-padding-top: calc(var(--nav-pad-y) * 2 + 32px);
+  scroll-padding-top: var(--nav-h);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
@@ -24,7 +24,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh; min-height: 100svh;              /* svh: never taller than what a phone shows with its bars out */
-  font-family: var(--font);
+  font-family: var(--font); font-size: var(--type-body);
   color: var(--ink);
   background: var(--paper);
   overflow-wrap: break-word;
@@ -55,7 +55,7 @@ button { margin: 0; padding: 0; border: 0; background: none; font: inherit; colo
 .skip {
   position: fixed; left: 12px; top: 12px; z-index: 300;
   padding: 8px 16px; border-radius: var(--round);
-  background: var(--ink); color: var(--paper); font-size: 14px;
+  background: var(--ink); color: var(--paper); font-size: var(--type-ui);
   transform: translateY(-200%);
 }
 .skip:focus-visible { transform: none; }
