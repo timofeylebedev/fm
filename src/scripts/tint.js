@@ -9,6 +9,7 @@
      · where sections overlap, the lower one on the page is drawn over the upper one, as the browser draws them;
      · the colours are read once, again when the screen changes size and when the page has loaded
        (refresh() of what followTint returns reads them again; fmNavTint.refresh() in the console for the navbar).
+   onColour(rgb), if given, hears every new colour as [r, g, b] (solid): for something else that should take it too.
    Returns { refresh, stop }: stop() lets the element go (its listeners are removed, its colour stays as it was). */
 import { ScrollTrigger } from "./gsap.js";
 
@@ -24,7 +25,7 @@ const parse = (s) => {
 const seen = (c) => (c && c[3] > 0.001 ? c : null);
 const over = (c, under) => (c[3] >= 0.999 ? c : [0, 1, 2].map((i) => c[i] * c[3] + under[i] * (1 - c[3])).concat(1));
 
-export function followTint(el, fallbackAlpha = 0.7) {
+export function followTint(el, fallbackAlpha = 0.7, onColour = null) {
   const alpha = (parse(getComputedStyle(el).backgroundColor) || [0, 0, 0, fallbackAlpha])[3];
 
   let page = [255, 255, 255, 1], sections = [], queued = 0, tint = "";
@@ -53,8 +54,9 @@ export function followTint(el, fallbackAlpha = 0.7) {
       boxes.forEach((b) => { if (b.top <= y && b.bottom > y) c = over(b.c, c); });
       for (let j = 0; j < 3; j++) sum[j] += c[j] * h;
     }
-    const v = "rgba(" + sum.map((s) => Math.round(s / (bottom - top))).join(", ") + ", " + alpha + ")";
-    if (tint !== v) { tint = v; el.style.backgroundColor = v; }
+    const rgb = sum.map((s) => Math.round(s / (bottom - top)));
+    const v = "rgba(" + rgb.join(", ") + ", " + alpha + ")";
+    if (tint !== v) { tint = v; el.style.backgroundColor = v; if (onColour) onColour(rgb); }
   };
   const later = () => { if (!queued) queued = requestAnimationFrame(paint); };
   const refresh = () => { read(); later(); };
