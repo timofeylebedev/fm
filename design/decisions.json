@@ -146,6 +146,13 @@
       "what": "The burger menu's pills open with the settle curve, from 20% to 117% and back to 100%, 0.8s in all, and close by playing the same backwards",
       "decided": "Tim, 2026-10-18 — kept as designed",
       "why": "the character of the menu"
+    },
+    {
+      "id": "browser-bar",
+      "kind": "decision",
+      "what": "The browser's own bar above the page is solid: the colour of the section behind the navbar (sand at the top of the page, white over white sections). Safari 26+ reads it from the hidden fixed strip .bar-tone (the navbar's glass is on .nav::before so Safari does not copy it); Chrome on Android and older Safari from <meta name=\"theme-color\">, updated by scripts/nav.js",
+      "decided": "Tim, 2026-10-19 — asked for a solid bar like YouTube and Google Docs instead of Safari's see-through one",
+      "why": "the bar and the navbar read as one piece; Safari 26 copied the navbar's backdrop-filter into its bar"
     }
   ]
 }
