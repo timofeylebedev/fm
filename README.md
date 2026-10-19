@@ -7,6 +7,9 @@ It is built with [Vite](https://vite.dev) into plain files in `dist/`, which any
 
 ## Working on it
 
+The rules Claude (Claude Code or the claude.ai project) follows when it works on the site are in [`CLAUDE.md`](CLAUDE.md).
+
+
 ```sh
 npm install          # once (Node 22 or newer)
 npm run dev          # the site at http://localhost:5173, reloads on every change
