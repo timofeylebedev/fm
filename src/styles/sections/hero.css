@@ -7,7 +7,7 @@
      · the picture: never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of
        the width tall) and never taller than 540px. At least --hero-pic-min (168px on a 320 phone … 300px on a 1440
        screen, by the width alone, so a short laptop keeps a big team; on phones the 40.8% is less, and that is all it
-       gets), and not more than half the screen's height (a phone turned sideways);
+       gets), and not more than half the screen's height (a phone turned sideways), unless that is under 168px;
      · the air above the text at least --hero-air-top, below it at least --hero-air-bottom (generous on every screen);
      · the section is the screen less twice the gap above the first card (--inset: the gap, then the top of the first
        card's pill shows), but never taller than its parts at their greatest (--hero-cap: the airs at --hero-air-max,
@@ -90,7 +90,7 @@
    picture and the chips size themselves by it (cqh, cqw). Its layout containment also makes it a stacking context of
    its own: the chips' shadows multiply into the table and nothing else. */
 .hero__stage {
-  --pic-min: min(var(--pic-max), var(--hero-pic-min), 50 * var(--fm-svh, 1svh));
+  --pic-min: min(var(--pic-max), var(--hero-pic-min), max(168px, 50 * var(--fm-svh, 1svh)));   /* 168: the least it had before, on the smallest phones sideways */
   order: 2;
   flex: 4 1 var(--pic-min);
   min-height: var(--pic-min);

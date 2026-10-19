@@ -1,0 +1,1848 @@
+{
+ "meta": {
+  "key": "fm-round4",
+  "title_tag": "FM Round 4 Review",
+  "name": "Flow Medium <span>· round 4</span>",
+  "eyebrow": "Round 4 · branch stack-hero-nav · Oct 19, 2026",
+  "title": "Navbar, hero and card stack: your 13 comments",
+  "lede": "The navbar on sideways phones follows the scroll and stays while the hero shows; the hero has least and greatest sizes for its parts; the card stack lost its coloured hairlines, its drawings follow the open part of the card, titles come from a blur and a finished card's pill stays pinned for a moment. Measured in Chromium against the build of main (PR #8), at 22 screen sizes and in sweeps of width and height.",
+  "footer": "Measured Oct 19, 2026 in headless Chromium (software WebGL), on main at 4fcedce (before) and branch stack-hero-nav (after). Real-device checks on an iPhone are still to do: see Next."
+ },
+ "sections": [
+  {
+   "id": "changes",
+   "nav": "Changes",
+   "title": "What changed",
+   "sub": "Your comments, in your order, with what was done. Pictures: the same moment in the old and the new build.",
+   "blocks": [
+    {
+     "type": "stats",
+     "items": [
+      {
+       "n": "13",
+       "unit": "comments",
+       "text": "12 done, 1 not reproduced (cards 6)"
+      },
+      {
+       "n": "0",
+       "unit": "hairlines",
+       "text": "frames with a card-colour line in the strips, of 90 (were 28) at 375×667 ×3"
+      },
+      {
+       "n": "291",
+       "unit": "px",
+       "text": "the team on a 1366×650 laptop (was 249); 281 at 1280×620 (was 235)"
+      }
+     ]
+    },
+    {
+     "type": "shots",
+     "label": "What it looks like",
+     "note": "Click a picture to open it full size.",
+     "items": [
+      {
+       "title": "Navbar stays with the hero",
+       "text": "844×390, sideways, scrolled 300px down: before it was gone, now it stays until the hero's bottom edge reaches it.",
+       "src": "shots/nav-hero.jpg"
+      },
+      {
+       "title": "Hairline between cards",
+       "text": "375×667 at ×3, the strip between two cards, zoomed 4×: the card's blue showed along the strip's tile seams.",
+       "src": "shots/seam.jpg"
+      },
+      {
+       "title": "Drawing centred in its room",
+       "text": "1366×650, first card open: the drawing is centred between the text and the right edge, no longer pushed to the right.",
+       "src": "shots/art-centre-1366.jpg"
+      },
+      {
+       "title": "Drawing follows the open card",
+       "text": "1440×900, the first card closing: before the drawing was cut by the edge; now it shrinks with the open part and the title has already gone.",
+       "src": "shots/art-follow-1440.jpg"
+      },
+      {
+       "title": "Drawing follows the open card (phone)",
+       "text": "390×844, mid hand-off: the next card's drawing is small and grows as the card opens.",
+       "src": "shots/art-follow-390.jpg"
+      },
+      {
+       "title": "Titles from blur",
+       "text": "1440×900, 0.23s into a title change: the lines come out of a blur (0.22em) instead of rising 70% of a line.",
+       "src": "shots/title-blur-1440.jpg"
+      },
+      {
+       "title": "The pinned pill",
+       "text": "390×844, just after the first card became a pill: before it was already scrolling away under the navbar; now it stays pinned (with a light shadow) while the next card comes up under it.",
+       "src": "shots/pin-390.jpg"
+      },
+      {
+       "title": "Hero, 390×844",
+       "text": "A tall phone: the hero no longer stretches to the whole screen (826 → 574); the first card shows under it.",
+       "src": "shots/hero-390.jpg"
+      },
+      {
+       "title": "Hero, 844×390",
+       "text": "A phone sideways: more air round the text (18/17 → 34/42), the team bigger (168 → 195); the hero is longer than the screen.",
+       "src": "shots/hero-844.jpg"
+      },
+      {
+       "title": "Hero, 1280×620",
+       "text": "A short laptop window: the team 281 tall (was 235); the hero runs 35px past the fold.",
+       "src": "shots/hero-1280x620.jpg"
+      },
+      {
+       "title": "Hero, 1440×900",
+       "text": "Almost unchanged: air 76/90 → 81/89, the team 374 → 371.",
+       "src": "shots/hero-1440.jpg"
+      },
+      {
+       "title": "Hero, 768×1024",
+       "text": "A tablet upright: 995 → 785, no more 265px gap between the button and the heads.",
+       "src": "shots/hero-768.jpg"
+      },
+      {
+       "title": "Hero, 2560×1440",
+       "text": "A big screen: the hero stops at 1112 (was 1392); air 124/132 instead of 200/336.",
+       "src": "shots/hero-2560.jpg"
+      }
+     ]
+    },
+    {
+     "type": "changes",
+     "title": "Your comments",
+     "groups": [
+      {
+       "section": "Navbar",
+       "items": [
+        {
+         "ask": "1. On mobile landscape it should not disappear when the hero is visible.",
+         "done": "It stays while any of the hero is under it: it starts to move only when the hero's bottom edge reaches it, and then goes up with that edge (<code>nav.js</code>, <code>initHide</code>).",
+         "tag": "done"
+        },
+        {
+         "ask": "2. It should appear and disappear more smoothly.",
+         "done": "It now follows the scroll px for px, like Safari's own bars, and when the scrolling stops it settles with a glide that keeps its speed (0.42s, the site's arrive curve): back if it was last moving back, away if it was moving away. With reduce motion it fades as before.",
+         "tag": "done"
+        },
+        {
+         "ask": "3. Scrolling up in mobile Safari it appears with a jump: down in place, then up, then down again.",
+         "done": "Most likely cause: when Safari's bars come back on the way up, the page's height and scroll position change by themselves for a moment, and 2px of that counted as scrolling down, which hid the navbar again. Now nothing the browser does by itself moves it: for 0.4s after the visible screen changes size it does not follow the scroll, nor while the page is pulled past its ends; and since it follows the finger, a small slip would move it only by that much. I could not run Safari here: please check on your iPhone.",
+         "tag": "check"
+        }
+       ]
+      },
+      {
+       "section": "Hero",
+       "items": [
+        {
+         "ask": "1. Min and max values, so it won't stretch or shrink too much; analyse how it should look on different screens.",
+         "done": "Each part has a least and a greatest size: the team at least 168 → 300px (by the width alone), at most 40.8% of the width or 540; the air above the text at least 32 → 64, below 40 → 72, at most 64 → 128 each. The section is the screen less the gap, but never taller than its parts at their greatest (so 390×844 is 574 instead of 826, 2560×1440 is 1112 instead of 1392) and never shorter than its parts at their least (it then runs past the fold). New roles in <code>design/scale.json</code>; the table and the chart below have every size.",
+         "tag": "done"
+        },
+        {
+         "ask": "2. The space above and below the info block should be generous.",
+         "done": "At least 32/40px on the smallest screens and 64/72 on large ones (was 16/16 → 48/32); the room left over is shared 4 : 1 : 1 between the team and the two airs.",
+         "tag": "done"
+        },
+        {
+         "ask": "3. Around 620px tall and lower the picture becomes too small.",
+         "done": "The team keeps its least size on short screens (291 at 1366×650, 281 at 1280×620); the hero is then a little taller than the screen, so on those laptops the first card's pill is below the fold. Say if you would rather keep the pill on the first screen: a smaller least size brings it back.",
+         "tag": "differently"
+        }
+       ]
+      },
+      {
+       "section": "Cards",
+       "items": [
+        {
+         "ask": "1. Sometimes the card's colour shows as a line around the overlapping white element.",
+         "done": "Found and measured: the white strips between cards were drawn from four background tiles, and on ×2/×3 screens the seams between the tiles let the card's colour through (28 of 90 frames at 375×667 ×3). Each strip is now one shape: a hole with the card's corners, its shadow the page colour. Also the white label of a finished card no longer lays a white copy over the label's own border edge. 0 frames now.",
+         "tag": "done"
+        },
+        {
+         "ask": "2. On horizontal layouts, centre the illo in the available space.",
+         "done": "The text column is as wide as the titles need (12.5 of their letters and the padding), and the drawing is centred in all the card right of it (at most as tall as the card).",
+         "tag": "done"
+        },
+        {
+         "ask": "3. The first illo not cut by the card: appears at about half the card, grows to the available size; the last one shrinks back and disappears.",
+         "done": "The drawing follows the open part of its card: it is as big as that part leaves room for and centred in it; it appears when half the card is open and grows to its full size, and the last one shrinks with the closing card and goes at half. Only a transform moves (no layout), with <code>will-change</code> just while it moves.",
+         "tag": "done"
+        },
+        {
+         "ask": "4. Text from blur.",
+         "done": "The titles come out of a blur (0.22em) with a short rise (18% of a line) and go into one. The blur is cleared once a title has arrived.",
+         "tag": "done"
+        },
+        {
+         "ask": "5. A card shrunk to a pill stays pinned for a bit, then scrolls away by a trigger; scrolling back it does not re-pin.",
+         "done": "On the way down a copy of the pill stays fixed under the navbar while the next card comes up under it, and leaves (slides up and fades, 0.5s) when the next card's title would reach it. Scrolled back, it leaves at once and the real card comes back with the page. Not for the last card. How long it stays is the open question: until the title reaches it is about 80–140px of scroll; staying longer would cover the next title (it would then have to wait).",
+         "tag": "check"
+        },
+        {
+         "ask": "6. Sometimes cards appear overlapping and stay under the next section (see the image).",
+         "done": "The images did not come through, and I could not reproduce it (reloads mid-stack, rotations, jumps, fast scrolling, 6 sizes). Done on the way: the sections after the stack are now drawn over it explicitly (z-index 1). Please send the screenshots and where it happened (phone, browser).",
+         "tag": "open"
+        },
+        {
+         "ask": "7. The title should disappear a bit earlier when the card is about to close.",
+         "done": "A closing card (going away, or scrolled back as it came) hides its title 12% of the card's height before the edge would reach it, and the title leaves into a blur.",
+         "tag": "done"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "list",
+     "title": "What it changes that you might not expect",
+     "items": [
+      "<b>Short laptops lose the pill.</b> Below about 690px of height (1366×650, 1280×620) the hero is taller than the screen, so the first card's pill is no longer on the first screen; the bottom of the table is cut by the fold.",
+      "<b>Tall screens show more of the first card.</b> On a tall phone, a tablet upright and big monitors the hero stops growing, and the first card shows under it with its label (390×844: 270px of it).",
+      "<b>Sideways phones scroll before the team shows whole.</b> 844×390: the hero is 508px, the team's heads are at the bottom of the first screen.",
+      "<b>The pinned pill covers the top of the next card's label</b> while that card comes up under it (the label slides under the pill).",
+      "<b>The drawings move while a card opens and closes</b> (scale and position, each frame): on a weak phone this is the most work the stack does per frame now. Watched with <code>will-change</code> only while moving."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hero",
+   "nav": "Hero",
+   "title": "The hero's sizes",
+   "sub": "Four parts in a column, each with a least and a greatest size; the section between the two sums.",
+   "blocks": [
+    {
+     "type": "table",
+     "title": "The parts",
+     "columns": [
+      {
+       "label": "Part"
+      },
+      {
+       "label": "Least"
+      },
+      {
+       "label": "Greatest"
+      },
+      {
+       "label": "Where",
+       "muted": true
+      }
+     ],
+     "stack": true,
+     "rows": [
+      [
+       "The team (picture)",
+       "<code>hero/pic-min</code> 168 → 300 by width; never more than half the screen's height",
+       "40.8% of the width (the five people fit) or 540",
+       "<code>.hero__stage</code>"
+      ],
+      [
+       "Air above the text",
+       "<code>hero/air-top</code> 32 → 64",
+       "about <code>hero/air-max</code> 64 → 128",
+       "<code>.hero::before</code>"
+      ],
+      [
+       "Air below the text",
+       "<code>hero/air-bottom</code> 40 → 72",
+       "about <code>hero/air-max</code>",
+       "<code>.hero::after</code>"
+      ],
+      [
+       "The section",
+       "the parts at their least (then it runs past the fold)",
+       "navbar + 2 × air-max + <code>hero/text</code> (224 → 260) + the team at its greatest",
+       "<code>.hero</code> min-height: min(screen − 2 × inset, cap)"
+      ]
+     ]
+    },
+    {
+     "type": "table",
+     "title": "At 22 screen sizes",
+     "sub": "px, before struck through. Air: navbar → title, button → heads.",
+     "columns": [
+      {
+       "label": "Screen"
+      },
+      {
+       "label": "Hero",
+       "num": true
+      },
+      {
+       "label": "Air above",
+       "num": true
+      },
+      {
+       "label": "Air below",
+       "num": true
+      },
+      {
+       "label": "Team",
+       "num": true
+      },
+      {
+       "label": "",
+       "muted": true
+      }
+     ],
+     "rows": [
+      [
+       "320×568",
+       "<span class=\"was\">552</span>535",
+       "<span class=\"was\">49</span>53",
+       "<span class=\"was\">82</span>61",
+       "131",
+       ""
+      ],
+      [
+       "375×667",
+       "<span class=\"was\">649</span>565",
+       "<span class=\"was\">80</span>65",
+       "<span class=\"was\">141</span>73",
+       "153",
+       ""
+      ],
+      [
+       "390×844",
+       "<span class=\"was\">826</span>574",
+       "<span class=\"was\">136</span>65",
+       "<span class=\"was\">254</span>73",
+       "159",
+       ""
+      ],
+      [
+       "430×932",
+       "<span class=\"was\">913</span>596",
+       "<span class=\"was\">172</span>85",
+       "<span class=\"was\">324</span>93",
+       "175",
+       ""
+      ],
+      [
+       "568×320",
+       "<span class=\"was\">434</span>466",
+       "<span class=\"was\">16</span>32",
+       "<span class=\"was\">16</span>40",
+       "<span class=\"was\">168</span>160",
+       "past the fold by 146"
+      ],
+      [
+       "667×375",
+       "<span class=\"was\">437</span>497",
+       "<span class=\"was\">17</span>33",
+       "<span class=\"was\">16</span>41",
+       "<span class=\"was\">168</span>188",
+       "past the fold by 122"
+      ],
+      [
+       "844×390",
+       "<span class=\"was\">441</span>508",
+       "<span class=\"was\">18</span>34",
+       "<span class=\"was\">17</span>42",
+       "<span class=\"was\">168</span>195",
+       "past the fold by 118"
+      ],
+      [
+       "932×430",
+       "<span class=\"was\">450</span>539",
+       "<span class=\"was\">20</span>36",
+       "<span class=\"was\">18</span>44",
+       "<span class=\"was\">168</span>215",
+       "past the fold by 109"
+      ],
+      [
+       "768×1024",
+       "<span class=\"was\">995</span>785",
+       "<span class=\"was\">150</span>98",
+       "<span class=\"was\">265</span>106",
+       "313",
+       ""
+      ],
+      [
+       "1024×768",
+       "732",
+       "<span class=\"was\">58</span>66",
+       "<span class=\"was\">69</span>74",
+       "<span class=\"was\">319</span>307",
+       ""
+      ],
+      [
+       "1024×1366",
+       "<span class=\"was\">1330</span>927",
+       "<span class=\"was\">224</span>108",
+       "<span class=\"was\">402</span>116",
+       "418",
+       ""
+      ],
+      [
+       "1280×620",
+       "<span class=\"was\">589</span>655",
+       "<span class=\"was\">40</span>47",
+       "<span class=\"was\">42</span>55",
+       "<span class=\"was\">235</span>281",
+       "past the fold by 35"
+      ],
+      [
+       "1280×720",
+       "683",
+       "53",
+       "<span class=\"was\">59</span>61",
+       "<span class=\"was\">284</span>283",
+       ""
+      ],
+      [
+       "1280×800",
+       "759",
+       "<span class=\"was\">63</span>67",
+       "<span class=\"was\">73</span>75",
+       "<span class=\"was\">324</span>319",
+       ""
+      ],
+      [
+       "1366×650",
+       "<span class=\"was\">617</span>673",
+       "<span class=\"was\">44</span>49",
+       "<span class=\"was\">48</span>57",
+       "<span class=\"was\">249</span>291",
+       "past the fold by 23"
+      ],
+      [
+       "1366×768",
+       "729",
+       "60",
+       "68",
+       "308",
+       ""
+      ],
+      [
+       "1440×900",
+       "853",
+       "<span class=\"was\">76</span>81",
+       "<span class=\"was\">90</span>89",
+       "<span class=\"was\">374</span>371",
+       ""
+      ],
+      [
+       "1536×864",
+       "819",
+       "<span class=\"was\">72</span>74",
+       "<span class=\"was\">84</span>82",
+       "<span class=\"was\">356</span>355",
+       ""
+      ],
+      [
+       "1920×1080",
+       "1032",
+       "<span class=\"was\">95</span>111",
+       "<span class=\"was\">126</span>119",
+       "<span class=\"was\">496</span>487",
+       ""
+      ],
+      [
+       "1920×960",
+       "912",
+       "<span class=\"was\">83</span>91",
+       "<span class=\"was\">102</span>99",
+       "<span class=\"was\">412</span>407",
+       ""
+      ],
+      [
+       "2560×1440",
+       "<span class=\"was\">1392</span>1112",
+       "<span class=\"was\">200</span>124",
+       "<span class=\"was\">336</span>132",
+       "540",
+       ""
+      ],
+      [
+       "1440×1440",
+       "<span class=\"was\">1392</span>1112",
+       "<span class=\"was\">200</span>124",
+       "<span class=\"was\">336</span>132",
+       "540",
+       ""
+      ]
+     ]
+    },
+    {
+     "type": "picture",
+     "title": "Every width and height",
+     "sub": "Widths 320–1920 at a screen 1100 tall; heights 400–1440 at 1440 wide. Dashed grey: before.",
+     "groups": {
+      "hero": {
+       "label": "Hero",
+       "keys": [
+        "heroH",
+        "airTop",
+        "airBottom",
+        "pic",
+        "title"
+       ]
+      }
+     },
+     "order": [
+      "hero"
+     ],
+     "labels": {
+      "heroH": "hero height",
+      "airTop": "air above the text",
+      "airBottom": "air below the text",
+      "pic": "team (picture)",
+      "title": "title size"
+     },
+     "sweep": {
+      "before": {
+       "width": [
+        {
+         "w": 320,
+         "heroH": 1084,
+         "airTop": 226.4,
+         "airBottom": 436.7,
+         "pic": 130.5,
+         "title": 36
+        },
+        {
+         "w": 360,
+         "heroH": 1082.8,
+         "airTop": 226.8,
+         "airBottom": 435.7,
+         "pic": 146.9,
+         "title": 37
+        },
+        {
+         "w": 400,
+         "heroH": 1081.7,
+         "airTop": 220.2,
+         "airBottom": 420.9,
+         "pic": 163.2,
+         "title": 38
+        },
+        {
+         "w": 440,
+         "heroH": 1080.6,
+         "airTop": 226.6,
+         "airBottom": 432.1,
+         "pic": 179.5,
+         "title": 39
+        },
+        {
+         "w": 480,
+         "heroH": 1079.4,
+         "airTop": 220.4,
+         "airBottom": 417.9,
+         "pic": 195.8,
+         "title": 40
+        },
+        {
+         "w": 520,
+         "heroH": 1078.3,
+         "airTop": 214.2,
+         "airBottom": 403.7,
+         "pic": 212.2,
+         "title": 41
+        },
+        {
+         "w": 560,
+         "heroH": 1077.1,
+         "airTop": 207.9,
+         "airBottom": 389.6,
+         "pic": 228.5,
+         "title": 42
+        },
+        {
+         "w": 600,
+         "heroH": 1076,
+         "airTop": 201.7,
+         "airBottom": 375.3,
+         "pic": 244.8,
+         "title": 43
+        },
+        {
+         "w": 640,
+         "heroH": 1074.8,
+         "airTop": 195.5,
+         "airBottom": 361.2,
+         "pic": 261.1,
+         "title": 44
+        },
+        {
+         "w": 680,
+         "heroH": 1073.7,
+         "airTop": 189.2,
+         "airBottom": 347.0,
+         "pic": 277.4,
+         "title": 45
+        },
+        {
+         "w": 720,
+         "heroH": 1072.6,
+         "airTop": 183.0,
+         "airBottom": 332.8,
+         "pic": 293.8,
+         "title": 46
+        },
+        {
+         "w": 760,
+         "heroH": 1071.4,
+         "airTop": 176.8,
+         "airBottom": 318.6,
+         "pic": 310.1,
+         "title": 47
+        },
+        {
+         "w": 800,
+         "heroH": 1070.3,
+         "airTop": 170.5,
+         "airBottom": 304.5,
+         "pic": 326.4,
+         "title": 48
+        },
+        {
+         "w": 840,
+         "heroH": 1069.1,
+         "airTop": 164.3,
+         "airBottom": 290.3,
+         "pic": 342.7,
+         "title": 49
+        },
+        {
+         "w": 880,
+         "heroH": 1068,
+         "airTop": 158.1,
+         "airBottom": 276.1,
+         "pic": 359.0,
+         "title": 50
+        },
+        {
+         "w": 920,
+         "heroH": 1066.8,
+         "airTop": 151.8,
+         "airBottom": 261.9,
+         "pic": 375.4,
+         "title": 51
+        },
+        {
+         "w": 960,
+         "heroH": 1065.7,
+         "airTop": 145.6,
+         "airBottom": 247.8,
+         "pic": 391.7,
+         "title": 52
+        },
+        {
+         "w": 1000,
+         "heroH": 1064.6,
+         "airTop": 139.4,
+         "airBottom": 233.6,
+         "pic": 408,
+         "title": 53
+        },
+        {
+         "w": 1040,
+         "heroH": 1063.4,
+         "airTop": 133.2,
+         "airBottom": 219.4,
+         "pic": 424.3,
+         "title": 54
+        },
+        {
+         "w": 1080,
+         "heroH": 1062.3,
+         "airTop": 126.9,
+         "airBottom": 205.3,
+         "pic": 440.6,
+         "title": 55
+        },
+        {
+         "w": 1120,
+         "heroH": 1061.1,
+         "airTop": 120.7,
+         "airBottom": 191.1,
+         "pic": 457.0,
+         "title": 56
+        },
+        {
+         "w": 1160,
+         "heroH": 1060,
+         "airTop": 114.5,
+         "airBottom": 176.9,
+         "pic": 473.3,
+         "title": 57
+        },
+        {
+         "w": 1200,
+         "heroH": 1058.8,
+         "airTop": 108.2,
+         "airBottom": 162.7,
+         "pic": 489.6,
+         "title": 58
+        },
+        {
+         "w": 1240,
+         "heroH": 1057.7,
+         "airTop": 102.0,
+         "airBottom": 148.6,
+         "pic": 505.9,
+         "title": 59
+        },
+        {
+         "w": 1280,
+         "heroH": 1056.6,
+         "airTop": 95.8,
+         "airBottom": 134.4,
+         "pic": 522.2,
+         "title": 60
+        },
+        {
+         "w": 1320,
+         "heroH": 1055.4,
+         "airTop": 95.1,
+         "airBottom": 131.4,
+         "pic": 521.8,
+         "title": 61
+        },
+        {
+         "w": 1360,
+         "heroH": 1054.3,
+         "airTop": 95.7,
+         "airBottom": 130.8,
+         "pic": 517.8,
+         "title": 62
+        },
+        {
+         "w": 1400,
+         "heroH": 1053.1,
+         "airTop": 96.2,
+         "airBottom": 130.2,
+         "pic": 513.7,
+         "title": 63
+        },
+        {
+         "w": 1440,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1480,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1520,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1560,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1600,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1640,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1680,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1720,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1760,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1800,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1840,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1880,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        },
+        {
+         "w": 1920,
+         "heroH": 1052,
+         "airTop": 96.8,
+         "airBottom": 129.6,
+         "pic": 509.6,
+         "title": 64
+        }
+       ],
+       "height": [
+        {
+         "h": 400,
+         "heroH": 442.9,
+         "airTop": 18.3,
+         "airBottom": 17.1,
+         "pic": 168,
+         "title": 38
+        },
+        {
+         "h": 440,
+         "heroH": 452.2,
+         "airTop": 20.6,
+         "airBottom": 18.3,
+         "pic": 168,
+         "title": 40
+        },
+        {
+         "h": 480,
+         "heroH": 461.5,
+         "airTop": 22.9,
+         "airBottom": 19.4,
+         "pic": 168,
+         "title": 42
+        },
+        {
+         "h": 520,
+         "heroH": 494.8,
+         "airTop": 27.6,
+         "airBottom": 25.4,
+         "pic": 184.8,
+         "title": 44
+        },
+        {
+         "h": 560,
+         "heroH": 532.6,
+         "airTop": 32.7,
+         "airBottom": 32.2,
+         "pic": 204.7,
+         "title": 46
+        },
+        {
+         "h": 600,
+         "heroH": 570.3,
+         "airTop": 37.8,
+         "airBottom": 39.0,
+         "pic": 224.6,
+         "title": 48
+        },
+        {
+         "h": 640,
+         "heroH": 608,
+         "airTop": 42.9,
+         "airBottom": 45.8,
+         "pic": 244.5,
+         "title": 50
+        },
+        {
+         "h": 680,
+         "heroH": 645.7,
+         "airTop": 48.0,
+         "airBottom": 52.7,
+         "pic": 264.3,
+         "title": 52
+        },
+        {
+         "h": 720,
+         "heroH": 683.4,
+         "airTop": 53.2,
+         "airBottom": 59.5,
+         "pic": 284.2,
+         "title": 54
+        },
+        {
+         "h": 760,
+         "heroH": 721.1,
+         "airTop": 58.3,
+         "airBottom": 66.3,
+         "pic": 304.1,
+         "title": 56
+        },
+        {
+         "h": 800,
+         "heroH": 758.8,
+         "airTop": 63.4,
+         "airBottom": 73.1,
+         "pic": 324.0,
+         "title": 58
+        },
+        {
+         "h": 840,
+         "heroH": 796.6,
+         "airTop": 68.6,
+         "airBottom": 80.0,
+         "pic": 343.9,
+         "title": 60
+        },
+        {
+         "h": 880,
+         "heroH": 834.3,
+         "airTop": 73.7,
+         "airBottom": 86.8,
+         "pic": 363.8,
+         "title": 62
+        },
+        {
+         "h": 920,
+         "heroH": 872,
+         "airTop": 78.8,
+         "airBottom": 93.6,
+         "pic": 383.6,
+         "title": 64
+        },
+        {
+         "h": 960,
+         "heroH": 912,
+         "airTop": 82.8,
+         "airBottom": 101.6,
+         "pic": 411.6,
+         "title": 64
+        },
+        {
+         "h": 1000,
+         "heroH": 952,
+         "airTop": 86.8,
+         "airBottom": 109.6,
+         "pic": 439.6,
+         "title": 64
+        },
+        {
+         "h": 1040,
+         "heroH": 992,
+         "airTop": 90.8,
+         "airBottom": 117.6,
+         "pic": 467.6,
+         "title": 64
+        },
+        {
+         "h": 1080,
+         "heroH": 1032,
+         "airTop": 94.8,
+         "airBottom": 125.6,
+         "pic": 495.6,
+         "title": 64
+        },
+        {
+         "h": 1120,
+         "heroH": 1072,
+         "airTop": 98.8,
+         "airBottom": 133.6,
+         "pic": 523.6,
+         "title": 64
+        },
+        {
+         "h": 1160,
+         "heroH": 1112,
+         "airTop": 106.7,
+         "airBottom": 149.3,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1200,
+         "heroH": 1152,
+         "airTop": 120,
+         "airBottom": 176,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1240,
+         "heroH": 1192,
+         "airTop": 133.3,
+         "airBottom": 202.7,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1280,
+         "heroH": 1232,
+         "airTop": 146.7,
+         "airBottom": 229.3,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1320,
+         "heroH": 1272,
+         "airTop": 160,
+         "airBottom": 256,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1360,
+         "heroH": 1312,
+         "airTop": 173.3,
+         "airBottom": 282.7,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1400,
+         "heroH": 1352,
+         "airTop": 186.7,
+         "airBottom": 309.3,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1440,
+         "heroH": 1392,
+         "airTop": 200,
+         "airBottom": 336,
+         "pic": 540,
+         "title": 64
+        }
+       ]
+      },
+      "after": {
+       "width": [
+        {
+         "w": 320,
+         "heroH": 534.5,
+         "airTop": 52.8,
+         "airBottom": 60.8,
+         "pic": 130.5,
+         "title": 36
+        },
+        {
+         "w": 360,
+         "heroH": 556.9,
+         "airTop": 64.3,
+         "airBottom": 72.2,
+         "pic": 146.9,
+         "title": 37
+        },
+        {
+         "w": 400,
+         "heroH": 579.2,
+         "airTop": 65.3,
+         "airBottom": 73.3,
+         "pic": 163.2,
+         "title": 38
+        },
+        {
+         "w": 440,
+         "heroH": 601.5,
+         "airTop": 85.8,
+         "airBottom": 93.8,
+         "pic": 179.5,
+         "title": 39
+        },
+        {
+         "w": 480,
+         "heroH": 623.8,
+         "airTop": 87.3,
+         "airBottom": 95.3,
+         "pic": 195.8,
+         "title": 40
+        },
+        {
+         "w": 520,
+         "heroH": 646.2,
+         "airTop": 88.9,
+         "airBottom": 96.9,
+         "pic": 212.2,
+         "title": 41
+        },
+        {
+         "w": 560,
+         "heroH": 668.5,
+         "airTop": 90.4,
+         "airBottom": 98.4,
+         "pic": 228.5,
+         "title": 42
+        },
+        {
+         "w": 600,
+         "heroH": 690.8,
+         "airTop": 91.9,
+         "airBottom": 99.9,
+         "pic": 244.8,
+         "title": 43
+        },
+        {
+         "w": 640,
+         "heroH": 713.1,
+         "airTop": 93.5,
+         "airBottom": 101.4,
+         "pic": 261.1,
+         "title": 44
+        },
+        {
+         "w": 680,
+         "heroH": 735.4,
+         "airTop": 95.0,
+         "airBottom": 103.0,
+         "pic": 277.4,
+         "title": 45
+        },
+        {
+         "w": 720,
+         "heroH": 757.8,
+         "airTop": 96.5,
+         "airBottom": 104.5,
+         "pic": 293.8,
+         "title": 46
+        },
+        {
+         "w": 760,
+         "heroH": 780.1,
+         "airTop": 98.0,
+         "airBottom": 106.0,
+         "pic": 310.1,
+         "title": 47
+        },
+        {
+         "w": 800,
+         "heroH": 802.4,
+         "airTop": 99.6,
+         "airBottom": 107.6,
+         "pic": 326.4,
+         "title": 48
+        },
+        {
+         "w": 840,
+         "heroH": 824.7,
+         "airTop": 101.1,
+         "airBottom": 109.1,
+         "pic": 342.7,
+         "title": 49
+        },
+        {
+         "w": 880,
+         "heroH": 847.0,
+         "airTop": 102.6,
+         "airBottom": 110.6,
+         "pic": 359.0,
+         "title": 50
+        },
+        {
+         "w": 920,
+         "heroH": 869.4,
+         "airTop": 104.2,
+         "airBottom": 112.1,
+         "pic": 375.4,
+         "title": 51
+        },
+        {
+         "w": 960,
+         "heroH": 891.7,
+         "airTop": 105.7,
+         "airBottom": 113.7,
+         "pic": 391.7,
+         "title": 52
+        },
+        {
+         "w": 1000,
+         "heroH": 914,
+         "airTop": 107.2,
+         "airBottom": 115.2,
+         "pic": 408,
+         "title": 53
+        },
+        {
+         "w": 1040,
+         "heroH": 936.3,
+         "airTop": 108.7,
+         "airBottom": 116.7,
+         "pic": 424.3,
+         "title": 54
+        },
+        {
+         "w": 1080,
+         "heroH": 958.6,
+         "airTop": 110.3,
+         "airBottom": 118.3,
+         "pic": 440.6,
+         "title": 55
+        },
+        {
+         "w": 1120,
+         "heroH": 981.0,
+         "airTop": 111.8,
+         "airBottom": 119.8,
+         "pic": 457.0,
+         "title": 56
+        },
+        {
+         "w": 1160,
+         "heroH": 1003.3,
+         "airTop": 113.3,
+         "airBottom": 121.3,
+         "pic": 473.3,
+         "title": 57
+        },
+        {
+         "w": 1200,
+         "heroH": 1025.6,
+         "airTop": 114.9,
+         "airBottom": 122.8,
+         "pic": 489.6,
+         "title": 58
+        },
+        {
+         "w": 1240,
+         "heroH": 1047.9,
+         "airTop": 116.4,
+         "airBottom": 124.4,
+         "pic": 505.9,
+         "title": 59
+        },
+        {
+         "w": 1280,
+         "heroH": 1056.6,
+         "airTop": 116.8,
+         "airBottom": 124.8,
+         "pic": 510.8,
+         "title": 60
+        },
+        {
+         "w": 1320,
+         "heroH": 1055.4,
+         "airTop": 116.1,
+         "airBottom": 124.1,
+         "pic": 508.1,
+         "title": 61
+        },
+        {
+         "w": 1360,
+         "heroH": 1054.3,
+         "airTop": 115.4,
+         "airBottom": 123.4,
+         "pic": 505.4,
+         "title": 62
+        },
+        {
+         "w": 1400,
+         "heroH": 1053.1,
+         "airTop": 114.7,
+         "airBottom": 122.7,
+         "pic": 502.7,
+         "title": 63
+        },
+        {
+         "w": 1440,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1480,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1520,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1560,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1600,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1640,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1680,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1720,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1760,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1800,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1840,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1880,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        },
+        {
+         "w": 1920,
+         "heroH": 1052,
+         "airTop": 114,
+         "airBottom": 122,
+         "pic": 500,
+         "title": 64
+        }
+       ],
+       "height": [
+        {
+         "h": 400,
+         "heroH": 516,
+         "airTop": 34.3,
+         "airBottom": 42.3,
+         "pic": 200,
+         "title": 38
+        },
+        {
+         "h": 440,
+         "heroH": 546.5,
+         "airTop": 36.6,
+         "airBottom": 44.6,
+         "pic": 220,
+         "title": 40
+        },
+        {
+         "h": 480,
+         "heroH": 576.9,
+         "airTop": 38.8,
+         "airBottom": 46.8,
+         "pic": 240,
+         "title": 42
+        },
+        {
+         "h": 520,
+         "heroH": 607.4,
+         "airTop": 41.2,
+         "airBottom": 49.1,
+         "pic": 260,
+         "title": 44
+        },
+        {
+         "h": 560,
+         "heroH": 637.8,
+         "airTop": 43.4,
+         "airBottom": 51.4,
+         "pic": 280,
+         "title": 46
+        },
+        {
+         "h": 600,
+         "heroH": 668.3,
+         "airTop": 45.7,
+         "airBottom": 53.7,
+         "pic": 300,
+         "title": 48
+        },
+        {
+         "h": 640,
+         "heroH": 678.8,
+         "airTop": 48,
+         "airBottom": 56,
+         "pic": 300,
+         "title": 50
+        },
+        {
+         "h": 680,
+         "heroH": 689.2,
+         "airTop": 50.3,
+         "airBottom": 58.3,
+         "pic": 300,
+         "title": 52
+        },
+        {
+         "h": 720,
+         "heroH": 699.7,
+         "airTop": 52.6,
+         "airBottom": 60.6,
+         "pic": 300,
+         "title": 54
+        },
+        {
+         "h": 760,
+         "heroH": 721.1,
+         "airTop": 56.7,
+         "airBottom": 64.7,
+         "pic": 307.4,
+         "title": 56
+        },
+        {
+         "h": 800,
+         "heroH": 758.8,
+         "airTop": 63.5,
+         "airBottom": 71.5,
+         "pic": 325.5,
+         "title": 58
+        },
+        {
+         "h": 840,
+         "heroH": 796.6,
+         "airTop": 70.4,
+         "airBottom": 78.3,
+         "pic": 343.7,
+         "title": 60
+        },
+        {
+         "h": 880,
+         "heroH": 834.3,
+         "airTop": 77.2,
+         "airBottom": 85.2,
+         "pic": 361.9,
+         "title": 62
+        },
+        {
+         "h": 920,
+         "heroH": 872,
+         "airTop": 84,
+         "airBottom": 92,
+         "pic": 380,
+         "title": 64
+        },
+        {
+         "h": 960,
+         "heroH": 912,
+         "airTop": 90.7,
+         "airBottom": 98.7,
+         "pic": 406.7,
+         "title": 64
+        },
+        {
+         "h": 1000,
+         "heroH": 952,
+         "airTop": 97.3,
+         "airBottom": 105.3,
+         "pic": 433.3,
+         "title": 64
+        },
+        {
+         "h": 1040,
+         "heroH": 992,
+         "airTop": 104,
+         "airBottom": 112,
+         "pic": 460,
+         "title": 64
+        },
+        {
+         "h": 1080,
+         "heroH": 1032,
+         "airTop": 110.7,
+         "airBottom": 118.7,
+         "pic": 486.7,
+         "title": 64
+        },
+        {
+         "h": 1120,
+         "heroH": 1072,
+         "airTop": 117.3,
+         "airBottom": 125.3,
+         "pic": 513.3,
+         "title": 64
+        },
+        {
+         "h": 1160,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1200,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1240,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1280,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1320,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1360,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1400,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        },
+        {
+         "h": 1440,
+         "heroH": 1112,
+         "airTop": 124,
+         "airBottom": 132,
+         "pic": 540,
+         "title": 64
+        }
+       ]
+      }
+     },
+     "axes": {
+      "width": {
+       "label": "screen width",
+       "x": "w",
+       "note": "screen 1100 tall"
+      },
+      "height": {
+       "label": "screen height",
+       "x": "h",
+       "note": "screen 1440 wide"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "stack",
+   "nav": "Card stack",
+   "title": "How the stack moves now",
+   "sub": "Everything that moves with the scroll is still moved by the browser (sticky, fixed); the script only decides what is shown, and now also sets one transform per card while it opens or closes.",
+   "blocks": [
+    {
+     "type": "cards",
+     "cols": 2,
+     "items": [
+      {
+       "title": "The strips",
+       "html": "Collar (the gap above a card and the bottom corners of the one it covers), cap (outside a card's top corners) and veil (the bottom edge of a card coming up) are each one hole with the card's corners, its shadow the page colour. One shape, one edge: no seams at fractional pixels. The cap's hole is 1.5px inside the card's outline, so a card's soft corner is drawn over white, never over the card before."
+      },
+      {
+       "title": "Wide card layout",
+       "html": "<code>--card-t</code> = min(the room the old square left, 2 × padding + 12.5 title letters). The drawing's room is the rest of the card; the drawing a square of min(1.08 × room width, card height), at least 300, centred."
+      },
+      {
+       "title": "The drawing follows the open part",
+       "html": "The open part is the card's top h px. Room beside the text: min(1.08 × room width, h); under it: min(1.08 × width, 1.04 × (h − text)). Scale = room(h) / room(open), moved by (h − open) / 2. Shown from half open (<code>SET.artAt</code> 0.5)."
+      },
+      {
+       "title": "Titles",
+       "html": "In: 0.8s, out of a 0.22em blur, 18% rise, lines 0.07s apart, the arrive curve. Out: 0.3s into the blur, the leave curve. A closing card hides its title <code>SET.titleLead</code> (12% of the card) early."
+      },
+      {
+       "title": "The pinned pill",
+       "html": "A fixed copy of the pill (<code>.stack__pin</code>), shown on the way down from the moment the card is a pill until the next card's first title is 0.4 pill from its edge (at most 0.3 screen after the next card is up). Leaves in 0.5s (up and out); scrolled back, in 0.22s. Re-armed only when the page has been above that moment. With reduce motion it goes at once."
+      },
+      {
+       "title": "Sections after the stack",
+       "html": "Get <code>position: relative; z-index: 1</code> from the script (were relative only), so they are drawn over the last card outright."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nav",
+   "nav": "Navbar",
+   "title": "The navbar on sideways phones",
+   "sub": "Only under <code>--sideways</code> (narrower than 1024, shorter than 500, landscape).",
+   "blocks": [
+    {
+     "type": "cards",
+     "cols": 2,
+     "items": [
+      {
+       "title": "Follows the scroll",
+       "html": "Offset = the scroll since it last turned, between 0 and its height, never more than the page is past the hero's bottom edge. Set as <code>translate</code> each scroll event (no transition)."
+      },
+      {
+       "title": "Settles",
+       "html": "140ms without a scroll event: if it is part way, a glide to away (if it was last moving away and the hero is far enough up) or back. 0.42s on the arrive curve, starting at the speed it had."
+      },
+      {
+       "title": "Ignores the browser",
+       "html": "For 400ms after the visible screen changes size (Safari's and the apps' bars) and while the page is pulled past its ends, the scroll does not move it."
+      },
+      {
+       "title": "Reduce motion",
+       "html": "Fades out after 24px down and back after 12px up, as before; never while the hero is under it."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "motion",
+   "nav": "Motion",
+   "title": "Curves and durations",
+   "blocks": [
+    {
+     "type": "curves",
+     "items": [
+      {
+       "name": "out",
+       "bez": [
+        0.22,
+        1,
+        0.36,
+        1
+       ],
+       "use": "titles in, navbar settle",
+       "code": "cubic-bezier(0.22, 1, 0.36, 1)"
+      },
+      {
+       "name": "leave",
+       "bez": [
+        0.55,
+        0,
+        0.75,
+        0.2
+       ],
+       "use": "titles out, pill when scrolled back",
+       "code": "cubic-bezier(0.55, 0, 0.75, 0.2)"
+      },
+      {
+       "name": "power3.out",
+       "bez": [
+        0.215,
+        0.61,
+        0.355,
+        1
+       ],
+       "use": "the pinned pill leaving",
+       "code": "power3.out"
+      },
+      {
+       "name": "linear",
+       "fn": "linear",
+       "use": "navbar following, drawings following the card"
+      }
+     ]
+    },
+    {
+     "type": "durations",
+     "title": "Durations",
+     "max": 1.2,
+     "rows": [
+      {
+       "group": "titles",
+       "name": "Title in",
+       "s": 0.8,
+       "stagger": 0.07,
+       "label": "0.8s + 0.07s per line"
+      },
+      {
+       "group": "titles",
+       "name": "Title out",
+       "s": 0.3,
+       "stagger": 0.03,
+       "label": "0.3s + 0.03s per line"
+      },
+      {
+       "group": "pill",
+       "name": "Pinned pill leaves",
+       "s": 0.5
+      },
+      {
+       "group": "pill",
+       "name": "Pinned pill, scrolled back",
+       "s": 0.22
+      },
+      {
+       "group": "navbar",
+       "name": "Navbar settles",
+       "s": 0.42
+      },
+      {
+       "group": "navbar",
+       "name": "Wait before settling",
+       "s": 0.14
+      },
+      {
+       "group": "drawings",
+       "name": "Drawing fade out / in",
+       "s": 0.5,
+       "label": "0.25s out, 0.5s in (art.css)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "checks",
+   "nav": "Checks",
+   "title": "Checks",
+   "blocks": [
+    {
+     "type": "stats",
+     "items": [
+      {
+       "n": "9",
+       "unit": "sizes",
+       "text": "npm run audit: all checks passed"
+      },
+      {
+       "n": "0 / 90",
+       "unit": "frames",
+       "text": "with a hairline in the stack (375×667 ×3; 1366×650 ×2)"
+      },
+      {
+       "n": "0",
+       "unit": "errors",
+       "text": "in the console, scrolling down and up, normal, reduced motion and ?fmcards=debug"
+      }
+     ]
+    },
+    {
+     "type": "decisions",
+     "items": [
+      {
+       "id": "hero-bounds",
+       "kind": "decision",
+       "what": "The hero has least and greatest sizes for its parts: it stops growing on tall screens and runs past the fold on screens under about 690px tall.",
+       "why": "no stretching or shrinking; generous air; a big enough team at about 620px tall",
+       "decided": "Claude, from your comments — to confirm",
+       "isNew": true
+      },
+      {
+       "id": "pinned-pill",
+       "kind": "decision",
+       "what": "A finished card's pill stays pinned on the way down until the next card's title would reach it; never on the way back. Not for the last card.",
+       "why": "in sight a little longer without covering the next title",
+       "decided": "Claude, from your comment — to confirm how long",
+       "isNew": true
+      }
+     ]
+    },
+    {
+     "type": "pre",
+     "summary": "Audit: kept as designed (unchanged)",
+     "text": "cta-light-middle, stack-and-stat-colours, teal-orange-buttons, footer-notes, endless-motion: the same five exceptions as before, measured again; all checks passed at 320×568, 390×844, 768×1024, 844×390, 1024×768, 1366×650, 1920×1080, and 390×844 / 1366×650 with the browser's text at 24px."
+    }
+   ]
+  },
+  {
+   "id": "next",
+   "nav": "Next",
+   "title": "Next",
+   "blocks": [
+    {
+     "type": "list",
+     "items": [
+      "<b>On your iPhone, sideways, in Safari:</b> scroll up and down past the hero and in the stack: does the navbar still jump? Does it feel smooth?",
+      "<b>Send the screenshots for cards 6</b> (overlapping cards, a card under the next section), with the phone and browser.",
+      "<b>How long should the pill stay?</b> Now: until the next title reaches it (80–140px of scroll). Longer means that title waits until the pill has gone.",
+      "<b>Short laptops:</b> is the hero past the fold on 1366×650 right, or should the first card's pill come back on the first screen (a smaller team)?",
+      "The last card has no pinned pill (it would cover the next section's heading): say if you want it there too."
+     ]
+    }
+   ]
+  }
+ ]
+}

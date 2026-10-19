@@ -224,6 +224,7 @@
   box-sizing: border-box;
   background-color: var(--card-bg);
   visibility: hidden; pointer-events: none;
+  box-shadow: 0 4px 16px var(--ink-10);              /* it floats over the next card, as the menu pills do */
   & > .card__tag { width: max-content; isolation: isolate; }
 }
 
