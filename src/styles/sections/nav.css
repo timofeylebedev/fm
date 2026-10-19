@@ -9,13 +9,21 @@
   position: fixed; inset: 0 0 auto; z-index: 200;
   display: flex; align-items: center; justify-content: center;
   padding: var(--nav-pad-y) var(--nav-pad-right) var(--nav-pad-y) var(--nav-pad-left);
-  overflow: hidden;
-  background-color: var(--glass-nav);
-  -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
+  overflow: hidden; isolation: isolate;
   transition: translate 0.35s var(--ease-out);
   @media (--sideways) { --nav-hides: 1; }             /* read by scripts/nav.js: the navbar slides away on the way down */
   @media (--calm) { transition: opacity 0.2s var(--ease-out); }   /* reduce motion: it fades out and back instead of sliding */
 }
+/* The frosted glass is a layer of its own, not the navbar's own background. Safari 26 and later colour their own top bar
+   from a fixed block at the top of the page, and copy its glass when it has a backdrop-filter: its bar came out
+   see-through. A pseudo-element is never looked at, so Safari takes the solid colour of the tone strip instead
+   (.bar-tone, base.css). The tint (scripts/nav.js) sets --nav-tint. */
+.nav::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-color: var(--nav-tint, var(--glass-nav));
+  -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
+}
+:root { --bar-tone: var(--sand); }                  /* the browser's bar before the tint has run: the hero's sand */
 html.nav-away .nav { translate: 0 calc(-100% - 1px); }
 @media (--calm) { html.nav-away .nav { translate: none; opacity: 0; pointer-events: none; } }
 .nav__row { display: flex; justify-content: space-between; width: 100%; max-width: 1920px; }   /* as wide as the stack's cards at most */

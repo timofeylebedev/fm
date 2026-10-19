@@ -10,6 +10,8 @@ import { ScrollTrigger } from "./gsap.js";
    mixed by how much of the navbar's height each section covers, so it follows the scroll exactly, both ways.
      · a section without a colour of its own shows the page (white);
      · where sections overlap, the lower one on the page is drawn over the upper one, as the browser draws them;
+     · the browser's own bar above the page gets the same colour, solid: the tone strip (.bar-tone, base.css) for
+       Safari 26 and later, <meta name="theme-color"> for Chrome on Android and Safari before 26;
      · the colours are read once, again when the screen changes size and when the page has loaded
        (fmNavTint.refresh() in the console reads them again). */
 const SECTIONS = "main > section, body > footer";
@@ -24,7 +26,9 @@ export function initTint(nav) {
   };
   const seen = (c) => (c && c[3] > 0.001 ? c : null);
   const over = (c, under) => (c[3] >= 0.999 ? c : [0, 1, 2].map((i) => c[i] * c[3] + under[i] * (1 - c[3])).concat(1));
-  const alpha = (parse(getComputedStyle(nav).backgroundColor) || [0, 0, 0, 0.7])[3];
+  const alpha = (parse(getComputedStyle(nav, "::before").backgroundColor) || [0, 0, 0, 0.7])[3];
+  const tone = document.querySelector(".bar-tone");
+  const meta = document.querySelector('meta[name="theme-color"]');
 
   let page = [255, 255, 255, 1], sections = [], queued = 0, tint = "";
   const read = () => {
@@ -52,8 +56,14 @@ export function initTint(nav) {
       boxes.forEach((b) => { if (b.top <= y && b.bottom > y) c = over(b.c, c); });
       for (let j = 0; j < 3; j++) sum[j] += c[j] * h;
     }
-    const v = "rgba(" + sum.map((s) => Math.round(s / (bottom - top))).join(", ") + ", " + alpha + ")";
-    if (tint !== v) { tint = v; nav.style.backgroundColor = v; }
+    const rgb = sum.map((s) => Math.round(s / (bottom - top)));
+    const v = "rgba(" + rgb.join(", ") + ", " + alpha + ")";
+    if (tint === v) return;
+    tint = v;
+    nav.style.setProperty("--nav-tint", v);
+    const solid = "#" + rgb.map((c) => c.toString(16).padStart(2, "0")).join("");
+    if (tone) tone.style.backgroundColor = solid;
+    if (meta) meta.setAttribute("content", solid);
   };
   const later = () => { if (!queued) queued = requestAnimationFrame(paint); };
   const refresh = () => { read(); later(); };
