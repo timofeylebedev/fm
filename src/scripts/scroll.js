@@ -44,7 +44,7 @@ export function placeOf(el) {
   const top = (spacer || el).getBoundingClientRect().top + scrollY();
   let y = top - navCover(top > scrollY());
   // pinned: where its pinning starts, when the block is seen whole there
-  const st = spacer && ScrollTrigger.getAll().find((t) => t.pin === el);
+  const st = spacer && (el.fmPin || ScrollTrigger.getAll().find((t) => t.pin === el));   // fmPin: held by sticky (logos.js)
   if (st && st.start < y) y = st.start;
   return Math.round(Math.min(max(), Math.max(0, y)));
 }
