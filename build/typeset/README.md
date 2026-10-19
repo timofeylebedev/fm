@@ -24,8 +24,10 @@ It replaced `build/typograph.js` (Oct 19, 2026). What changed, measured: see the
 1. **Blocks.** `html.js` reads the page with parse5 and collects the text of every block (a `p`, `h1`–`h6`, `li`, `td`,
    `div`…). Inline tags (`a`, `span`, `b`, `em`…) are part of the block: «в <a>доме</a>» is one text. A `<br>` ends a
    text. `<template>` content is included (the cookie notice). Left alone: `script`, `style`, `svg`, `pre`, `code`,
-   `kbd`, `samp`, `var`, `textarea`, `noscript`, anything with `data-typeset="off"` or `contenteditable`, the `<head>`,
-   and every attribute.
+   `kbd`, `samp`, `var`, `textarea`, `noscript`, `title`, `option` and the other raw-text elements, anything with
+   `data-typeset="off"` or `contenteditable`, the `<head>`, and every attribute. Inside `data-reveal="chars"` (letters
+   split one by one by motion.js) or `data-typeset="spaces"` only no-break spaces are written, no invisible joiners.
+   Text the parser does not keep as written (a stray end tag inside a sentence, a NUL) is left alone.
 2. **Language.** Each block takes the nearest `lang` attribute (`<html lang="ru">`, a `<span lang="en">` inside it).
    `ru` and `en` have their own rules; any other language gets the rules for every language.
 3. **Tokens.** The text is cut into words, numbers, spaces, punctuation, dashes, hyphens, signs, and whole pieces for
@@ -37,7 +39,8 @@ It replaced `build/typograph.js` (Oct 19, 2026). What changed, measured: see the
    word joiner (U+2060): invisible, and the real hyphen stays, so copying and searching still find «e-mail».
 6. **A limit.** Holds make longer pieces a line cannot break inside. When a piece grows past **28 letters** in text or
    **16 in a heading**, the weakest holds in it are let go (of equal ones, the one nearest the middle), until it fits or
-   only *must* holds are left. So a phone never gets a piece wider than its column.
+   only *must* holds are left. So a phone never gets a piece wider than its column. A hold beside a word that is too
+   long on its own is kept (letting it go would not make the piece fit, only leave «в» hanging).
 7. **In place.** Only the characters the rules decide on change, at their place in the source; entities (`&nbsp;`,
    `&laquo;`, `&#8209;`) and everything else stay exactly as written.
 
@@ -60,12 +63,12 @@ Marks: `⍽` no-break space, `⁀` word joiner, `¦` a place a long link may bre
 | number-sign | must | `5⍽%`, `100⍽₽`, `20⍽°C` |
 | currency-number | must | `$⍽100` |
 | dash | should | `лейбл⍽— на одной волне`: a spaced dash never starts a line (a closed `word—word` is left as it is) |
-| initials | must | `А.⍽С.⍽Пушкин`, `J.⍽R.⍽R.⍽Tolkien` |
+| initials | must / should | `А.⍽С.⍽Пушкин`, `J.⍽R.⍽R.⍽Tolkien` (a chain: must); one initial before a word: should, since `план Б. Затем` may be a sentence end |
 | last-word | nice | the last word of a text of 4+ words, if it has 3 letters or fewer, does not stand alone: `Напишите⍽нам`, `CEO`|
 | range (join) | must | `2022–⁀2025`, `2-⁀11` |
 | short-part (join) | should | `COVID-⁀19`, `1-⁀й`, `e-⁀mail`, `из-⁀за`, `кто-⁀то`, `кое-⁀как`; long parts still break: `Telegram-бот` |
 | link breaks | — | `hello@¦flowmedium¦.pro`, `https://¦yandex¦.ru/¦legal/` (links of 16+ characters) |
-| phone | must | `+7⍽(904)⍽512-⁀51-⁀50` is one piece |
+| phone | must | `+7⍽(904)⍽512-⁀51-⁀50`, `(555)⍽123-⁀4567` are one piece |
 
 ### Russian (`lang="ru"`)
 
@@ -74,10 +77,13 @@ Marks: `⍽` no-break space, `⁀` word joiner, `¦` a place a long link may bre
 | particle | should | `сделал⍽бы`, `так⍽ли`, `он⍽же` |
 | org | must | `ООО⍽«Ромашка»`, `ИП⍽Поплавский` |
 | abbr-pair | must | `т.⍽е.`, `и⍽т.⍽д.`, `в⍽т.⍽ч.` |
-| label-number | must | `ст.⍽6`, `п.⍽5`, `глава⍽3`, `в параграфе⍽3` (the number goes with its label, not with the next word: `3 Политики` breaks) |
+| label-number | must | `ст.⍽6`, `п.⍽5`, `глава⍽3`, `в параграфе⍽3`, `ИНН:⍽7701…` (the number goes with its label, not with the next word: `3 Политики` breaks; a one-letter label only with its dot: `с 1 января` is not a page) |
+| place | should | `г.⍽Москва`, `ул.⍽Тверская` (not `2006 г. В том году`) |
+| century | must | `XX⍽в.`, `XIX⍽вв.` |
+| amount-currency | must | `5⍽млн⍽руб.`, `10⍽тыс.⍽₽` |
 | pointer | should | `см.⍽раздел`, `напр.⍽так` |
 | name-initials | should | `Поплавский⍽М.⍽К.` |
-| number-word | must / should | units, years, months: `10⍽км`, `27⍽июля`, `2006⍽г.` (must); what a number counts: `20⍽000⍽договоров` (should); never a capitalised word (`3 Политики`), a short word (`2026 и`) or after a label (`части⍽1 статьи`) |
+| number-word | must / should | units, years, months: `10⍽км`, `27⍽июля`, `2006⍽г.` (must; one-letter units only with their dot: `в 2025 в Москве`, `5 с лишним`); what a number counts: `20⍽000⍽договоров` (should); never a capitalised word (`3 Политики`), a short word (`2026 и`) or after a label (`части⍽1 статьи`) |
 | short-word | should | one- and two-letter words and `без для над под при про обо изо ото что как или меж ибо`: `в⍽доме`, `без⍽уточнений`, `а⍽не⍽в⍽последний`; not abbreviations in capitals (`РФ о`, `ПД (п. 1`), not particles, not the end of a hyphenated word (`кто-то из`); hyphenated prepositions count (`из-за⍽этого`) |
 
 Sources: А. Э. Мильчин, Л. К. Чельцова, «Справочник издателя и автора» (no-break spaces after prepositions and
@@ -90,9 +96,9 @@ conjunctions, with numbers and units, initials, abbreviations); the rules of [Ty
 |---|---|---|
 | honorific | must | `Dr.⍽Smith`, `Mr⍽Smith`, `Prof.⍽Lee` |
 | name-suffix | must | `Smith,⍽Jr.` |
-| label-number | must | `Fig.⍽3`, `page⍽12`, `No.⍽5`, `Chapter⍽2`, `Art.⍽6` |
+| label-number | must | `Fig.⍽3`, `page⍽12`, `No.⍽5`, `Chapter⍽2`, `Art.⍽6` (a short lower-case label needs its dot: `no 5-star`) |
 | month-day | must | `October⍽19`, `Oct.⍽19`, `19⍽October` |
-| number-word | must / should | units: `9⍽am`, `5⍽GB`, `10⍽km`, `30⍽min` (must); what is counted: `20,000⍽contracts` (should); not `2026 the`, not capitalised words |
+| number-word | must / should | units: `9⍽am`, `9⍽a.m.`, `5⍽GB`, `10⍽km`, `30⍽min` (must); what is counted: `20,000⍽contracts` (should); not `2026 the`, not capitalised words |
 | short-word | should / nice | `a`, `an`, `the`, `I` stay with the next word (`the⍽label`, `I⍽think`); in headings also `of to in on at by for and or nor but as if is it so up via per vs am are was be my our its` (nice) |
 
 English is lighter than Russian on purpose: English typesetting does not forbid a line ending in «of» or «to» in
