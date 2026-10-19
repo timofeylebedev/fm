@@ -27,6 +27,11 @@ export default defineConfig({
     // repeated in the page where it is used more than once)
     assetsInlineLimit: (file, content) => /\/art-[\w-]+\.svg$/.test(file) && content.length < 4096,
     modulePreload: { polyfill: false },
-    rollupOptions: { input: { index: resolve(src, "index.html"), 404: resolve(src, "404.html") } }
+    rollupOptions: { input: {
+      index: resolve(src, "index.html"), 404: resolve(src, "404.html"),
+      // the legal documents, at the addresses they had on the old site (/privacy_policy_ru, /soglasie_cookie: every host in
+      // deploy/ and GitHub Pages serve a page.html for its address without .html)
+      privacy_policy_ru: resolve(src, "privacy_policy_ru.html"), soglasie_cookie: resolve(src, "soglasie_cookie.html")
+    } }
   }
 });

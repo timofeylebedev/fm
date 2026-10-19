@@ -35,6 +35,7 @@
    For quick experiments in the console: fmMotion.M is the list below; fmMotion.state() lists what has come in. */
 
 import { gsap, ScrollTrigger, SplitText, CustomEase } from "./gsap.js";
+import { ioRoot } from "./scroller.js";
 
 export const M = {
   // the curves of the site: [x1, y1, x2, y2] as in CSS cubic-bezier, or a path (CustomEase), or a GSAP ease
@@ -428,7 +429,7 @@ function prepareNear() {
     if (!e.isIntersecting) return;
     near.unobserve(e.target);
     setTimeout(() => prepare(e.target.fmItem), 0);       // each in a task of its own: the browser can paint and answer taps in between
-  }), { rootMargin: "100% 0px" });
+  }), { root: ioRoot, rootMargin: "100% 0px" });
   list.forEach((it) => near.observe(it.el));
 }
 

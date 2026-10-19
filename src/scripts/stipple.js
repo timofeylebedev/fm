@@ -6,6 +6,7 @@
    (data-dots="cards" or data-dots="cta" in the HTML). Without WebGL2 a stat card fades into its colour instead and the
    purple card stays purple. */
 import { pace } from "./pace.js";
+import { ioRoot } from "./scroller.js";
 import { calm } from "./motion.js";
 
 // ── settings ──
@@ -557,7 +558,7 @@ function mount(host, set) {
     wake();
   });
   new ResizeObserver(me.redraw).observe(host);
-  new IntersectionObserver((entries) => { me.visible = entries[entries.length - 1].isIntersecting; wake(); }, { rootMargin: "100px 0px" }).observe(host);
+  new IntersectionObserver((entries) => { me.visible = entries[entries.length - 1].isIntersecting; wake(); }, { root: ioRoot, rootMargin: "100px 0px" }).observe(host);
 
   host.fmStipple = me;
   instances.push(me);

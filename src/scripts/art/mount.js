@@ -12,6 +12,7 @@
    Each drawing has its own clock that stops while it is not live, so it carries on where it left off. A drawing whose
    animation has an end (the royalty ones) returns false from tick when it is over, and is not called again. */
 import { pace } from "../pace.js";
+import { ioRoot } from "../scroller.js";
 import { SIZE, LIMIT, unit, toUnits, STILL } from "./shared.js";
 import { ROYALTY } from "./royalty-settings.js";
 import "../../styles/art/art.css";        // the styles of the drawings come with them
@@ -22,7 +23,7 @@ const DETAIL = 3;                                           // see fit()
 const mounted = [];
 const resize = new ResizeObserver((entries) => entries.forEach((e) => fit(e.target)));
 addEventListener("resize", () => mounted.forEach(fit));     // also catches a change of the screen's pixel density (browser zoom, another monitor)
-const observe = (margin, change) => new IntersectionObserver((entries) => entries.forEach((e) => change(e.target, e.isIntersecting)), { rootMargin: margin });
+const observe = (margin, change) => new IntersectionObserver((entries) => entries.forEach((e) => change(e.target, e.isIntersecting)), { root: ioRoot, rootMargin: margin });
 // A drawing moves only while its block is on screen (or about to be)…
 const watch = observe("100px 0px", (host, seen) => { host.fmArt.seen = seen; setLive(host); });
 // …and it is kept ready only while its block is within one screen of the visible part of the page. Further away it is
@@ -225,7 +226,7 @@ export function initArt() {
     if (!card) return;
     card.hosts.forEach(([host]) => near.unobserve(host));
     setTimeout(() => mountCard(card), 0);                  // in a task of its own, not together with the other work of this moment
-  }), { rootMargin: "150% 0px" });
+  }), { root: ioRoot, rootMargin: "150% 0px" });
   list.forEach((card) => card.hosts.forEach(([host]) => near.observe(host)));
 
   const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));

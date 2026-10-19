@@ -12,8 +12,9 @@
    On phones and tablets, a change of height alone is the browser's bars coming and going: boot.js keeps the page
    steady for that, so only a change of width counts there. */
 import { ScrollTrigger } from "./gsap.js";
+import { y as scrollY, to, onScroll } from "./scroller.js";
 
-const BLOCKS = "main > section, main > .pin-spacer, body > footer";
+const BLOCKS = "main > section, main > .pin-spacer, [data-page] > footer";
 const LINE = 1 / 3;
 
 export function initAnchor() {
@@ -26,7 +27,7 @@ export function initAnchor() {
   };
   const remember = () => {
     if (Date.now() < quiet) return;
-    if (scrollY <= 1) { mark = { top: true }; return; }  // at the very top it stays at the top
+    if (scrollY() <= 1) { mark = { top: true }; return; }  // at the very top it stays at the top
     const y = line();
     for (const el of document.querySelectorAll(BLOCKS)) {
       const r = el.getBoundingClientRect();
@@ -34,15 +35,15 @@ export function initAnchor() {
     }
   };
   const restore = () => {
-    if (mark && mark.top) { if (scrollY > 0) scrollTo({ top: 0, behavior: "instant" }); return; }
+    if (mark && mark.top) { if (scrollY() > 0) to(0); return; }
     if (!mark || !mark.el.isConnected) return;
     const r = mark.el.getBoundingClientRect(), by = r.top + mark.share * r.height - line();
-    if (Math.abs(by) >= 1) scrollTo({ top: scrollY + by, behavior: "instant" });
+    if (Math.abs(by) >= 1) to(scrollY() + by);
   };
   // a change of size: the remembered place is kept (not overwritten by the scrolls the change itself causes) for a
   // moment after each change and each measuring; the visitor's own scrolling after that is remembered again
   const hold = (ms) => { quiet = Math.max(quiet, Date.now() + ms); };
-  addEventListener("scroll", remember, { passive: true });
+  onScroll(remember);
   addEventListener("resize", () => {
     const wide = innerWidth !== width, tall = innerHeight !== height;
     width = innerWidth; height = innerHeight;
