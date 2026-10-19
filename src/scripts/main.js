@@ -13,6 +13,7 @@ import { initRing } from "./ring.js";
 import { initLogos } from "./logos.js";
 import { initDeck } from "./deck.js";
 import { box, height as pageHeight, watchSize, ioRoot } from "./scroller.js";
+import { hasConsent } from "./consent.js";
 
 const root = document.documentElement;
 root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
@@ -81,6 +82,17 @@ addEventListener("load", () => setTimeout(() => {
     timer = setTimeout(() => { if (!busy && Math.abs(height() - measured) > 2) ScrollTrigger.refresh(true); }, 300);
   }));
 }, 0));
+
+// ── the cookie notice: only for a visitor who has not pressed «ОК» yet (consent.js), loaded once the page has loaded
+//    and its first screen is in place (fm:ready); it then waits a moment more by itself before it fades in (cookies.js) ──
+if (!hasConsent()) {
+  let ready = false, loaded = document.readyState === "complete";
+  const go = () => { if (ready && loaded) import("./cookies.js").then((m) => m.showCookies(), () => {}); };   // not loaded: no notice this time
+  document.addEventListener("fm:ready", () => { ready = true; go(); }, { once: true });
+  if (!loaded) addEventListener("load", () => { loaded = true; go(); }, { once: true });
+}
+// fmCookies.replay() in the console shows the notice again, also to someone who has agreed (cookies.js is then loaded)
+window.fmCookies ??= { replay: () => import("./cookies.js").then((m) => m.showCookies({ delay: 0, force: true })) };
 
 // ── the booking popup of Planerka: its script is loaded once the page has loaded and the browser is free, so it does
 //    not compete with the page. A click before that simply opens the booking page itself (the link's own address). ──

@@ -423,6 +423,19 @@
       </div>
     </div>
   </footer>
+
+  <!-- ── The cookie notice: put on the page by scripts/cookies.js, only for a visitor who has not pressed «ОК» yet
+       (scripts/consent.js). Both links: the policy until the consent has a page of its own (see the PR). ── -->
+  <template id="cookies">
+    <section class="cookies" aria-label="Уведомление о куки">
+      <p class="cookies__text"><a class="cookies__link" href="https://flowmedium.pro/privacy_policy_ru" target="_blank" rel="noopener">Используем куки</a>, чтобы делать сайт лучше. Оставаясь, вы даете <a class="cookies__link" href="https://flowmedium.pro/privacy_policy_ru" target="_blank" rel="noopener">согласие на обработку данных</a></p>
+      <button class="cookies__ok" type="button">
+        <span class="cookies__label">ОК</span>
+        <svg class="cookies__check" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><path d="M16 24L21.3333 32L32 16" pathLength="1"/></svg>
+      </button>
+      <p class="cookies__said" role="status"></p>
+    </section>
+  </template>
 </div>
 </body>
 </html>

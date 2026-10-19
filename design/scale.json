@@ -20,11 +20,12 @@
       "type/body-m":       { "px": [16, 18], "use": "the text of the tool cards" },
       "type/body":         { "px": [16, 16], "use": "running text: publications, buttons, the footer" },
       "type/body-s":       { "px": [14, 16], "use": "short text in small cards: the features, the bylines of the publications" },
-      "type/ui":           { "px": [14, 14], "use": "navbar links and button, menu, skip link, footer notes" }
+      "type/ui":           { "px": [14, 14], "use": "navbar links and button, menu, skip link, footer notes" },
+      "type/note":         { "px": [12, 12], "use": "the cookie notice: a note in the corner, below the UI size (12 everywhere)" }
     },
     "relations": {
       "min": 1.125,
-      "pairs": [["type/hero", "type/h2"], ["type/h2", "type/card-heading"], ["type/card-heading", "type/lead"], ["type/card-heading", "type/body-m"], ["type/body", "type/ui"]],
+      "pairs": [["type/hero", "type/h2"], ["type/h2", "type/card-heading"], ["type/card-heading", "type/lead"], ["type/card-heading", "type/body-m"], ["type/body", "type/ui"], ["type/ui", "type/note"]],
       "$about": "Neighbouring levels that must stay apart at both ends of the range. Not here, on purpose: lead and body are the same on phones (16) and apart on computers (20 / 16); body-m, body and body-s are one text size on phones and differ by 2px on computers."
     },
     "aliases": {

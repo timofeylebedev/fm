@@ -20,6 +20,7 @@ export const by = (d) => { if (d) to(y() + d); };
 export const height = () => el.scrollHeight;                // the height of the whole page
 export const max = () => Math.max(0, el.scrollHeight - innerHeight);
 export const onScroll = (fn) => target.addEventListener("scroll", fn, { passive: true });
+export const offScroll = (fn) => target.removeEventListener("scroll", fn);
 // the root for an IntersectionObserver that looks ahead (a rootMargin beyond the screen): the box clips what is in it,
 // so seen from the screen nothing below it would ever be "near"; seen from the box it is
 export const ioRoot = box || null;
