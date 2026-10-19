@@ -9,9 +9,14 @@
      · 640–1023px: square corners, as wide as its content, in the middle (not used here: its width cannot be known);
      · 1024px and wider: the three columns side by side, the card 940px wide in the middle, 60px from the top and
        21px from the bottom of the page, corners 40px.
-   So the frame is given one of the two shapes that are known, and is cropped to the card exactly (.book__card): what
-   shows is Planerka's own card, and a click beside it is a click on the glass (it closes the window). The calendar
-   reports the height of its page (book.js sets it as --h); the card is that height less what is above and under it.
+   So the frame is given one of the two shapes that are known, and is cropped to the card (.book__card): what shows is
+   Planerka's own card, and a click beside it is a click on the glass (it closes the window). The calendar reports the
+   height of its page (book.js sets it as --h); the crop is that height less what is above the card (the page under
+   the card, 21px at most, is left in: it is see-through, and a card that grows a moment before it says so is not cut).
+   Nothing of ours is drawn around the card (no shadow, no border): while Planerka lays its card out again (loading,
+   a window made wider) its size and the crop's may differ for a moment, which must not show.
+   The card does not move while it changes height: its top is placed for its final height (--h0, the same for every
+   visitor of a width), so whatever changes, changes at the bottom.
    If Planerka changes its layout, the numbers below are the ones to measure again (a sliver of the see-through page
    at an edge is invisible anyway; only a card wider than the crop would lose its edges).
 
@@ -55,8 +60,13 @@
 html { scrollbar-gutter: stable; }
 html.book-open { overflow: hidden; }
 
-/* the card and the close button over its corner; in the middle while it is shorter than the screen */
-.book__box { position: relative; flex: none; width: var(--box); margin: auto; }
+/* the card and the close button over its corner: in the middle of the screen for the card's final height (computers),
+   at the top when it is taller than the screen (phones, tablets) */
+.book__box {
+  --tall: calc(var(--h0) - var(--top) - var(--bottom));   /* the card */
+  position: relative; flex: none; width: var(--box);
+  margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0;
+}
 
 /* the close button: above the card's right corner, on the glass. While a tall calendar is scrolled (phones), it stays
    at the top of the screen, over the card (a white round, like the pills of the menu, so it reads over both). */
@@ -83,18 +93,29 @@ html.book-open { overflow: hidden; }
   @media (--mouse) { &:hover { background: var(--mist); transition-duration: var(--hover-in); } }
 }
 
-/* the crop: exactly Planerka's card. White only while the calendar is not there yet (the dots, the message): the
-   same white as the card that then fades in over it, so nothing changes shape when it arrives. */
+/* the crop of Planerka's card */
 .book__card {
   position: relative;
-  height: calc(var(--h, var(--h0)) - var(--top) - var(--bottom));
+  height: calc(var(--h, var(--h0)) - var(--top));
   border-radius: var(--corner);
   overflow: hidden;
-  background: var(--paper);
-  transition: background-color 0s linear 0.35s;         /* gone once the calendar has faded in */
-  @media (width >= 62em) { box-shadow: 0 24px 64px var(--ink-10); }
 }
-.book.is-ready .book__card { background: transparent; }
+/* a white card of the final size and shape, the same white as Planerka's card: under the dots and the message while the
+   calendar is not there yet, and under the calendar while it fills in (on a cold load it reports a skeleton first,
+   then the days, then the times, each a little taller), so the outline seen is the final one from the start. Gone once
+   the calendar's height has stood still for a second (book.js, .is-still): then the card is Planerka's alone, and a
+   window made wider or narrower shows only that. */
+.book__card::before {
+  content: ""; position: absolute; inset: 0 0 auto;
+  height: var(--tall);
+  border-radius: var(--corner);
+  background: var(--paper);
+  transition: opacity 0.2s var(--ease-out);
+}
+.book.is-ready.is-still .book__card::before { opacity: 0; }
+/* …and the crop is at least that tall meanwhile, or it would cut the white card short while the calendar is shorter */
+.book:not(.is-still) .book__card { height: max(var(--h, var(--h0)) - var(--top), var(--tall)); }
+.book.is-failed .book__card::before { opacity: 1; transition: none; }
 .book__frame {
   position: absolute; left: calc(-1 * var(--side)); top: calc(-1 * var(--top));
   display: block; width: var(--frame); height: var(--h, var(--h0));
@@ -126,4 +147,3 @@ html.book-open { overflow: hidden; }
   & a { color: var(--purple); text-decoration: underline; text-underline-offset: 3px; }
   &[hidden] { display: none; }
 }
-.book.is-failed .book__card { background: var(--paper); }

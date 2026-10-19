@@ -47,7 +47,7 @@ const narrow = matchMedia("(max-width: 47.999em)");     // --phone of media.css:
 
 let dlg, box, card, frame, fail;
 let ready = false, failed = false, heard = false, isOpen = false, opened = false, warmedAt = 0, from = null;
-let waitTimer = 0, silentTimer = 0, grow = null;
+let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, firstHeight = 0, byKeys = false;
 // the history: the step the window added (and how long the history was then), and a Back of ours on its way
 let pushedAt = 0, backing = false, pushAfterBack = false;
 const messages = [];
@@ -121,7 +121,7 @@ function onLoad() {
 }
 
 function setReady() {
-  clearTimeout(silentTimer); clearTimeout(waitTimer);
+  clearTimeout(silentTimer); clearTimeout(waitTimer); clearTimeout(settleTimer);
   failed = false;
   fail.hidden = true;
   dlg.classList.remove("is-failed");
@@ -138,16 +138,23 @@ function setFailed() {
   dlg.classList.add("is-failed");
 }
 
-// the height of the calendar's page: the frame is that tall, the card (the crop) that less the page above and under it
+// the height of the calendar's page: the frame is that tall, the crop that less the page above the card. At once, not
+// eased: the calendar's own card has already changed, and a crop catching up with it would trail behind it.
 function setHeight(h) {
-  const old = frame.offsetHeight;
-  if (Math.abs(h - old) < 1) return;
-  // while the window is on screen the card follows smoothly (from where it is now, even halfway through the last
-  // change); the calendar itself is in place at once
-  const shown = isOpen && ready && !calm && Math.abs(h - old) > 4 ? card.getBoundingClientRect().height : 0;
   card.style.setProperty("--h", h + "px");
-  if (grow) { grow.cancel(); grow = null; }
-  if (shown) grow = card.animate([{ height: shown + "px" }, { height: card.offsetHeight + "px" }], { duration: 350, easing: css.out });
+  // the white card of the final size under it stays until its height has not changed for a second: while it fills in
+  // (days, then times) its outline does not move (book.css, .is-still)
+  if (!dlg.classList.contains("is-still")) {
+    clearTimeout(stillTimer);
+    stillTimer = setTimeout(() => dlg.classList.add("is-still"), 1000);
+  }
+  // shown only once it has settled: while loading, the calendar reports a few heights in a row (its skeleton, then the
+  // days, then the times); it is shown when it has said nothing new for a moment (at most 1.5 s after the first)
+  if (ready) return;
+  const now = performance.now();
+  if (!firstHeight) firstHeight = now;
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => setReady(), now - firstHeight > 1500 ? 0 : 250);
 }
 
 addEventListener("message", (e) => {
@@ -158,8 +165,8 @@ addEventListener("message", (e) => {
   messages.push([Math.round(performance.now()), d.type || (d.data && d.data.type) || "?", d]);
   if (messages.length > 50) messages.shift();
   if (d.type === "planerka:resize" && d.height > 0) {
+    clearTimeout(silentTimer);
     setHeight(Math.max(400, Math.round(d.height)));
-    setReady();
   } else if (d.type === "planerka:enable_scroll") {
     // the calendar wants to scroll by itself (a long form): it gets the height of the screen and its own scroll
     frame.setAttribute("scrolling", "yes");
@@ -226,12 +233,15 @@ function open(opts = {}) {
   }
 }
 
-// the window gone: the page is let go, the focus goes back to the button that opened it (or to the burger, if the
-// button was a pill of the menu, which has closed meanwhile)
+// the window gone: the page is let go. Opened from the keyboard, the focus goes back to the button that opened it (or
+// to the burger, if the button was a pill of the menu, which has closed meanwhile), with its ring: that is where Tab
+// goes on from. Opened with a mouse or a finger, nothing is focused (the browser would put the focus back on the
+// button by itself, and show its ring after Escape, which is a key).
 function settle() {
   root.classList.remove("book-open");
   const back = from && from.isConnected && from.getClientRects().length ? from : document.querySelector("[data-menu-button]");
-  if (back && back.getClientRects().length) back.focus({ preventScroll: true });
+  if (byKeys) { if (back && back.getClientRects().length) back.focus({ preventScroll: true }); }
+  else if (document.activeElement && document.activeElement !== document.body && !dlg.contains(document.activeElement)) document.activeElement.blur();
   from = null;
 }
 
@@ -272,8 +282,8 @@ function initWarm() {
   // page, so the history gets no step of its own)
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible" || !frame || opened || Date.now() - warmedAt < BOOK.stale) return;
-    ready = false; failed = false; heard = false;
-    dlg.classList.remove("is-ready", "is-failed");
+    ready = false; failed = false; heard = false; firstHeight = 0;
+    dlg.classList.remove("is-ready", "is-failed", "is-still");
     warmedAt = Date.now();
     try { frame.contentWindow.location.replace(address(PAGE, BOOK.look)); } catch {}
   });
@@ -312,6 +322,7 @@ export function initBook() {
     if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     from = a;
+    byKeys = e.detail === 0;                             // Enter on a focused link: a click with no pointer
     open();
   });
 
