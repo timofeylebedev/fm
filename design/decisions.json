@@ -188,10 +188,10 @@
     {
       "id": "pinned-pill",
       "kind": "decision",
-      "what": "A card that has become a pill stays pinned under the navbar (a fixed copy) while the next card comes up under it, and leaves (slides up and fades) when the next card's title would reach it; only on the way down. Scrolled back, it never pins: the card comes back with the page. Not for the last card",
-      "decided": "Claude, 2026-10-19, from Tim's round-4 comment (cards 5) — to confirm how long it should stay",
-      "why": "the finished card stays in sight a little longer; staying until the next title has gone under it would hide that title (SET.hold in cards.js allows it, with the title waiting)",
-      "fix if reconsidered": "cards.js SET.hold and the touch point in pinOf()"
+      "what": "A card that has become a pill stays pinned under the navbar for a fifth of a screen of scrolling, and the next card waits under it with the usual gap; then both go on with the page. It is laid out by the browser (a sticky holder round each card, stack.css), so it is the same both ways: scrolled back, the pill waits there again. The last card's pill does the same with a copy at the top of the section after the stack, which slides under it below a band of the page's colour as tall as the gap",
+      "decided": "Tim, 2026-10-19 — round-4 comment (cards 5), then: keep the gap instead of the pill over the next card, the last one pinned too, a pause both ways, about 1/5 of a screen",
+      "why": "the finished card stays in sight a little longer without covering the next one; a pause only on the way down would need the script to move the cards, which lags on phones",
+      "fix if reconsidered": "SET.hold in cards.js (screens; 0 turns the pause off)"
     }
   ]
 }
