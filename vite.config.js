@@ -1,7 +1,7 @@
 // The build of the site: `npm run dev` to work on it, `npm run build` for the finished site in dist/.
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
-import { icons, inlineScripts, typograph, minifyPages, csp, precompress } from "./build/plugins.js";
+import { icons, inlineScripts, typeset, minifyPages, csp, precompress } from "./build/plugins.js";
 
 const src = resolve(import.meta.dirname, "src");
 const dist = resolve(import.meta.dirname, "dist");
@@ -10,7 +10,7 @@ export default defineConfig({
   root: src,
   base: "./",                                   // relative addresses: the site works at a domain's root or in a folder
   publicDir: resolve(import.meta.dirname, "public"),
-  plugins: [inlineScripts(src), icons(resolve(src, "assets/icons")), typograph(), minifyPages(), csp(), precompress(dist)],
+  plugins: [inlineScripts(src), icons(resolve(src, "assets/icons")), typeset(), minifyPages(), csp(), precompress(dist)],
   css: {
     transformer: "lightningcss",
     // the same browsers as build.target below, given to Lightning CSS itself: without them Vite gives it its own

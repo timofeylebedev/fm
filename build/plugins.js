@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { resolve, dirname } from "node:path";
 import { minify as minifyJs } from "terser";
 import { minify as minifyHtml } from "html-minifier-terser";
-import { typographHtml } from "./typograph.js";
+import { typesetHtml } from "./typeset/html.js";
 
 // <svg data-icon="logo" class="…"></svg> in the HTML → the SVG of src/assets/icons/logo.svg, with the attributes of the
 // tag added (a class, a label). Icons without a label are hidden from screen readers.
@@ -46,9 +46,27 @@ export function inlineScripts(root) {
   };
 }
 
-// Russian non-breaking spaces (see typograph.js)
-export function typograph() {
-  return { name: "fm-typograph", transformIndexHtml: { order: "pre", handler: (html) => typographHtml(html) } };
+// Where the lines of the page's texts may break: no-break spaces and word joiners, by the language of each text
+// (build/typeset/README.md). Letters you can see are never changed: what a proofreader would change (straight quotes, a
+// hyphen for a dash, a look-alike letter) is listed when the site is built, and `npm run typeset -- --lint` shows it all.
+export function typeset() {
+  let warned = false;
+  return {
+    name: "fm-typeset",
+    transformIndexHtml: {
+      order: "pre",
+      handler(html, ctx) {
+        const { html: out, report } = typesetHtml(html);
+        const findings = report.flatMap((r) => r.findings);
+        if (findings.length && !warned) {
+          const name = ctx.filename.split("/").pop();
+          console.warn(`typeset: ${name} — ${findings.length} spots a proofreader would change (npm run typeset -- --lint src/${name})`);
+        }
+        return out;
+      }
+    },
+    buildEnd() { warned = true; }
+  };
 }
 
 // The finished pages, minified: no comments, no indentation (whitespace that shows on the page is kept)

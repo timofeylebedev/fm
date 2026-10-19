@@ -65,8 +65,9 @@
 /* the titles are counted in their own letters: about 12.5 of them wide, so they break into three or four lines
    of a similar length at every size (text-wrap evens them out) */
 /* the size of the section headings, but never so big that the longest unbreakable run of a title (9.7em: «без
-   уточнений —», joined by the typograph's non-breaking spaces) is wider than the card's text: on phones under about
-   350px that is a little less than h2 (26px at 320, 24px at 300) */
+   уточнений —», joined by the no-break spaces of build/typeset; `npm run typeset -- src/index.html` lists each text's
+   longest run) is wider than the card's text: on phones under about 350px that is a little less than h2 (26px at 320,
+   24px at 300) */
 .card__titles { --card-title: min(var(--type-h2), (100cqw - 2 * var(--card-pad)) / 9.8); width: min(100%, 12.5em); font-size: var(--card-title); }
 .card__title {
   font-family: var(--font-display); font-weight: 700; font-size: 1em; line-height: var(--lh-display); color: var(--paper);
