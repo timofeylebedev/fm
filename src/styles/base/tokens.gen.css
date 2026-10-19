@@ -80,11 +80,14 @@
   --text-gap: clamp(12px, calc(12px + (var(--vp) - 20rem) * 4 / 1120), 16px);
   --action-gap: clamp(20px, calc(20px + (var(--vp) - 20rem) * 4 / 1120), 24px);
   --pub-air: clamp(40px, calc(40px + (var(--vp) - 20rem) * 24 / 1120), 64px);
-  --hero-air-top: clamp(16px, calc(16px + (var(--vp) - 20rem) * 32 / 1120), 48px);
-  --hero-air-bottom: clamp(16px, calc(16px + (var(--vp) - 20rem) * 16 / 1120), 32px);
+  --hero-air-top: clamp(32px, calc(32px + (var(--vp) - 20rem) * 32 / 1120), 64px);
+  --hero-air-bottom: clamp(40px, calc(40px + (var(--vp) - 20rem) * 32 / 1120), 72px);
   --center-air: clamp(0px, calc(8px + (var(--vp) - 20rem) * -8 / 1120), 8px);
   --tool-min-h: clamp(400px, calc(400px + (var(--vp) - 20rem) * 80 / 1120), 480px);
   --cta-air: clamp(64px, calc(64px + (var(--vp) - 20rem) * 64 / 1120), 128px);
   --tool-pad: clamp(28px, calc(28px + (100cqi - 18rem) * 36 / 312), 64px);
   --type-note: 0.75rem;
+  --hero-air-max: clamp(64px, calc(64px + (var(--vp) - 20rem) * 64 / 1120), 128px);
+  --hero-pic-min: clamp(168px, calc(168px + (100vw - 20rem) * 132 / 1120), 300px);
+  --hero-text: clamp(224px, calc(224px + (var(--vp) - 20rem) * 36 / 1120), 260px);
 }

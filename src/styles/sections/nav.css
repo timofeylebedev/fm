@@ -1,8 +1,9 @@
 /* The navbar: fixed at the top, frosted. Its colour follows the section behind it (scripts/nav.js), and the
    outline of the current link slides from link to link (scripts/nav-pill.js). Below 1024px (--tablet) the links give
    way to a burger and a menu of pills (scripts/menu.js). Paddings: the nav/* tokens.
-   On phones turned sideways (--sideways: a short, wide screen) it slides away while the page is scrolled down and
-   comes back as soon as it is scrolled up (scripts/nav.js, "hide"): there the screen is too short to give it a strip.
+   On phones turned sideways (--sideways: a short, wide screen) it moves away with the page while it is scrolled down,
+   once the hero has gone, and comes back with it while it is scrolled up (scripts/nav.js, "hide"): there the screen is
+   too short to give it a strip.
    Its height is --nav-h (tokens.css): the controls (--nav-control, 32px) and the padding. */
 
 .nav {
@@ -12,15 +13,14 @@
   overflow: hidden;
   background-color: var(--glass-nav);
   -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
-  transition: translate 0.35s var(--ease-out);
-  @media (--sideways) { --nav-hides: 1; }             /* read by scripts/nav.js: the navbar slides away on the way down */
-  @media (--calm) { transition: opacity 0.2s var(--ease-out); }   /* reduce motion: it fades out and back instead of sliding */
+  @media (--sideways) { --nav-hides: 1; }             /* read by scripts/nav.js: the navbar moves away on the way down (it sets its translate) */
+  @media (--calm) { transition: opacity 0.2s var(--ease-out); }   /* reduce motion: it fades out and back instead of moving */
 }
 /* in the page's own box (Safari on a Mac, base.css) it sticks to the top of the box instead: as tall as before, taking no
    room (the hero starts under it, as with fixed), and inside the box, so the wheel over it scrolls the page */
 @media screen { html.boxed:has(> body > .page) .nav { position: sticky; top: 0; margin-bottom: calc(-1 * var(--nav-h)); } }
-html.nav-away .nav { translate: 0 calc(-100% - 1px); }
-@media (--calm) { html.nav-away .nav { translate: none; opacity: 0; pointer-events: none; } }
+html.nav-away .nav { pointer-events: none; }
+@media (--calm) { html.nav-away .nav { opacity: 0; } }
 .nav__row { display: flex; justify-content: space-between; width: 100%; max-width: 1920px; }   /* as wide as the stack's cards at most */
 .nav__start, .nav__end { display: flex; width: 100%; }
 .nav__end {
@@ -87,10 +87,9 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
 }
 
 /* the strip above the navbar in the browsers built into apps (scripts/nav.js, "cap"). It reaches a little under the
-   navbar (more while scrolling down): when the navbar slides away (a phone turned sideways), its lower end is cut off
-   by the navbar's height and 48px, a little faster than the navbar moves, so no white band is left at the top of the
-   screen. In Telegram the strip behind the app's buttons then shows the page too, as the rest of the screen does while
-   the navbar is away. */
+   navbar (more while scrolling down): when the navbar moves away (a phone turned sideways), its lower end is cut off
+   with it (nav.js, "hide": by the navbar's height and 48px over the navbar's way, a little faster than the navbar
+   moves), so no white band is left at the top of the screen. In Telegram the strip behind the app's buttons then shows
+   the page too, as the rest of the screen does while the navbar is away. With reduce motion it is cut off at once. */
 @keyframes nav-cap { from { transform: translateY(0); } to { transform: translateY(var(--cap-max, 0px)); } }
-.nav-cap { transition: clip-path 0.35s var(--ease-out); @media (--calm) { transition: none; } }
-html.nav-away .nav-cap { clip-path: inset(0 0 calc(var(--nav-h) + 48px) 0); }
+@media (--calm) { html.nav-away .nav-cap { clip-path: inset(0 0 calc(var(--nav-h) + 48px) 0); } }
