@@ -10,7 +10,7 @@ async def main():
         b = await p.chromium.launch(executable_path=CH, args=ARGS)
         ctx = await b.new_context(viewport={"width":W,"height":H}, device_scale_factor=D, is_mobile=W<1024, has_touch=W<1024, bypass_csp=True)
         pg = await ctx.new_page(); await pg.goto(url); await pg.wait_for_timeout(800); await warm(pg)
-        await pg.add_style_tag(content=".card__art,canvas,.card__text,.stack__pin,.nav{opacity:0!important}")
+        await pg.add_style_tag(content=".card__art,canvas,.card__text,.stack__end-pin,.nav{opacity:0!important}")
         r = await pg.evaluate("(()=>{const s=document.querySelector('[data-stack]');const b=s.getBoundingClientRect();return [b.top+scrollY,b.bottom+scrollY]})()")
         bad=0; N=90; worst=0
         for i in range(N):

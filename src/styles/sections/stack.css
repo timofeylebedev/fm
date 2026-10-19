@@ -118,8 +118,9 @@
 
 /* ── while the script runs (stack-on) ──
    The browser moves the cards itself, with the page: each card is sticky under the navbar in a block of its own
-   (.stack__slot, made by the script) that is as tall as the scroll the card stays for; the next slot overlaps it
-   from below, so the next card comes up over the old one. Everything here is laid out by the styles alone, from the
+   (.stack__hold, made by the script, itself sticky in a .stack__slot while the pill before it is pinned) that is as
+   tall as the scroll the card stays for; the next slot overlaps it from below, so the next card comes up over the old
+   one. Everything here is laid out by the styles alone, from the
    tokens and the screen's height, so nothing waits for the script when the window changes size, and nothing is
    moved by the script while the page scrolls (the script only decides which title and drawing are shown):
      · --stack-nav: where the cards stick, right under the navbar (on a phone turned sideways, whose navbar hides
@@ -193,15 +194,15 @@
    from four background tiles, and on screens whose pixels do not fall on whole CSS px (phones: 3 px to 1) the seams
    between the tiles let a hairline of the card's colour through. All of them move with the page or are sticky: the
    browser moves them in the same frame as the cards, so they never lag behind.
-     · .stack__collar, at the top of every slot but the first: the gap above the card and the bottom corners of the
+     · .stack__collar, at the top of every hold but the first: the gap above the card and the bottom corners of the
        card it comes up over (and the strip at the end, .stack__collar-end, above the section after the stack);
      · .stack__cap, sticky with the card: the page colour outside its top corners, over the card it covers;
-     · .stack__veil, in every slot, drawn over its card: the bottom edge of the card while it comes up. Its hole ends
+     · .stack__veil, in every hold, drawn over its card: the bottom edge of the card while it comes up. Its hole ends
        where the smallest card ends, and it is sticky at the bottom of the stage: so the card comes up from the bottom of
        the screen as the smallest card (a pill), until that reaches the bottom of the stage; from then on its bottom edge
        stays there and only its top keeps coming up, and the card grows. It covers the card before below that edge too.
        It is only as tall as the gap under the stage, the smallest card and 15vh (in case the screen is taller for a
-       moment than --screen, while an app's bars collapse): where the slot ends it is pushed up with it, and by then the
+       moment than --screen, while an app's bars collapse): where the hold ends it is pushed up with it, and by then the
        next card has come up over it. */
 .stack__collar, .stack__cap, .stack__veil {
   --r: var(--card-r);

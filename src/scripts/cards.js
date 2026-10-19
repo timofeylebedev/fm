@@ -12,7 +12,8 @@
        left (the progress);
      · then the next card comes up from the bottom in the same way, the gap of the stage under the old one. The old card
        gives it room: its top stays, its bottom edge goes up as fast as the new card comes. Its label turns white. Once
-       it is the smallest card it goes on up with the page and leaves the screen under the navbar;
+       it is the smallest card it stays pinned for a moment (see «The pinned pill» below), then goes on up with the page
+       and leaves the screen under the navbar;
      · the last card does the same for the section after the stack.
    A title is shown while the open part of its card reaches below it (with the card's padding under it); while the card
    closes (going away, or scrolled back as it came), a little earlier: SET.titleLead of the card's height before the
@@ -75,7 +76,7 @@ export function initCards() {
     const titles = [...el.querySelectorAll(".card__title")].map((title) => ({ el: title, lines: [title], on: false, size: null }));
     const arts = [...el.querySelectorAll(".card__art > .art")];
     const artBox = el.querySelector(".card__art");
-    const c = { el, tag, titles, arts, artBox, art: "", steps: Math.max(1, titles.length, arts.length), m: {}, title: -1, turn: -1, off: null, asleep: null, white: null, pill: null };
+    const c = { el, tag, titles, arts, artBox, art: "", steps: Math.max(1, titles.length, arts.length), m: {}, title: -1, turn: -1, off: null, asleep: null, white: null };
     // two layers in the label: the progress (fills it from the left) and the white label (fades in when the card is done)
     c.fill = document.createElement("span");
     c.fill.className = "card__tag-fill";
@@ -100,7 +101,6 @@ export function initCards() {
   if (!cards.length) return;
   stage.appendChild(div("stack__collar stack__collar-end"));
   const last = cards[cards.length - 1];
-  section.style.setProperty("--stack-step", SET.step);
   section.classList.add("stack-on");
   // the colour of the page (the strips are painted in it); the section after the stack comes up over the last card,
   // which stays whole under it: it needs a background of its own, and must be drawn above the section of the cards
@@ -116,7 +116,7 @@ export function initCards() {
   // the hold of every card (stack.css): how long the pill of the card before it stays (--hold-in), and how long its own
   // pill stays before it goes on with the page (--hold-out: not for the last card, whose pill is the copy below)
   const setHolds = () => {
-    section.style.setProperty("--stack-hold", SET.hold);
+    section.style.setProperty("--stack-step", SET.step);
     cards.forEach((c, i) => {
       c.slot.style.setProperty("--hold-in", i ? SET.hold : 0);
       c.slot.style.setProperty("--hold-out", i < cards.length - 1 ? SET.hold : 0);
@@ -235,11 +235,12 @@ export function initCards() {
     navH = navBottom();                                      // where the cards stick
     cards.forEach((c) => {
       const el = c.el, m = c.m;
-      m.A = el.offsetHeight;
+      m.A = el.getBoundingClientRect().height;               // fractional px, as the styles lay them out (whole px would drift)
       m.R = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
       const at = offsetIn(c.tag, el);
-      m.tagH = c.tag.offsetHeight; m.padX = at.x; m.padY = at.y;
-      m.ph = Math.min(m.tagH + 2 * m.padY, m.A);             // the smallest card: the label with the card's top padding above and below it
+      m.tagH = c.tag.getBoundingClientRect().height; m.padX = at.x; m.padY = at.y;
+      // the smallest card: the label with the card's top padding above and below it, which is twice the radius (stack.css)
+      m.ph = Math.min(m.R ? 2 * m.R : m.tagH + 2 * m.padY, m.A);
       // the drawing's room (see "the drawing follows the open part"), as laid out with the card open (transforms do not count)
       if (c.artBox) {
         const b = c.artBox;
@@ -264,10 +265,13 @@ export function initCards() {
 
   // The sizes of the slots, the strips and the section are in stack.css (they follow the screen by themselves). They
   // make the browser move every card exactly as state() below describes it (A: the height of a card, ph: its smallest):
-  //   · a slot is A (the card) + the scroll of its steps + A - ph: the card stays until only ph of it is left uncovered,
-  //     then its slot ends and it goes on up with the page;
-  //   · every slot but the first is pulled up by A - ph, less the gap: the next card comes up under the old one's
-  //     smallest size, the gap between them. The section after the stack is pulled up the same way under the last card.
+  //   · a hold is P (where its card waits: 0 for the first, ph + gap for the others) + A (the card) + the scroll of its
+  //     steps + A - ph + H (its pill pinned; not for the last card): the card stays until only ph of it is left
+  //     uncovered and H more, then its hold ends and it goes on up with the page;
+  //   · a slot is its hold + H (the hold is sticky that long while the pill before is pinned; not for the first card),
+  //     and every slot but the first is pulled up by A + H: the next card comes up the gap under the old one's pill and
+  //     waits there while the pill is pinned. The section after the stack is pulled up by A - ph under the last card,
+  //     which has the copy at its top (see the top).
   // The first time, the section has just taken its new height: everything on the page is measured again (once).
   let laid = false;
   function layOut() { if (!laid) { laid = true; refreshSoon(); } }
@@ -313,12 +317,13 @@ export function initCards() {
   const target = () => V - section.getBoundingClientRect().top - (padTop - navH);
   function draw(p) {
     if (onDraw) onDraw(p);
+    // the last card's pill is the copy while it is pinned (see the top): the real card is hidden under it (read from
+    // where the copy is: it is pinned once it has reached the top, the very moment the real pill's own hold ends, both
+    // laid out by the styles, so the swap is exact). Read before anything is written, so no layout is forced
+    const endOn = !!endPin && p > last.to && endPin.band.getBoundingClientRect().top <= navH + 0.5;
     cards.forEach((c, i) => {
       const s = state(c, i, p), g = s.g, m = c.m;
-      // the last card's pill is the copy while it is pinned (see the top): the real card is hidden under it
-      // (read from where the copy is: it is pinned once it has reached the top, the very moment the real pill's own
-      // slot ends, both laid out by the styles, so the swap is exact)
-      const pinned = c === last && !!endPin && p > c.to && endPin.band.getBoundingClientRect().top <= navH + 0.5;
+      const pinned = c === last && endOn;
       if (c === last && endPin && endPin.shown !== pinned) { endPin.shown = pinned; endPin.holder.classList.toggle("is-on", pinned); }
       const fill = "inset(0 " + n2(100 - s.fill * 100) + "% 0 0)";
       if (fills.get(c) !== fill) { fills.set(c, fill); c.fill.style.clipPath = fill; }
