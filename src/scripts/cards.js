@@ -23,9 +23,9 @@
    The pinned pill: once a card has become the smallest card and the next one comes up, its pill stays where it is (a
    copy of it, fixed under the navbar: the card itself goes on up with the page, under it) while the next card comes up
    under it, until the next card's title would go under its edge (at most SET.hold screens past the moment the next
-   card has come all the way up). Then it leaves: it slides up and fades. It does that only on the way down: scrolled back, it leaves at once and the real
-   card comes back with the page, so it never waits there on the way back up. Not for the last card (the section after
-   the stack would be under it).
+   card has come all the way up). Then it leaves: it slides up and fades. It does that only on the way down:
+   scrolled back, it leaves at once and the real card comes back with the page, so it never waits there on the way
+   back up. Not for the last card (the section after the stack would be under it).
 
    How it moves, so that it stays smooth on phones: the browser moves the cards itself, with the page, like any other
    block (see stack.css): nothing is moved by the script, so nothing can lag behind the page or shake. Even the sizes
@@ -45,7 +45,7 @@ const SET = {
   artAt: 0.5,            // a card shows its drawing once it is this tall (0…1 of its full height)
   artWake: 0.3,          // a card that leaves lets its drawing go below this height (0…1); one that comes is made ready at once
   title: { in: 0.8, out: 0.3, stagger: 0.07, rise: 18, lift: 12, blur: 0.22 },  // the titles: seconds, how far the lines travel (% of a line), and how blurred they come and go (em)
-  titleLead: 0.12,       // a closing card hides its title this much (0…1 of its height) before the edge would reach it
+  titleLead: 0.12,       // a title shows once the open part reaches this much (0…1 of the card's height) below it; it hides at half that
   hold: 0.3,             // the pinned pill stays at most this many screens after the next card has come all the way up (it leaves earlier when the next card's title would go under it)
   pill: { out: 0.5, back: 0.22 },                        // the pinned pill leaves: seconds (on its way; when scrolled back)
   enter: { time: 0.9, rise: 32 }                         // the first card's way in: seconds, px it rises (no bounce: fm-out)
@@ -105,7 +105,6 @@ export function initCards() {
     const b = getComputedStyle(after).backgroundColor;
     if (!b || b === "transparent" || /rgba\(.*,\s*0\)$/.test(b)) after.style.backgroundColor = page;
     if (getComputedStyle(after).position === "static") after.style.position = "relative";
-    if (getComputedStyle(after).zIndex === "auto") after.style.zIndex = "1";   // drawn over the cards, said outright (not left to the order of the page)
   }
 
   // ── the titles: split into lines, which come and go one after another ──
@@ -279,12 +278,16 @@ export function initCards() {
       if (fills.get(c) !== fill) { fills.set(c, fill); c.fill.style.clipPath = fill; }
       flag(c, "off", "is-off", !g.seen || pinned);           // nothing of it is seen (or the pinned copy is in its place)
       flag(c, "white", "is-done", s.white, c.tag);           // the colour change itself is a transition in stack.css
-      // a title is shown while the open part of the card reaches below it (and the card's padding under it); while the
-      // card closes, a little earlier (SET.titleLead), so the edge never cuts through it
-      const closing = (s.phase < 0 && dir < 0) || (s.phase > 0 && dir > 0);
+      // a title is shown once the open part of the card reaches SET.titleLead of the card's height below it (with the
+      // card's padding under it), and hidden again when it is only half that: so a closing card hides its title before
+      // its edge could cut through it, and a finger that wobbles near the point does not make the title come and go
+      // (the two points are apart, whichever way the page goes)
       const now = c.titles[s.step];
       let fits = false;
-      if (now && g.seen) { const b = sizeOf(c, now); fits = b.y + b.h + m.padY + (closing ? SET.titleLead * m.A : 0) <= g.h + 0.5; }
+      if (now && g.seen) {
+        const b = sizeOf(c, now), lead = SET.titleLead * m.A * (c.title === s.step ? 0.5 : 1);
+        fits = b.y + b.h + m.padY + lead <= g.h + 0.5;
+      }
       showTitle(c, fits ? s.step : -1, dir);
       // the drawing whose turn it is (art/mount.js fades it in), as big as the open part leaves room for
       const turn = g.seen && g.h >= SET.artAt * m.A ? s.step : -1;
@@ -299,8 +302,9 @@ export function initCards() {
   // A copy of the card's smallest shape (its colour, its white label), fixed where the cards stick. It is shown when
   // the card has just become the smallest card on the way down (pill: the scroll at which that happens) and stays until
   // the next card's first title would go under it (touch), at most SET.hold screens past the moment the next card has
-  // come all the way up (until); then it slides up and fades. Scrolled back while it is pinned, it leaves at once (quicker), and the card itself, which has gone on up with
-  // the page under it, comes back with the page. It is shown again only after the page has been above that moment.
+  // come all the way up (until); then it slides up and fades. Scrolled back while it is pinned, it leaves at once
+  // (quicker), and the card itself, which has gone on up with the page under it, comes back with the page. It is shown
+  // only when the page goes past that moment on the way down.
   function makePin(c) {
     const el = div("stack__pin");
     el.style.setProperty("--card-bg", c.el.style.getPropertyValue("--card-bg"));
@@ -316,7 +320,7 @@ export function initCards() {
     box.append(...tag.childNodes);
     el.appendChild(box);
     section.appendChild(el);
-    return { el, state: "off", armed: true, tween: null };
+    return { el, state: "off", gone: false, at: undefined, tween: null };
   }
   function pinOf(c, i, p) {
     const P = c.pin, m = c.m, next = cards[i + 1];
@@ -325,18 +329,23 @@ export function initCards() {
     const lead = next.titles[0] ? sizeOf(next, next.titles[0]).y : m.ph;
     const touch = c.to + m.A + gap - Math.max(0, m.ph - lead) - 0.4 * m.ph;   // 0.4 of a pill early: it is gone before the title is there
     const pill = c.to + m.A - m.ph, until = Math.min(next.from + SET.hold * V, touch);
-    if (p < pill) P.armed = true;
-    if (P.state === "off" && P.armed && dir > 0 && p >= pill && p < until) {
-      P.armed = false; P.state = "on";
+    const before = P.at; P.at = p;
+    // only when the page has just gone past the moment the card became a pill, on the way down (not when it comes back
+    // into that stretch from further down, nor on the first measure)
+    if (P.state === "off" && before !== undefined && before < pill && p >= pill && p < until) {
+      P.state = "on"; P.gone = false;
       if (P.tween) P.tween.kill();
       gsap.set(P.el, { y: 0, opacity: 1, visibility: "visible" });
     } else if (P.state === "on" && (p >= until || dir < 0 || p < pill)) {
       leave(P, dir < 0 || p < pill);
     }
-    return P.state === "on";
+    // the card itself stays hidden while its copy is there or leaving, and after the copy has left on the way down,
+    // while what is left of it (a sliver going up under the navbar) would show; scrolled back, it comes back with the page
+    if (dir < 0 || p < pill) P.gone = false;
+    return P.state !== "off" || P.gone;
   }
   function leave(P, back) {
-    P.state = "leaving";
+    P.state = "leaving"; P.gone = !back;
     const done = () => { P.state = "off"; P.tween = null; gsap.set(P.el, { visibility: "hidden", y: 0, opacity: 1 }); };
     if (calm) return done();
     const T = back ? SET.pill.back : SET.pill.out;

@@ -9,8 +9,8 @@
 
    The card arranges itself by its own shape (it is a size container, @container card), not by the screen:
      · a wide card (at least 1.3 times as wide as tall: laptops, computers, tablets and phones turned sideways): the text
-       on the left, the drawing on the right as a square as tall as the card (at most 58% of its width), a little past
-       its right edge (the drawings have air of their own around them);
+       on the left in a column as wide as the titles need, the drawing centred in all the card right of it, as a square
+       as big as fits (at most as tall as the card);
      · a tall card (phones, tablets upright, a narrow window), and any card on a screen 1440px tall or taller: the text
        on top, the drawing in all the room below it.
    So the drawing always takes the card's room, on a tall screen as on a short one.

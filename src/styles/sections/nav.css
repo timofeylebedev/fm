@@ -1,8 +1,9 @@
 /* The navbar: fixed at the top, frosted. Its colour follows the section behind it (scripts/nav.js), and the
    outline of the current link slides from link to link (scripts/nav-pill.js). Below 1024px (--tablet) the links give
    way to a burger and a menu of pills (scripts/menu.js). Paddings: the nav/* tokens.
-   On phones turned sideways (--sideways: a short, wide screen) it slides away while the page is scrolled down and
-   comes back as soon as it is scrolled up (scripts/nav.js, "hide"): there the screen is too short to give it a strip.
+   On phones turned sideways (--sideways: a short, wide screen) it moves away with the page while it is scrolled down,
+   once the hero has gone, and comes back with it while it is scrolled up (scripts/nav.js, "hide"): there the screen is
+   too short to give it a strip.
    Its height is --nav-h (tokens.css): the controls (--nav-control, 32px) and the padding. */
 
 .nav {

@@ -158,17 +158,18 @@ export function initCap(nav) {
    media.css: narrower than 1024px, shorter than 500px, wider than tall) the navbar goes up out of sight while the page is
    scrolled down, and comes back while it is scrolled up. How:
      · it follows the scroll, px for px, like the bars of the phone's own browser: scrolled down by 20px, it is 20px
-       further out of sight; scrolled up by 20px, 20px further back. Nothing jumps, and a small slip of the finger the
-       other way moves it only by that much;
-     · once the scrolling stops (STILL_MS without a scroll event), it settles, with a glide that keeps its speed: back
-       in place if it was last moving back (or is mostly back), out of sight if it was last moving away;
+       further out of sight; scrolled up by 20px, 20px further back. Nothing jumps;
+     · once the scrolling stops (STILL_MS without a scroll event), it settles, with a glide that keeps its speed: out of
+       sight if it was last moving away and is a third of the way out already, back in place otherwise (so a small
+       slip of the finger brings it back);
      · it stays while any of the hero is under it: it starts to move away only when the hero's bottom edge reaches it,
        and then goes up with that edge. It stays too while the menu is open and while the keyboard is in it;
      · the browser's own bars: when they come and go (iOS shows them on the way up), the page's height and scroll
        position change by themselves for a moment. Those changes are not the visitor's scrolling, so for BARS_MS after
-       the visible screen changes size the navbar does not follow the scroll; neither does it while the page is pulled
-       past its top or bottom end (iOS lets it spring back). Both made the navbar on iPhones come down, jump up and
-       come down again on the way up;
+       the visible screen changes size the navbar does not follow the scroll (it still comes back over the hero), and
+       when that time is over the way the page went meanwhile decides: back if up, away if down (MOVE px or more);
+       it does not follow either while the page is pulled past its top or bottom end (iOS lets it spring back). Both
+       made the navbar on iPhones come down, jump up and come down again on the way up;
      · with "reduce motion" it does not move: it fades out once the page has gone AWAY px down, and back in after
        BACK px up.
    The class nav-hides on <html> says the mode is on (scroll.js then lands a block at the top of the screen on the way
@@ -179,6 +180,7 @@ export function initHide(nav) {
   const BARS_MS = 400;                                      // after the visible screen changed size: not the visitor's scrolling
   const SETTLE_S = 0.42;                                    // seconds for settling
   const AWAY = 24, BACK = 12;                               // reduce motion: px down that fade it out, px up that bring it back
+  const MOVE = 24;                                          // px the page must have gone while the bars moved, to count as a way
   const hides = () => getComputedStyle(nav).getPropertyValue("--nav-hides").trim() === "1";
   const root = document.documentElement;
   const menu = document.querySelector("[data-menu]");
@@ -186,6 +188,7 @@ export function initHide(nav) {
   const quiet = matchMedia("(prefers-reduced-motion: reduce)");
   const glide = glider(bezier(0.22, 1, 0.36, 1), 0);        // the site's --ease-out
   let on = false, H = 0, off = 0, last = scrollY, turn = scrollY, down = false, still = 0, bars = 0, settling = 0, cap = null;
+  let barsFrom = 0, barsEnd = 0;
 
   // how far the page must be scrolled before the navbar may move: the hero's bottom edge at its bottom edge
   const free = () => (hero ? hero.offsetTop + hero.offsetHeight - H : H);
@@ -193,10 +196,10 @@ export function initHide(nav) {
   const paint = () => {
     const away = H > 0 && off >= H - 0.5;
     root.classList.toggle("nav-away", away);
-    if (quiet.matches) { nav.style.translate = ""; return; }
-    nav.style.translate = off > 0.25 ? "0 " + (-off).toFixed(2) + "px" : "";
     cap = cap || document.querySelector(".nav-cap");
-    // the white strip: cut off from below by as much as the navbar has moved, and 48px more once it is away (stack.css)
+    if (quiet.matches) { nav.style.translate = ""; if (cap) cap.style.clipPath = ""; return; }   // nav.css fades both
+    nav.style.translate = off > 0.25 ? "0 " + (-off).toFixed(2) + "px" : "";
+    // the white strip: cut off from below by as much as the navbar has moved, and 48px more once it is away (nav.css)
     if (cap) cap.style.clipPath = off > 0.25 ? "inset(0 0 " + (off * (H + 48) / H).toFixed(2) + "px 0)" : "";
   };
   const stopSettling = () => { if (settling) { cancelAnimationFrame(settling); settling = 0; } };
@@ -212,18 +215,34 @@ export function initHide(nav) {
     };
     settling = requestAnimationFrame(tick);
   };
+  // where it goes when the scrolling stops part way: away only if it was last moving away, is a third of the way out
+  // already (a small slip of the finger brings it back) and the hero is far enough up; back otherwise
   const settle = () => {
     still = 0;
     if (!on || off <= 0.25 || off >= H - 0.25) return;
     const room = scrollY - free();                          // how far it may be away here
-    settleTo(down && room >= H ? H : 0);
+    settleTo(down && off > H / 3 && room >= H ? H : 0);
+  };
+  // the browser's bars have stopped moving: what the visitor did meanwhile (the page's net way) decides
+  const afterBars = () => {
+    barsEnd = 0;
+    if (!on || held()) return;
+    const net = scrollY - barsFrom;
+    if (Math.abs(net) < MOVE) return settle();
+    down = net > 0;
+    settleTo(down && scrollY - free() >= H ? H : 0);
   };
   const onScroll = () => {
     const y = scrollY, d = y - last;
     last = y;
     if (!on) return;
     const max = root.scrollHeight - innerHeight;
-    if (y < 0 || y > max + 1 || performance.now() < bars) return;   // the page pulled past its ends, or the browser's bars moving
+    if (y < 0 || y > max + 1) return;                     // the page pulled past its ends (iOS springs it back)
+    if (performance.now() < bars) {                         // the browser's bars are moving: not followed (see afterBars),
+      const most = Math.max(0, y - free());                 // but never away while the hero is under it
+      if (off > most) { stopSettling(); off = most; paint(); }
+      return;
+    }
     if (Math.abs(d) < 0.01) return;
     if (held()) { if (off) settleTo(0); return; }
     if (quiet.matches) {                                    // reduce motion: in or out at once (it fades: nav.css)
@@ -248,7 +267,14 @@ export function initHide(nav) {
     if (!on || held()) { stopSettling(); off = 0; paint(); }
     last = scrollY;
   };
-  const barsMoved = () => { bars = performance.now() + BARS_MS; last = scrollY; };
+  // the visible screen changed size (the browser's bars come or go): for BARS_MS the scroll is not followed; when that
+  // time is over, the net way the page went meanwhile decides (afterBars)
+  const barsMoved = () => {
+    if (!barsEnd) barsFrom = scrollY;
+    bars = performance.now() + BARS_MS; last = scrollY;
+    clearTimeout(still); still = 0;                         // a settle timed before would use the direction from before
+    clearTimeout(barsEnd); barsEnd = setTimeout(afterBars, BARS_MS + 20);
+  };
   addEventListener("resize", () => { barsMoved(); check(); });   // a phone turned, a window made shorter, the browser's bars
   if (window.visualViewport) visualViewport.addEventListener("resize", barsMoved);
   addEventListener("scroll", onScroll, { passive: true });

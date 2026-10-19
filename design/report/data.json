@@ -176,17 +176,17 @@
         },
         {
          "ask": "5. A card shrunk to a pill stays pinned for a bit, then scrolls away by a trigger; scrolling back it does not re-pin.",
-         "done": "On the way down a copy of the pill stays fixed under the navbar while the next card comes up under it, and leaves (slides up and fades, 0.5s) when the next card's title would reach it. Scrolled back, it leaves at once and the real card comes back with the page. Not for the last card. How long it stays is the open question: until the title reaches it is about 80–140px of scroll; staying longer would cover the next title (it would then have to wait).",
+         "done": "On the way down a copy of the pill stays fixed under the navbar while the next card comes up under it, and leaves (slides up and fades, 0.5s) when the next card's title would reach it. Scrolled back, it leaves at once and the real card comes back with the page. It pins only when the page passes that moment on the way down. Not for the last card. How long it stays is the open question: until the title reaches it is about 80–140px of scroll; staying longer would cover the next title (it would then have to wait).",
          "tag": "check"
         },
         {
          "ask": "6. Sometimes cards appear overlapping and stay under the next section (see the image).",
-         "done": "The images did not come through, and I could not reproduce it (reloads mid-stack, rotations, jumps, fast scrolling, 6 sizes). Done on the way: the sections after the stack are now drawn over it explicitly (z-index 1). Please send the screenshots and where it happened (phone, browser).",
+         "done": "The images did not come through, and I could not reproduce it (reloads mid-stack, rotations, jumps, fast scrolling, 6 sizes). Please send the screenshots and where it happened (phone, browser).",
          "tag": "open"
         },
         {
          "ask": "7. The title should disappear a bit earlier when the card is about to close.",
-         "done": "A closing card (going away, or scrolled back as it came) hides its title 12% of the card's height before the edge would reach it, and the title leaves into a blur.",
+         "done": "A title now shows once the open part of the card reaches 12% of the card's height below it and hides when only 6% is left, so a closing card's title goes before the edge reaches it, and a wobbling finger does not make it blink. It leaves into a blur.",
          "tag": "done"
         }
        ]
@@ -1641,7 +1641,7 @@
       },
       {
        "title": "Sections after the stack",
-       "html": "Get <code>position: relative; z-index: 1</code> from the script (were relative only), so they are drawn over the last card outright."
+       "html": "Unchanged: <code>position: relative</code> and the page colour from the script. (A z-index tried in this round painted the releases over the ID cards' shadows; taken out after the review.)"
       }
      ]
     }
@@ -1663,11 +1663,11 @@
       },
       {
        "title": "Settles",
-       "html": "140ms without a scroll event: if it is part way, a glide to away (if it was last moving away and the hero is far enough up) or back. 0.42s on the arrive curve, starting at the speed it had."
+       "html": "140ms without a scroll event: if it is part way, a glide to away (if it was last moving away, is a third of the way out and the hero is far enough up) or back. 0.42s on the arrive curve, starting at the speed it had."
       },
       {
        "title": "Ignores the browser",
-       "html": "For 400ms after the visible screen changes size (Safari's and the apps' bars) and while the page is pulled past its ends, the scroll does not move it."
+       "html": "For 400ms after the visible screen changes size (Safari's and the apps' bars) and while the page is pulled past its ends, the scroll does not move it (except that it always comes back over the hero); when the 400ms are over, the way the page went meanwhile decides: back if up, away if down (24px or more)."
       },
       {
        "title": "Reduce motion",
@@ -1797,6 +1797,23 @@
        "unit": "errors",
        "text": "in the console, scrolling down and up, normal, reduced motion and ?fmcards=debug"
       }
+     ]
+    },
+    {
+     "type": "list",
+     "title": "Independent review",
+     "sub": "A separate agent that had not seen the work tested the commit at ten sizes and tried to break it. Its findings and what was done:",
+     "items": [
+      "<b>Navbar ignored real scrolling during the 0.4s after the bars moved</b> (it could stay hidden on the way up, even over the hero): now it always comes back over the hero, and when the 0.4s end the way the page went decides. Fixed and re-tested.",
+      "<b>A settle timed before the bars moved used the old direction</b>: the timer is cleared when the bars move. Fixed.",
+      "<b>Titles blinked when the direction wobbled</b> near the early-hide point: show and hide points are now apart (12% / 6%), whichever way. Fixed: 10 wobbles, 0 swaps.",
+      "<b>The pinned pill could pop in late</b> after coming back into its stretch from below: it pins only when the page passes the moment on the way down. Fixed.",
+      "<b>Two pills for a moment while the copy left</b>: the real card stays hidden until the copy has gone (and its sliver under the navbar too). Fixed: 0 of 22 pinned frames.",
+      "<b>z-index 1 on the sections after the stack cut the ID cards' shadows</b>: taken out (it was only a guess at comment 6).",
+      "<b>A 4px slip sent the navbar all the way away</b>: it settles away only from a third of the way out. Fixed.",
+      "<b>The white strip's clip could stick when reduce motion turned on</b>: cleared. Fixed.",
+      "<b>Comments that had become false</b> (stack layout, navbar): rewritten.",
+      "Not changed: sideways phones show only the text and heads on the first screen (a decision to confirm, see Next); a stack title can reach 2–29px past its text column on 568×320 and 1024×768 (as before this round; the drawing now sits next to it)."
      ]
     },
     {
