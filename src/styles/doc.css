@@ -1,0 +1,102 @@
+/* The two legal documents (privacy_policy_ru.html, soglasie_cookie.html): the logo navbar of the 404 page, frosted
+   like the main navbar; the title on the sand of the first screen (as the hero); the text in one reading column on
+   white; the site's footer.
+   Sizes come from the scale (design/scale.json) like the rest of the site. One local value: --doc-line, the line
+   height of the text (1.5, not --lh-text 1.3): a long legal text is read line after line, not glanced at like the
+   page's short texts (design/decisions.json, "doc-pages"). */
+@import "./base/media.css";
+@import "./base/tokens.css";
+@import "./base/tokens.gen.css";
+@import "./base/fonts.css";
+@import "./base/base.css";
+@import "./sections/footer.css";
+
+:root {
+  --doc-measure: 42rem;                               /* the text column: ~70 letters a line at 16px */
+  --doc-line: 1.5;
+}
+
+.doc-nav {
+  position: fixed; inset: 0 0 auto; z-index: 10;
+  display: flex; align-items: center;
+  padding: var(--nav-pad-y) var(--nav-pad-right) var(--nav-pad-y) var(--nav-pad-left);
+  background-color: var(--glass-nav);
+  -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
+}
+.doc-nav__home { display: inline-flex; color: var(--ink); border-radius: 8px; }
+.doc-nav__logo { width: calc(var(--nav-control) * 4.6); height: var(--nav-control); }
+
+.doc__column {
+  width: 100%; max-width: calc(var(--doc-measure) + 2 * var(--gutter));
+  margin-inline: auto; padding-inline: var(--gutter);
+}
+.doc__head {
+  background: var(--sand);
+  padding-block: calc(var(--nav-h) + var(--section-y)) var(--section-y);
+}
+.doc__title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: var(--type-card-heading); line-height: var(--lh-heading);
+  text-wrap: balance;
+}
+.doc__date { margin-top: var(--text-gap); font-size: var(--type-body); line-height: var(--lh-text); color: var(--ink-60); }
+
+h4 { margin: 0; font: inherit; }                    /* (base.css resets h1–h3 only) */
+
+/* ── the text ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+.doc__body {
+  padding-block: var(--section-y) calc(var(--section-y) * 1.5);
+  font-size: var(--type-body); line-height: var(--doc-line);
+  & > * + * { margin-top: var(--text-gap); }
+  & p { text-wrap: pretty; }
+  & strong { font-weight: 600; }
+  & a {
+    text-decoration: underline 1px var(--ink-30); text-underline-offset: 3px;
+    overflow-wrap: anywhere;                          /* long addresses wrap anywhere instead of pushing the page wide */
+    transition: text-decoration-color var(--hover-out) var(--ease-out);
+    @media (--mouse) { &:hover { text-decoration-color: var(--ink); transition-duration: var(--hover-in); } }
+  }
+}
+.doc-h2 {
+  font-size: var(--type-lead); font-weight: 600; line-height: var(--lh-heading);
+  .doc__body > & { margin-top: var(--section-gap); }
+  .doc__body > &:first-child { margin-top: 0; }
+}
+.doc-h3 {
+  font-size: var(--type-body); font-weight: 600; line-height: var(--doc-line);
+  .doc__body > & { margin-top: calc(var(--text-gap) * 2); }
+  .doc__body > .doc-h2 + & { margin-top: var(--text-gap); }
+}
+.doc-h4, .doc-group {
+  font-weight: 600;
+  .doc__body > & { margin-top: calc(var(--text-gap) * 1.5); }
+}
+.doc-note { font-size: var(--type-body-s); color: var(--ink-60); }
+
+/* lists: the marker of the text — (1), 1.1., — or a dot — hangs in its own column */
+.doc-list {
+  display: grid; gap: 4px;
+  & li {
+    display: grid; grid-template-columns: minmax(2.25em, max-content) minmax(0, 1fr); column-gap: 0.5em;
+  }
+  & .doc-list__n { color: var(--ink-50); font-variant-numeric: tabular-nums; }
+}
+.doc-list--dot li::before { content: "•"; color: var(--ink-50); }
+.doc-list--dot li, .doc-list--dash li { grid-template-columns: 1em minmax(0, 1fr); }
+
+/* a purpose of processing (№ 1–13): a card one step off the white, its corner radius = its padding (as the
+   half-column cards of the page); several groups of subjects inside one card are parted by a line */
+.doc-card {
+  padding: var(--radius-m); border-radius: var(--radius-m);
+  background: var(--mist);
+  .doc__body > & { margin-top: var(--gap-cards); }
+  .doc__body > :not(.doc-card) + & { margin-top: calc(var(--text-gap) * 2); }
+  .doc__body > & + :not(.doc-card) { margin-top: calc(var(--text-gap) * 2); }
+  & > * + * { margin-top: var(--text-gap); }
+  & > .doc-list { margin-top: 8px; }
+}
+.doc-card__title { font-family: var(--font-display); font-weight: 700; font-size: var(--type-lead); line-height: var(--lh-heading); }
+.doc-card__rule {
+  height: 0; margin: calc(var(--text-gap) * 1.5) 0; border: 0; border-top: 1px solid var(--ink-10);
+  & + * { margin-top: 0; }
+}
