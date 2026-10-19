@@ -8,12 +8,12 @@
     {
       "id": "cta-light-middle",
       "kind": "exception",
-      "what": "CTA card: the white title, the white text and the focus ring of the white button sit on the light purple between the dots (#b596ff, STIPPLE_CTA.background in scripts/stipple.js)",
+      "what": "CTA card: the white title and the white text sit on the purple card (#884dff) with white dust moving over it (15%, scripts/stipple.js; until Oct 19, 2026 on the light purple #b596ff between purple dots)",
       "rule": "WCAG 1.4.3 text contrast (3 : 1 large, 4.5 : 1 text), 1.4.11 focus indicator 3 : 1",
-      "measured": "text 2.39 : 1, focus ring 1.93 : 1 (Oct 17, 2026)",
+      "measured": "text 2.39 : 1, focus ring 1.93 : 1 (Oct 17, 2026, the old dots); with the white dust: the lead 4.4–4.5 : 1 at 320 px (the audit, Oct 19, 2026; the dust moves), the title passes",
       "decided": "Tim, 2026-10-18 — kept for now",
-      "why": "the look of the card: purple dots on a lighter purple",
-      "fix": "swap the two colours of the dots (purple between them: white text 4.61 : 1), or a darker middle; the focus ring can be ink on this card (8.8 : 1)",
+      "why": "the look of the card: white dust over its text",
+      "fix": "invClear in STIPPLE_CTA (the dust thins out round each text line: quietPad), or less dust (invOpacity); the focus ring can be ink on this card (8.8 : 1)",
       "audit": {
         "pixels": [
           ".cta__title",
@@ -26,7 +26,7 @@
       "kind": "exception",
       "what": "White text on the colours of the card stack and the stats: the orange «Документы» and green «Финансы» cards, their labels (also over the progress fill), the orange, green and blue stats",
       "rule": "WCAG 1.4.3 text contrast: the labels are 500, not bold, so they need 4.5 : 1",
-      "measured": "labels on orange 2.95 (over the fill 2.17), on green 3.76 (2.52); stat labels 2.8 (orange) – 3.6 (green); stat numbers 2.3 (orange) – 2.8 (green) on the dots (Oct 17, 2026)",
+      "measured": "labels on orange 2.95 (over the fill 2.17), on green 3.76 (2.52); stat labels 2.8 (orange) – 3.6 (green); stat numbers 2.3 (orange) – 2.8 (green) on the dots (Oct 17, 2026); since Oct 19, 2026 the stats are filled with their colour under white dust: «>20 000» and «Договоров» 2.95 on orange",
       "decided": "Tim, 2026-10-17 (orange) and 2026-10-18 (green, the progress fill)",
       "why": "the brand colours of the subjects",
       "fix": "text-safe shades for text-bearing surfaces: orange #c25700, green #008a25 (4.5 : 1)",
@@ -134,7 +134,7 @@
     {
       "id": "endless-motion",
       "kind": "exception",
-      "what": "Things that move by themselves without end and have no pause switch: the CTA's strip of words, the hero chips, the ring's idle spin, the dots of the stats and the CTA, the loops in the drawings. They all stop for visitors who turned on \"reduce motion\"",
+      "what": "Things that move by themselves without end and have no pause switch: the CTA's strip of words, the hero chips, the ring's idle spin, the dust of the stats and the CTA, the loops in the drawings. They all stop for visitors who turned on \"reduce motion\"",
       "rule": "WCAG 2.2.2 Pause, Stop, Hide (moving content that lasts more than 5 seconds can be paused)",
       "decided": "Tim, 2026-10-18 — no pause switch, the strip keeps its loop",
       "why": "the look of the page; reduce motion covers the visitors who need it",
