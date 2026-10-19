@@ -146,6 +146,21 @@
       "what": "The burger menu's pills open with the settle curve, from 20% to 117% and back to 100%, 0.8s in all, and close by playing the same backwards",
       "decided": "Tim, 2026-10-18 — kept as designed",
       "why": "the character of the menu"
+    },
+    {
+      "id": "cookie-notice",
+      "kind": "decision",
+      "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (6% under the mouse, the one colour without a token), as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25",
+      "decided": "Tim, 2026-10-19 — the Figma section 'cookies' (pending his review of PR: cookies)",
+      "why": "a small note in the corner that should look the same everywhere; 1.3 is the line height of all small text on the site"
+    },
+    {
+      "id": "consent-by-ok",
+      "kind": "decision",
+      "what": "Only «ОК» counts as consent: nothing optional (analytics, a chat) starts before it (scripts/consent.js, onConsent). The answer is kept 12 months on the device, with the version of the text (VERSION); a visitor who has not answered is asked again on the next visit",
+      "decided": "Claude, 2026-10-19 — proposed to Tim with the cookie notice",
+      "why": "152-ФЗ art. 9: consent is specific and unambiguous; by 2026 practice, staying on the page or scrolling is not treated as consent to analytics",
+      "fix": "if the text keeps «Оставаясь, вы даете согласие», it promises more than the code does: change it to «Нажимая «ОК», вы даёте согласие…», or accept that analytics waits for «ОК» anyway"
     }
   ]
 }

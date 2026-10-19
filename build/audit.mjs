@@ -80,7 +80,10 @@ function measure() {
   for (let n; (n = walker.nextNode()); ) {
     const e = n.parentElement;
     if (!e || !n.textContent.trim() || e.closest(".fm-stage, .hero-chips, .sprite, script, style") || !shown(e)) continue;
-    const k = e.offsetHeight ? e.getBoundingClientRect().height / e.offsetHeight : 1;
+    // drawn size ÷ laid-out size: below 1 only when the element is scaled down. Both sides, the larger: offsetWidth and
+    // offsetHeight are whole px, so one of them alone reads a box of 39.6px (trimmed text, say) as scaled by 0.99
+    const b = e.getBoundingClientRect();
+    const k = e.offsetHeight && e.offsetWidth ? Math.max(b.height / e.offsetHeight, b.width / e.offsetWidth) : 1;
     const px = parseFloat(getComputedStyle(e).fontSize) * (k > 0.05 && k < 1.01 ? k : 1);
     if (px < 11.95) out.small.push(`${path(e)} «${n.textContent.trim().slice(0, 24)}» ${px.toFixed(1)}px`);
   }

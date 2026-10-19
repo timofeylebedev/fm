@@ -1,0 +1,81 @@
+/* The cookie notice (scripts/cookies.js; the Figma section "cookies": default, link on hover, done). A small frosted
+   card in the bottom left corner, the same at every screen width: the text, and the «ОК» button that turns into a
+   drawn checkmark. Like the navbar it takes the colour of the section behind it (scripts/tint.js), here at 80%
+   (--paper-80: white on a white section). Its sizes are in rem, like its text (type/note 12px, type/ui 14px), so with bigger
+   browser text the whole card grows with it, never wider than the screen. */
+
+@import "../base/media.css";
+
+.cookies {
+  position: fixed; z-index: 190;                    /* under the navbar and its menu (200, 199), over the page */
+  left: max(8px, env(safe-area-inset-left)); bottom: max(8px, env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 8px;
+  box-sizing: border-box;
+  width: 17.25rem;                                   /* 276px */
+  max-width: calc(100vw - 2 * max(8px, env(safe-area-inset-left)));
+  padding: 8px 8px 8px 12px;
+  border-radius: 16px;                               /* the button inside: 16 − its inset 8 = 8 */
+  font-size: var(--type-note); line-height: var(--lh-text);
+  color: var(--ink-70);
+  background-color: var(--paper-80);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  box-shadow: 0 4px 16px var(--ink-10);              /* the shadow of the menu pills */
+  opacity: 0;                                        /* scripts/cookies.js fades it in, and out */
+}
+
+.cookies__text {
+  flex: 1; min-width: 0; margin: 0;
+  text-box: trim-both cap alphabetic;                /* centred by its letters, as in Figma (where the browser can) */
+}
+.cookies__link {
+  /* a taller target to tap, the lines staying where they are (padding on a line of text moves nothing): 25px at 12px
+     (the line is 15.6px), as the footer links (footer.css). The two links are two lines apart, so their targets never
+     overlap */
+  padding-block: 5px;
+  color: inherit;
+  text-decoration: underline 1px var(--ink-10); text-decoration-skip-ink: none;
+  transition: color var(--hover-out) var(--ease-out), text-decoration-color var(--hover-out) var(--ease-out);
+}
+@media (--mouse) {
+  .cookies__link:hover { color: var(--ink); text-decoration-color: var(--ink-30); transition-duration: var(--hover-in); }
+}
+
+.cookies__ok {
+  position: relative; flex: none;
+  display: grid; place-items: center;
+  width: 3rem; height: 3rem;                         /* 48px */
+  border-radius: 8px;
+  font-size: var(--type-ui);
+  line-height: var(--lh-compact);
+  color: var(--ink-70);
+  background-color: var(--tint-hover);               /* black at 5%, as in Figma */
+  transition: background-color var(--hover-out) var(--ease-out), scale 0.6s var(--ease-settle);
+  user-select: none; -webkit-user-select: none;
+}
+/* Figma's hover: black at 6%. No colour token has it (the tints are 3% and 5%, the next ink step 10%), so it is
+   written here, once (design/decisions.json, cookie-notice) */
+@media (--mouse) { .cookies__ok:hover { background-color: rgb(0 0 0 / 0.06); transition-duration: var(--hover-in); } }
+/* pressed: gives in to 97% and springs back past its size, as every button of the site (button.css) */
+@media (prefers-reduced-motion: no-preference) {
+  .cookies__ok:active { scale: 0.97; transition: background-color var(--hover-in) var(--ease-out), scale 0.15s var(--ease-out); }
+}
+
+.cookies__label, .cookies__check { grid-area: 1 / 1; }
+.cookies__check {
+  width: 100%; height: 100%;
+  fill: none; stroke: var(--ink); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;         /* the path is 1 long (pathLength): drawn from 1 to 0 */
+}
+
+/* what a screen reader hears after «ОК» (nothing is shown) */
+.cookies__said {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* Windows high-contrast mode: the card keeps its edge, the button its shape */
+@media (forced-colors: active) {
+  .cookies { border: 1px solid CanvasText; }
+  .cookies__ok { border: 1px solid ButtonText; }
+  .cookies__check { stroke: CanvasText; }
+}
