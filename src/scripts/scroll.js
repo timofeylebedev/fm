@@ -14,11 +14,13 @@
        loads, a pinned block is measured again);
      · the visitor takes over at once: a turn of the wheel, a touch, a key that scrolls, a drag of the scrollbar stops it;
      · "reduce motion": it jumps.
+   Where the page scrolls (the window, or the page's box in Safari on a Mac): scroller.js.
    The page's CSS (base.css) also has scroll-padding-top as tall as the navbar, for whatever the browser scrolls to by
    itself (the focus, a #link in the address). */
 import { bezier, glider } from "./glide.js";
 import { reveal } from "./motion.js";
 import { ScrollTrigger } from "./gsap.js";
+import { y as scrollY, to, max } from "./scroller.js";
 
 const EASE = bezier(0.5, 0, 0.12, 1);          // gentle start, long soft landing
 const TIME = { min: 0.55, max: 1.5, perScreen: 0.16 };   // seconds: the least, the most, and per screen of distance
@@ -39,13 +41,12 @@ function navCover(down) {
 export function placeOf(el) {
   if (!el || el === document.body || el === root) return 0;
   const spacer = el.parentElement && el.parentElement.classList.contains("pin-spacer") ? el.parentElement : null;
-  const top = (spacer || el).getBoundingClientRect().top + scrollY;
-  let y = top - navCover(top > scrollY);
+  const top = (spacer || el).getBoundingClientRect().top + scrollY();
+  let y = top - navCover(top > scrollY());
   // pinned: where its pinning starts, when the block is seen whole there
   const st = spacer && ScrollTrigger.getAll().find((t) => t.pin === el);
   if (st && st.start < y) y = st.start;
-  const max = root.scrollHeight - innerHeight;
-  return Math.round(Math.min(max, Math.max(0, y)));
+  return Math.round(Math.min(max(), Math.max(0, y)));
 }
 
 let run = null;                                // the scroll under way: { glide, el, raf }
@@ -70,9 +71,9 @@ addEventListener("keydown", (e) => {
 export function scrollToEl(el, onDone) {
   const instant = calm.matches;
   const t = now();
-  if (instant) { stop(); scrollTo({ top: placeOf(el), behavior: "instant" }); if (onDone) onDone(); return; }
+  if (instant) { stop(); to(placeOf(el)); if (onDone) onDone(); return; }
   if (!run) {
-    run = { glide: glider(EASE, scrollY), el, raf: 0, done: [], last: scrollY };
+    run = { glide: glider(EASE, scrollY()), el, raf: 0, done: [], last: scrollY() };
     root.classList.add("fm-scrolling");
   }
   run.el = el;
@@ -88,10 +89,10 @@ export function scrollToEl(el, onDone) {
     const goalNow = placeOf(run.el);
     if (Math.abs(goalNow - run.glide.target[0]) > 1) run.glide.retarget(goalNow);
     // the visitor dragged the scrollbar: the page is not where we left it
-    if (Math.abs(scrollY - run.last) > 2) { stop(); return; }
+    if (Math.abs(scrollY() - run.last) > 2) { stop(); return; }
     const s = run.glide.at(now());
-    scrollTo({ top: s.p[0], behavior: "instant" });
-    run.last = scrollY;
+    to(s.p[0]);
+    run.last = scrollY();
     if (s.done) { stop(); return; }
     run.raf = requestAnimationFrame(frame);
   };

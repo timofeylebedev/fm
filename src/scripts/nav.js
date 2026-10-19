@@ -1,6 +1,7 @@
 /* The navbar: its colour follows the section behind it (tint), and in the browsers built into apps a strip of white
    covers the page above it (cap). The outline of the current link is in nav-pill.js. */
 import { ScrollTrigger } from "./gsap.js";
+import { box, y as scrollY, onScroll, watchSize, paper } from "./scroller.js";
 
 /* ── tint ──
    The navbar takes the colour of the section that is behind it, at its own transparency (70%): behind the hero it is
@@ -12,7 +13,7 @@ import { ScrollTrigger } from "./gsap.js";
      · where sections overlap, the lower one on the page is drawn over the upper one, as the browser draws them;
      · the colours are read once, again when the screen changes size and when the page has loaded
        (fmNavTint.refresh() in the console reads them again). */
-const SECTIONS = "main > section, body > footer";
+const SECTIONS = "main > section, [data-page] > footer";
 
 export function initTint(nav) {
   // "rgb(1, 2, 3)", "rgba(1, 2, 3, 0.5)", "rgb(1 2 3 / 50%)" → [r, g, b, a]; anything else → null
@@ -28,7 +29,7 @@ export function initTint(nav) {
 
   let page = [255, 255, 255, 1], sections = [], queued = 0, tint = "";
   const read = () => {
-    page = over(seen(parse(getComputedStyle(document.body).backgroundColor)) || [255, 255, 255, 1], [255, 255, 255, 1]);
+    page = over(seen(parse(paper())) || [255, 255, 255, 1], [255, 255, 255, 1]);
     sections = [...document.querySelectorAll(SECTIONS)]
       .map((el) => ({ el, c: seen(parse(getComputedStyle(el).backgroundColor)) }))
       .filter((s) => s.c);
@@ -58,10 +59,10 @@ export function initTint(nav) {
   const later = () => { if (!queued) queued = requestAnimationFrame(paint); };
   const refresh = () => { read(); later(); };
   refresh();
-  addEventListener("scroll", later, { passive: true });
+  onScroll(later);
   addEventListener("resize", refresh);
   addEventListener("load", refresh);
-  new ResizeObserver(later).observe(document.body);   // the page grew or shrank (pictures, the card stack, a pinned block)
+  watchSize(new ResizeObserver(later));               // the page grew or shrank (pictures, the card stack, a pinned block)
   ScrollTrigger.addEventListener("refresh", later);   // pinned blocks were measured and placed again
   window.fmNavTint = { refresh };
 }
@@ -96,6 +97,7 @@ export function initCap(nav) {
   const touch = matchMedia("(hover: none) and (pointer: coarse)").matches;
   if (DEBUG) import("./debug.js").then((m) => m.capDebug(touch));
   if (!touch && !DEBUG) return;
+  if (box) return;                          // the page scrolls in its own box (Safari on a Mac): no app's browser
   if (!CSS.supports("animation-timeline: scroll()")) return;
 
   const cap = document.createElement("div");
@@ -108,7 +110,7 @@ export function initCap(nav) {
   document.body.prepend(cap);
 
   const root = document.documentElement;
-  let queued = 0, max = 0, navTop = 0, lastY = scrollY, down = false, idle = 0, shift = 0, still = false;
+  let queued = 0, max = 0, navTop = 0, lastY = scrollY(), down = false, idle = 0, shift = 0, still = false;
   const inApp = !!(window.webkit && window.webkit.messageHandlers);
   const place = () => {
     queued = 0;
@@ -124,7 +126,7 @@ export function initCap(nav) {
   };
   const bounce = () => {
     if (!inApp) return;
-    const off = scrollY > max - innerHeight;
+    const off = scrollY() > max - innerHeight;
     if (off !== still) { still = off; root.style.overscrollBehaviorY = off ? "none" : ""; }
   };
   const fix = () => {
@@ -138,8 +140,8 @@ export function initCap(nav) {
   addEventListener("scroll", () => {
     fix();
     bounce();
-    const nowDown = scrollY > lastY;
-    lastY = scrollY;
+    const nowDown = scrollY() > lastY;
+    lastY = scrollY();
     if (nowDown !== down) { down = nowDown; reach(down ? DOWN_EXTRA : 0); }
     clearTimeout(idle);
     idle = setTimeout(() => { fix(); if (down) { down = false; reach(0); } }, IDLE_MS);
@@ -167,10 +169,10 @@ export function initHide(nav) {
   let on = hides();
   const root = document.documentElement;
   const menu = document.querySelector("[data-menu]");
-  let last = scrollY, turn = scrollY, away = false;
+  let last = scrollY(), turn = scrollY(), away = false;
   const set = (v) => { if (v !== away) { away = v; root.classList.toggle("nav-away", v); } };
-  const onScroll = () => {
-    const y = scrollY, h = nav.offsetHeight;
+  const onScrolled = () => {
+    const y = scrollY(), h = nav.offsetHeight;
     if (!on || y <= h || (menu && menu.classList.contains("is-open")) || nav.contains(document.activeElement)) {
       set(false); last = turn = y; return;
     }
@@ -179,9 +181,9 @@ export function initHide(nav) {
     else if (y < last && turn - y >= MOVE) set(false);
     last = y;
   };
-  const check = () => { on = hides(); root.classList.toggle("nav-hides", on); onScroll(); };
+  const check = () => { on = hides(); root.classList.toggle("nav-hides", on); onScrolled(); };
   addEventListener("resize", check);                        // a phone turned, a window made shorter
-  addEventListener("scroll", onScroll, { passive: true });
+  onScroll(onScrolled);
   nav.addEventListener("focusin", () => set(false));
   check();
 }

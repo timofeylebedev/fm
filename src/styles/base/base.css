@@ -39,6 +39,25 @@ body {
   }
 }
 
+/* Safari on a Mac: the page scrolls in its own box, .page, which fills the screen (scroller.js says why; boot.js gives
+   <html> the class). The window itself does not scroll, so nothing goes on under Safari's bar and it stays solid.
+     · the body is see-through, so past the ends of the box (where Safari springs back) the root's colours show, sand
+       above and grey below, as before; the white of the page is the box's, and it moves with the page ("local");
+     · what the root did for the window, the box does for itself: room for the navbar when the browser scrolls to
+       something, no scroll anchoring;
+     · the box holds the focus at first (main.js), so the keys scroll the page: it is not outlined. */
+html.boxed:has(> body > .page) {
+  height: 100%; overflow: hidden;
+  & body { height: 100%; min-height: 0; overflow: hidden; background: transparent; }
+  & body::before { display: none; }
+  & .page {
+    position: fixed; inset: 0; overflow: hidden auto;
+    background: var(--paper) local;
+    scroll-padding-top: var(--nav-h); overflow-anchor: none;
+    outline: none;
+  }
+}
+
 h1, h2, h3, p, ul, dl, dd, figure { margin: 0; }
 h1, h2, h3 { font: inherit; }
 ul { padding: 0; list-style: none; }
