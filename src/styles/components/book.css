@@ -17,7 +17,8 @@
   margin: 0; padding: var(--inset);
   border: 0; color: var(--ink);
   background: var(--glass-nav);
-  -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+  /* the page behind keeps moving (the dots, the ring), so the glass is blurred anew every frame: a modest radius */
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
   overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
   @media (prefers-reduced-transparency: reduce) { background: var(--sand); -webkit-backdrop-filter: none; backdrop-filter: none; }
   @media (--phone) { padding: 0; }
@@ -40,7 +41,8 @@ html.book-open { overflow: hidden; }
   border-radius: var(--radius-l);
   background: var(--paper);
   box-shadow: 0 24px 64px var(--ink-10);
-  overflow: clip;
+  /* not clipped: the bar sticks to the window's scroll, which a clipping card would stop (Safari 15 has no
+     overflow: clip, only hidden); the bar and the body round their own corners instead */
   @media (--phone) { margin: auto 0 0; border-radius: var(--radius-l) var(--radius-l) 0 0; box-shadow: none; }
 }
 
@@ -49,6 +51,7 @@ html.book-open { overflow: hidden; }
   position: sticky; top: 0; z-index: 2;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   min-height: 56px; padding: 8px 12px 8px 24px;
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
   background: var(--paper);
   @media (--phone) { padding-left: 20px; touch-action: none; cursor: grab; }   /* in line with the calendar's text */
 }
@@ -80,8 +83,11 @@ html.book-open { overflow: hidden; }
 
 /* the frame's room: as tall as the calendar says it is (book.js), the change of height eased while the window is open */
 .book__body {
-  position: relative; overflow: clip;
-  @media (--phone) { padding-bottom: env(safe-area-inset-bottom); }   /* clear of the home bar of an iPhone */
+  position: relative;
+  overflow: hidden;                                     /* clip where it exists (below); Safari 15 has only hidden */
+  @supports (overflow: clip) { overflow: clip; }
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  @media (--phone) { border-radius: 0; padding-bottom: env(safe-area-inset-bottom); }   /* clear of the home bar of an iPhone */
 }
 .book__frame {
   display: block; width: 100%; height: 1040px;          /* until the calendar reports its height (one column) */
