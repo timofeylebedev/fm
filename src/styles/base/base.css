@@ -45,16 +45,21 @@ body {
        above and grey below, as before; the white of the page is the box's, and it moves with the page ("local");
      · what the root did for the window, the box does for itself: room for the navbar when the browser scrolls to
        something, no scroll anchoring;
-     · the box holds the focus at first (main.js), so the keys scroll the page: it is not outlined. */
-html.boxed:has(> body > .page) {
-  height: 100%; overflow: hidden;
-  & body { height: 100%; min-height: 0; overflow: hidden; background: transparent; }
-  & body::before { display: none; }
-  & .page {
-    position: fixed; inset: 0; overflow: hidden auto;
-    background: var(--paper) local;
-    scroll-padding-top: var(--nav-h); overflow-anchor: none;
-    outline: none;
+     · the box holds the focus at first (main.js), so the keys scroll the page: it is not outlined;
+     · the navbar is not fixed to the screen there but sticks to the top of the box (nav.css): the wheel, the trackpad
+       and the keys over something fixed go to the window, which does not scroll, and the page would not move;
+     · on screens only: printed, the page is the whole page, as everywhere. */
+@media screen {
+  html.boxed:has(> body > .page) {
+    height: 100%; overflow: hidden;
+    & body { height: 100%; min-height: 0; overflow: hidden; background: transparent; }
+    & body::before { display: none; }
+    & .page {
+      position: fixed; inset: 0; overflow: hidden auto;
+      background: var(--paper) local;
+      scroll-padding-top: var(--nav-h); overflow-anchor: none;
+      outline: none;
+    }
   }
 }
 

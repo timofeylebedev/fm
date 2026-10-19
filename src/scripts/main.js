@@ -12,7 +12,7 @@ import { initHero } from "./hero.js";
 import { initRing } from "./ring.js";
 import { initLogos } from "./logos.js";
 import { initDeck } from "./deck.js";
-import { box, height as pageHeight, watchSize } from "./scroller.js";
+import { box, height as pageHeight, watchSize, ioRoot } from "./scroller.js";
 
 const root = document.documentElement;
 root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
@@ -56,7 +56,7 @@ const near = (els, margin, load) => {
     if (!entries.some((e) => e.isIntersecting)) return;
     io.disconnect();
     setTimeout(load, 0);                         // in a task of its own, not together with the other work of this moment
-  }, { rootMargin: margin });
+  }, { root: ioRoot, rootMargin: margin });
   els.forEach((el) => io.observe(el));
 };
 ["cards", "cta"].forEach((set) => near([...document.querySelectorAll(`[data-dots='${set}']`)], "100% 0px",

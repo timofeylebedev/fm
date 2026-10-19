@@ -16,6 +16,9 @@
   @media (--sideways) { --nav-hides: 1; }             /* read by scripts/nav.js: the navbar slides away on the way down */
   @media (--calm) { transition: opacity 0.2s var(--ease-out); }   /* reduce motion: it fades out and back instead of sliding */
 }
+/* in the page's own box (Safari on a Mac, base.css) it sticks to the top of the box instead: as tall as before, taking no
+   room (the hero starts under it, as with fixed), and inside the box, so the wheel over it scrolls the page */
+@media screen { html.boxed:has(> body > .page) .nav { position: sticky; top: 0; margin-bottom: calc(-1 * var(--nav-h)); } }
 html.nav-away .nav { translate: 0 calc(-100% - 1px); }
 @media (--calm) { html.nav-away .nav { translate: none; opacity: 0; pointer-events: none; } }
 .nav__row { display: flex; justify-content: space-between; width: 100%; max-width: 1920px; }   /* as wide as the stack's cards at most */
