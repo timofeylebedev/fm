@@ -14,6 +14,7 @@ import { initLogos } from "./logos.js";
 import { initDeck } from "./deck.js";
 import { box, height as pageHeight, watchSize, ioRoot } from "./scroller.js";
 import { hasConsent } from "./consent.js";
+import { initBook } from "./book.js";
 
 const root = document.documentElement;
 root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
@@ -94,17 +95,9 @@ if (!hasConsent()) {
 // fmCookies.replay() in the console shows the notice again, also to someone who has agreed (cookies.js is then loaded)
 window.fmCookies ??= { replay: () => import("./cookies.js").then((m) => m.showCookies({ delay: 0, force: true })) };
 
-// ── the booking popup of Planerka: its script is loaded once the page has loaded and the browser is free, so it does
-//    not compete with the page. A click before that simply opens the booking page itself (the link's own address). ──
-addEventListener("load", () => (window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(() => {
-  document.querySelectorAll("[data-demo]").forEach((a) => Object.assign(a.dataset, {
-    planerkaEmbed: "popup", planerkaUrl: "https://planerka.app", planerkaUser: "flow-medium-8nzjz3", planerkaEvent: "demo"
-  }));
-  const s = document.createElement("script");
-  s.src = "https://planerka.app/assets/external/embed.js";
-  s.async = true;
-  document.body.appendChild(s);
-}, { timeout: 3000 }));
+// ── the booking of a demo: our own window with the calendar of Planerka, loaded before it is asked for once the
+//    visitor has agreed to the cookies (book.js) ──
+initBook();
 
 // ── the lines of split texts may wrap again once the page is at rest (motion.css, .fm-line) ──
 // While fonts arrive and while the window is being resized, a line made by SplitText keeps to one line (it may stick

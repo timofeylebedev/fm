@@ -51,7 +51,11 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
   The console of the browser has the same objects as before for trying values live: `fmMotion`, `fmHero`, `fmCards`,
   `fmStipple`, `fmRoyalty`, `fmPace`.
 - **Something from another site** (an analytics counter, a chat): add its address to `POLICY` in `build/plugins.js`,
-  or the browser will block it (the page allows only its own scripts and the booking popup of Planerka).
+  or the browser will block it (the page allows only its own scripts, and a frame of Planerka for the booking).
+- **The booking of a demo:** `src/scripts/book.js` (its settings: `BOOK` at the top — the Planerka user and event,
+  when the calendar is loaded ahead) and `src/styles/components/book.css`. Every link with `data-demo` opens it;
+  a link to the page with `#demo` opens it straight away. In the console: `fmBook` (`fmBook.state`, `fmBook.open()`,
+  `fmBook.messages`: what the calendar has said).
 
 Test switches for phones, at the end of the address: `?fmcards=debug` (what the card stack measures), `?fmcap=debug`
 (the strip above the navbar in the browsers of apps).

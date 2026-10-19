@@ -69,12 +69,13 @@ export function minifyPages() {
 
 // A Content Security Policy for every page, written into it when the site is built: the page may run only its own
 // scripts (and the inline ones it was built with: their hashes are worked out here), and frame only the booking page of
-// Planerka. Whatever else tried to run (an injected script, a browser extension's code put into the page) is blocked.
+// Planerka (scripts/book.js; no script of Planerka runs on the page itself). Whatever else tried to run (an injected
+// script, a browser extension's code put into the page) is blocked.
 // When something new is added to the site (an analytics counter, a chat), add its addresses to POLICY below.
 // (frame-ancestors cannot be set from the page itself: the server sends it, see deploy/.)
 const POLICY = {
   "default-src": ["'self'"],
-  "script-src": ["'self'", "https://planerka.app"],
+  "script-src": ["'self'"],
   "style-src": ["'self'", "'unsafe-inline'"],          // the drawings and GSAP set styles on the elements they move
   "img-src": ["'self'", "data:", "blob:"],
   "font-src": ["'self'"],
