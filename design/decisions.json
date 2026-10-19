@@ -150,8 +150,8 @@
     {
       "id": "cookie-notice",
       "kind": "decision",
-      "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (6% under the mouse, the one colour without a token), as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25",
-      "decided": "Tim, 2026-10-19 — the Figma section 'cookies' (pending his review of PR: cookies)",
+      "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (6% under the mouse, the one colour without a token), as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25; after «ОК» the text stays, «ОК» turns into a drawn checkmark, then the card goes down below the screen edge while fading (0.45 s, the 'leave' curve of motion.js, as the stack titles leave)",
+      "decided": "Tim, 2026-10-19 — the Figma section 'cookies'; the exit (text stays, card goes down with an existing curve) on his request",
       "why": "a small note in the corner that should look the same everywhere; 1.3 is the line height of all small text on the site"
     },
     {

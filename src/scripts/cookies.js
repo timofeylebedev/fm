@@ -5,23 +5,26 @@
      · DELAY ms after it is loaded it fades in from 0 (FADE_IN ms): not during the entrance of the first screen, which
        is what the visitor should see first;
      · its colour follows the section behind it, as the navbar's does (tint.js), for as long as it is on the screen;
-     · «ОК»: consent is given (consent.js), the text and the «ОК» fade out (TEXT_OUT ms), the checkmark is drawn
-       (DRAW ms, starting DRAW_AT ms after the press), stays a moment (HOLD ms), and the notice fades out (FADE_OUT ms)
-       and is removed;
-     · an «ОК» pressed in another tab: here it simply fades out;
+     · «ОК»: consent is given (consent.js); the text stays, the word «ОК» fades out (LABEL_OUT ms) and the checkmark is
+       drawn in its place (DRAW ms, starting DRAW_AT ms after the press). As soon as it is drawn (after HOLD ms, 0 by
+       default) the notice goes down below the edge of the screen and fades out on the way (EXIT ms, the site's "leave"
+       curve of motion.js: it gathers speed, as the titles of the card stack do when they go), and is removed;
+     · an «ОК» pressed in another tab: here it goes the same way, without the checkmark;
      · while it is shown, the page keeps its height clear above the bottom of the screen (scroll-padding-bottom), so a
        link reached with the Tab key is never scrolled to under the notice (WCAG 2.4.11);
-     · reduce motion: the checkmark is not drawn but shown, and every fade is quick (at most 250 ms).
+     · reduce motion: the checkmark is not drawn but shown, nothing moves, and every fade is quick (at most 250 ms).
    Tuning in the console: fmCookies (the timings, in ms; replay() puts the notice back on the page for a look). */
 import "../styles/components/cookies.css";
 import { grant, hasConsent } from "./consent.js";
 import { followTint } from "./tint.js";
+import { css } from "./motion.js";                  // the curves of the site (already on the page: main.js loads it)
 
 const T = {
   DELAY: 1200, FADE_IN: 700,
-  TEXT_OUT: 250, DRAW_AT: 150, DRAW: 450, HOLD: 550, FADE_OUT: 400,
+  LABEL_OUT: 250, DRAW_AT: 150, DRAW: 450, HOLD: 0, EXIT: 450,
 };
-const OUT = "cubic-bezier(0.22, 1, 0.36, 1)";        // --ease-out of tokens.css
+const OUT = css.out;                                 // arriving: quick, then a long soft landing
+const LEAVE = css.leave;                             // going away: gathers speed
 const DRAW_EASE = "cubic-bezier(0.65, 0, 0.35, 1)";  // a hand drawing a line: sets off, then slows to a stop
 const calm = matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -49,7 +52,6 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
     box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: calmFade(T.FADE_IN), easing: OUT, fill: "forwards" });
 
     const ok = box.querySelector(".cookies__ok");
-    const text = box.querySelector(".cookies__text");
     const label = box.querySelector(".cookies__label");
     const check = box.querySelector(".cookies__check path");
 
@@ -62,17 +64,19 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
       if (drawn) {
         said.textContent = "Готово, спасибо";
         const quick = calm.matches;
-        const fade = { duration: quick ? 150 : T.TEXT_OUT, easing: OUT, fill: "forwards" };
-        text.animate([{ opacity: 1 }, { opacity: 0 }], fade);
-        label.animate([{ opacity: 1 }, { opacity: 0 }], fade);
+        label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: quick ? 150 : T.LABEL_OUT, easing: OUT, fill: "forwards" });
         await check.animate(quick
           ? [{ strokeDashoffset: 0, opacity: 0 }, { strokeDashoffset: 0, opacity: 1 }]
           : [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
           { duration: quick ? 150 : T.DRAW, delay: quick ? 0 : T.DRAW_AT, easing: quick ? OUT : DRAW_EASE, fill: "forwards" }).finished;
-        await new Promise((r) => setTimeout(r, T.HOLD));
+        if (T.HOLD > 0) await new Promise((r) => setTimeout(r, T.HOLD));
       }
+      // down, until the card and its shadow (4px down, 16px blur) are below the bottom edge of the screen
       const current = Number(getComputedStyle(el).opacity);
-      await el.animate([{ opacity: current }, { opacity: 0 }], { duration: calmFade(T.FADE_OUT), easing: OUT, fill: "forwards" }).finished;
+      const down = calm.matches ? 0 : Math.max(0, innerHeight - el.getBoundingClientRect().top) + 24;
+      await el.animate(
+        [{ opacity: current, transform: "translateY(0)" }, { opacity: 0, transform: `translateY(${down}px)` }],
+        { duration: calmFade(T.EXIT), easing: LEAVE, fill: "forwards" }).finished;
       tint.stop();
       removeEventListener("resize", clear);
       document.removeEventListener("fm:consent", elsewhere);
@@ -91,7 +95,7 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
         main.focus({ preventScroll: true });
       }
     };
-    // consent given by anything but this card's «ОК» (another tab, fmConsent.grant()): the card just fades out
+    // consent given by anything but this card's «ОК» (another tab, fmConsent.grant()): the card goes, no checkmark
     const elsewhere = () => leave(false);
     document.addEventListener("fm:consent", elsewhere);
     // leave() first: it marks the card as leaving at once, so the fm:consent that grant() sends does not end it plainly
