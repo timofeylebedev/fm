@@ -1,38 +1,48 @@
 /* The first section, «Весь лейбл — на одной волне»: the heading, and the team at the table with chips floating over it
    (the chips are made and moved by scripts/hero.js).
 
-   One rule for every screen, wide or narrow, tall or short:
-     · the section is as tall as the screen less twice the gap above the first card (--inset: the gap, then as much
-       of the card shows, the top of its pill), on every screen. On a screen too short for the content (a phone turned
-       sideways) it simply takes what the content needs, and the page scrolls;
-     · the picture (3531×900, the people at its top) sits at the bottom, in .hero__stage. It is as tall as the stage,
-       but never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of the width
-       tall) and never taller than 540px. It never gets shorter than 168px (or that 40.8%, on phones): on a short
-       laptop the team still shows on the first screen, a little smaller;
-     · the space that is left is shared out as flex grow 1 : 2 : 7: 70% to the picture until it is at its biggest,
-       10% above the heading, 20% between the button and the heads; once the picture has stopped, all the rest goes to
-       the two gaps, 1 : 2 (the factors add up to more than 1, so flexbox hands out all of it: with 0.1, 0.2 and 0.7
-       a stopped picture left 70% of the space unused, under the table).
+   The section is a column of four parts: the air above the text, the text (title, lead, button), the air below it,
+   and the picture (3531×900, the people at its top) in .hero__stage. Each part has a least and a greatest size, so the
+   section neither shrinks nor stretches past what looks right:
+     · the picture: never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of
+       the width tall) and never taller than 540px. At least --hero-pic-min (168px on a 320 phone … 300px on a 1440
+       screen, by the width alone, so a short laptop keeps a big team; on phones the 40.8% is less, and that is all it
+       gets), and not more than half the screen's height (a phone turned sideways);
+     · the air above the text at least --hero-air-top, below it at least --hero-air-bottom (generous on every screen);
+     · the section is the screen less twice the gap above the first card (--inset: the gap, then the top of the first
+       card's pill shows), but never taller than its parts at their greatest (--hero-cap: the airs at --hero-air-max,
+       the text, the picture at its biggest): on a tall screen (a tall phone, a tablet upright, 2560 × 1440) the first
+       card simply shows more under it. Never shorter than its parts at their least either: on a short screen (a
+       laptop window under about 690px, a phone turned sideways) the section is taller than the screen, and the page
+       scrolls, rather than a small picture and the text pressed together;
+     · between those, the room is shared out as flex grow 4 : 1 : 1: four parts to the picture until it is at its
+       biggest, one to each air; then all of it to the two airs. The text itself never stretches.
    The screen's height is 100svh: the visible height with the browser's bars shown. On phones and tablets scripts/boot.js
    keeps it steady (--fm-svh) and reads it again only when the phone is turned, so the section does not change its
    height when the bars of an app's browser collapse while scrolling. */
 
 .hero {
+  /* the picture at its biggest, and the section at its tallest (the text is about --hero-text tall: a little more
+     or less only moves the two airs, which share what is left) */
+  --pic-max: min(40.8vw, 540px);
+  --hero-cap: calc(var(--nav-h) + 2 * var(--hero-air-max) + var(--hero-text) + var(--pic-max));
   position: relative;
   isolation: isolate;                                 /* the shadows of the chips blend with the table, and only with what is in this section */
   display: flex; flex-direction: column;
-  min-height: calc(var(--screen-s) - 2 * var(--inset));
+  min-height: min(var(--screen-s) - 2 * var(--inset), var(--hero-cap));
   overflow: hidden;
   background-color: var(--sand);
 
-  &::before { content: ""; flex: 1 1 0px; }         /* the air above the heading */
+  /* the air above the text (::before) and below it (::after, put between the text and the picture by its order) */
+  &::before, &::after { content: ""; flex: 1 1 var(--hero-air-top); min-height: var(--hero-air-top); }
+  &::after { order: 1; flex-basis: var(--hero-air-bottom); min-height: var(--hero-air-bottom); }
 }
 
 .hero__inner {
   position: relative; z-index: 1;
-  flex: 2 1 auto;                                     /* grows below its text: the air between the button and the heads */
+  flex: none;
   display: flex; flex-direction: column; align-items: center;
-  padding: calc(var(--nav-h) + var(--hero-air-top)) var(--gutter) var(--hero-air-bottom);
+  padding: var(--nav-h) var(--gutter) 0;              /* the navbar is over the section's top */
 }
 .hero__text {
   display: flex; flex-direction: column; align-items: center; gap: var(--action-gap);
@@ -80,10 +90,11 @@
    picture and the chips size themselves by it (cqh, cqw). Its layout containment also makes it a stacking context of
    its own: the chips' shadows multiply into the table and nothing else. */
 .hero__stage {
-  --pic-min: min(40.8vw, 168px);
-  flex: 7 1 var(--pic-min);
+  --pic-min: min(var(--pic-max), var(--hero-pic-min), 50 * var(--fm-svh, 1svh));
+  order: 2;
+  flex: 4 1 var(--pic-min);
   min-height: var(--pic-min);
-  max-height: min(40.8vw, 540px);
+  max-height: var(--pic-max);
   position: relative;
   container-type: size;
   pointer-events: none;
