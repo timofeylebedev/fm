@@ -26,6 +26,10 @@
     background-color: rgb(238 234 233 / 0.7); -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
   }
   .solid { background-color: var(--sand); }
+  .solid-black { background-color: #0f0f0f; color: #fff; }
+  .solid-white { background-color: #fff; }
+  html.inner, html.inner body { height: 100%; overflow: hidden; }
+  html.inner main { position: fixed; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .tint-only { background-color: rgb(238 234 233 / 0.7); }
 
   /* the tone strip, in its different forms */
@@ -67,10 +71,15 @@
     H: { nav: "glass-child", tone: "", what: "Glass on a real child element (not ::before). No strip." },
     I: { nav: "tint-only", tone: "", what: "Navbar 70% sand, no blur at all." },
     J: { nav: "solid", tone: "", what: "Navbar solid sand, no glass. Control: should give a solid bar." },
-    K: { nav: "glass-self", tone: "thin", what: "Navbar with its own glass (like A) + visible 3px strip on top." }
+    K: { nav: "glass-self", tone: "thin", what: "Navbar with its own glass (like A) + visible 3px strip on top." },
+    L: { nav: "solid-black", tone: "", what: "Navbar solid near-black (#0f0f0f, like YouTube dark)." },
+    M: { nav: "solid-white", tone: "", what: "Navbar solid white." },
+    N: { nav: "glass-self", tone: "", inner: true, what: "Like A, but the page scrolls inside a box (Google Docs way): nothing goes under Safari's bar." },
+    O: { nav: "solid", tone: "", inner: true, what: "Solid sand navbar + page scrolls inside a box." }
   };
   var key = (new URLSearchParams(location.search).get("v") || "A").toUpperCase();
   if (!V[key]) key = "A";
+  if (V[key].inner) document.documentElement.classList.add("inner");
   document.write('<header class="nav ' + V[key].nav + '">' + (V[key].nav === "glass-child" ? '<div class="glass"></div>' : '') + 'Variant ' + key + '</header>');
   if (V[key].tone) document.write('<div class="tone ' + V[key].tone + '"></div>');
 </script>
@@ -101,9 +110,10 @@
     document.body.appendChild(badge);
     addEventListener("load", function () {
       var y = document.getElementById("stripes").offsetTop + 120;
-      scrollTo(0, y);
-      var keys = Object.keys(V), next = keys[(keys.indexOf(key) + 1) % keys.length];
-      setTimeout(function () { location.replace("?v=" + next + "&auto"); }, 7000);
+      if (V[key].inner) document.querySelector("main").scrollTop = y; else scrollTo(0, y);
+      var set = (new URLSearchParams(location.search).get("set") || Object.keys(V).join("")).toUpperCase().split("");
+      var next = set[(set.indexOf(key) + 1) % set.length];
+      setTimeout(function () { location.replace("?v=" + next + "&auto&set=" + set.join("")); }, 7000);
     });
   }
 </script>
