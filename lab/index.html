@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safari bar lab</title>
+<style>
+  :root { --sand: #eeeae9; --nav-h: 56px; }
+  * { box-sizing: border-box; }
+  html { background: #fff; }
+  body { margin: 0; font: 16px/1.4 -apple-system, system-ui, sans-serif; color: #111; background: #fff; }
+
+  /* the navbar, as on the site */
+  .nav {
+    position: fixed; inset: 0 0 auto; height: var(--nav-h); z-index: 200;
+    display: flex; align-items: center; padding: 0 24px; overflow: hidden; isolation: isolate;
+    font-weight: 700;
+  }
+  .glass-self { background-color: rgb(238 234 233 / 0.7); -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px); }
+  .glass-layer::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background-color: rgb(238 234 233 / 0.7); -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
+  }
+  .glass-child > .glass {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background-color: rgb(238 234 233 / 0.7); -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
+  }
+  .solid { background-color: var(--sand); }
+  .tint-only { background-color: rgb(238 234 233 / 0.7); }
+
+  /* the tone strip, in its different forms */
+  .tone { position: fixed; inset: 0 0 auto; pointer-events: none; background-color: var(--sand); }
+  .tone.hidden  { visibility: hidden; height: var(--nav-h); z-index: 201; }
+  .tone.zero    { opacity: 0; height: var(--nav-h); z-index: 201; }
+  .tone.thin    { height: 3px; z-index: 201; }
+  .tone.under   { height: var(--nav-h); z-index: 199; }
+  .tone.clipped { height: var(--nav-h); z-index: 201; clip-path: inset(0 0 100% 0); }
+
+  /* the page: loud stripes, so a see-through bar is obvious */
+  main { padding-top: var(--nav-h); }
+  .stripe { height: 260px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; color: #fff; }
+  .stripe:nth-child(4n+1) { background: #7b3cff; }
+  .stripe:nth-child(4n+2) { background: #ff7a00; }
+  .stripe:nth-child(4n+3) { background: #00a3c4; }
+  .stripe:nth-child(4n+4) { background: #111; }
+  .panel { padding: 24px; background: var(--sand); }
+  .panel h1 { margin: 0 0 6px; font-size: 22px; }
+  .panel p { margin: 0 0 16px; color: #555; }
+  .list { display: grid; gap: 8px; max-width: 760px; }
+  .list a { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 12px; background: #fff; color: inherit; text-decoration: none; }
+  .list a b { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #111; color: #fff; }
+  .list a.on { outline: 2px solid #7b3cff; }
+  .now { font-size: 15px; color: #111; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<script>
+  // Every variant reloads the page (?v=X), so Safari reads it fresh.
+  var V = {
+    A: { nav: "glass-self", tone: "", what: "Now on the live site: the navbar itself has the glass (blur + 70% sand)." },
+    B: { nav: "glass-layer", tone: "", what: "Glass moved to a ::before layer. No strip." },
+    C: { nav: "glass-layer", tone: "hidden", what: "B + hidden strip (visibility: hidden) above the navbar. This is PR #9." },
+    D: { nav: "glass-layer", tone: "zero", what: "B + strip with opacity: 0 above the navbar." },
+    E: { nav: "glass-layer", tone: "thin", what: "B + visible 3px sand strip above the navbar." },
+    F: { nav: "glass-layer", tone: "under", what: "B + visible sand strip, navbar-tall, under the navbar's glass." },
+    G: { nav: "glass-layer", tone: "clipped", what: "B + strip cut away to nothing by clip-path, above the navbar." },
+    H: { nav: "glass-child", tone: "", what: "Glass on a real child element (not ::before). No strip." },
+    I: { nav: "tint-only", tone: "", what: "Navbar 70% sand, no blur at all." },
+    J: { nav: "solid", tone: "", what: "Navbar solid sand, no glass. Control: should give a solid bar." },
+    K: { nav: "glass-self", tone: "thin", what: "Navbar with its own glass (like A) + visible 3px strip on top." }
+  };
+  var key = (new URLSearchParams(location.search).get("v") || "A").toUpperCase();
+  if (!V[key]) key = "A";
+  document.write('<header class="nav ' + V[key].nav + '">' + (V[key].nav === "glass-child" ? '<div class="glass"></div>' : '') + 'Variant ' + key + '</header>');
+  if (V[key].tone) document.write('<div class="tone ' + V[key].tone + '"></div>');
+</script>
+<main>
+  <div class="panel">
+    <h1>Safari bar lab</h1>
+    <p>Tap a variant, then scroll down a little so the stripes go under Safari's bar. Note whether the bar is <b>solid sand</b> or <b>see-through</b> (stripes showing through).</p>
+    <div class="now" id="now"></div>
+    <div class="list" id="list"></div>
+  </div>
+  <div id="stripes"></div>
+</main>
+<script>
+  document.getElementById("now").innerHTML = "<b>Now: " + key + "</b> — " + V[key].what;
+  document.getElementById("list").innerHTML = Object.keys(V).map(function (k) {
+    return '<a href="?v=' + k + '"' + (k === key ? ' class="on"' : '') + '><b>' + k + '</b><span>' + V[k].what + '</span></a>';
+  }).join("");
+  var s = "";
+  for (var i = 1; i <= 16; i++) s += '<div class="stripe">' + key + " · " + i + "</div>";
+  document.getElementById("stripes").innerHTML = s;
+  document.getElementById("stripes").style.display = "block";
+</script>
+<style>#stripes { display: block; } #stripes > .stripe:nth-child(4n+1) { background: #7b3cff; } #stripes > .stripe:nth-child(4n+2) { background: #ff7a00; } #stripes > .stripe:nth-child(4n+3) { background: #00a3c4; } #stripes > .stripe:nth-child(4n+4) { background: #111; }</style>
+</body>
+</html>
