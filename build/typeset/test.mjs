@@ -125,3 +125,46 @@ test("lint finds what a proofreader would", () => {
   assert.deepEqual(f("в 2022-2025 годы, 1920x1080, №152 ,слово - слово"), ["range:–", "times:×", "number-sign:\u00A0", "space-before:", "hyphen-as-dash:—"]);
   assert.deepEqual(f("дата 2026-10-19 и код 512-51-50"), []);
 });
+
+// ── what the independent review found (Oct 19, 2026) ──
+test("review: one-letter words are not labels or units without their dot", () => check("ru", [
+  ["Действует с 1 января 2026 года", "Действует с⍽1⍽января 2026⍽года"],
+  ["Каждый в 2025 в Москве", "Каждый в⍽2025 в⍽Москве"],
+  ["В 2025 т. е. так", "В⍽2025 т.⍽е. так"],
+  ["5 с лишним", "5 с⍽лишним"],
+  ["в 2006 г. в силе, XX в. и XIX вв.", "в⍽2006⍽г. в⍽силе, XX⍽в. и⍽XIX⍽вв."],
+  ["г. Москва, ул. Тверская, д. 5", "г.⍽Москва, ул.⍽Тверская, д.⍽5"],
+  ["в 2006 г. В том году", "в⍽2006⍽г. В⍽том году"],
+  ["5 млн руб. и ИНН: 7701234567", "5⍽млн⍽руб. и⍽ИНН:⍽7701234567"],
+  ["сделал Б и бы", "сделал Б и⍽бы"],
+]));
+
+test("review: English a.m., «no» is not «No.», US phones", () => check("en", [
+  ["at 9 a.m. and 9:30 p.m. today", "at 9⍽a.m. and 9:30⍽p.m. today"],
+  ["There are no 5-star hotels", "There are no 5-⁀star hotels"],
+  ["Call (555) 123-4567 now", "Call (555)⍽123-⁀4567 now"],
+]));
+
+test("review: a heading never lets a hold go when the word alone is too long", () => {
+  assert.equal(show(typeset("в Конфиденциальность", { lang: "ru", heading: true })), "в⍽Конфиденциальность");
+});
+
+test("review: HTML the parser does not keep as written is left alone", () => {
+  assert.equal(html("<p>текст</span> в доме и на столе</p>"), "<p>текст</span> в доме и на столе</p>");
+  assert.equal(html("<p>в <b> доме</b></p>"), "<p>в⍽<b>доме</b></p>");
+  assert.equal(html("<p>в\n  <span>\n    Москве</span></p>"), "<p>в⍽<span>Москве</span></p>");
+  assert.equal(html("<title>см. https://example.com/path/to</title><select><option>в доме</option></select>"), "<title>см. https://example.com/path/to</title><select><option>в доме</option></select>");
+  assert.equal(html('<h1 data-reveal="chars">кто-то из 2022–2025</h1>'), '<h1 data-reveal="chars">кто-то из⍽2022–2025</h1>');
+});
+
+test("review: twice is the same as once, <wbr> included", () => {
+  const once = typesetHtml(page('<p>на <a href=x>https://example.com/very/long/path</a> и .com/<wbr>very</p>')).html;
+  assert.equal(typesetHtml(once).html, once);
+});
+
+test("review: a big page is fast and a long text does not crash", () => {
+  const big = page("<p>" + "в доме и на столе, а не в последний момент. ".repeat(25000) + "</p>");
+  const t = Date.now();
+  typesetHtml(big);
+  assert.ok(Date.now() - t < 8000, "1 MB in " + (Date.now() - t) + " ms");
+});

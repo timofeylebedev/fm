@@ -11,7 +11,7 @@ const INLINE = new Set("a abbr b bdi bdo cite data del dfn em font i ins mark q 
 // things that sit between words like a letter: a picture, an icon, a field
 const OBJECTS = new Set("img svg picture video audio canvas iframe input select object embed math meter progress".split(" "));
 // never touched: code, scripts, preformatted text
-const SKIP = new Set("script style pre code kbd samp var textarea noscript".split(" "));
+const SKIP = new Set("script style pre code kbd samp var textarea noscript title xmp noembed noframes plaintext option optgroup datalist".split(" "));
 
 const attr = (el, name) => el.attrs?.find((a) => a.name === name)?.value;
 
@@ -34,6 +34,8 @@ function mapText(node, src) {
       }
     }
     if (src[p] === "\r" && src[p + 1] === "\n" && value[c] === "\n") { map.push({ s: p, e: p + 2, whole: true }); c++; p += 2; continue; }
+    // the parser left something out here (a stray end tag inside the text, a NUL): the node is not touched at all
+    if (src[p] !== value[c]) return value.split("").map(() => null);
     map.push({ s: p, e: p + 1, whole: true }); c++; p++;
   }
   return map;
@@ -47,7 +49,8 @@ function blocks(doc, src) {
       if (child.nodeName === "#text") {
         if (!child.sourceCodeLocation) continue;
         const map = mapText(child, src);
-        run.text += child.value; run.map.push(...map);
+        run.text += child.value;
+        for (const m of map) run.map.push(m);                       // (not push(...map): a long text overflows the stack)
         continue;
       }
       if (child.nodeName === "#comment" || !child.tagName) continue;
@@ -62,7 +65,9 @@ function blocks(doc, src) {
       if (off) { run.text += OBJ; run.map.push(null); continue; }
       const lang = attr(child, "lang") ?? ctx.lang;
       const heading = ctx.heading || /^h[1-6]$/.test(tag) || attr(child, "role") === "heading";
-      const inner = { lang, heading };
+      // letters a script splits one by one (data-reveal="chars", motion.js): only no-break spaces, no invisible marks
+      const spacesOnly = ctx.spacesOnly || attr(child, "data-reveal") === "chars" || attr(child, "data-typeset") === "spaces";
+      const inner = { lang, heading, spacesOnly };
       const content = tag === "template" ? child.content : child;
       // the edges of an inline tag are marked (U+E000, invisible to the rules): «лейбл.</span><span>На одной» is two
       // words, not «лейбл.На»
@@ -78,21 +83,26 @@ function blocks(doc, src) {
   };
   const mark = (run) => { run.text += "\uE000"; run.map.push(null); };
   const flush = (run, ctx) => {
-    if (/\S/.test(run.text)) out.push({ lang: ctx.lang, heading: ctx.heading, text: run.text, map: run.map.slice() });
+    if (/\S/.test(run.text)) out.push({ lang: ctx.lang, heading: ctx.heading, spacesOnly: ctx.spacesOnly, text: run.text, map: run.map.slice() });
   };
   const html = doc.childNodes.find((n) => n.tagName === "html");
   const body = html?.childNodes.find((n) => n.tagName === "body");
   if (!body) return out;
-  const ctx = { lang: attr(html, "lang") ?? attr(body, "lang") ?? "", heading: false };
+  const ctx = { lang: attr(html, "lang") ?? attr(body, "lang") ?? "", heading: false, spacesOnly: false };
   const run = { text: "", map: [] };
   walk(body, ctx, run);
   flush(run, ctx);
   return out;
 }
 
+// line and column of an offset (the starts of the lines are found once per page)
+let lines = { src: null, starts: [] };
 const lineCol = (src, at) => {
-  const before = src.slice(0, at), line = before.split("\n").length;
-  return { line, col: at - before.lastIndexOf("\n") };
+  if (lines.src !== src) { const starts = [0]; for (let i = 0; i < src.length; i++) if (src[i] === "\n") starts.push(i + 1); lines = { src, starts }; }
+  const { starts } = lines;
+  let lo = 0, hi = starts.length - 1;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (starts[mid] <= at) lo = mid; else hi = mid - 1; }
+  return { line: lo + 1, col: at - starts[lo] + 1 };
 };
 
 // options as in core.js (cap, off) + headingCap. Returns { html, report }.
@@ -104,6 +114,7 @@ export function typesetHtml(src, opts = {}) {
     // the text's own leading and trailing spaces are not between words
     for (const e of textEdits(b.text, o)) {
       if (e.i === e.j) {
+        if (b.spacesOnly) continue;
         const at = b.map[e.i - 1];
         if (at) changes.push({ s: at.e, e: at.e, to: e.wbr ? "<wbr>" : e.to });
         continue;
@@ -132,13 +143,15 @@ export function typesetHtml(src, opts = {}) {
       findings,
     });
   }
-  // merge the changes into the source, from the end so the offsets stay right
-  changes.sort((a, b) => b.s - a.s || b.e - a.e);
-  let html = src, last = Infinity;
+  // the changes merged into the source in one pass (never two changes on one character)
+  changes.sort((a, b) => a.s - b.s || a.e - b.e);
+  const parts = [];
+  let at = 0;
   for (const c of changes) {
-    if (c.e > last) continue;                                        // never two changes on one character
-    html = html.slice(0, c.s) + c.to + html.slice(c.e);
-    last = c.s;
+    if (c.s < at) continue;
+    parts.push(src.slice(at, c.s), c.to);
+    at = c.e;
   }
-  return { html, report };
+  parts.push(src.slice(at));
+  return { html: parts.join(""), report };
 }

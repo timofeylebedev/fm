@@ -43,7 +43,8 @@ export function lint(text, { lang = "ru" } = {}) {
     if (k.t === "d" && k.s === "-") add(k.i, k.j, "hyphen-as-dash", "—");
     if (k.t === "h" && R?.t === "h") add(k.i, R.j, "double-hyphen", "—");
     // a hyphen between two numbers, but not in a chain of them (a date «2026-10-19», a code «512-51-50»)
-    if (k.t === "h" && L?.t === "n" && R?.t === "n" && toks[n - 2]?.t !== "h" && toks[n + 2]?.t !== "h") add(k.i, k.j, "range", "–");
+    // (nor a phone number written «123-4567»)
+    if (k.t === "h" && L?.t === "n" && R?.t === "n" && toks[n - 2]?.t !== "h" && toks[n + 2]?.t !== "h" && !(L.s.length === 3 && R.s.length === 4)) add(k.i, k.j, "range", "–");
     if (k.t === "w" && /^[xх]$/i.test(k.s) && L?.t === "n" && R?.t === "n") add(k.i, k.j, "times", "×");
     if (base === "ru" && k.s === "№" && R?.t === "n") add(k.j, k.j, "number-sign", "\u00A0");
     if (k.t === "s" && L && R?.t === "p" && ",.;:!?)»”".includes(R.s) && !/[\u00A0]/.test(k.s)) add(k.i, k.j, "space-before", "");

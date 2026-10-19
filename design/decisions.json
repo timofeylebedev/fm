@@ -182,7 +182,7 @@
       "kind": "decision",
       "what": "Where lines may break is decided by build/typeset (it replaced build/typograph.js): one answer per space, by the language of each text (lang), Russian and English rules plus rules for any language; no-break spaces and word joiners only. Letters you can see are never changed by the build: straight quotes, a hyphen for a dash, look-alike letters are reported (npm run typeset -- --lint) and changed only with --fix. Pieces held together are at most 28 letters in text and 16 in headings (the weakest holds are let go first)",
       "decided": "Claude, 2026-10-19 — to confirm with Tim",
-      "why": "the old typograph missed every second word of a chain («а⍽не в последний»), held numbers to the wrong word («3⍽Политики»), treated РФ/ПД and Latin words as Russian prepositions, double-escaped entities (&#8209;) and had no English rules. Measured in Chromium at 9 widths: lines ending in a short Russian word 108 → 2; on an English sample at 17 widths, faults 114 (old) / 151 (none) → 0",
+      "why": "the old typograph missed every second word of a chain («а⍽не в последний»), held numbers to the wrong word («3⍽Политики»), treated РФ/ПД and Latin words as Russian prepositions, double-escaped entities (&#8209;) and had no English rules. Measured in Chromium at 9 widths: lines ending in a short Russian word 108 → 0; on an English sample at 17 widths, faults 114 (old) / 151 (none) → 0",
       "fix": "a rule that misbehaves: switch it off for one text with data-typeset=off, or fix its test in build/typeset/test.mjs first"
     }
   ]
