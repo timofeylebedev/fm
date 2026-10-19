@@ -77,6 +77,9 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   ~300ms after a resize.
 - axe and the audit cannot see text over the stipple/WebGL backgrounds (stats, CTA card): check that contrast from
   pixels (hide the text, screenshot, sample behind it), in reduced and normal motion.
+- The dust of the stats and the CTA (`scripts/stipple.js`): with software WebGL it keeps only 6 000 specks per card so
+  the page stays usable; add `?fmdust=full` for its real look (slow), and step it in tests with `fmStipple.advance(sec)`
+  (`fmStipple.replay()` pushes it in again, `fmStipple.level(n | "auto")` sets the engine's ladder).
 - The CSP blocks injected scripts: use `bypassCSP: true` in Playwright contexts.
 - Headless Chromium without a GPU: launch with `--use-gl=swiftshader --enable-unsafe-swiftshader` (as
   `build/audit.mjs` does), at most 2 browser contexts at a time, and judge motion by its curves, not by frame timing.

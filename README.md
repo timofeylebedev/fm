@@ -47,7 +47,7 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
   The list in `build/images.mjs` says what is made from each original (sizes and formats: AVIF and WebP).
 - **A font:** `assets-src/fonts/`, then `npm run fonts` (needs Python with `pip install fonttools brotli`).
 - **The animations:** every part has its settings at the top of its file in `src/scripts/` (`motion.js` for how
-  headings, texts and cards come in; `hero.js` for the chips; `stipple.js` for the dots; `art/` for the drawings).
+  headings, texts and cards come in; `hero.js` for the chips; `stipple.js` for the dust on the stat cards and the purple card; `art/` for the drawings).
   The console of the browser has the same objects as before for trying values live: `fmMotion`, `fmHero`, `fmCards`,
   `fmStipple`, `fmRoyalty`, `fmPace`.
 - **Something from another site** (an analytics counter, a chat): add its address to `POLICY` in `build/plugins.js`,
