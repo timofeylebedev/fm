@@ -5,10 +5,11 @@
      · DELAY ms after it is loaded it fades in from 0 (FADE_IN ms): not during the entrance of the first screen, which
        is what the visitor should see first;
      · its colour follows the section behind it, as the navbar's does (tint.js), for as long as it is on the screen;
-     · «ОК»: consent is given (consent.js); the text stays, the word «ОК» fades out (LABEL_OUT ms) and the checkmark is
-       drawn in its place (DRAW ms, starting DRAW_AT ms after the press). As soon as it is drawn (after HOLD ms, 0 by
-       default) the notice goes down below the edge of the screen and fades out on the way (EXIT ms, the site's "leave"
-       curve of motion.js: it gathers speed, as the titles of the card stack do when they go), and is removed;
+     · «ОК»: consent is given (consent.js); the text stays, the word «ОК» fades out quickly (LABEL_OUT ms) and the
+       checkmark is drawn in its place (DRAW ms, starting DRAW_AT ms after the press). LEAD ms before the drawing ends
+       the notice sets off down below the edge of the screen and fades out on the way (EXIT ms, the site's "leave" curve
+       of motion.js: it gathers speed, as the titles of the card stack do when they go), so the last of the line is
+       drawn as it goes; then it is removed;
      · an «ОК» pressed in another tab: here it goes the same way, without the checkmark;
      · while it is shown, the page keeps its height clear above the bottom of the screen (scroll-padding-bottom), so a
        link reached with the Tab key is never scrolled to under the notice (WCAG 2.4.11);
@@ -21,7 +22,7 @@ import { css } from "./motion.js";                  // the curves of the site (a
 
 const T = {
   DELAY: 1200, FADE_IN: 700,
-  LABEL_OUT: 250, DRAW_AT: 150, DRAW: 450, HOLD: 0, EXIT: 450,
+  LABEL_OUT: 100, DRAW_AT: 150, DRAW: 450, LEAD: 150, EXIT: 450,
 };
 const OUT = css.out;                                 // arriving: quick, then a long soft landing
 const LEAVE = css.leave;                             // going away: gathers speed
@@ -65,11 +66,13 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
         said.textContent = "Готово, спасибо";
         const quick = calm.matches;
         label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: quick ? 150 : T.LABEL_OUT, easing: OUT, fill: "forwards" });
-        await check.animate(quick
+        const draw = check.animate(quick
           ? [{ strokeDashoffset: 0, opacity: 0 }, { strokeDashoffset: 0, opacity: 1 }]
           : [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
-          { duration: quick ? 150 : T.DRAW, delay: quick ? 0 : T.DRAW_AT, easing: quick ? OUT : DRAW_EASE, fill: "forwards" }).finished;
-        if (T.HOLD > 0) await new Promise((r) => setTimeout(r, T.HOLD));
+          { duration: quick ? 150 : T.DRAW, delay: quick ? 0 : T.DRAW_AT, easing: quick ? OUT : DRAW_EASE, fill: "forwards" });
+        // it sets off LEAD ms before the drawing ends (reduce motion: once the checkmark is shown)
+        if (quick) await draw.finished;
+        else await new Promise((r) => setTimeout(r, Math.max(0, T.DRAW_AT + T.DRAW - T.LEAD)));
       }
       // down, until the card and its shadow (4px down, 16px blur) are below the bottom edge of the screen
       const current = Number(getComputedStyle(el).opacity);
