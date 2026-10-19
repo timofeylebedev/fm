@@ -18,6 +18,7 @@
 import "../styles/components/cookies.css";
 import { grant, hasConsent } from "./consent.js";
 import { followTint } from "./tint.js";
+import { box as scrollBox } from "./scroller.js";
 import { css } from "./motion.js";                  // the curves of the site (already on the page: main.js loads it)
 
 const T = {
@@ -46,7 +47,7 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
     else box.querySelector(".cookies__said")?.remove();
     said.textContent = "";
     const tint = followTint(box, 0.8);
-    const root = document.documentElement;
+    const root = scrollBox || document.documentElement;   // what scrolls: the page's box in Safari on a Mac
     const clear = () => { root.style.scrollPaddingBottom = box ? (innerHeight - box.getBoundingClientRect().top + 8) + "px" : ""; };
     clear();
     addEventListener("resize", clear);

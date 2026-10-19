@@ -12,8 +12,9 @@
    onColour(rgb), if given, hears every new colour as [r, g, b] (solid): for something else that should take it too.
    Returns { refresh, stop }: stop() lets the element go (its listeners are removed, its colour stays as it was). */
 import { ScrollTrigger } from "./gsap.js";
+import { onScroll, offScroll, watchSize, paper } from "./scroller.js";   // the window, or the page's box (Safari on a Mac)
 
-const SECTIONS = "main > section, body > footer";
+const SECTIONS = "main > section, [data-page] > footer";
 
 // "rgb(1, 2, 3)", "rgba(1, 2, 3, 0.5)", "rgb(1 2 3 / 50%)" → [r, g, b, a]; anything else → null
 const parse = (s) => {
@@ -30,7 +31,7 @@ export function followTint(el, fallbackAlpha = 0.7, onColour = null) {
 
   let page = [255, 255, 255, 1], sections = [], queued = 0, tint = "";
   const read = () => {
-    page = over(seen(parse(getComputedStyle(document.body).backgroundColor)) || [255, 255, 255, 1], [255, 255, 255, 1]);
+    page = over(seen(parse(paper())) || [255, 255, 255, 1], [255, 255, 255, 1]);
     sections = [...document.querySelectorAll(SECTIONS)]
       .map((s) => ({ el: s, c: seen(parse(getComputedStyle(s).backgroundColor)) }))
       .filter((s) => s.c);
@@ -61,15 +62,15 @@ export function followTint(el, fallbackAlpha = 0.7, onColour = null) {
   const later = () => { if (!queued) queued = requestAnimationFrame(paint); };
   const refresh = () => { read(); later(); };
   refresh();
-  addEventListener("scroll", later, { passive: true });
+  onScroll(later);
   addEventListener("resize", refresh);
   addEventListener("load", refresh);
   const ro = new ResizeObserver(later);               // the page grew or shrank (pictures, the card stack, a pinned block)
-  ro.observe(document.body);
+  watchSize(ro);
   ScrollTrigger.addEventListener("refresh", later);   // pinned blocks were measured and placed again
   const stop = () => {
     cancelAnimationFrame(queued); queued = 0;
-    removeEventListener("scroll", later);
+    offScroll(later);
     removeEventListener("resize", refresh);
     removeEventListener("load", refresh);
     ro.disconnect();

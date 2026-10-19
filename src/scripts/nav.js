@@ -1,6 +1,7 @@
 /* The navbar: its colour follows the section behind it (tint), and in the browsers built into apps a strip of white
    covers the page above it (cap). The outline of the current link is in nav-pill.js. */
 import { followTint } from "./tint.js";
+import { box, y as pageY, onScroll as onPageScroll } from "./scroller.js";
 
 /* ── tint ──
    The navbar takes the colour of the section that is behind it, at its own transparency (70%): behind the hero it is
@@ -40,6 +41,7 @@ export function initCap(nav) {
   const touch = matchMedia("(hover: none) and (pointer: coarse)").matches;
   if (DEBUG) import("./debug.js").then((m) => m.capDebug(touch));
   if (!touch && !DEBUG) return;
+  if (box) return;                          // the page scrolls in its own box (Safari on a Mac): no app's browser
   if (!CSS.supports("animation-timeline: scroll()")) return;
 
   const cap = document.createElement("div");
@@ -111,10 +113,10 @@ export function initHide(nav) {
   let on = hides();
   const root = document.documentElement;
   const menu = document.querySelector("[data-menu]");
-  let last = scrollY, turn = scrollY, away = false;
+  let last = pageY(), turn = pageY(), away = false;
   const set = (v) => { if (v !== away) { away = v; root.classList.toggle("nav-away", v); } };
   const onScroll = () => {
-    const y = scrollY, h = nav.offsetHeight;
+    const y = pageY(), h = nav.offsetHeight;
     if (!on || y <= h || (menu && menu.classList.contains("is-open")) || nav.contains(document.activeElement)) {
       set(false); last = turn = y; return;
     }
@@ -125,7 +127,7 @@ export function initHide(nav) {
   };
   const check = () => { on = hides(); root.classList.toggle("nav-hides", on); onScroll(); };
   addEventListener("resize", check);                        // a phone turned, a window made shorter
-  addEventListener("scroll", onScroll, { passive: true });
+  onPageScroll(onScroll);
   nav.addEventListener("focusin", () => set(false));
   check();
 }

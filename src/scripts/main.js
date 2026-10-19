@@ -12,10 +12,19 @@ import { initHero } from "./hero.js";
 import { initRing } from "./ring.js";
 import { initLogos } from "./logos.js";
 import { initDeck } from "./deck.js";
+import { box, height as pageHeight, watchSize, ioRoot } from "./scroller.js";
 import { hasConsent } from "./consent.js";
 
 const root = document.documentElement;
 root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
+
+// Safari on a Mac, where the page scrolls in its own box (scroller.js): the keys that scroll (space, the arrows, Page
+// Down…) scroll what holds the focus, and at first nothing does. The box takes the focus (not drawn, base.css), so they
+// scroll the page from the start; the first Tab still goes to the skip link, the box's first child.
+if (box) {
+  box.tabIndex = -1;
+  box.focus({ preventScroll: true });
+}
 
 // boot.js asks for the page to be measured again (after a reload restores the scroll, or a phone's bars change)
 window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
@@ -48,7 +57,7 @@ const near = (els, margin, load) => {
     if (!entries.some((e) => e.isIntersecting)) return;
     io.disconnect();
     setTimeout(load, 0);                         // in a task of its own, not together with the other work of this moment
-  }, { rootMargin: margin });
+  }, { root: ioRoot, rootMargin: margin });
   els.forEach((el) => io.observe(el));
 };
 ["cards", "cta"].forEach((set) => near([...document.querySelectorAll(`[data-dots='${set}']`)], "100% 0px",
@@ -64,14 +73,14 @@ initScroll();
 // ── the scroll animations measure the page again when its height has changed by itself, after it has loaded
 //    (a late font, a picture, an app's browser resizing the page); ScrollTrigger measures only on load and resize ──
 addEventListener("load", () => setTimeout(() => {
-  const height = () => root.scrollHeight;
+  const height = pageHeight;
   let measured = height(), busy = false, timer = 0;
   ScrollTrigger.addEventListener("refreshInit", () => { busy = true; });
   ScrollTrigger.addEventListener("refresh", () => { busy = false; measured = height(); });
-  new ResizeObserver(() => {
+  watchSize(new ResizeObserver(() => {
     clearTimeout(timer);
     timer = setTimeout(() => { if (!busy && Math.abs(height() - measured) > 2) ScrollTrigger.refresh(true); }, 300);
-  }).observe(document.body);
+  }));
 }, 0));
 
 // ── the cookie notice: only for a visitor who has not pressed «ОК» yet (consent.js), loaded once the page has loaded

@@ -12,6 +12,7 @@
    speed it has (glide.js), instead of stopping it and starting again. With "reduce motion" it jumps instead of sliding.
    The current link has aria-current (screen readers say which section is on screen; the outline is its only mark). */
 import { M, css } from "./motion.js";
+import { y as scrollY, height, onScroll } from "./scroller.js";
 import { bezier, glider } from "./glide.js";
 
 const MIN = 250, MAX = 650;          // ms: the shortest move, and a move across the whole row
@@ -90,7 +91,7 @@ export function initPill() {
   function pick() {
     const top = Math.max(0, bar.getBoundingClientRect().bottom), vh = innerHeight;
     const line = top + (vh - top) * LINE;
-    const end = Math.ceil(scrollY + vh) >= document.documentElement.scrollHeight - 2;
+    const end = Math.ceil(scrollY() + vh) >= height() - 2;
     let best = null, bestTop = -Infinity;
     items.forEach((it) => {
       if (!shown(it.a)) return;
@@ -112,13 +113,13 @@ export function initPill() {
     clearTimeout(lockTimer);
     lockTimer = setTimeout(release, 500);                 // the page did not scroll at all (already there)
   }));
-  addEventListener("scroll", () => {
+  onScroll(() => {
     if (lock) {
       clearTimeout(lockTimer);
       if (Date.now() - lockStart > 4000) release(); else lockTimer = setTimeout(release, 200);
     }
     later();
-  }, { passive: true });
+  });
 
   // the layout changed (fonts, screen width): the outline goes back under its link at once
   const settle = () => {
