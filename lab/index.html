@@ -92,6 +92,20 @@
   for (var i = 1; i <= 16; i++) s += '<div class="stripe">' + key + " · " + i + "</div>";
   document.getElementById("stripes").innerHTML = s;
   document.getElementById("stripes").style.display = "block";
+  // ?auto: scroll so the stripes sit under Safari's bar, hold, then go on to the next variant (for watching from afar)
+  var auto = /[?&]auto\b/.test(location.search);
+  if (auto) {
+    var badge = document.createElement("div");
+    badge.textContent = key;
+    badge.style.cssText = "position:fixed;right:24px;bottom:24px;z-index:999;font:800 120px/1 system-ui;color:#fff;background:#111;padding:12px 28px;border-radius:24px";
+    document.body.appendChild(badge);
+    addEventListener("load", function () {
+      var y = document.getElementById("stripes").offsetTop + 120;
+      scrollTo(0, y);
+      var keys = Object.keys(V), next = keys[(keys.indexOf(key) + 1) % keys.length];
+      setTimeout(function () { location.replace("?v=" + next + "&auto"); }, 7000);
+    });
+  }
 </script>
 <style>#stripes { display: block; } #stripes > .stripe:nth-child(4n+1) { background: #7b3cff; } #stripes > .stripe:nth-child(4n+2) { background: #ff7a00; } #stripes > .stripe:nth-child(4n+3) { background: #00a3c4; } #stripes > .stripe:nth-child(4n+4) { background: #111; }</style>
 </body>
