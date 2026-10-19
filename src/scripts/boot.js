@@ -5,6 +5,19 @@
   // the page has scripts: what comes in on scroll starts hidden (see motion.css)
   root.classList.add("js");
 
+  /* ── Safari on a Mac: the page scrolls in its own box (scroller.js says why) ──
+     Safari 26 and later (Version/26…), on a Mac (no touch: an iPad says "Macintosh" too, but has touch points), and not
+     another browser that names Safari in its address (Chrome, Edge, Firefox, Opera). ?fmbox=1 / ?fmbox=0 force it. */
+  var force = /[?&]fmbox=([01])/.exec(location.search);
+  var ua = navigator.userAgent, ver = /Version\/(\d+)[\d.]* (Mobile\/\S+ )?Safari\//.exec(ua);
+  var macSafari = /Macintosh/.test(ua) && !navigator.maxTouchPoints && !!ver && +ver[1] >= 26
+    && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Firefox/.test(ua);
+  if (force ? force[1] === "1" : macSafari) root.classList.add("boxed");
+  // what scrolls: the page's box once it is there (the body is read later than this script), else the window
+  var scroller = function () { return (root.classList.contains("boxed") && document.querySelector("[data-page]")) || null; };
+  var scrollY_ = function () { var b = scroller(); return b ? b.scrollTop : scrollY; };
+  var scrollTo_ = function (top) { (scroller() || window).scrollTo({ top: top, behavior: "instant" }); };
+
   /* ── Reload: back to where the visitor was, without a flash of the top of the page ──
      Safari puts a reloaded page back in place only after everything has loaded, so for a moment it shows the top. Here
      the browser is told not to do it (scrollRestoration = "manual"). The position is remembered here and scrolled to
@@ -14,7 +27,7 @@
   if ("scrollRestoration" in history) {
     history.scrollRestoration = "manual";
     var KEY = "fm-scroll:" + location.pathname;
-    var save = function () { try { sessionStorage.setItem(KEY, String(Math.round(scrollY))); } catch {} };
+    var save = function () { try { sessionStorage.setItem(KEY, String(Math.round(scrollY_()))); } catch {} };
     addEventListener("pagehide", save);
     document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") save(); });
     // only a reload or Back / Forward goes back to the old place; a visit by a link starts at the top
@@ -30,7 +43,7 @@
       var restore = function () {
         if (done) return;
         done = true;
-        scrollTo({ top: y, behavior: "instant" });
+        scrollTo_(y);
         if (window.fmRefresh) window.fmRefresh();          // pins and scroll animations measured for this place
         requestAnimationFrame(show);                        // one more frame, so everything that follows the scroll has caught up
       };
@@ -78,7 +91,7 @@
       var before = keep ? keep.getBoundingClientRect().top : 0;
       set(now);
       changes++;
-      if (keep) { var moved = keep.getBoundingClientRect().top - before; if (Math.abs(moved) > 1) scrollBy(0, moved); }
+      if (keep) { var moved = keep.getBoundingClientRect().top - before; if (Math.abs(moved) > 1) scrollTo_(scrollY_() + moved); }
       clearTimeout(timer);
       // the scroll animations measure again once the scrolling has stopped, so a flick of the finger is not cut short
       timer = setTimeout(function () { if (window.fmRefresh) window.fmRefresh(true); }, 100);

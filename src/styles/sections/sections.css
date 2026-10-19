@@ -254,15 +254,16 @@
 }
 .stat__number { position: relative; z-index: 1; font-size: calc(var(--u) * 64 / 247); font-weight: 600; line-height: 1; overflow-wrap: anywhere; }
 .stat__label { position: relative; z-index: 1; font-size: max(12px, var(--u) * 24 / 247); font-weight: 500; letter-spacing: var(--tracking-label); text-transform: uppercase; }
-/* the colour of the dots (scripts/stipple.js); without WebGL2 the card fades into it instead */
+/* a stat card is filled with its colour, and white dust moves on it (scripts/stipple.js); without WebGL2 it simply
+   keeps its colour */
 .stat--orange { --dots: var(--orange); }
 .stat--blue { --dots: var(--blue); }
 .stat--green { --dots: var(--green); }
-.stat.no-dots { background-image: linear-gradient(to bottom, rgb(255 255 255 / 0) 10%, var(--dots) 65%); }
+.stat { background: var(--dots); }
 .dots { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
 .no-dots > .dots { visibility: hidden; }
 
-/* ── Call to action: the purple card, with dots along its border (scripts/stipple.js) and a strip of words ──
+/* ── Call to action: the purple card, with white dust in its middle (scripts/stipple.js) and a strip of words ──
    As wide as the column (on phones nearly the whole screen, like the card stack: --inset), and about three quarters
    of the screen's height (at most 680px): on a short screen it never needs scrolling through, on a tall one it never
    becomes a tower. Its content sets the least it can be, with generous air above and below it at every size
@@ -289,7 +290,7 @@
   overflow: hidden; border-radius: var(--radius-l);
   background-color: var(--purple);
 
-  /* the dots are drawn behind the content (the card is a world of its own) */
+  /* the dust is drawn behind the content (the card is a world of its own) */
   & > .dots { z-index: -1; }
 }
 .cta__content {

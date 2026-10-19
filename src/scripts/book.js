@@ -4,7 +4,9 @@
    Why our own: Planerka's script (embed.js) builds its popup and starts loading the calendar only when the button is
    clicked, and throws both away when the popup is closed. The calendar is a whole web app (its page is made on the
    server, ~0.55 s; then its scripts; then two requests for the free days and times, ~1.3 s more), so every click
-   waited 2–4 seconds behind three blinking dots. Here the calendar is loaded before it is asked for and kept:
+   waited 2–4 seconds behind three blinking dots. Here the calendar is loaded before it is asked for and kept, once the
+   visitor has pressed «ОК» on the cookie notice (consent.js: Planerka's page brings Yandex Metrica, Google Analytics
+   and reCAPTCHA with it, so loading it ahead is optional, and waits for consent; a click always loads it):
      · when the visitor pauses (after the first move of their own on the page: the mouse, a key, a finger, the wheel;
        once the page has not been scrolled for a moment and the browser is idle); not at all on Save-Data or a 2G
        connection, and never for a visitor who does nothing (a robot, a speed test), so Planerka is not loaded for nobody;
@@ -26,6 +28,8 @@
    a demo button opens the page of Planerka in a new tab, as before. UTM tags in the address are handed to Planerka,
    so a booking keeps its source. */
 import { css, calm } from "./motion.js";
+import { onScroll, offScroll } from "./scroller.js";
+import { onConsent } from "./consent.js";
 
 const BOOK = {
   url: "https://planerka.app",
@@ -273,7 +277,7 @@ const demoOf = (t) => {
   return t.closest("[data-demo]") || (card && card.querySelector("[data-demo]"));
 };
 
-function initWarm() {
+function initWarm() {  // runs once the visitor has agreed to the cookies (initBook)
   const intent = (e) => { if (!frame && demoOf(e.target)) warm(e.type); };
   ["pointerover", "pointerdown", "focusin"].forEach((t) => document.addEventListener(t, intent, { passive: true }));
   document.addEventListener("touchstart", intent, { passive: true });
@@ -296,11 +300,11 @@ function initWarm() {
   const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 300));
   const rest = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => { removeEventListener("scroll", rest); idle(() => warm("idle"), { timeout: 3000 }); }, BOOK.rest);
+    timer = setTimeout(() => { offScroll(rest); idle(() => warm("idle"), { timeout: 3000 }); }, BOOK.rest);
   };
   const first = () => {
     moves.forEach((t) => removeEventListener(t, first));
-    addEventListener("scroll", rest, { passive: true });
+    onScroll(rest);                                      // the page's scroll: the window's, or its box's (scroller.js)
     rest();
   };
   const start = () => moves.forEach((t) => addEventListener(t, first, { passive: true }));
@@ -351,5 +355,5 @@ export function initBook() {
     history.replaceState(null, "", clean());
   }
 
-  initWarm();
+  onConsent(initWarm);                                   // loading ahead only with consent (at once if given earlier)
 }

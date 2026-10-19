@@ -1,0 +1,2 @@
+# scroll positions for the stack, as JS: p (px since the stage was pinned) -> scrollY
+P = "(()=>{{const c=fmCards.cards,s=document.querySelector('[data-stack]'),st=document.querySelector('.stack__stage');const top=s.getBoundingClientRect().top+scrollY,navH=parseFloat(getComputedStyle(c[0].el).top),m=c[0].m;const V=m.A+navH+parseFloat(getComputedStyle(st).paddingBottom);const base=top-V+parseFloat(getComputedStyle(st).paddingTop)-navH;return base+({expr});}})()"

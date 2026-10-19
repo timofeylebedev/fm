@@ -4,7 +4,7 @@
     "One range for everything: a size has its 'from' value on a 320px screen and its 'to' value on a 1440px one, and goes in a straight line in between (constant outside). Not the screen's width alone: a screen counts as only as big as its height allows (range.height): a screen 360px tall gets the sizes of a 320 screen, one 920px tall the sizes of a 1440 screen, a straight line in between (so every px of height a screen lacks counts as two px of width). A phone turned sideways gets the phone sizes, a 1366 × 650 laptop window the sizes of a 900 screen, and every size shrinks together.",
     "One ladder for every size, type and space alike (ladder): steps of 2px up to 24, of 4px up to 64, of 8px up to 128. Both ends of every role are on it, so no size ends on an odd value like 36.6 or 31.",
     "Type: a role is two sizes from the ladder, at 320 and at 1440. The roles keep their order and their distance at both ends: every pair in type.relations is at least type.relations.min apart (×1.125) on a 320 screen and on a 1440 one, and so at every size in between (the ratio of two straight lines can only move from its value at one end to its value at the other). Labels (\"label\": true) are set apart by case and weight, not size, and are left out of that.",
-    "Space: every spacing and radius is two numbers from the ladder (its value at 320 and at 1440). Roles marked size are measures of a block, not spacing, and need not be on the ladder. A role with \"per\" follows the width of its own block instead of the screen (per.from → per.to px of that width): the padding of a card that is narrow on a phone and wide on a tablet.",
+    "Space: every spacing and radius is two numbers from the ladder (its value at 320 and at 1440). Roles marked size are measures of a block, not spacing, and need not be on the ladder. A role with \"per\" follows the width of its own block instead of the screen (per.from → per.to px of that width): the padding of a card that is narrow on a phone and wide on a tablet. A role with \"by\": \"width\" follows the screen's width alone, not its height.",
     "Sizes are written in rem in the CSS (type) or px with the range in rem (space): with the browser's text made bigger, the whole system behaves as on a narrower screen, like the em steps of media.css."
   ],
   "range": { "from": 320, "to": 1440, "height": { "from": 360, "to": 920 } },
@@ -20,11 +20,12 @@
       "type/body-m":       { "px": [16, 18], "use": "the text of the tool cards" },
       "type/body":         { "px": [16, 16], "use": "running text: publications, buttons, the footer" },
       "type/body-s":       { "px": [14, 16], "use": "short text in small cards: the features, the bylines of the publications" },
-      "type/ui":           { "px": [14, 14], "use": "navbar links and button, menu, skip link, footer notes" }
+      "type/ui":           { "px": [14, 14], "use": "navbar links and button, menu, skip link, footer notes" },
+      "type/note":         { "px": [12, 12], "use": "the cookie notice: a note in the corner, below the UI size (12 everywhere)" }
     },
     "relations": {
       "min": 1.125,
-      "pairs": [["type/hero", "type/h2"], ["type/h2", "type/card-heading"], ["type/card-heading", "type/lead"], ["type/card-heading", "type/body-m"], ["type/body", "type/ui"]],
+      "pairs": [["type/hero", "type/h2"], ["type/h2", "type/card-heading"], ["type/card-heading", "type/lead"], ["type/card-heading", "type/body-m"], ["type/body", "type/ui"], ["type/ui", "type/note"]],
       "$about": "Neighbouring levels that must stay apart at both ends of the range. Not here, on purpose: lead and body are the same on phones (16) and apart on computers (20 / 16); body-m, body and body-s are one text size on phones and differ by 2px on computers."
     },
     "aliases": {
@@ -59,8 +60,11 @@
       "tool/gap":        { "px": [24, 32], "css": "--tool-gap", "use": "a tool card's text → its button" },
       "feature/gap":     { "px": [24, 40], "css": "--feature-gap", "use": "a feature's icon → its text (at least)" },
       "pub/air":         { "px": [40, 64], "css": "--pub-air", "use": "a publication's text → its footer (at least)" },
-      "hero/air-top":    { "px": [16, 48], "css": "--hero-air-top", "use": "under the navbar, above the hero title (at least)" },
-      "hero/air-bottom": { "px": [16, 32], "css": "--hero-air-bottom", "use": "under the hero button, above the team (at least)" },
+      "hero/air-top":    { "px": [32, 64], "css": "--hero-air-top", "use": "under the navbar, above the hero title (at least: the hero is taller than the screen rather than less)" },
+      "hero/air-bottom": { "px": [40, 72], "css": "--hero-air-bottom", "use": "under the hero button, above the team (at least)" },
+      "hero/air-max":    { "px": [64, 128], "css": "--hero-air-max", "use": "above and below the hero's text at most: the hero stops growing there, on tall screens" },
+      "hero/pic-min":    { "px": [168, 300], "by": "width", "size": true, "css": "--hero-pic-min", "use": "the least height of the team at the table (by the screen's width only: a short laptop keeps a big picture; never more than the picture's height for the width)" },
+      "hero/text":       { "px": [224, 260], "size": true, "css": "--hero-text", "use": "about how tall the hero's text is (title, lead, button): only for the hero's greatest height" },
       "space/center-air": { "px": [8, 0], "css": "--center-air", "use": "air at the sides of a centred heading, so a line of big letters is not pressed against the gutter on phones" },
       "nav/pad-y":       { "px": [10, 12], "css": "--nav-pad-y" },
       "nav/pad-left":    { "px": [12, 24], "css": "--nav-pad-left" },

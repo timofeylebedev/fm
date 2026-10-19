@@ -3,6 +3,7 @@
    its block. The covers (about 200 KB) are downloaded only when the block comes within one screen of the visible part of
    the page. Decorative: screen readers skip it (aria-hidden in the HTML). */
 import { ScrollTrigger, refreshSoon } from "./gsap.js";
+import { ioRoot } from "./scroller.js";
 import { pace } from "./pace.js";
 import { calm } from "./motion.js";
 
@@ -255,11 +256,11 @@ function init(root) {
   new IntersectionObserver((entries) => {
     visible = entries[entries.length - 1].isIntersecting;
     visible ? start() : stop();
-  }, { rootMargin: "200px 0px" }).observe(root);
+  }, { root: ioRoot, rootMargin: "200px 0px" }).observe(root);
   if (!coversWanted) {
     const near = new IntersectionObserver((entries) => {
       if (entries[entries.length - 1].isIntersecting) { near.disconnect(); loadCovers(); }
-    }, { rootMargin: "100% 0px" });
+    }, { root: ioRoot, rootMargin: "100% 0px" });
     near.observe(root);
   }
   start();

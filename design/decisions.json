@@ -8,12 +8,12 @@
     {
       "id": "cta-light-middle",
       "kind": "exception",
-      "what": "CTA card: the white title, the white text and the focus ring of the white button sit on the light purple between the dots (#b596ff, STIPPLE_CTA.background in scripts/stipple.js)",
+      "what": "CTA card: the white title and the white text sit on the purple card (#884dff) with white dust moving over it (15%, scripts/stipple.js; until Oct 19, 2026 on the light purple #b596ff between purple dots)",
       "rule": "WCAG 1.4.3 text contrast (3 : 1 large, 4.5 : 1 text), 1.4.11 focus indicator 3 : 1",
-      "measured": "text 2.39 : 1, focus ring 1.93 : 1 (Oct 17, 2026)",
+      "measured": "text 2.39 : 1, focus ring 1.93 : 1 (Oct 17, 2026, the old dots); with the white dust: the lead 4.4–4.5 : 1 at 320 px (the audit, Oct 19, 2026; the dust moves), the title passes",
       "decided": "Tim, 2026-10-18 — kept for now",
-      "why": "the look of the card: purple dots on a lighter purple",
-      "fix": "swap the two colours of the dots (purple between them: white text 4.61 : 1), or a darker middle; the focus ring can be ink on this card (8.8 : 1)",
+      "why": "the look of the card: white dust over its text",
+      "fix": "invClear in STIPPLE_CTA (the dust thins out round each text line: quietPad), or less dust (invOpacity); the focus ring can be ink on this card (8.8 : 1)",
       "audit": {
         "pixels": [
           ".cta__title",
@@ -26,7 +26,7 @@
       "kind": "exception",
       "what": "White text on the colours of the card stack and the stats: the orange «Документы» and green «Финансы» cards, their labels (also over the progress fill), the orange, green and blue stats",
       "rule": "WCAG 1.4.3 text contrast: the labels are 500, not bold, so they need 4.5 : 1",
-      "measured": "labels on orange 2.95 (over the fill 2.17), on green 3.76 (2.52); stat labels 2.8 (orange) – 3.6 (green); stat numbers 2.3 (orange) – 2.8 (green) on the dots (Oct 17, 2026)",
+      "measured": "labels on orange 2.95 (over the fill 2.17), on green 3.76 (2.52); stat labels 2.8 (orange) – 3.6 (green); stat numbers 2.3 (orange) – 2.8 (green) on the dots (Oct 17, 2026); since Oct 19, 2026 the stats are filled with their colour under white dust: «>20 000» and «Договоров» 2.95 on orange",
       "decided": "Tim, 2026-10-17 (orange) and 2026-10-18 (green, the progress fill)",
       "why": "the brand colours of the subjects",
       "fix": "text-safe shades for text-bearing surfaces: orange #c25700, green #008a25 (4.5 : 1)",
@@ -134,7 +134,7 @@
     {
       "id": "endless-motion",
       "kind": "exception",
-      "what": "Things that move by themselves without end and have no pause switch: the CTA's strip of words, the hero chips, the ring's idle spin, the dots of the stats and the CTA, the loops in the drawings. They all stop for visitors who turned on \"reduce motion\"",
+      "what": "Things that move by themselves without end and have no pause switch: the CTA's strip of words, the hero chips, the ring's idle spin, the dust of the stats and the CTA, the loops in the drawings. They all stop for visitors who turned on \"reduce motion\"",
       "rule": "WCAG 2.2.2 Pause, Stop, Hide (moving content that lasts more than 5 seconds can be paused)",
       "decided": "Tim, 2026-10-18 — no pause switch, the strip keeps its loop",
       "why": "the look of the page; reduce motion covers the visitors who need it",
@@ -146,6 +146,52 @@
       "what": "The burger menu's pills open with the settle curve, from 20% to 117% and back to 100%, 0.8s in all, and close by playing the same backwards",
       "decided": "Tim, 2026-10-18 — kept as designed",
       "why": "the character of the menu"
+    },
+    {
+      "id": "cookie-notice",
+      "kind": "decision",
+      "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (7% under the mouse, the one colour without a token); its links underlined 1px, 3px under the baseline, in ink 20% (Tim, Oct 19; Figma has 10%), ink 30% under the mouse, as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25; after «ОК» the text stays, «ОК» turns into a drawn checkmark, the card sets off 0.15 s before the drawing ends and goes down below the screen edge while fading (0.45 s, the 'leave' curve of motion.js, as the stack titles leave)",
+      "decided": "Tim, 2026-10-19 — the Figma section 'cookies'; the exit (text stays, card goes down with an existing curve) on his request",
+      "why": "a small note in the corner that should look the same everywhere; 1.3 is the line height of all small text on the site"
+    },
+    {
+      "id": "consent-by-ok",
+      "kind": "decision",
+      "what": "Only «ОК» counts as consent: nothing optional (analytics, a chat) starts before it (scripts/consent.js, onConsent). The answer is kept 12 months on the device, with the version of the text (VERSION); a visitor who has not answered is asked again on the next visit",
+      "decided": "Claude, 2026-10-19 — proposed to Tim with the cookie notice",
+      "why": "152-ФЗ art. 9: consent is specific and unambiguous; by 2026 practice, staying on the page or scrolling is not treated as consent to analytics",
+      "fix": "if the text keeps «Оставаясь, вы даете согласие», it promises more than the code does: change it to «Нажимая «ОК», вы даёте согласие…», or accept that analytics waits for «ОК» anyway"
+    },
+    {
+      "id": "safari-box",
+      "kind": "decision",
+      "what": "In Safari 26+ on a Mac the page scrolls in its own box (.page, position fixed, inset 0) instead of the window; everywhere else the window scrolls as before. boot.js gives <html> the class boxed; scroller.js is what every script asks about scrolling; GSAP's ScrollTrigger watches the box (gsap.js), and the logos are held there by position: sticky instead of GSAP's pin. ?fmbox=1 / ?fmbox=0 force it on or off",
+      "decided": "Tim, 2026-10-19 — wanted a solid Safari bar, as on YouTube and Google Docs",
+      "why": "Safari 26+ on a Mac draws its bar as glass over the page and the page shows through while it scrolls. Measured in Tim's Safari on macOS 27: no light header (solid, glass, tone strips) made the bar solid in dark mode; a page whose window does not scroll did, in light and dark mode (the Google Docs way). theme-color is ignored. Checked in Chromium: the boxed page renders pixel for pixel like the normal one at 1440×900, 390×844 and 1366×650"
+    },
+    {
+      "id": "doc-pages",
+      "kind": "decision",
+      "what": "The privacy policy and the cookie consent are pages of the site (privacy_policy_ru.html, soglasie_cookie.html) at their old addresses. Their text is the Tilda text as it was (Tim, 2026-10-19: «keep it as is for now except formatting»); only the layout is new: headings, paragraphs, hanging list markers, one card per purpose of processing, links. Text line height 1.5 (--doc-line), not --lh-text 1.3",
+      "decided": "Tim, 2026-10-19 (text as is); Claude, 2026-10-19 (layout, line height)",
+      "why": "a long legal text is read line after line; 1.3 suits the page's short texts. The wording waits for a separate review (errors listed in the chat of Oct 19)",
+      "fix": "when the text is revised, edit it in the two pages directly"
+    },
+    {
+      "id": "hero-bounds",
+      "kind": "decision",
+      "what": "The hero has least and greatest sizes for its parts (picture, air above and below the text). On tall screens it stops growing and the first card shows more under it (390×844: 574px instead of 826); on screens shorter than about 690px it is taller than the screen rather than squeezing the picture (1366×650: 673px, the team 291px tall instead of 249, no pill of the first card on the first screen)",
+      "decided": "Claude, 2026-10-19, from Tim's round-4 comments (hero 1–3) — to confirm",
+      "why": "the hero should neither stretch nor shrink too much; generous air round the text; a big enough team at ≈620px tall",
+      "fix if reconsidered": "lower hero/pic-min or hero/air-top/bottom in design/scale.json to bring the first card's pill back on short laptops"
+    },
+    {
+      "id": "pinned-pill",
+      "kind": "decision",
+      "what": "A card that has become a pill stays pinned under the navbar for a fifth of a screen of scrolling, and the next card waits under it with the usual gap; then both go on with the page. It is laid out by the browser (a sticky holder round each card, stack.css), so it is the same both ways: scrolled back, the pill waits there again. The last card's pill does the same with a copy at the top of the section after the stack, which slides under it below a band of the page's colour as tall as the gap",
+      "decided": "Tim, 2026-10-19 — round-4 comment (cards 5), then: keep the gap instead of the pill over the next card, the last one pinned too, a pause both ways, about 1/5 of a screen",
+      "why": "the finished card stays in sight a little longer without covering the next one; a pause only on the way down would need the script to move the cards, which lags on phones",
+      "fix if reconsidered": "SET.hold in cards.js (screens; 0 turns the pause off)"
     }
   ]
 }
