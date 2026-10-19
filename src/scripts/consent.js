@@ -24,8 +24,11 @@ export const VERSION = 1;                  // raise when what is collected chang
 const MONTHS = 12;                         // how long an answer is kept
 
 let memory = null;                         // where storage is not available (some private windows): this page only
+// what was saved on this page comes first: where storage can be read but not written (full, some private modes),
+// an «ОК» still counts on this page
 const load = () => {
-  try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch { return memory; }
+  if (memory) return memory;
+  try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch { return null; }
 };
 const save = (v) => {
   memory = v;
@@ -33,7 +36,8 @@ const save = (v) => {
 };
 const valid = (v) => {
   if (!v || v.v !== VERSION || !v.at) return false;
-  const until = new Date(v.at);
+  const at = new Date(v.at), until = new Date(v.at);
+  if (!(at <= new Date())) return false;                 // a date in the future (or none at all) is not an answer
   until.setMonth(until.getMonth() + MONTHS);
   return until > new Date();
 };
@@ -55,7 +59,7 @@ export function grant() {
   document.dispatchEvent(new CustomEvent("fm:consent"));
 }
 
-export function withdraw() { save(null); }
+export function withdraw() { memory = null; save(null); }
 
 // an answer given in another tab
 addEventListener("storage", (e) => {

@@ -11,7 +11,7 @@
      · an «ОК» pressed in another tab: here it simply fades out;
      · while it is shown, the page keeps its height clear above the bottom of the screen (scroll-padding-bottom), so a
        link reached with the Tab key is never scrolled to under the notice (WCAG 2.4.11);
-     · reduce motion: the checkmark is not drawn but shown, with the text going (it fades, quickly).
+     · reduce motion: the checkmark is not drawn but shown, and every fade is quick (at most 250 ms).
    Tuning in the console: fmCookies (the timings, in ms; replay() puts the notice back on the page for a look). */
 import "../styles/components/cookies.css";
 import { grant, hasConsent } from "./consent.js";
@@ -25,7 +25,8 @@ const OUT = "cubic-bezier(0.22, 1, 0.36, 1)";        // --ease-out of tokens.css
 const DRAW_EASE = "cubic-bezier(0.65, 0, 0.35, 1)";  // a hand drawing a line: sets off, then slows to a stop
 const calm = matchMedia("(prefers-reduced-motion: reduce)");
 
-let box = null;
+let box = null, said = null;
+const calmFade = (ms) => (calm.matches ? Math.min(ms, 250) : ms);
 
 // force: shown even to a visitor who has agreed (fmCookies.replay(), for a look; the answer is kept as it was)
 export function showCookies({ delay = T.DELAY, force = false } = {}) {
@@ -35,18 +36,22 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
     if (box || (!force && hasConsent())) return;
     box = tpl.content.firstElementChild.cloneNode(true);
     document.body.append(box);
+    // what a screen reader hears after «ОК»: a status line of the page, not of the card, so it is still there when the
+    // card has gone and the focus has moved (a line removed with its card may never be read out)
+    if (!said) { said = box.querySelector(".cookies__said"); document.body.append(said); }
+    else box.querySelector(".cookies__said")?.remove();
+    said.textContent = "";
     const tint = followTint(box, 0.8);
     const root = document.documentElement;
     const clear = () => { root.style.scrollPaddingBottom = box ? (innerHeight - box.getBoundingClientRect().top + 8) + "px" : ""; };
     clear();
     addEventListener("resize", clear);
-    box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: T.FADE_IN, easing: OUT, fill: "forwards" });
+    box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: calmFade(T.FADE_IN), easing: OUT, fill: "forwards" });
 
     const ok = box.querySelector(".cookies__ok");
     const text = box.querySelector(".cookies__text");
     const label = box.querySelector(".cookies__label");
     const check = box.querySelector(".cookies__check path");
-    const said = box.querySelector(".cookies__said");
 
     let leaving = false;
     const leave = async (drawn) => {
@@ -54,7 +59,6 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
       leaving = true;
       const el = box;
       el.style.pointerEvents = "none";
-      const hadFocus = el.contains(document.activeElement);
       if (drawn) {
         said.textContent = "Готово, спасибо";
         const quick = calm.matches;
@@ -68,10 +72,12 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
         await new Promise((r) => setTimeout(r, T.HOLD));
       }
       const current = Number(getComputedStyle(el).opacity);
-      await el.animate([{ opacity: current }, { opacity: 0 }], { duration: T.FADE_OUT, easing: OUT, fill: "forwards" }).finished;
+      await el.animate([{ opacity: current }, { opacity: 0 }], { duration: calmFade(T.FADE_OUT), easing: OUT, fill: "forwards" }).finished;
       tint.stop();
       removeEventListener("resize", clear);
       document.removeEventListener("fm:consent", elsewhere);
+      // the focus still on «ОК» (not moved on by the visitor meanwhile): it goes to the content, see below
+      const hadFocus = el.contains(document.activeElement);
       el.remove();
       box = null;
       clear();
@@ -85,9 +91,11 @@ export function showCookies({ delay = T.DELAY, force = false } = {}) {
         main.focus({ preventScroll: true });
       }
     };
-    const elsewhere = (e) => { if (e.detail?.elsewhere) leave(false); };
+    // consent given by anything but this card's «ОК» (another tab, fmConsent.grant()): the card just fades out
+    const elsewhere = () => leave(false);
     document.addEventListener("fm:consent", elsewhere);
-    ok.addEventListener("click", () => { if (leaving) return; if (!force || !hasConsent()) grant(); leave(true); });
+    // leave() first: it marks the card as leaving at once, so the fm:consent that grant() sends does not end it plainly
+    ok.addEventListener("click", () => { if (leaving) return; leave(true); if (!force || !hasConsent()) grant(); });
   }, delay);
 }
 

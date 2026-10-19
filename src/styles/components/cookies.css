@@ -12,7 +12,7 @@
   display: flex; align-items: center; gap: 8px;
   box-sizing: border-box;
   width: 17.25rem;                                   /* 276px */
-  max-width: calc(100vw - 2 * max(8px, env(safe-area-inset-left)));
+  max-width: calc(100% - 16px);                      /* % of the screen (without a scrollbar), 8px on each side */
   padding: 8px 8px 8px 12px;
   border-radius: 16px;                               /* the button inside: 16 − its inset 8 = 8 */
   font-size: var(--type-note); line-height: var(--lh-text);
