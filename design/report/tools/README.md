@@ -12,3 +12,5 @@ Python Playwright, run from this folder. Old build on http://localhost:8001/, ne
 - `pair.py out.jpg W H mobile dpr "<js: scrollY>" [crop] [wait]` — a before/after picture at one scroll position; `jsy.py` turns a stack position into JS.
 - `navt.py url` — the sideways navbar: stays with the hero, follows, settles.
 - `errs.py` — scrolls down and up in normal, reduced-motion and debug modes and prints console errors.
+- `fullsweep.py url out.json` — the whole responsive picture: every key of the page's picture block (type, spacing, radii, paddings, blocks, the hero's parts) at every 10px of width (1100 tall) and every 25px of height (1440 wide). Run it on both builds; the review page uses the two files as before/now.
+- `ovf.py` — sideways scroll at 101 widths.
