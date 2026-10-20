@@ -300,7 +300,7 @@
 
     <!-- ── Tools ── -->
     <section class="tools" id="tools">
-      <div class="head head--center"><h2 class="head__title" data-reveal="chars">Полезные инструменты для вашего лейбла</h2></div>
+      <div class="head head--center"><h2 class="head__title" data-reveal="title">Полезные инструменты для вашего лейбла</h2></div>
       <div class="tools__list">
         <article class="tool" data-reveal="block" data-linkcard>
           <div class="tool__body">
@@ -339,66 +339,83 @@
 
     <!-- ── Publications ── -->
     <section class="pubs" id="publications">
-      <div class="head head--center"><h2 class="head__title" data-reveal="chars">Делимся знаниями о музыкальной индустрии</h2></div>
-      <div class="pubs__grid">
-        <a class="pub" href="https://i-m-i.ru/guides/kak-razobratsya-v-royalti-otchetah" target="_blank" rel="noopener" data-reveal="block">
-          <div class="pub__body">
-            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
-            <div class="pub__copy">
-              <h3 class="pub__title">Как разобраться в отчетах по роялти</h3>
-              <p class="pub__desc">Что должно быть в роялти-отчетах, как проверить их корректность, почему один трек может повторяться десятки раз, откуда берутся отрицательные стримы.</p>
-            </div>
-          </div>
-          <div class="pub__foot">
-            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
-          </div>
-        </a>
-        <div class="pub-video" data-reveal="block">
-          <a class="pub__cover" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener">
+      <div class="head head--center"><h2 class="head__title" data-reveal="title">Делимся знаниями о музыкальной индустрии</h2></div>
+      <div class="pubs__list">
+        <div class="pubs__grid" id="pubs-grid" data-pubs>
+          <a class="pub" href="https://i-m-i.ru/guides/kak-razobratsya-v-royalti-otchetah" target="_blank" rel="noopener" data-reveal="block">
             <div class="pub__body">
               <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
               <div class="pub__copy">
-                <h3 class="pub__title">Как получать максимум от треков</h3>
-                <p class="pub__desc">Как подписки на стриминги превращаются в роялти артиста, что определяет цену стрима и почему прямой контракт с платформой не всегда выгоден.</p>
+                <h3 class="pub__title">Как разобраться в отчетах по роялти</h3>
+                <p class="pub__desc">Что должно быть в роялти-отчетах, как проверить их корректность, почему один трек может повторяться десятки раз, откуда берутся отрицательные стримы.</p>
               </div>
             </div>
             <div class="pub__foot">
-              <img class="pub__source pub__source--mark" src="./assets/img/institute-mark.webp" width="76" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-              <img class="pub__source pub__source--full" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
             </div>
           </a>
-          <div class="pub__watch">
-            <a class="pub__platform" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener"><img src="./assets/img/vk-video.webp" width="32" height="32" alt="Смотреть в VK Видео" loading="lazy" decoding="async"></a>
-            <a class="pub__platform" href="https://youtu.be/WegSIuNXDJg" target="_blank" rel="noopener"><img src="./assets/img/youtube.webp" width="32" height="32" alt="Смотреть на YouTube" loading="lazy" decoding="async"></a>
+          <div class="pub-video" data-reveal="block">
+            <a class="pub__cover" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener">
+              <div class="pub__body">
+                <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+                <div class="pub__copy">
+                  <h3 class="pub__title">Как получать максимум от треков</h3>
+                  <p class="pub__desc">Как подписки на стриминги превращаются в роялти артиста, что определяет цену стрима и почему прямой контракт с платформой не всегда выгоден.</p>
+                </div>
+              </div>
+              <div class="pub__foot">
+                <img class="pub__source pub__source--mark" src="./assets/img/institute-mark.webp" width="76" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+                <img class="pub__source pub__source--full" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              </div>
+            </a>
+            <div class="pub__watch">
+              <a class="pub__platform" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener"><img src="./assets/img/vk-video.webp" width="32" height="32" alt="Смотреть в VK Видео" loading="lazy" decoding="async"></a>
+              <a class="pub__platform" href="https://youtu.be/WegSIuNXDJg" target="_blank" rel="noopener"><img src="./assets/img/youtube.webp" width="32" height="32" alt="Смотреть на YouTube" loading="lazy" decoding="async"></a>
+            </div>
           </div>
+          <a class="pub" href="https://i-m-i.ru/post/razbor-2025-leybly" target="_blank" rel="noopener" data-reveal="block">
+            <div class="pub__body">
+              <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+              <div class="pub__copy">
+                <h3 class="pub__title">Трансформация рынка лейблов в России</h3>
+                <p class="pub__desc">Анализ российской музыкальной индустрии за 2022–2025 годы: правовое поле, стриминги, лейблы и дистрибьюторы, концерты и фестивали, артисты, музыкальные тренды.</p>
+              </div>
+            </div>
+            <div class="pub__foot">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+            </div>
+          </a>
+          <a class="pub" href="https://i-m-i.ru/post/razbor-2025-strimingi" target="_blank" rel="noopener" data-reveal="block">
+            <div class="pub__body">
+              <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+              <div class="pub__copy">
+                <h3 class="pub__title">Динамика объема и стоимости стримов в России</h3>
+                <p class="pub__desc">Как экосистемные подписки и рекомендательные системы стали драйверами роста, кто лидирует по доходам и аудитории и как изменилась стоимость стрима.</p>
+              </div>
+            </div>
+            <div class="pub__foot">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+            </div>
+          </a>
+          <!-- a fifth card to try «Показать больше» (Tim, Oct 20): a copy of the first one; replace it with a real publication -->
+          <a class="pub" href="https://i-m-i.ru/guides/kak-razobratsya-v-royalti-otchetah" target="_blank" rel="noopener" data-reveal="block">
+            <div class="pub__body">
+              <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+              <div class="pub__copy">
+                <h3 class="pub__title">Как разобраться в отчетах по роялти</h3>
+                <p class="pub__desc">Что должно быть в роялти-отчетах, как проверить их корректность, почему один трек может повторяться десятки раз, откуда берутся отрицательные стримы.</p>
+              </div>
+            </div>
+            <div class="pub__foot">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+            </div>
+          </a>
         </div>
-        <a class="pub" href="https://i-m-i.ru/post/razbor-2025-leybly" target="_blank" rel="noopener" data-reveal="block">
-          <div class="pub__body">
-            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
-            <div class="pub__copy">
-              <h3 class="pub__title">Трансформация рынка лейблов в России</h3>
-              <p class="pub__desc">Анализ российской музыкальной индустрии за 2022–2025 годы: правовое поле, стриминги, лейблы и дистрибьюторы, концерты и фестивали, артисты, музыкальные тренды.</p>
-            </div>
-          </div>
-          <div class="pub__foot">
-            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
-          </div>
-        </a>
-        <a class="pub" href="https://i-m-i.ru/post/razbor-2025-strimingi" target="_blank" rel="noopener" data-reveal="block">
-          <div class="pub__body">
-            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
-            <div class="pub__copy">
-              <h3 class="pub__title">Динамика объема и стоимости стримов в России</h3>
-              <p class="pub__desc">Как экосистемные подписки и рекомендательные системы стали драйверами роста, кто лидирует по доходам и аудитории и как изменилась стоимость стрима.</p>
-            </div>
-          </div>
-          <div class="pub__foot">
-            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
-          </div>
-        </a>
+        <button class="btn btn--tint pubs__more" type="button" aria-controls="pubs-grid" data-pubs-more hidden>Показать больше</button>
       </div>
     </section>
   </main>

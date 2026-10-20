@@ -19,6 +19,8 @@
 .btn--orange { --btn-hover: var(--orange-hover); background-color: var(--orange); padding-inline: var(--button-pad-x-alt); }
 .btn--teal { --btn-hover: var(--teal-hover); background-color: var(--teal); padding: 9px var(--button-pad-x-alt) 9px 10px; }
 .btn--white { background-color: var(--paper); color: var(--purple); }
+/* a quiet one: ink on black 5%, 7% under the mouse, as the cookie «ОК» (the publications' «Показать больше») */
+.btn--tint { --btn-hover: var(--tint-strong); background-color: var(--tint-hover); color: var(--ink); }
 /* the small one in the navbar */
 .btn--nav { height: var(--nav-control); padding: 9px 16px; font-size: var(--type-ui); }
 .btn__icon { flex: none; width: 20px; height: 20px; }
