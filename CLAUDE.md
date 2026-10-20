@@ -69,6 +69,9 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
 - **Icons:** `<svg data-icon="name">` in the HTML is replaced with `src/assets/icons/name.svg` at build time.
 - Console tuning objects for trying values live: `fmMotion`, `fmHero`, `fmCards`, `fmStipple`, `fmRoyalty`, `fmPace`,
   `fmDeck`, `fmAnchor`, `fmCookies`, `fmConsent`. Debug: `?fmcards=debug`, `?fmcap=debug`.
+- **The ring of covers** (`scripts/ring.js` + `scripts/ring-gl.js`): one WebGL canvas, drawn only on a real GPU. In a
+  browser without one (headless Chromium here, CI) it is a still 2D picture; add `?fmring=gl` to test the WebGL path
+  there. `document.querySelector(".ring").roundCarousel` has `config`, `state()` (with `draws`, `webgl`) and `update()`.
 
 ## Testing tips
 
@@ -103,5 +106,7 @@ Web code syntax is `var(--name)`. Pull: run `design/figma/pull.js` with `use_fig
 - **Claude in the cloud (claude.ai project "FM")**: same repo, but the shell can't reach figma.com or planerka.app,
   `gh pr create` fails (open PRs with `gh api repos/timofeylebedev/fm-website/pulls`), branches can't be deleted, and
   there is no Firefox/WebKit. To show Tim a build there, push `dist/` (without `.br`/`.gz`) to a throwaway branch and
-  link `https://raw.githack.com/timofeylebedev/fm-website/<branch>/index.html`.
+  link `https://raw.githack.com/timofeylebedev/fm-website/<branch>/index.html`. Since Oct 2026 githack puts a notice
+  page in front and the page's pictures do not load there (seen Oct 20 in the Claude app's browser: the images are sent
+  off-site and the site's CSP blocks them), so for anything with pictures Tim runs the branch locally instead.
 - Whichever side changes a rule here, update this file in the same PR, so both read the same thing.

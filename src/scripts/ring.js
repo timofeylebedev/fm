@@ -8,9 +8,10 @@
    visible part of the page. While the block is on screen, a frame costs two numbers sent to the GPU and one draw;
    off screen nothing runs.
 
-   Rebuilt Oct 20, 2026: the ring used to be 16 DOM faces in CSS 3D (preserve-3d). Measured in Chromium, the browser
-   re-layered those 16 layers on every frame: ≈ 10 ms of every 16.7 ms frame on a phone-speed CPU, ≈ 5.7 ms on a
-   laptop. The canvas draws the same picture (checked pixel by pixel against the old ring at fixed poses). */
+   Rebuilt Oct 20, 2026: the ring used to be 16 DOM faces in CSS 3D (preserve-3d), and the browser re-layered them on
+   every frame. Measured on a MacBook (M5 Pro, the Chromium of the Claude app, 120 Hz) with the ring turning: the whole
+   page kept the main thread busy ≈ 100 ms a second with the old ring, ≈ 13–15 ms with the canvas. Checked against
+   the old ring at fixed poses: the covers stand within a pixel of where they stood. */
 import { ScrollTrigger, refreshSoon } from "./gsap.js";
 import { ioRoot } from "./scroller.js";
 import { pace } from "./pace.js";
@@ -58,7 +59,7 @@ const SETTLED = 1e-3;        // degrees: a pose that moved less than this since 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
 const radiusOf = (c, n) => {
-  const w = c.imageWidth * (1 + c.spacing * 0.15);
+  const w = c.imageWidth * (1 + Math.max(0, c.spacing) * 0.15);   // below 0 the cards would overlap (ring-gl.js)
   return n > 2 ? w / (2 * Math.tan(Math.PI / n)) : w * 0.6;
 };
 
@@ -136,7 +137,8 @@ function init(root) {
       ox: W / 2, oy: above + cy,                       // the ring's centre on the canvas (the old perspective-origin)
       halfW: c.imageWidth * s / 2, halfH: c.imageHeight * s / 2,
       radius: radiusOf(c, n) * s, perspective: c.perspective * s,
-      corner: c.cornerRadius * s, fade: clamp01(c.backFade / 10)
+      corner: c.cornerRadius * s, fade: clamp01(c.backFade / 10),
+      dprMax: pace.slow ? 2 : 3                        // device pixels per CSS px (the lighter mode for weak devices: 2)
     };
     if (view) { view.resize(geom); drawn = [NaN, NaN]; paint(); }
 
@@ -156,7 +158,7 @@ function init(root) {
   const st = calm ? null : ScrollTrigger.create({ trigger: root, start: "top bottom", end: "bottom top" });
   function progress(measure) {
     if (typeof c.progress === "number") return clamp01(c.progress);   // testing aid: pins the scroll position
-    if (calm) return STILL_AT;
+    if (calm || (view && !view.webgl)) return STILL_AT;   // the still picture: the pose of "reduce motion"
     if (st && !measure && st.end > st.start) return st.progress;
     const rect = root.getBoundingClientRect();
     const vh = window.innerHeight || document.documentElement.clientHeight;
@@ -239,6 +241,7 @@ function init(root) {
 
   layout();
   new ResizeObserver(layout).observe(root);
+  pace.onChange(layout);                               // the lighter mode draws fewer pixels
   // a new screen density (the window moved to another screen, page zoom) changes the canvas's pixels, not its size
   const watchDensity = () => matchMedia("(resolution: " + (window.devicePixelRatio || 1) + "dppx)").addEventListener("change", () => { layout(); watchDensity(); }, { once: true });
   watchDensity();
@@ -250,17 +253,23 @@ function init(root) {
   }, { root: ioRoot, rootMargin: "200px 0px" }).observe(root);
 
   // The drawing code and the covers: when the block comes within one screen of the visible part of the page
+  // (a cover that arrives, or the GPU coming back, changes the picture by itself: draw it again)
+  const dirty = () => { drawn = [NaN, NaN]; if (!raf) paint(); };
+  let loading = false;
   const near = new IntersectionObserver((entries) => {
-    if (!entries[entries.length - 1].isIntersecting) return;
-    near.disconnect();
+    if (!entries[entries.length - 1].isIntersecting || loading || view) return;
+    loading = true;
     import("./ring-gl.js").then(({ createRingView }) => {
-      view = createRingView(root, c);
+      near.disconnect();
+      view = createRingView(root, c, dirty);
       if (!view) return;                               // no WebGL and no 2D canvas: the block stays empty
       if (geom) view.resize(geom);
       place();
       paint();
       start();
-    }).catch(() => {});
+    }).catch(() => {                                   // the download failed (offline for a moment): try again later
+      setTimeout(() => { loading = false; near.unobserve(root); near.observe(root); }, 5000);
+    });
   }, { root: ioRoot, rootMargin: "100% 0px" });
   near.observe(root);
 
@@ -269,9 +278,9 @@ function init(root) {
     config: c,
     state: () => ({ progress: lastP, rotation: scrollRot + offset, tilt, draws, running: !!raf, webgl: view ? view.webgl : null }),
     update(patch) {
-      const images = patch.images && patch.images !== c.images;
+      const remake = (patch.images && patch.images !== c.images) || "backFadeColor" in patch;
       Object.assign(c, patch);
-      if (view) view.refresh(images);
+      if (view && remake) view.refresh();              // the covers or the colours: the texture is made again
       layout();
       if (still() || typeof c.progress === "number") { place(); paint(); }
     }
