@@ -107,18 +107,26 @@
 /* the table picture: at the bottom of the stage and centred. On narrow screens its sides are cut off by the section;
    on screens wider than the picture, the table fades into the background by itself (the picture does that).
    It fades in once it has loaded and its turn has come, after the heading, the text and the button: scripts/boot.js
-   adds the class hero-loaded to <html> when it has loaded, scripts/hero.js hero-in when its turn comes. */
+   adds the class hero-loaded to <html> when it has loaded, scripts/hero.js hero-in when its turn comes.
+   What fades is a cover in the sand colour over it (::after), not the picture: a picture that fades is drawn on a layer
+   of its own while it fades and put back into the page when it is done, scaled and placed once more, and that last
+   step made the team jump a little at the end of the fade (Tim, Oct 20: «the hero image sometimes shakes»; measured:
+   one changed frame after the fade had ended). The picture itself is drawn once, where it stays. */
 .hero__table {
   position: absolute; left: 50%; bottom: 0;
   width: calc(var(--hero-h) * 3.92333); height: var(--hero-h);
   translate: -50% 0;
-  opacity: 0; transition: opacity 0.9s var(--ease-out);
 
   & picture, & img { width: 100%; height: 100%; }
-  @media (--calm) { transition: none; }
+  &::after {
+    content: ""; position: absolute; inset: -1px; pointer-events: none;
+    background: var(--sand);
+    transition: opacity 0.9s var(--ease-out);
+    @media (--calm) { transition: none; }
+  }
 }
-html.hero-in .hero__table,
-html.hero-loaded:not(.motion) .hero__table { opacity: 1; }
+html.hero-in .hero__table::after,
+html.hero-loaded:not(.motion) .hero__table::after { opacity: 0; }
 
 /* the chips: scripts/hero.js puts them into .hero-chips, a layer as high as the picture, along the bottom of the stage.
    Every size here is a number of --u: one px of a chip at its full size (see --hero-u above). A chip is laid out at

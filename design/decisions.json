@@ -91,9 +91,9 @@
     {
       "id": "id-card-object",
       "kind": "decision",
-      "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck; only their corners follow the screen (radius/m, the radius of the royalty and publication cards; the table half a radius in). Their deck starts below a 35rem column, their own step: the row needs that room",
-      "decided": "2026-10-18; radius/m on 2026-10-18 (Tim)",
-      "why": "their text stays readable at one size; the corners match the cards around them"
+      "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck, corners included: 16px of the card's 240 (the table half that in), so the card keeps its shape at every screen size. Their deck starts below a 35rem column, their own step: the row needs that room",
+      "decided": "2026-10-18; radius/m on 2026-10-18 (Tim); 16px, scaled with the card, on 2026-10-20 (Tim: smaller corners, always in proportion to the card)",
+      "why": "their text stays readable at one size; a card is one object, so its corners belong to it, not to the screen"
     },
     {
       "id": "body-16",
@@ -150,7 +150,7 @@
     {
       "id": "cookie-notice",
       "kind": "decision",
-      "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (7% under the mouse: --tint-strong since Oct 20, shared with «Показать больше» of the publications); its links underlined 1px, 3px under the baseline, in ink 20% (Tim, Oct 19; Figma has 10%), ink 30% under the mouse, as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25; after «ОК» the text stays, «ОК» turns into a drawn checkmark, the card sets off 0.15 s before the drawing ends and goes down below the screen edge while fading (0.45 s, the 'leave' curve of motion.js, as the stack titles leave)",
+      "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (7% under the mouse: --tint-strong); its links underlined 1px, 3px under the baseline, in ink 20% (Tim, Oct 19; Figma has 10%), ink 30% under the mouse, as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25; after «ОК» the text stays, «ОК» turns into a drawn checkmark, the card sets off 0.15 s before the drawing ends and goes down below the screen edge while fading (0.45 s, the 'leave' curve of motion.js, as the stack titles leave)",
       "decided": "Tim, 2026-10-19 — the Figma section 'cookies'; the exit (text stays, card goes down with an existing curve) on his request",
       "why": "a small note in the corner that should look the same everywhere; 1.3 is the line height of all small text on the site"
     },
@@ -188,18 +188,35 @@
     {
       "id": "pinned-pill",
       "kind": "decision",
-      "what": "A card that has become a pill does not wait: it goes on up with the page at once and leaves the screen under the navbar, while the next card comes up to the top (the pinned pill of 2026-10-19 is turned off). The mechanism stays in the code: a sticky holder round each card (stack.css) and, for the last card, a copy at the top of the section after the stack, made only when SET.hold > 0",
-      "decided": "Tim, 2026-10-20 — remove the sticky behaviour of a closed card pill (it was pinned for 1/5 of a screen since 2026-10-19, round-4 comment cards 5)",
+      "what": "A card that has become a pill does not wait: it goes on up with the page at once and leaves the screen under the navbar, while the next card comes up to the top. The pinned pill of 2026-10-19 is gone, and its code with it (the sticky holder round each card, the last card's copy, SET.hold)",
+      "decided": "Tim, 2026-10-20 — remove the sticky behaviour of a closed card pill (it was pinned for 1/5 of a screen since 2026-10-19, round-4 comment cards 5); the same day — remove the pause from the code completely",
       "why": "the pause felt like the page sticking; without it the stack scrolls on evenly",
-      "fix if reconsidered": "SET.hold in cards.js (screens; 0.2 was the pinned pill)"
+      "fix if reconsidered": "bring back the holder of PR #13 (git history: stack.css .stack__hold, cards.js SET.hold and endPin)"
     },
     {
       "id": "pubs-more",
       "kind": "decision",
-      "what": "The publications show at most 4 cards; with 5 or more, a «Показать больше» pill under them shows the next 4 each time and goes away when none are left. It is as far below the cards as the heading is above them (--section-gap; Tim, 2026-10-20). Its colours are those of the cookie «ОК»: black 5% (--tint-hover), 7% under the mouse (--tint-strong), a step darker than the cards (3% → 5%). Without scripts every card is shown and the button is not",
-      "decided": "Tim, 2026-10-20 — button below the cards from 5 cards, a bit less see-through than the cards, the «ОК» colours",
+      "what": "The publications show at most 4 cards; with 5 or more, a «Показать больше» pill under them shows the next 4 each time and goes away when none are left. It is --section-gap below the cards (the gap their heading had; Tim, 2026-10-20), while the heading itself has --section-air-l above the cards. It is a line button (.btn--line): no colour of its own, a 1px border, ink 70% on an ink 16% border, ink on ink 25% under the mouse (Tim, 2026-10-20), and it comes in as a block, as the hero's button does. Without scripts every card is shown and the button is not",
+      "decided": "Tim, 2026-10-20 — button below the cards from 5 cards; later the same day: no background, 1px border, 70%/16% → 100%/25%, coming in like the hero's button",
       "why": "the list can grow without the page getting longer; 4 is two full rows of the two-column grid",
       "fix if reconsidered": "PUBS in scripts/pubs.js (first, more); the colours in sections.css (.pubs__more)"
+    },
+    {
+      "id": "no-focus-ring",
+      "kind": "exception",
+      "what": "No focus ring anywhere on the page (links, buttons, the publications the focus moves to after «Показать больше», the booking window's close button). Only the system's high-contrast modes (forced colours) keep a ring, in the system's colour. The skip link still appears when it is reached with Tab",
+      "rule": "WCAG 2.4.7 Focus Visible (and 2.4.11 Focus Not Obscured relies on seeing the focus)",
+      "measured": "outline none on every focused element (Oct 20, 2026: a publication after «Показать больше», a footer link after Tab)",
+      "decided": "Tim, 2026-10-20 — remove all design for focus states",
+      "why": "the purple ring showed on the publication the focus moves to after «Показать больше», and on other elements; the look of the page",
+      "fix": "base.css: :focus-visible { outline: 2px solid var(--purple); outline-offset: 3px } (the ring before Oct 20), or a quieter one (ink 30%, 2px)"
+    },
+    {
+      "id": "section-air-l",
+      "kind": "decision",
+      "what": "The tools and the publications have more air than the other sections: --section-air-l (56 → 112px) above and below their content and from their headings to their cards, the same as under the CTA card (which had section-y × 1.4, the same numbers). The gap from the publications to «Показать больше» stays --section-gap",
+      "decided": "Tim, 2026-10-20 — top and bottom paddings 112 at most (as under the CTA card), the heading gap 112 too, the button's gap unchanged",
+      "why": "the two sections after the CTA read as a calmer, more spacious end of the page"
     }
   ]
 }

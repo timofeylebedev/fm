@@ -53,7 +53,7 @@
   transition: background-color var(--hover-out) var(--ease-out), scale 0.6s var(--ease-settle);
   user-select: none; -webkit-user-select: none;
 }
-/* Figma's hover: black at 7% (--tint-strong; the publications' «Показать больше» has the same two colours) */
+/* Figma's hover: black at 7% (--tint-strong) */
 @media (--mouse) { .cookies__ok:hover { background-color: var(--tint-strong); transition-duration: var(--hover-in); } }
 /* pressed: gives in to 97% and springs back past its size, as every button of the site (button.css) */
 @media (prefers-reduced-motion: no-preference) {
