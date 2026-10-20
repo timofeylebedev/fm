@@ -188,15 +188,15 @@
     {
       "id": "pinned-pill",
       "kind": "decision",
-      "what": "A card that has become a pill stays pinned under the navbar for a fifth of a screen of scrolling, and the next card waits under it with the usual gap; then both go on with the page. It is laid out by the browser (a sticky holder round each card, stack.css), so it is the same both ways: scrolled back, the pill waits there again. The last card's pill does the same with a copy at the top of the section after the stack, which slides under it below a band of the page's colour as tall as the gap",
-      "decided": "Tim, 2026-10-19 — round-4 comment (cards 5), then: keep the gap instead of the pill over the next card, the last one pinned too, a pause both ways, about 1/5 of a screen",
-      "why": "the finished card stays in sight a little longer without covering the next one; a pause only on the way down would need the script to move the cards, which lags on phones",
-      "fix if reconsidered": "SET.hold in cards.js (screens; 0 turns the pause off)"
+      "what": "A card that has become a pill does not wait: it goes on up with the page at once and leaves the screen under the navbar, while the next card comes up to the top (the pinned pill of 2026-10-19 is turned off). The mechanism stays in the code: a sticky holder round each card (stack.css) and, for the last card, a copy at the top of the section after the stack, made only when SET.hold > 0",
+      "decided": "Tim, 2026-10-20 — remove the sticky behaviour of a closed card pill (it was pinned for 1/5 of a screen since 2026-10-19, round-4 comment cards 5)",
+      "why": "the pause felt like the page sticking; without it the stack scrolls on evenly",
+      "fix if reconsidered": "SET.hold in cards.js (screens; 0.2 was the pinned pill)"
     },
     {
       "id": "pubs-more",
       "kind": "decision",
-      "what": "The publications show at most 4 cards; with 5 or more, a «Показать больше» pill under them shows the next 4 each time and goes away when none are left. Its colours are those of the cookie «ОК»: black 5% (--tint-hover), 7% under the mouse (--tint-strong), a step darker than the cards (3% → 5%). Without scripts every card is shown and the button is not",
+      "what": "The publications show at most 4 cards; with 5 or more, a «Показать больше» pill under them shows the next 4 each time and goes away when none are left. It is as far below the cards as the heading is above them (--section-gap; Tim, 2026-10-20). Its colours are those of the cookie «ОК»: black 5% (--tint-hover), 7% under the mouse (--tint-strong), a step darker than the cards (3% → 5%). Without scripts every card is shown and the button is not",
       "decided": "Tim, 2026-10-20 — button below the cards from 5 cards, a bit less see-through than the cards, the «ОК» colours",
       "why": "the list can grow without the page getting longer; 4 is two full rows of the two-column grid",
       "fix if reconsidered": "PUBS in scripts/pubs.js (first, more); the colours in sections.css (.pubs__more)"

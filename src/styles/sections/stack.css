@@ -88,13 +88,12 @@
        the card below --art-min: it then reaches past the card's top and bottom edges, which cut its air, not the drawing;
      · a tall card: the room is all the space under the text; the drawing fills it (a little past it: its air), up to
        --art-max (1080px, about the room of a 1440px tall screen), and stays centred in it when the room is bigger.
-   While a card opens and closes, the script makes the drawing smaller with the open part of the card (cards.js, "the
-   drawing follows the open part"), so it is never cut by the card's moving edge. */
+   While a card opens and closes the drawing stays as it is (its size and place with the card open): the card's moving
+   edge covers and uncovers it (Tim, Oct 20). */
 .card__art {
   --art-min: 300px;
   --art-max: 1080px;
   position: absolute; top: 0; bottom: 0; right: 0; left: var(--card-t);
-  transform-origin: 50% 50%;
   & > .art {
     --side: max(var(--art-min), min((100cqw - var(--card-t)) * 1.08, 100cqh));
     position: absolute; left: 50%; top: 50%; width: var(--side); height: var(--side);

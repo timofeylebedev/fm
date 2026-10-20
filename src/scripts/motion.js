@@ -5,7 +5,7 @@
    What comes in, and how (the attribute data-reveal in the HTML):
      · chars   a heading: letter by letter, each one up from below its place, a little past it and back (the wave);
      · lines   a text: line by line, up from one line below, calmly (no bounce: text is for reading);
-     · title   a heading line by line, each line out of a blur and up a little from below, as the titles of the card
+     · title   a heading line by line, each line fading in and up a little from below, as the titles of the card
                stack come (cards.js takes its numbers from M.title); the headings after the CTA (tools, publications);
      · block   a block (a card, a button, a picture): up from 40px below, a little past its place and back (settle),
                fading in during the first half of that;
@@ -54,7 +54,7 @@ export const M = {
   // place by 10%, back by 4%, past by 1%, in place; fully visible at 40%
   chars: { time: 1.1, stagger: 0.03, wave: [[0, 25, 0], [0.4, -10, 1], [0.65, 4], [0.85, -1], [1, 0]] },
   lines: { time: 0.9, stagger: 0.1, rise: 100 },        // a text: seconds, between lines, % of a line it comes up from
-  title: { time: 0.8, stagger: 0.07, rise: 18, blur: 0.22 },  // a heading by lines (and the stack's titles): seconds, between lines, % of a line, blur (em)
+  title: { time: 0.8, stagger: 0.07, rise: 18 },      // a heading by lines (and the stack's titles): seconds, between lines, % of a line (no blur: Tim, Oct 20)
   block: { time: 1.0, rise: 40, fade: 0.5 },            // a block: seconds, px it comes up from, the part of its time it fades in
   tilt: { lean: 8, follow: 0.6 },                       // tilt cards: how far they lean to the mouse (°), seconds to follow it
   // a tilt card falling:
@@ -273,7 +273,7 @@ function show(it) {
   else if (it.kind === "tilt") {
     gsap.set(el, { y: 0, scale: 1, rotation: it.rest || 0, opacity: 1, transformPerspective: 800 });
     dropShadowDone(it);
-  } else if (it.targets) gsap.set(it.targets, { yPercent: 0, opacity: 1, clearProps: "filter" });
+  } else if (it.targets) gsap.set(it.targets, { yPercent: 0, opacity: 1 });
   el.style.visibility = "visible";
   if (it.kind === "block" || it.kind === "tilt") el.style.opacity = "1";
   el.classList.add("fm-showing", "fm-shown");
@@ -387,8 +387,6 @@ const ended = (it) => { it.state = "done"; it.tween = null; it.el.classList.add(
 // the letters that are shown at this screen width (a heading can have a part for some widths only: the hero's title on
 // the narrowest phones); the others are simply put in place, so they do not hold up the letters that are seen
 const shownOf = (parts) => parts.filter((p) => p.getClientRects().length);
-// how blurred a heading's lines are before they come in (px, from its own size: M.title.blur em)
-export const blurOf = (el) => "blur(" + +(M.title.blur * (parseFloat(getComputedStyle(el).fontSize) || 40)).toFixed(2) + "px)";
 // the animation of a thing, starting after a delay
 function build(it, delay) {
   const el = it.el, on = { delay, onStart: () => began(it), onComplete: () => ended(it) };
@@ -405,10 +403,8 @@ function build(it, delay) {
       Object.assign({ yPercent: 0, opacity: 1, duration: M.lines.time, ease: "fm-out", stagger: M.lines.stagger }, on));
   }
   if (it.kind === "title") {
-    const blur = calm ? "none" : blurOf(el);
-    return gsap.fromTo(it.targets, { yPercent: M.title.rise, opacity: 0, filter: blur },
-      Object.assign({ yPercent: 0, opacity: 1, filter: calm ? "none" : "blur(0px)", duration: M.title.time, ease: "fm-out", stagger: M.title.stagger }, on,
-        { onComplete() { gsap.set(it.targets, { clearProps: "filter" }); ended(it); } }));   // no filter left on a heading that stays
+    return gsap.fromTo(it.targets, { yPercent: M.title.rise, opacity: 0 },
+      Object.assign({ yPercent: 0, opacity: 1, duration: M.title.time, ease: "fm-out", stagger: M.title.stagger }, on));
   }
   const tl = gsap.timeline(on);
   if (it.kind === "tilt") {
@@ -499,7 +495,7 @@ function prepare(it) {
         if (label) it.el.setAttribute("aria-label", label);
         const first = !it.targets;
         it.targets = parts;
-        if (it.state === "done") gsap.set(parts, { yPercent: 0, opacity: 1, clearProps: "filter" });
+        if (it.state === "done") gsap.set(parts, { yPercent: 0, opacity: 1 });
         else if (it.state === "play" && it.tween) {
           // split again while it is coming in (its font arrived, the window was resized): the new letters or lines
           // carry on from the same moment
