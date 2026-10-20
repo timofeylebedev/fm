@@ -1,7 +1,16 @@
 /* The ring of covers under «Больше релизов, меньше хаоса»: the covers stand on a ring in 3D that turns as the page
    scrolls by (and a little by itself), and tilts from seen-from-above to seen-from-below. It is sized to the width of
-   its block. The covers (about 200 KB) are downloaded only when the block comes within one screen of the visible part of
-   the page. Decorative: screen readers skip it (aria-hidden in the HTML). */
+   its block. Decorative: screen readers skip it (aria-hidden in the HTML).
+
+   This file decides where the ring stands and how it turns; scripts/ring-gl.js draws it on one canvas with WebGL (see
+   the comment there). The block gets its height at once, from the maths below, so the page never moves; the drawing
+   code (about 3 KB) and the covers (about 200 KB) are downloaded only when the block comes within one screen of the
+   visible part of the page. While the block is on screen, a frame costs two numbers sent to the GPU and one draw;
+   off screen nothing runs.
+
+   Rebuilt Oct 20, 2026: the ring used to be 16 DOM faces in CSS 3D (preserve-3d). Measured in Chromium, the browser
+   re-layered those 16 layers on every frame: ≈ 10 ms of every 16.7 ms frame on a phone-speed CPU, ≈ 5.7 ms on a
+   laptop. The canvas draws the same picture (checked pixel by pixel against the old ring at fixed poses). */
 import { ScrollTrigger, refreshSoon } from "./gsap.js";
 import { ioRoot } from "./scroller.js";
 import { pace } from "./pace.js";
@@ -45,6 +54,7 @@ const CONFIG = {
 const PAD = 2;               // breathing room around the ring, in design px
 const LEVEL = 4;             // degrees of tilt the block's height makes room for (the rest reaches into the gaps)
 const STILL_AT = 0.25;       // the pose shown to visitors who turned on "reduce motion"
+const SETTLED = 1e-3;        // degrees: a pose that moved less than this since the last frame is not drawn again
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
 const radiusOf = (c, n) => {
@@ -89,44 +99,18 @@ const refreshScrollTriggers = () => { if (document.readyState === "complete") re
 
 function init(root) {
   const c = Object.assign({}, CONFIG, { images: IMAGES.slice() });
+  root.textContent = "";
 
-  root.innerHTML = '<div class="rc-tilt"><div class="rc-ring"></div></div>';
-  const tiltEl = root.firstChild, ring = tiltEl.firstChild;
-
-  let radius = 0;            // ring radius on screen, px
+  let geom = null;           // where the ring stands, CSS px (see layout)
+  let view = null;           // the drawing (scripts/ring-gl.js), once loaded
   let scrollRot = 0;         // rotation that follows the scroll (eased)
   let tilt = 0;              // tilt that follows the scroll (eased)
   let offset = 0;            // rotation added by the idle spin and by dragging
-  let vel = 0, last = 0, raf = 0, visible = true, lastP = 0;
+  let vel = 0, last = 0, raf = 0, visible = false, lastP = 0;
+  let drawn = [NaN, NaN];    // the pose last drawn
+  let draws = 0;             // frames drawn (for tests: nothing should be drawn off screen or with "reduce motion")
   let lastHeight = -1, lastWinW = window.innerWidth;
   const drag = { active: false, x: 0 };
-
-  function build() {
-    ring.innerHTML = "";
-    c.images.forEach((src, i) => {
-      const item = document.createElement("div");
-      item.className = "rc-item";
-      item.style.setProperty("--rc-angle", (i * 360 / c.images.length) + "deg");
-      ["rc-front", "rc-back"].forEach((side) => {
-        const face = document.createElement("div");
-        face.className = "rc-face " + side;
-        if (src) face.dataset.src = src;
-        item.appendChild(face);
-      });
-      ring.appendChild(item);
-    });
-    if (coversWanted) loadCovers();
-  }
-
-  // the covers are downloaded only when the block comes within one screen of the visible part of the page
-  let coversWanted = false;
-  function loadCovers() {
-    coversWanted = true;
-    ring.querySelectorAll(".rc-face[data-src]").forEach((face) => {
-      face.style.backgroundImage = 'url("' + face.dataset.src + '")';
-      face.removeAttribute("data-src");
-    });
-  }
 
   function layout() {
     root.style.maxWidth = c.maxWidth + "px";
@@ -138,27 +122,23 @@ function init(root) {
     // The width: what the ring needs across the whole tilt. The height: what it needs while nearly level (within
     // LEVEL° of no tilt), the pose it has around the middle of the screen. Tilted further, on its way in and out, its
     // covers reach a little past the block (into the section's gaps: its overflow is visible up and down,
-    // sections.css), on the side that is off screen at that moment, never into the heading or the features. The block
-    // used to keep room for the whole tilt, which looked like a gap too big at the moment the ring is seen best.
+    // sections.css), on the side that is off screen at that moment, never into the heading or the features. So the
+    // canvas is as tall as the whole tilt needs and reaches past the block by the same amount.
     const n = c.images.length, b = boundsOf(c, n);
     const level = boundsOf(Object.assign({}, c, { tiltStart: -Math.min(LEVEL, Math.abs(c.tiltStart)), tiltEnd: Math.min(LEVEL, Math.abs(c.tiltEnd)) }), n);
     const s = (W * c.fill) / (2 * b.halfW);            // design px → screen px
     const cy = -level.minY * s;                        // where the ring's centre sits inside the block
     const height = Math.ceil((level.maxY - level.minY) * s);
-    radius = radiusOf(c, n) * s;
+    const above = Math.ceil((level.minY - b.minY) * s), below = Math.ceil((b.maxY - level.maxY) * s);
     root.style.height = height + "px";
-    root.style.perspective = (c.perspective * s) + "px";
-    root.style.perspectiveOrigin = "50% " + cy + "px";
-    root.style.setProperty("--rc-radius", radius + "px");
-    root.style.setProperty("--rc-corner", (c.cornerRadius * s) + "px");
-    root.style.setProperty("--rc-fade", clamp01(c.backFade / 10));
-    root.style.setProperty("--rc-fade-color", c.backFadeColor);
-    tiltEl.style.width = (c.imageWidth * s) + "px";
-    tiltEl.style.height = (c.imageHeight * s) + "px";
-    tiltEl.style.left = ((W - c.imageWidth * s) / 2) + "px";
-    tiltEl.style.top = (cy - (c.imageHeight * s) / 2) + "px";
-    tiltEl.style.transformOrigin = "50% 50% " + (-radius) + "px";   // tilt around the centre of the ring
-    apply();
+    geom = {
+      width: W, height: above + height + below, above,
+      ox: W / 2, oy: above + cy,                       // the ring's centre on the canvas (the old perspective-origin)
+      halfW: c.imageWidth * s / 2, halfH: c.imageHeight * s / 2,
+      radius: radiusOf(c, n) * s, perspective: c.perspective * s,
+      corner: c.cornerRadius * s, fade: clamp01(c.backFade / 10)
+    };
+    if (view) { view.resize(geom); drawn = [NaN, NaN]; paint(); }
 
     // The block changed height: the pinned logos strip below (and the card reveals) must re-measure.
     // After a window resize ScrollTrigger does that by itself, so skip the extra pass.
@@ -170,10 +150,9 @@ function init(root) {
   }
 
   // 0 = the block's top edge reaches the bottom of the screen, 1 = its bottom edge leaves at the top.
-  // ScrollTrigger works this out when it measures the page and keeps it up to date while scrolling. Reading the block's
-  // place on every frame instead (the line with getBoundingClientRect below) made the browser lay out the page again on
-  // every frame, after the other animations had moved things. That line is still used before ScrollTrigger has measured,
-  // and if GSAP did not load.
+  // ScrollTrigger works this out when it measures the page and keeps it up to date while scrolling (reading the block's
+  // place on every frame would make the browser lay out the page again on every frame). The getBoundingClientRect line
+  // is used only before ScrollTrigger has measured, and if GSAP did not load.
   const st = calm ? null : ScrollTrigger.create({ trigger: root, start: "top bottom", end: "bottom top" });
   function progress(measure) {
     if (typeof c.progress === "number") return clamp01(c.progress);   // testing aid: pins the scroll position
@@ -184,9 +163,20 @@ function init(root) {
     return clamp01((vh - rect.top) / (vh + rect.height));
   }
 
-  function apply() {
-    tiltEl.style.transform = "rotateX(" + tilt.toFixed(3) + "deg)";
-    ring.style.transform = "translateZ(" + (-radius) + "px) rotateY(" + (scrollRot + offset).toFixed(3) + "deg)";
+  // draw the pose if it changed enough to see
+  function paint() {
+    if (!view) return;
+    const rot = scrollRot + offset;
+    if (Math.abs(rot - drawn[0]) < SETTLED && Math.abs(tilt - drawn[1]) < SETTLED) return;
+    drawn = [rot, tilt];
+    draws++;
+    view.draw(rot, tilt);
+  }
+
+  function place() {                                   // straight to the pose of the current scroll, no easing
+    lastP = progress(true);
+    scrollRot = c.scrollRotate * lastP;
+    tilt = c.tiltStart + (c.tiltEnd - c.tiltStart) * lastP;
   }
 
   function frame(now) {
@@ -199,7 +189,7 @@ function init(root) {
     const p = lastP = progress();
     const targetRot = c.scrollRotate * p;
     const targetTilt = c.tiltStart + (c.tiltEnd - c.tiltStart) * p;
-    if (!c.smoothing || calm) {
+    if (!c.smoothing) {
       scrollRot = targetRot;
       tilt = targetTilt;
     } else {
@@ -212,19 +202,22 @@ function init(root) {
       if (Math.abs(vel) > 0.01) {                       // coasting after a drag
         offset += vel * dt;
         vel *= Math.pow(0.94, dt * 60);
-      } else if (c.speed && !calm) {            // idle spin
+      } else if (c.speed) {                             // idle spin
         offset += c.speed * 6 * (c.direction === "left" ? -1 : 1) * dt;
       }
     }
-    apply();
+    paint();
   }
 
-  const start = () => { if (!raf && visible) { last = 0; raf = requestAnimationFrame(frame); } };
+  // With "reduce motion", and with the 2D still picture (no WebGL 2), there is no loop: the ring is drawn once, and
+  // again only on a resize.
+  const still = () => calm || (view && !view.webgl);
+  const start = () => { if (!raf && visible && view && !still()) { last = 0; raf = requestAnimationFrame(frame); } };
   const stop = () => { cancelAnimationFrame(raf); raf = 0; };
 
   // Dragging (only when drag: true)
   root.addEventListener("pointerdown", (e) => {
-    if (!c.drag) return;
+    if (!c.drag || calm) return;
     try { root.setPointerCapture(e.pointerId); } catch {}
     drag.active = true; drag.x = e.clientX; vel = 0;
     root.style.cursor = "grabbing";
@@ -244,36 +237,43 @@ function init(root) {
   root.addEventListener("pointerup", endDrag);
   root.addEventListener("pointercancel", endDrag);
 
-  build();
   layout();
-  lastP = progress(true);                              // place the ring before the first paint
-  scrollRot = c.scrollRotate * lastP;
-  tilt = c.tiltStart + (c.tiltEnd - c.tiltStart) * lastP;
-  apply();
-
   new ResizeObserver(layout).observe(root);
+  // a new screen density (the window moved to another screen, page zoom) changes the canvas's pixels, not its size
+  const watchDensity = () => matchMedia("(resolution: " + (window.devicePixelRatio || 1) + "dppx)").addEventListener("change", () => { layout(); watchDensity(); }, { once: true });
+  watchDensity();
+
   // Only animate while the block is on screen (or about to be)
   new IntersectionObserver((entries) => {
     visible = entries[entries.length - 1].isIntersecting;
     visible ? start() : stop();
   }, { root: ioRoot, rootMargin: "200px 0px" }).observe(root);
-  if (!coversWanted) {
-    const near = new IntersectionObserver((entries) => {
-      if (entries[entries.length - 1].isIntersecting) { near.disconnect(); loadCovers(); }
-    }, { root: ioRoot, rootMargin: "100% 0px" });
-    near.observe(root);
-  }
-  start();
+
+  // The drawing code and the covers: when the block comes within one screen of the visible part of the page
+  const near = new IntersectionObserver((entries) => {
+    if (!entries[entries.length - 1].isIntersecting) return;
+    near.disconnect();
+    import("./ring-gl.js").then(({ createRingView }) => {
+      view = createRingView(root, c);
+      if (!view) return;                               // no WebGL and no 2D canvas: the block stays empty
+      if (geom) view.resize(geom);
+      place();
+      paint();
+      start();
+    }).catch(() => {});
+  }, { root: ioRoot, rootMargin: "100% 0px" });
+  near.observe(root);
 
   // For the tuner and for quick experiments in the console
   root.roundCarousel = {
     config: c,
-    state: () => ({ progress: lastP, rotation: scrollRot + offset, tilt }),
+    state: () => ({ progress: lastP, rotation: scrollRot + offset, tilt, draws, running: !!raf, webgl: view ? view.webgl : null }),
     update(patch) {
-      const rebuild = patch.images && patch.images !== c.images;
+      const images = patch.images && patch.images !== c.images;
       Object.assign(c, patch);
-      if (rebuild) build();
+      if (view) view.refresh(images);
       layout();
+      if (still() || typeof c.progress === "number") { place(); paint(); }
     }
   };
 }
