@@ -41,13 +41,15 @@
    script measures (see debug.js). */
 import { gsap, ScrollTrigger, SplitText, refreshSoon } from "./gsap.js";
 import { paper } from "./scroller.js";
-import { calm, tidy, cue } from "./motion.js";
+import { M, calm, tidy, cue } from "./motion.js";
 
 const SET = {
   step: 0.7,             // scroll for one step of a card (a title and its drawing), in screen heights
   artAt: 0.5,            // a card shows its drawing once it is this tall (0…1 of its full height)
   artWake: 0.3,          // a card that leaves lets its drawing go below this height (0…1); one that comes is made ready at once
-  title: { in: 0.8, out: 0.3, stagger: 0.07, rise: 18, lift: 12, blur: 0.22 },  // the titles: seconds, how far the lines travel (% of a line), and how blurred they come and go (em)
+  // the titles: seconds, how far the lines travel (% of a line), and how blurred they come and go (em). Their way in is
+  // M.title of motion.js, which the headings after the CTA share (data-reveal="title")
+  title: { in: M.title.time, out: 0.3, stagger: M.title.stagger, rise: M.title.rise, lift: 12, blur: M.title.blur },
   titleLead: 0.12,       // a title shows once the open part reaches this much (0…1 of the card's height) below it; it hides at half that
   hold: 0.2,             // a card's pill stays pinned for this much scrolling (screens), the next card waiting under it (stack.css)
   enter: { time: 0.9, rise: 32 }                         // the first card's way in: seconds, px it rises (no bounce: fm-out)

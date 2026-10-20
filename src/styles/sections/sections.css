@@ -374,13 +374,20 @@
 }
 .tool__img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 
-/* ── Publications: four grey cards, links to articles and a video ──
-   Two columns from step M; one column, as wide as the column, below that. */
+/* ── Publications: grey cards, links to articles and a video ──
+   Two columns from step M; one column, as wide as the column, below that. At most four are shown: with more, the
+   pill «Показать больше» under them (one card gap below) shows the next ones (scripts/pubs.js; decision pubs-more). */
 .pubs { padding-bottom: calc(var(--section-y) * 2); container: pubs / inline-size; }
-.pubs__grid {
-  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
+.pubs__list {
+  display: flex; flex-direction: column; align-items: center; gap: var(--gap-cards);
   width: 100%; max-width: var(--column-max);
 }
+.pubs__grid {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
+  width: 100%;
+  & > [hidden] { display: none; }
+}
+.pubs__more[hidden] { display: none; }
 @container pubs (width >= 43rem) { .pubs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pub, .pub__cover {
   display: flex; flex-direction: column; justify-content: space-between;

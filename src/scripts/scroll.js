@@ -111,7 +111,9 @@ export function initScroll() {
     e.preventDefault();
     if (target !== document.body) reveal(target);       // everything in it is there when the scroll arrives
     scrollToEl(target);
-    history.pushState(null, "", target === document.body ? location.pathname + location.search : "#" + id);
+    // the address stays as it is: no #section in it and no step in the history (Tim, Oct 20). A #… the visitor came in
+    // with is taken out, so the address never names a section other than the one scrolled to
+    if (location.hash) history.replaceState(history.state, "", location.pathname + location.search);
     if (target === document.body) return;
     if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");   // keyboard and screen readers go on from there
     target.focus({ preventScroll: true });

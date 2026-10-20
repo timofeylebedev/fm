@@ -15,6 +15,7 @@ import { initDeck } from "./deck.js";
 import { box, height as pageHeight, watchSize, ioRoot } from "./scroller.js";
 import { hasConsent } from "./consent.js";
 import { initBook } from "./book.js";
+import { initPubs } from "./pubs.js";
 
 const root = document.documentElement;
 root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
@@ -35,6 +36,7 @@ window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
 // page has its final height (a reload then scrolls back to where the visitor was).
 const nav = document.querySelector("[data-nav]");
 initDeck();                                      // before the motion: it decides how the ID cards fall (onto a deck or into a row)
+initPubs();                                      // before the motion too: the publications past the first four wait for «Показать больше»
 initMotion();
 if (nav) { initTint(nav); initHide(nav); }
 initCards();
