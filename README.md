@@ -3,7 +3,7 @@
 The landing page of [Flow Medium](https://flowmedium.pro/), a custom static site (no Taptop, no runtime of a builder).
 It is built with [Vite](https://vite.dev) into plain files in `dist/`, which any web server can host.
 
-**Test link:** https://timofeylebedev.github.io/fm-website/ — built and published by GitHub Actions on every push to `main`.
+**Test link:** https://timofeylebedev.github.io/fm/ — built and published by GitHub Actions on every push to `main`.
 
 ## Working on it
 

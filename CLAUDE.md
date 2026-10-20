@@ -7,7 +7,7 @@ rules Claude follows. The site's history, open PRs and open questions live in th
 ## The project
 
 - The landing page of Flow Medium, a custom static Vite site (rebuilt from Taptop, same design and motion).
-- `main` is the live site: every push to `main` builds and publishes to https://timofeylebedev.github.io/fm-website/
+- `main` is the live site: every push to `main` builds and publishes to https://timofeylebedev.github.io/fm/
   (`.github/workflows/deploy.yml`). The real host (flowmedium.pro) is not decided; settings for it are in `deploy/`.
 - Owner and reviewer: Tim (timofeylebedev). The site's language is Russian; talk to Tim in the language he writes in.
 - The design lives in Figma: https://www.figma.com/design/JTfxQeW8liN3knCO3GWtns/website-2.0 (Figma Pro plan:
@@ -105,9 +105,9 @@ Web code syntax is `var(--name)`. Pull: run `design/figma/pull.js` with `use_fig
   `npm run dev` and Tim watches it in his own Safari. `gh pr create` works. Don't delete branches, reset `main` or
   force-push without asking.
 - **Claude in the cloud (claude.ai project "FM")**: same repo, but the shell can't reach figma.com or planerka.app,
-  `gh pr create` fails (open PRs with `gh api repos/timofeylebedev/fm-website/pulls`), branches can't be deleted, and
+  `gh pr create` fails (open PRs with `gh api repos/timofeylebedev/fm/pulls`), branches can't be deleted, and
   there is no Firefox/WebKit. To show Tim a build there, push `dist/` (without `.br`/`.gz`) to a throwaway branch and
-  link `https://raw.githack.com/timofeylebedev/fm-website/<branch>/index.html`. Since Oct 2026 githack puts a notice
+  link `https://raw.githack.com/timofeylebedev/fm/<branch>/index.html`. Since Oct 2026 githack puts a notice
   page in front and the page's pictures do not load there (seen Oct 20 in the Claude app's browser: the images are sent
   off-site and the site's CSP blocks them), so for anything with pictures Tim runs the branch locally instead.
 - Whichever side changes a rule here, update this file in the same PR, so both read the same thing.
