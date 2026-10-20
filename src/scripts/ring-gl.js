@@ -70,7 +70,7 @@ flat in float v_back;
 flat in float v_have;
 out vec4 o;
 void main() {
-  vec3 col = mix(u_mist, texture(u_tex, vec3(v_uv, float(v_tile)), -0.5).rgb, v_have);
+  vec3 col = mix(u_mist, texture(u_tex, vec3(v_uv, float(v_tile))).rgb, v_have);
   col = mix(col, u_fade.rgb, u_fade.a * v_back);
   vec2 q = abs(v_p) - u_ring.xy + u_corner;
   float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - u_corner;   // CSS px from the rounded edge, < 0 inside
@@ -257,7 +257,7 @@ export function createRingView(root, c) {
       gl.uniform3f(U.u_mist, mist[0], mist[1], mist[2]);
       gl.uniform4f(U.u_fade, fade[0], fade[1], fade[2], g.fade);
       // the covers' texture: as many pixels as the nearest cover shows, never more than the files have
-      const need = Math.min(TILE_MAX, Math.ceil(2 * g.halfW * dpr * 1 / TILE_STEP) * TILE_STEP);
+      const need = Math.min(TILE_MAX, Math.ceil(2 * g.halfW * dpr / TILE_STEP) * TILE_STEP);
       if (need > tile) { makeTexture(need); images = []; fetchCovers(); }
       paint();
     },
