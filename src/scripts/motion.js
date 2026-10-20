@@ -5,7 +5,7 @@
    What comes in, and how (the attribute data-reveal in the HTML):
      · chars   a heading: letter by letter, each one up from below its place, a little past it and back (the wave);
      · lines   a text: line by line, up from one line below, calmly (no bounce: text is for reading);
-     · title   a heading line by line, each line fading in and up a little from below, as the titles of the card
+     · title   a heading line by line, each line fading in and up from below (60% of a line), as the titles of the card
                stack come (cards.js takes its numbers from M.title); the headings after the CTA (tools, publications);
      · block   a block (a card, a button, a picture): up from 40px below, a little past its place and back (settle),
                fading in during the first half of that;
@@ -54,7 +54,7 @@ export const M = {
   // place by 10%, back by 4%, past by 1%, in place; fully visible at 40%
   chars: { time: 1.1, stagger: 0.03, wave: [[0, 25, 0], [0.4, -10, 1], [0.65, 4], [0.85, -1], [1, 0]] },
   lines: { time: 0.9, stagger: 0.1, rise: 100 },        // a text: seconds, between lines, % of a line it comes up from
-  title: { time: 0.8, stagger: 0.07, rise: 18 },      // a heading by lines (and the stack's titles): seconds, between lines, % of a line (no blur: Tim, Oct 20)
+  title: { time: 0.9, stagger: 0.07, rise: 60 },      // a heading by lines (and the stack's titles): seconds, between lines, % of a line it comes from (no blur; more travel, from 18: Tim, Oct 20)
   block: { time: 1.0, rise: 40, fade: 0.5 },            // a block: seconds, px it comes up from, the part of its time it fades in
   tilt: { lean: 8, follow: 0.6 },                       // tilt cards: how far they lean to the mouse (°), seconds to follow it
   // a tilt card falling:

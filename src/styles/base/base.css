@@ -70,7 +70,10 @@ img, svg, picture, canvas { display: block; }
 img { max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button { margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
-:focus-visible { outline: 2px solid var(--purple); outline-offset: 3px; }
+/* no focus ring anywhere (Tim, Oct 20: no design for focus states). Only the high-contrast modes of the system keep
+   one, in the system's own colour (they ignore the site's colours anyway) */
+:focus, :focus-visible { outline: none; }
+@media (forced-colors: active) { :focus-visible { outline: 2px solid Highlight; outline-offset: 3px; } }
 
 /* icons that are used more than once live in a sprite at the top of the page */
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -83,8 +86,6 @@ button { margin: 0; padding: 0; border: 0; background: none; font: inherit; colo
   transform: translateY(-200%);
 }
 .skip:focus-visible { transform: none; }
-/* a section that a link has moved the focus to (scripts/main.js) is not outlined */
-[tabindex="-1"]:focus { outline: none; }
 /* after a reload further down the page, the page stays hidden for a moment, until it is back where the visitor was
    (boot.js): under a white cover, not made transparent itself. With the page itself made transparent and back, Safari
    (on Mac, iPhone, in Telegram) sometimes left a grey section white under its cards (the tools): a repaint it skipped. */

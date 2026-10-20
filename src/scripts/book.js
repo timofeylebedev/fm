@@ -23,7 +23,8 @@
    The window: Planerka's own card on the frosted glass, cropped out of its frame (book.css says how), with nothing of
    ours but a close button over its corner; three columns on computers, one on phones and tablets. It closes with the
    cross, Escape, a click on the glass, or Back (the window is a step in the history, so a
-   phone's Back button closes it instead of leaving the site). A link to the page with #demo opens it straight away.
+   phone's Back button closes it instead of leaving the site; the step keeps the page's own address: no #demo in the
+   address bar, Tim, Oct 20). A link to the page with #demo opens it straight away, and the #demo is taken away.
    Without scripts, in a browser without <dialog> (Safari before 15.4), or with Ctrl/⌘/Shift or the middle button,
    a demo button opens the page of Planerka in a new tab, as before. UTM tags in the address are handed to Planerka,
    so a booking keeps its source. */
@@ -186,7 +187,7 @@ addEventListener("message", (e) => {
 // ── the history: the open window is one step of it ──
 const clean = () => location.pathname + location.search;
 function pushStep() {
-  history.pushState({ fmBook: 1 }, "", BOOK.hash);
+  history.pushState({ fmBook: 1 }, "", clean());         // the address stays as it is
   pushedAt = history.length;
 }
 function dropStep() {
@@ -342,7 +343,7 @@ export function initBook() {
   });
   addEventListener("hashchange", () => {
     if (location.hash !== BOOK.hash || isOpen) return;
-    history.replaceState({ fmBook: 1 }, "", BOOK.hash);  // a link to #demo on the page: that step is the window's
+    history.replaceState({ fmBook: 1 }, "", clean());    // a link to #demo on the page: that step is the window's (without the #demo)
     pushedAt = history.length;
     open({ push: false });
   });
@@ -351,7 +352,7 @@ export function initBook() {
     history.replaceState(null, "", clean());
     open();
   } else if (history.state && history.state.fmBook) {
-    // a reload while the window was open (boot.js has taken the #demo away to scroll back): no window, no step
+    // a reload while the window was open: no window, no step
     history.replaceState(null, "", clean());
   }
 

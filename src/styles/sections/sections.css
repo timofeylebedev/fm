@@ -11,7 +11,7 @@
    (a classic scrollbar takes about 15px of the column: M and L leave room for it; phones have none)
    The ID cards are the one exception (a deck below a 35rem column): an object of a fixed size, its row needs that room.
    The cards share one grammar: tiles (features, logos, stats) have --radius-s and --gap-tiles between them,
-   half-column cards (royalty, publications) and the ID cards --radius-m and --gap-cards, full-column cards (tools, CTA)
+   half-column cards (royalty, publications) --radius-m and --gap-cards, full-column cards (tools, CTA)
    --radius-l. A card's padding is its radius (the corners and the text are concentric), except the tool cards, padded
    by their own width (--tool-pad: their extra air, design/decisions.json), and the CTA, whose centred text has
    --radius-m at its sides and generous air above and below (--cta-air). */
@@ -20,6 +20,9 @@
   display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
   padding: var(--section-y) var(--gutter);
 }
+/* the two sections after the CTA have more air: above, below and under their headings, as much as under the CTA card
+   (--section-air-l, 56 → 112; Tim, Oct 20) */
+.tools, .pubs { gap: var(--section-air-l); padding-block: var(--section-air-l); }
 
 /* ── Royalty: two magenta cards with drawings (art/royalty.js) ──
    Half-column cards, made like the publications: the same gap, radius, padding, title and steps (one column, two from
@@ -127,10 +130,11 @@
 }
 
 .idcard {
-  /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are
-     those of the royalty and publication cards (--radius-m); the table inside sits half a radius in, with the other
-     half as its own radius, so the two curves are concentric */
-  --id-r: var(--radius-m);
+  /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are its
+     own, fixed in the object (16px of its 240), so they scale with it and keep the same shape at every screen size
+     (Tim, Oct 20: smaller corners, always in step with the card); the table inside sits half a radius in, with the
+     other half as its own radius, so the two curves are concentric */
+  --id-r: 16px;
   --id-inset: calc(var(--id-r) / 2);
   position: relative;
   width: 240px; height: 345px;
@@ -272,7 +276,7 @@
    instead: 1.15 to 1.4 times as tall as wide, within that by the screen's height. */
 .cta {
   display: flex; flex-direction: column; align-items: center;
-  padding: var(--section-y) var(--inset) calc(var(--section-y) * 1.4);
+  padding: var(--section-y) var(--inset) var(--section-air-l);
   @media not (--phone) { padding-inline: var(--gutter); }
 }
 .cta__card {
@@ -377,8 +381,8 @@
 /* ── Publications: grey cards, links to articles and a video ──
    Two columns from step M; one column, as wide as the column, below that. At most four are shown: with more, the
    pill «Показать больше» under them shows the next ones (scripts/pubs.js; decision pubs-more), as far below the cards
-   as the heading is above them (--section-gap; Tim, Oct 20). */
-.pubs { padding-bottom: calc(var(--section-y) * 2); container: pubs / inline-size; }
+   as the heading used to be above them (--section-gap; Tim, Oct 20: it stays so while the heading gets more air). */
+.pubs { container: pubs / inline-size; }
 .pubs__list {
   display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
   width: 100%; max-width: var(--column-max);

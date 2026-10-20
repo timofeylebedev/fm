@@ -117,9 +117,8 @@
 
 /* ── while the script runs (stack-on) ──
    The browser moves the cards itself, with the page: each card is sticky under the navbar in a block of its own
-   (.stack__hold, made by the script, itself sticky in a .stack__slot while the pill before it is pinned) that is as
-   tall as the scroll the card stays for; the next slot overlaps it from below, so the next card comes up over the old
-   one. Everything here is laid out by the styles alone, from the
+   (.stack__slot, made by the script) that is as tall as the scroll the card stays for; the next slot overlaps it from
+   below, so the next card comes up over the old one. Everything here is laid out by the styles alone, from the
    tokens and the screen's height, so nothing waits for the script when the window changes size, and nothing is
    moved by the script while the page scrolls (the script only decides which title and drawing are shown):
      · --stack-nav: where the cards stick, right under the navbar (on a phone turned sideways, whose navbar hides
@@ -143,32 +142,20 @@
   --stack-w: calc(min(100%, 1920px) + 2px);
   display: block; position: relative; padding-top: var(--stack-gap); visibility: hidden; pointer-events: none;
 }
-/* a slot: its hold (below), and the scroll for which the hold waits (--hold-in). The hold is the card's own height
-   twice (it comes, then gives room), the scroll of its steps (--steps × --stack-step screens, set by the script), less
-   the smallest card, the time its pill stays pinned (--hold-out) and the card's place in it (--p). Every slot but the
-   first is pulled up under the one before, so that the card is under the pill of the card before, the gap between them,
-   at the moment that card has become a pill */
+/* a slot: the card's own height twice (it comes, then gives room), the scroll of its steps (--steps × --stack-step
+   screens, set by the script), less the smallest card, and the card's place in it (--p: how far below the slot's top the
+   card starts, the pill and the gap; 0 for the first card). Every slot but the first is pulled up under the one before,
+   so that the card is under the pill of the card before, the gap between them, at the moment that card has become a
+   pill. The card is sticky in it; its strips (collar, cap, veil) are in it too, so they keep to the card. */
 .stack-on .stack__slot {
-  /* --hold-in: how long the pill of the card before stays pinned (screens; 0 for the first card), --hold-out: how long
-     this card's own pill stays (0 for the last, whose pill is a copy: see the end of this file), --p: how far below the
-     top the card waits meanwhile (the pill and the gap; 0 for the first card) */
   --p: 0px;
-  --hold: calc(var(--p) + 2 * var(--stack-a) + var(--steps, 1) * var(--stack-step, 0.7) * var(--screen)
-    - var(--stack-ph) + var(--hold-out, 0) * var(--screen));
   display: flow-root; position: relative;
-  height: calc(var(--hold) + var(--hold-in, 0) * var(--screen));
+  height: calc(var(--p) + 2 * var(--stack-a) + var(--steps, 1) * var(--stack-step, 0.7) * var(--screen) - var(--stack-ph));
+  padding-top: var(--p);
   & + .stack__slot {
     --p: calc(var(--stack-ph) + var(--stack-gap));
-    margin-top: calc(-1 * var(--stack-a) - var(--hold-in, 0) * var(--screen));
+    margin-top: calc(-1 * var(--stack-a));
   }
-}
-/* the hold: sticky at the top for --hold-in of scrolling (its slot is that much taller), while the pill of the card
-   before is pinned; the card waits in it, --p below its top (under the pill, the gap between them). Then it goes on with
-   the page, the card comes up the rest of the way and sticks in it (the card is sticky in the hold, which is as tall as
-   the slot used to be, and --p more). Its strips (collar, cap, veil) are in it too, so they keep to the card. */
-.stack-on .stack__hold {
-  display: flow-root; position: sticky; top: var(--stack-nav);
-  height: var(--hold); padding-top: var(--p);
 }
 .stack-on .card {
   position: sticky; top: var(--stack-nav);
@@ -193,15 +180,15 @@
    from four background tiles, and on screens whose pixels do not fall on whole CSS px (phones: 3 px to 1) the seams
    between the tiles let a hairline of the card's colour through. All of them move with the page or are sticky: the
    browser moves them in the same frame as the cards, so they never lag behind.
-     · .stack__collar, at the top of every hold but the first: the gap above the card and the bottom corners of the
+     · .stack__collar, at the top of every slot but the first: the gap above the card and the bottom corners of the
        card it comes up over (and the strip at the end, .stack__collar-end, above the section after the stack);
      · .stack__cap, sticky with the card: the page colour outside its top corners, over the card it covers;
-     · .stack__veil, in every hold, drawn over its card: the bottom edge of the card while it comes up. Its hole ends
+     · .stack__veil, in every slot, drawn over its card: the bottom edge of the card while it comes up. Its hole ends
        where the smallest card ends, and it is sticky at the bottom of the stage: so the card comes up from the bottom of
        the screen as the smallest card (a pill), until that reaches the bottom of the stage; from then on its bottom edge
        stays there and only its top keeps coming up, and the card grows. It covers the card before below that edge too.
        It is only as tall as the gap under the stage, the smallest card and 15vh (in case the screen is taller for a
-       moment than --screen, while an app's bars collapse): where the hold ends it is pushed up with it, and by then the
+       moment than --screen, while an app's bars collapse): where the slot ends it is pushed up with it, and by then the
        next card has come up over it. */
 .stack__collar, .stack__cap, .stack__veil {
   --r: var(--card-r);
@@ -215,7 +202,7 @@
 .stack__collar::before, .stack__veil::before { top: calc(-1 * var(--r)); height: calc(2 * var(--r)); border-radius: 0 0 var(--r) var(--r); }
 .stack__collar {
   position: absolute; left: 50%; translate: -50% 0; width: var(--stack-w);
-  top: calc(var(--p, 0px) - var(--stack-gap) - var(--r)); height: calc(var(--stack-gap) + 2 * var(--r));   /* --p: the card's place in its hold */
+  top: calc(var(--p, 0px) - var(--stack-gap) - var(--r)); height: calc(var(--stack-gap) + 2 * var(--r));   /* --p: the card's place in its slot */
 }
 .stack__collar-end {
   --stack-w: calc(min(100% - 2 * var(--stack-gap), 1920px) + 2px);
@@ -235,39 +222,6 @@
   width: var(--stack-w); margin-inline: calc((100% - var(--stack-w)) / 2);
   height: var(--r); margin-bottom: calc(-1 * var(--r));
   &::before { left: 2.5px; right: 2.5px; top: 1.5px; height: calc(2 * var(--r)); border-radius: calc(var(--r) - 1.5px) calc(var(--r) - 1.5px) 0 0; }
-}
-
-/* the last card's pinned pill (cards.js): a copy, at the top of the section after the stack. Its holder starts where the
-   real pill is when it has become a pill (the pill and the gap above that section) and is --stack-hold of a screen
-   taller than the copy: the copy is sticky in it, so it stays under the navbar for that much scrolling and then goes on
-   with the page, the way the other pills do. The section comes up under it, under a band of the page's colour as tall
-   as the pill and the gap; the band covers the whole width, so nothing of the section shows beside the pill. The
-   script shows it (is-on) only while the real pill would be there, and hides the real card meanwhile. */
-.stack__end-pin {
-  /* the stack's own sizes (the section after it does not inherit them) */
-  --tag-h: calc(var(--type-card-tag) * 1.2 + 2 * var(--card-tag-pad-y) + 4px);
-  --card-r: calc(var(--tag-h) / 2 + var(--card-pad));
-  --ph: calc(2 * var(--card-r));
-  --stack-nav: var(--nav-h);
-  position: absolute; left: 0; right: 0; z-index: 2;
-  top: calc(-1 * (var(--ph) + var(--inset)));
-  height: calc(var(--ph) + var(--inset) + var(--stack-hold, 0.2) * var(--screen));
-  pointer-events: none; visibility: hidden;
-  @media (--sideways) { --stack-nav: var(--inset); }
-  &.is-on { visibility: visible; }
-}
-.stack__end-band {
-  position: sticky; top: var(--stack-nav);
-  display: flex; justify-content: center;
-  height: calc(var(--ph) + var(--inset)); padding: 0 var(--inset) var(--inset);
-  background: var(--stack-page, var(--paper));
-}
-.stack__end-pill {
-  width: min(100%, 1920px); height: var(--ph);
-  padding: var(--card-pad) 0 0 var(--card-pad);
-  border-radius: var(--card-r);
-  background-color: var(--card-bg);
-  & > .card__tag { width: max-content; isolation: isolate; }
 }
 
 /* the label: the progress (.card__tag-fill) fills it from the left while the card goes through its steps; the white
