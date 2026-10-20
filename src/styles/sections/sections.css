@@ -376,10 +376,11 @@
 
 /* ── Publications: grey cards, links to articles and a video ──
    Two columns from step M; one column, as wide as the column, below that. At most four are shown: with more, the
-   pill «Показать больше» under them (one card gap below) shows the next ones (scripts/pubs.js; decision pubs-more). */
+   pill «Показать больше» under them shows the next ones (scripts/pubs.js; decision pubs-more), as far below the cards
+   as the heading is above them (--section-gap; Tim, Oct 20). */
 .pubs { padding-bottom: calc(var(--section-y) * 2); container: pubs / inline-size; }
 .pubs__list {
-  display: flex; flex-direction: column; align-items: center; gap: var(--gap-cards);
+  display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
   width: 100%; max-width: var(--column-max);
 }
 .pubs__grid {
