@@ -189,13 +189,16 @@
        stays there and only its top keeps coming up, and the card grows. It covers the card before below that edge too.
        It is only as tall as the gap under the stage, the smallest card and 15vh (in case the screen is taller for a
        moment than --screen, while an app's bars collapse): where the slot ends it is pushed up with it, and by then the
-       next card has come up over it. */
+       next card has come up over it.
+   The shadow reaches only as far as the tallest strip (the veil): it used to be 100vmax + 100px (about 1900px on a
+   computer), and Safari on macOS 27 drew none of the strips (Tim's video, Oct 22: the next card came up straight over
+   the one before, with no gap and no rounded edge between them). */
 .stack__collar, .stack__cap, .stack__veil {
   --r: var(--card-r);
   display: block; position: relative; overflow: hidden; visibility: visible; pointer-events: none;
   &::before {
     content: ""; position: absolute; left: 1px; right: 1px;
-    box-shadow: 0 0 0 calc(100vmax + 100px) var(--stack-page, var(--paper));
+    box-shadow: 0 0 0 calc(var(--stack-gap) + var(--stack-ph) + 15vh + 2 * var(--r)) var(--stack-page, var(--paper));
   }
 }
 /* the collar and the veil: the hole is the bottom of the card above (its corners in the strip's top r) */

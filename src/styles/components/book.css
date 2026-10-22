@@ -16,7 +16,8 @@
    Nothing of ours is drawn around the card (no shadow, no border): while Planerka lays its card out again (loading,
    a window made wider) its size and the crop's may differ for a moment, which must not show.
    The card does not move while it changes height: its top is placed for its final height (--h0, the same for every
-   visitor of a width), so whatever changes, changes at the bottom.
+   visitor of a width and month: a month of six weeks has a row of days more, book.js sets --rows), so whatever
+   changes, changes at the bottom.
    If Planerka changes its layout, the numbers below are the ones to measure again (a sliver of the see-through page
    at an edge is invisible anyway; only a card wider than the crop would lose its edges).
 
@@ -29,7 +30,7 @@
   --box: min(100%, 37.5rem);
   --frame: 100%;
   --top: 0px; --bottom: 1px; --side: 0px; --corner: 16px;
-  --h0: 1213px;                                         /* its height until it says (one column, 390px wide) */
+  --h0: calc(973px + var(--rows, 5) * 48px);            /* its height until it says (one column, 390px wide; 1213 for five weeks, Oct 19) */
 
   position: fixed; inset: 0; z-index: 300;
   display: flex; flex-direction: column;
@@ -49,7 +50,7 @@
     --box: 940px;
     --frame: 1024px;
     --top: 60px; --bottom: 21px; --side: 42px; --corner: 40px;
-    --h0: 668px;
+    --h0: calc(403px + var(--rows, 5) * 48px);          /* 643 for five weeks (Tim's video, Oct 22; 668 on Oct 19), 48px a row of days */
   }
 
   &::backdrop { background: transparent; }
@@ -92,28 +93,29 @@ html.book-open { overflow: hidden; }
   @media (--mouse) { &:hover { background: var(--mist); transition-duration: var(--hover-in); } }
 }
 
-/* the crop of Planerka's card */
+/* the crop of Planerka's card. While the calendar fills in it follows its height smoothly (with the white card below):
+   a calendar a little taller or shorter than --h0 does not make the card jump (Tim, Oct 22) */
 .book__card {
   position: relative;
   height: calc(var(--h, var(--h0)) - var(--top));
   border-radius: var(--corner);
   overflow: hidden;
 }
+.book:not(.is-still) .book__card { transition: height 0.4s var(--ease-out); }
 /* a white card of the final size and shape, the same white as Planerka's card: under the dots and the message while the
    calendar is not there yet, and under the calendar while it fills in (on a cold load it reports a skeleton first,
-   then the days, then the times, each a little taller), so the outline seen is the final one from the start. Gone once
+   then the days, then the times), so the outline seen is the final one from the start; if the calendar says it is
+   taller or shorter than that, the white card grows or shrinks to it smoothly, with the crop. Gone once
    the calendar's height has stood still for a second (book.js, .is-still): then the card is Planerka's alone, and a
    window made wider or narrower shows only that. */
 .book__card::before {
   content: ""; position: absolute; inset: 0 0 auto;
-  height: var(--tall);
+  height: calc(var(--h, var(--h0)) - var(--top) - var(--bottom));
   border-radius: var(--corner);
   background: var(--paper);
-  transition: opacity 0.2s var(--ease-out);
+  transition: opacity 0.2s var(--ease-out), height 0.4s var(--ease-out);
 }
 .book.is-ready.is-still .book__card::before { opacity: 0; }
-/* …and the crop is at least that tall meanwhile, or it would cut the white card short while the calendar is shorter */
-.book:not(.is-still) .book__card { height: max(var(--h, var(--h0)) - var(--top), var(--tall)); }
 .book.is-failed .book__card::before { opacity: 1; transition: none; }
 .book__frame {
   position: absolute; left: calc(-1 * var(--side)); top: calc(-1 * var(--top));
@@ -128,7 +130,7 @@ html.book-open { overflow: hidden; }
 .book__wait {
   position: absolute; inset: 0 0 auto; z-index: 1;
   display: flex; justify-content: center; align-items: center; gap: 8px;
-  height: min(var(--tall), 100svh - 48px - 3 * var(--inset));
+  height: min(var(--h, var(--h0)) - var(--top) - var(--bottom), 100svh - 48px - 3 * var(--inset));
   pointer-events: none;
   transition: opacity 0.2s var(--ease-out);
   & i { width: 8px; height: 8px; border-radius: var(--round); background: var(--purple); animation: book-wait 1.2s ease-in-out infinite both; }
@@ -139,10 +141,13 @@ html.book-open { overflow: hidden; }
 .book.is-ready .book__wait, .book.is-failed .book__wait { opacity: 0; }
 @keyframes book-wait { 0%, 80%, 100% { opacity: 0.25; scale: 0.8; } 40% { opacity: 1; scale: 1; } }
 
-/* the calendar did not come (no network, Planerka down, a blocker): the page of Planerka itself, in a new tab */
+/* the calendar did not come (no network, Planerka down, a blocker): the page of Planerka itself, in a new tab. Where
+   the dots were, in the middle of the white card (Tim, Oct 22): the sentence, and the link on a line of its own */
 .book__fail {
   position: absolute; inset: 0 0 auto; z-index: 1;
-  margin: 0; padding: 120px 24px 0;
+  display: grid; place-content: center; gap: 4px;
+  height: min(var(--tall), 100svh - 48px - 3 * var(--inset));
+  margin: 0; padding: 0 24px;
   font-size: var(--type-body); line-height: var(--lh-text); text-align: center; color: var(--ink-60);
   & a { color: var(--purple); text-decoration: underline; text-underline-offset: 3px; }
   &[hidden] { display: none; }
