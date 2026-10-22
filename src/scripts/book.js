@@ -234,9 +234,12 @@ let keepTimer = 0;
 function crop(h) {
   shown = h;
   card.style.setProperty("--h", h + "px");
-  // far from this month's calendar (another page of Planerka: the form): the card is centred for its own height
+  // far from this month's calendar (another page of Planerka: the form): the card is centred for its own height.
+  // Only once the visitor has used the calendar: while it loads, Planerka reports a page ~220px taller than its card
+  // for a second or more (the times sliding in), whose extra is see-through, and the card moved up and back down for
+  // it (Tim's video, Oct 23, 02:34)
   const h0 = probe && probe.offsetHeight;
-  if (ready && h0 && Math.abs(h - h0) > 24) dlg.style.setProperty("--h-center", h + "px");
+  if (ready && used && h0 && Math.abs(h - h0) > 24) dlg.style.setProperty("--h-center", h + "px");
   else dlg.style.removeProperty("--h-center");
   clearTimeout(keepTimer);
   keepTimer = setTimeout(remember, 1000);                // kept once it has stood for a second
