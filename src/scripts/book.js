@@ -56,6 +56,8 @@ let dlg, box, card, frame, fail;
 let ready = false, failed = false, heard = false, isOpen = false, opened = false, warmedAt = 0, from = null;
 let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, growTimer = 0, firstHeight = 0, shown = 0, byKeys = false;
 let used = false, probe;   // the visitor has used the calendar (the focus went into its frame); probe: an element --h0 tall
+let seenAt = 0;            // when the calendar was first seen: the window open with the calendar in it (performance.now())
+const heights = [];        // what setHeight decided, for fmBook.report(): [ms, height, wait, used, h0]
 // the history: the step the window added (and how long the history was then), and a Back of ours on its way
 let pushedAt = 0, backing = false, pushAfterBack = false;
 const messages = [];
@@ -118,8 +120,12 @@ function warm(reason) {
   frame.title = "Календарь записи на демо (Планёрка)";
   frame.setAttribute("scrolling", "no");                 // as tall as its content: the window scrolls, not the frame
   frame.addEventListener("load", onLoad);
-  // a click or a tap in the calendar (or Tab into it) takes the focus into the frame: the page loses it
-  addEventListener("blur", () => setTimeout(() => { if (document.activeElement === frame) used = true; }));
+  // a click or a tap in the calendar (or Tab into it) takes the focus into the frame: the page loses it. Only while
+  // the window is open and the calendar has been seen for a moment: a calendar may take the focus by itself while it
+  // loads, which is not the visitor (then a click later sends no new blur: its taller pages wait BOOK.trust)
+  addEventListener("blur", () => setTimeout(() => {
+    if (document.activeElement === frame && isOpen && seenAt && performance.now() - seenAt > 600) used = true;
+  }));
   frame.src = address(PAGE, BOOK.look);
   card.prepend(frame);
   warmedAt = Date.now();
@@ -140,6 +146,7 @@ function setReady() {
   dlg.classList.remove("is-failed");
   if (ready) return;
   ready = true;
+  if (isOpen && !seenAt) seenAt = performance.now();
   dlg.classList.add("is-ready");
   window.fmBook.ready = Math.round(performance.now());
 }
@@ -175,6 +182,8 @@ function setHeight(h) {
   const wait = h <= shown ? 0
     : h > Math.max(shown, h0) && !used ? BOOK.trust
     : dlg.classList.contains("is-still") || h > Math.max(shown, h0) ? BOOK.grow : 0;
+  heights.push([Math.round(performance.now()), h, wait, used, h0]);
+  if (heights.length > 80) heights.shift();
   if (wait) growTimer = setTimeout(() => crop(h), wait);
   else crop(h);
   // the white card under it stays until its height has not changed for a second: while the calendar fills in (days,
@@ -249,6 +258,7 @@ function open(opts = {}) {
   warm("click");
   mine().forEach((a) => a.cancel());                     // a close still on its way: stopped
   isOpen = true; opened = true;
+  if (ready && !seenAt) seenAt = performance.now();
   if (!dlg.open) dlg.showModal();
   dlg.focus({ preventScroll: true });
   root.classList.add("book-open");
@@ -322,7 +332,7 @@ function initWarm() {  // runs once the visitor has agreed to the cookies (initB
   // page, so the history gets no step of its own)
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible" || !frame || opened || Date.now() - warmedAt < BOOK.stale) return;
-    ready = false; failed = false; heard = false; firstHeight = 0; used = false;
+    ready = false; failed = false; heard = false; firstHeight = 0; used = false; seenAt = 0;
     dlg.classList.remove("is-ready", "is-failed", "is-still");
     warmedAt = Date.now();
     try { frame.contentWindow.location.replace(address(PAGE, BOOK.look)); } catch {}
@@ -352,6 +362,9 @@ export function initBook() {
   // without <dialog> (Safari before 15.4) the buttons stay links to the page of Planerka, in a new tab
   if (!links.length || !(window.HTMLDialogElement && HTMLDialogElement.prototype.showModal)) return;
   window.fmBook = { BOOK, messages, warm: () => warm("console"), open: () => open(), close: () => close(),
+    // for Tim's console when the card jumps: copy(JSON.stringify(fmBook.report())) and paste it to Claude
+    report: () => ({ ua: navigator.userAgent, now: Math.round(performance.now()), seenAt: Math.round(seenAt), heights,
+      messages: messages.map(([t, type, d]) => [t, type, d && d.height]), card: card && Math.round(card.getBoundingClientRect().height) }),
     get state() { return { warmed: !!frame, ready, failed, open: isOpen, used, height: frame && frame.offsetHeight, shown, h0: probe && probe.offsetHeight }; } };
 
   // the links themselves, for a new tab: with the UTM tags of this page

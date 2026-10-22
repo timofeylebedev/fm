@@ -50,7 +50,8 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   the page scrolls inside its own box (`html.boxed`, `.page`) so Safari's bar stays solid; `?fmbox=1` / `?fmbox=0`
   turns the box on or off in any browser. See the comment at the top of scroller.js.
   On iPhone, Safari's bottom bar takes the background of anything fixed or sticky at the bottom edge (even clipped);
-  `.bar-guard` (base.css) keeps it colourless (decision `safari-bottom-bar`). Don't remove it for a sticky/fixed block.
+  `.bar-guard` (base.css: an empty fixed block that takes taps) keeps it plain glass (decision `safari-bottom-bar`);
+  never give it a background or a backdrop filter (Safari then paints the bar white).
 - **Motion curves:** one table, `M.curve` in `scripts/motion.js` (`out`, `move`, `leave`, `wave`, `settle`, `fall`,
   `glide`). GSAP uses `"fm-<name>"`; WAAPI/CSS imports `css.out` / `css.move` / `css.leave` from motion.js.
   Never copy the numbers. Every animation respects reduced motion.
@@ -72,7 +73,8 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
 - **Icons:** `<svg data-icon="name">` in the HTML is replaced with `src/assets/icons/name.svg` at build time.
 - Console tuning objects for trying values live: `fmMotion`, `fmHero`, `fmCards`, `fmStipple`, `fmRoyalty`, `fmPace`,
   `fmDeck`, `fmAnchor`, `fmCookies`, `fmConsent`. Debug: `?fmcards=debug`, `?fmcap=debug`, `?fmhero=debug` (every change of the hero's layout in its first 5 s:
-  `fmHero.log`).
+  `fmHero.log`). The booking window: `copy(JSON.stringify(fmBook.report()))` gives every height Planerka sent and what
+  was done with it.
 - **The ring of covers** (`scripts/ring.js` + `scripts/ring-gl.js`): one WebGL canvas, drawn only on a real GPU. In a
   browser without one (headless Chromium here, CI) it is a still 2D picture; add `?fmring=gl` to test the WebGL path
   there. `document.querySelector(".ring").roundCarousel` has `config`, `state()` (with `draws`, `webgl`) and `update()`.

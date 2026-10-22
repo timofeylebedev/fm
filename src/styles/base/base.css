@@ -86,20 +86,23 @@ button { margin: 0; padding: 0; border: 0; background: none; font: inherit; colo
   transform: translateY(-200%);
 }
 .skip:focus-visible { transform: none; }
-/* Safari's bottom bar on iPhone (iOS 26) takes a colour from the page: it looks at what is at the middle of the bottom
-   edge of the screen (4px up), and when that is inside something fixed or sticky, the bar takes that thing's background
-   colour. The cards of the stack are sticky, so the bar turned green under «Финансы», and stayed green after it: Safari
-   looks through clipping, so the last card, hidden by the stack's overflow under the section after it, still counted
-   (Tim's screenshot, Oct 22; WebKit, LocalFrameView::fixedContainerEdges). Tim: no colour in that bar.
-   This strip is fixed over the bottom edge, above everything on the page, and has a backdrop filter that changes nothing to the eye:
-   Safari takes a fixed thing with a backdrop filter for glass and then gives the bar no colour of its own, whatever is
-   under it. It is not seen and not touched (pointer-events: none). Only where the bar is (iPhone, iPad). */
+/* Safari's bottom bar on iPhone (iOS 26) takes a colour from the page: it hit-tests the middle of the bottom edge of the
+   screen (4px up), and when what it finds is inside something fixed or sticky, the bar takes that thing's background
+   colour (WebKit, LocalFrameView::fixedContainerEdges). That hit test looks through clipping and through every block
+   that has nothing fixed or sticky in it, so it found the stack's sticky cards even under the sections after the stack:
+   the bar turned green under «Финансы» and stayed green (Tim's screenshot, Oct 22).
+   This small block is fixed over that point, above everything, and has nothing to show (no background, no backdrop
+   filter, no content): Safari skips such a block as see-through and then finds nothing fixed or sticky above the page
+   (the walk goes on to its parents, not to what is under it), so the bar keeps no colour of its own: plain glass over
+   the page (Tim, Oct 22: «no background»). It must take taps (pointer-events: auto): a see-through block that does not
+   makes Safari hit-test again without it. 64 × 8px, over the bar and the home indicator, where nothing is tapped.
+   (A backdrop filter on it, Oct 22, made Safari count the edge as glass of many colours, and it painted the bar white.)
+   Only where that bar is (iPhone, iPad). */
 .bar-guard { display: none; }
 @supports (-webkit-touch-callout: none) {
   .bar-guard {
-    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 250;
-    height: 24px; pointer-events: none;
-    -webkit-backdrop-filter: opacity(0.999); backdrop-filter: opacity(0.999);   /* not 1: the minifier would write opacity(), with no number */
+    display: block; position: fixed; left: calc(50% - 32px); bottom: 0; z-index: 250;
+    width: 64px; height: 8px;
   }
 }
 
