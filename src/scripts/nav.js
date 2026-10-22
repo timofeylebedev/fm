@@ -28,9 +28,15 @@ export function initTint(nav) {
      · iOS does not tell the page when it is pulled past its end, so in the browsers built into apps the bounce is
        turned off while the last screen of the page is shown (overscroll-behavior), and on again above it. Such a
        browser is known by window.webkit.messageHandlers (an app that talks to its page), or, on an iPhone or iPad, by
-       a user agent without "Safari/" (a bare WKWebView). Telegram's browser seems not to be known by the first: its
-       bounce stayed on, the page went up past its end and the cap with it, and the page showed above the navbar
-       (Tim's screenshot, Oct 22; ?fmcap=debug shows both signs and the user agent). Safari itself, Chrome and the others on iOS say "Safari/" and keep their bounce;
+       a user agent without "Safari/" (a bare WKWebView). Safari itself, Chrome and the others on iOS say "Safari/"
+       and keep their bounce;
+     · the browser's own idea of how far the page scrolls can differ from the page's: in Telegram the scroll-driven
+       animation counted 83px more than scrollHeight − clientHeight (its buttons and bars cover the page at the top and
+       bottom), so the cap fell behind the page as it went down and was 83px too high at the end, where the page showed
+       above the navbar (Tim's debug screenshot, Oct 23: cap −323…−42, should end at 1). So the cap's travel is taken from
+       the browser itself where it can say (ScrollTimeline: how far through its scroll it thinks the page is), and in
+       the browsers built into apps the cap's place is checked again four times a second (the app's bars come and go
+       without telling the page);
      · the browser moves the cap a frame or two after the page, so while scrolling down quickly it lags a few px above
        the navbar: while scrolling down it reaches DOWN_EXTRA px further under the navbar, back to OVERLAP once the
        scrolling stops.
@@ -70,7 +76,7 @@ export function initCap(nav) {
     navTop = Math.round(nav.getBoundingClientRect().top);
     cap.style.top = (navTop - CAP_PX) + "px";
     max = Math.max(0, root.scrollHeight - root.clientHeight);
-    cap.style.setProperty("--cap-max", max + "px");
+    travel();
     fix();
     bounce();
   };
@@ -78,6 +84,16 @@ export function initCap(nav) {
     if (!inApp) return;
     const off = scrollY > max - innerHeight;
     if (off !== still) { still = off; root.style.overscrollBehaviorY = off ? "none" : ""; }
+  };
+  // the cap's travel: the browser's own scroll range (scrollY ÷ how far through the scroll its timeline is), else ours
+  const timeline = window.ScrollTimeline ? new ScrollTimeline({ source: root, axis: "block" }) : null;
+  let range = 0;
+  const travel = () => {
+    let r = max;
+    const t = timeline && timeline.currentTime, pct = t && (typeof t === "object" ? t.value : t);
+    if (pct > 2 && scrollY > 200) r = Math.round(scrollY / (pct / 100));
+    if (!(Math.abs(r - max) < 400)) r = max;          // nonsense (no timeline, a page still growing): ours
+    if (r !== range) { range = r; cap.style.setProperty("--cap-max", r + "px"); }
   };
   const fix = () => {
     if (cap.style.display === "none") return;
@@ -94,7 +110,7 @@ export function initCap(nav) {
     lastY = scrollY;
     if (nowDown !== down) { down = nowDown; reach(down ? DOWN_EXTRA : 0); }
     clearTimeout(idle);
-    idle = setTimeout(() => { fix(); if (down) { down = false; reach(0); } }, IDLE_MS);
+    idle = setTimeout(() => { travel(); fix(); if (down) { down = false; reach(0); } }, IDLE_MS);
   }, { passive: true });
   const later = () => { if (!queued) queued = requestAnimationFrame(place); };
   place();
@@ -102,6 +118,8 @@ export function initCap(nav) {
   addEventListener("load", later);
   if (window.visualViewport) visualViewport.addEventListener("resize", place);
   new ResizeObserver(later).observe(document.body);
+  if (inApp) setInterval(() => { if (!document.hidden) { travel(); fix(); bounce(); } }, 250);
+  window.fmCap = { get state() { return { max, range, shift, navTop, inApp, top: Math.round(cap.getBoundingClientRect().top) }; } };
 }
 
 /* ── hide: on phones turned sideways the navbar moves away while the page is scrolled down ──
