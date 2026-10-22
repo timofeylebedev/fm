@@ -11,9 +11,11 @@
        brings the bottom card back on top from the left;
      · the first time the deck comes on screen, the top card nudges to the left and back once, to show it can be swiped.
    Where the cards stand in a row again (a wider screen, a phone turned), the deck lets go of them.
-   How deep each card lies is --d on its slot (0 on top); the styles place and size it by that, with a transition. */
+   How deep each card lies is --d on its slot (0 on top); the styles place, turn and size it by that, with a transition
+   (the top card straight, each one under it 4° further round). A swipe moves the slot by --swipe-x (px) and --swipe-turn
+   (°), a transform of its own: GSAP moving the slot itself would clear the depth's translate, rotate and scale. */
 import { gsap, CustomEase } from "./gsap.js";
-import { calm } from "./motion.js";
+import { calm, settleTilts } from "./motion.js";
 
 const SET = {
   far: 0.28,        // a swipe this far (a share of the card's width) changes the card
@@ -34,16 +36,20 @@ export function initDeck() {
 
   const width = () => slots[order[0]].offsetWidth || 270;
   const paint = () => order.forEach((slot, d) => slots[slot].style.setProperty("--d", d));
+  // the swipe's place and turn of a slot (see the top); tweened by GSAP as CSS variables
+  const at = (x, turn) => ({ "--swipe-x": x + "px", "--swipe-turn": turn + "deg" });
+  const xOf = (slot) => parseFloat(gsap.getProperty(slot, "--swipe-x")) || 0;
+  const home = at(0, 0);
 
   // one card changes: the top one leaves (way 1) to the left (side -1) or the right (side 1); or the bottom one comes in
   // from the left (way -1). speed: how fast the finger was moving when it let go (px per ms, 0 for the keyboard): the
   // card leaves at that speed, as a thrown card does, instead of stopping under the finger and setting off again.
   function step(way, side = -1, speed = 0) {
     busy = busy.then(() => new Promise((done) => {
-      const k = 1, gone = { x: side * width() * 1.15, rotation: side * 12 };
+      const k = 1, goneX = side * width() * 1.15, gone = at(goneX, side * 12);
       if (calm) {
         if (way > 0) order.push(order.shift()); else order.unshift(order.pop());
-        paint(); slots.forEach((s) => gsap.set(s, { x: 0, rotation: 0 })); done(); return;
+        paint(); slots.forEach((s) => gsap.set(s, home)); done(); return;
       }
       // a tween that is killed (the visitor grabbed the deck again) ends the change as if it had played out, so the
       // queue never waits for it forever
@@ -51,7 +57,7 @@ export function initDeck() {
       const end = (fn) => () => { if (ended) return; ended = true; flight = null; fn(); done(); };
       if (way > 0) {
         const top = slots[order[0]];
-        const D = Math.max(1, Math.abs(gone.x - gsap.getProperty(top, "x")));
+        const D = Math.max(1, Math.abs(goneX - xOf(top)));
         let ms = SET.out * 1000 * k, ease = "power2.in";
         if (speed > 0) {
           if (2 * D / speed <= ms) { ms = Math.max(120, 2 * D / speed); ease = "power1.out"; }
@@ -59,14 +65,14 @@ export function initDeck() {
         }
         const landed = end(() => {
           order.push(order.shift()); paint();              // now at the bottom (its z-index drops at once): it slides back under
-          gsap.to(top, { x: 0, rotation: 0, duration: SET.back * k, ease: "fm-out" });
+          gsap.to(top, Object.assign({ duration: SET.back * k, ease: "fm-out" }, home));
         });
         flight = gsap.to(top, Object.assign({ duration: ms / 1000, ease, overwrite: true, onComplete: landed, onInterrupt: landed }, gone));
       } else {
         order.unshift(order.pop()); paint();               // the bottom card is on top now, still off to the left
         const top = slots[order[0]];
         const landed = end(() => {});
-        flight = gsap.fromTo(top, gone, { x: 0, rotation: 0, duration: SET.back * k, ease: "fm-out", overwrite: true, onComplete: landed, onInterrupt: landed });
+        flight = gsap.fromTo(top, gone, Object.assign({ duration: SET.back * k, ease: "fm-out", overwrite: true, onComplete: landed, onInterrupt: landed }, home));
       }
     }));
     return busy;
@@ -94,7 +100,7 @@ export function initDeck() {
     drag.dx = dx;
     drag.track.push([e.timeStamp, e.clientX]);
     if (drag.track.length > 6) drag.track.shift();
-    gsap.set(drag.top, { x: dx, rotation: dx * SET.lean });
+    gsap.set(drag.top, at(dx, dx * SET.lean));
   });
   const release = (e) => {
     if (!drag || e.pointerId !== drag.id) return;
@@ -105,7 +111,7 @@ export function initDeck() {
     const w = width();
     if (d.dx < -w * SET.far || v < -SET.flick) step(1, -1, Math.max(0, -v));
     else if (d.dx > w * SET.far || v > SET.flick) step(1, 1, Math.max(0, v));
-    else gsap.to(d.top, { x: 0, rotation: 0, duration: 0.5, ease: "fm-settle" });
+    else gsap.to(d.top, Object.assign({ duration: 0.5, ease: "fm-settle" }, home));
   };
   stage.addEventListener("pointerup", release);
   stage.addEventListener("pointercancel", release);
@@ -121,11 +127,12 @@ export function initDeck() {
     if (deck === on) return;
     on = deck;
     stage.classList.toggle("is-deck", on);
-    if (on) { stage.tabIndex = 0; paint(); }
+    if (on) { stage.tabIndex = 0; paint(); gsap.set(slots, home); }   // the swipe starts from 0 (GSAP needs a value to tween from)
     else {
       stage.removeAttribute("tabindex");
-      slots.forEach((s) => { s.style.removeProperty("--d"); gsap.set(s, { clearProps: "transform" }); });
+      slots.forEach((s) => { gsap.killTweensOf(s); ["--d", "--swipe-x", "--swipe-turn"].forEach((v) => s.style.removeProperty(v)); });
     }
+    settleTilts();                                          // the cards already there: straight in a slot, or their own angle in a row
   }
   new ResizeObserver(check).observe(stage);
   check();
@@ -139,8 +146,8 @@ export function initDeck() {
         if (!on || touched) return;
         const top = slots[order[0]];
         gsap.timeline()
-          .to(top, { x: -width() * 0.16, rotation: -3, duration: 0.45, ease: "power2.inOut" })
-          .to(top, { x: 0, rotation: 0, duration: 0.6, ease: "fm-settle" });
+          .to(top, Object.assign({ duration: 0.45, ease: "power2.inOut" }, at(-width() * 0.16, -3)))
+          .to(top, Object.assign({ duration: 0.6, ease: "fm-settle" }, home));
       }, 1900);
     }, { threshold: 0.7 });
     io.observe(stage);

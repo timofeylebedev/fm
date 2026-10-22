@@ -77,7 +77,9 @@
        overlap at their edges, never over the text of the one under it), then scaled down a little;
      · below a 35rem (560px) column (phones held upright, narrow windows): a deck, one card on top of the others, which you
        swipe away to either side (scripts/deck.js). The deck is scaled down only below a 300px column. Phones turned
-       sideways and tablets held upright have a row, a little smaller.
+       sideways and tablets held upright have a row, a little smaller. In the deck the angle goes with the place: the
+       top card lies straight, each card under it 4° further round (Tim, Oct 23), so after a swap the stack looks the
+       same; the slot carries it, and a card turns with its slot as it moves to its new place.
    The section is the container: 100cqw is its column. It cuts off what goes past its sides (a card swiped away), but
    not above and below: the shadows of the cards reach into the next section (it is drawn over it, z-index), so the
    section keeps the same padding as every other one. */
@@ -116,16 +118,21 @@
     user-select: none; -webkit-user-select: none;
   }
   .access__cards { display: block; position: relative; height: 392px; }
-  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) is set by the script */
+  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) is set by the script. A swipe moves the slot
+     by --swipe-x and --swipe-turn (deck.js), in a transform of their own, so it never touches the depth's translate,
+     rotate and scale (GSAP moving the slot itself cleared them: after a swap the card at the bottom lost its place) */
   .access__slot {
     position: absolute; left: 50%; top: 8px;
     width: 270px; height: 376px; margin: 0 0 0 -135px !important;
     z-index: calc(3 - var(--d, 0));
     translate: calc(var(--d, 0) * 13px) calc(var(--d, 0) * -7px);
+    rotate: calc(var(--d, 0) * 4deg);
     scale: calc(1 - var(--d, 0) * 0.045);
-    transition: translate 0.45s var(--ease-out), scale 0.45s var(--ease-out);
+    transform: translateX(var(--swipe-x, 0px)) rotate(var(--swipe-turn, 0deg));
+    transition: translate 0.45s var(--ease-out), rotate 0.45s var(--ease-out), scale 0.45s var(--ease-out);
     @media (--calm) { transition: none; }
   }
+  .access__slot .idcard { rotate: none; }                              /* straight in its slot (without scripts too) */
   .access__slot--2 { --d: 1; }
   .access__slot--3 { --d: 2; }
   .access__stage.is-dragging .access__slot { transition: none; }
@@ -138,6 +145,8 @@
      other half as its own radius, so the two curves are concentric */
   --id-r: 24px;
   --id-inset: calc(var(--id-r) / 2);
+  /* the card less the slot: 48×12px, fully rounded, 12px from the top, centred */
+  --id-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
   position: relative;
   width: 240px; height: 345px;
   border-radius: var(--id-r);
@@ -145,22 +154,30 @@
 }
 /* The card's face. Its colour is a layer of its own (::before) with the slot for the clip cut right through it, so
    what lies under the card (the cards under it in the deck, the page) shows through the slot, as through a real one.
-   The face itself has no colour, only the shadow, which a box-shadow draws outside the card and not in the slot. */
+   The face itself has no colour, only the shadow, which a box-shadow draws outside the card and not in the slot. Its first
+   layer is a hairline of the face's own colour: a box-shadow leaves the card's box empty, so the pixels on the card's
+   edge, only partly covered by the card, showed the white page through them, a thin light line between the card and
+   its shadow (Tim, Oct 23); the hairline covers them. */
 .idcard__face {
   position: relative; isolation: isolate;
   display: flex; flex-direction: column;
   width: 240px; height: 345px;
   border-radius: var(--id-r);
-  box-shadow: 0 24px 24px -16px rgb(0 0 0 / 0.4), 0 0 16px rgb(0 0 0 / 0.02), 0 24px 56px rgb(0 0 0 / 0.1);
+  box-shadow: 0 0 0 0.5px var(--face), 0 24px 24px -16px rgb(0 0 0 / 0.4), 0 0 16px rgb(0 0 0 / 0.02), 0 24px 56px rgb(0 0 0 / 0.1);
   color: var(--paper);
 
   &::before {
     content: ""; position: absolute; inset: 0; z-index: -1;
     border-radius: inherit; background: var(--face);
-    /* the card less the slot: 48×12px, fully rounded, 12px from the top, centred */
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+    -webkit-mask: var(--id-mask); mask: var(--id-mask);
   }
+}
+/* the light on the face (scripts/motion.js, shade): a white or black veil over all of it, as the card tips towards the
+   light or away from it; none while it lies flat */
+.idcard__light {
+  position: absolute; inset: 0; z-index: 1;
+  border-radius: inherit; pointer-events: none;
+  -webkit-mask: var(--id-mask); mask: var(--id-mask);
 }
 .idcard__face--1 { --line: var(--idcard-line-1); --face: var(--idcard-face-1); }
 .idcard__face--2 { --line: var(--idcard-line-2); --face: var(--idcard-face-2); }

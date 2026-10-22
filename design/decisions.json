@@ -232,6 +232,22 @@
       "decided": "Tim, 2026-10-23 — «let's do this» (record it and leave it): the top bar is white in general, a split-second flicker on a hard scroll past the end",
       "why": "the flicker is Telegram's own: in those frames it animates its top bar and moves the whole page, the fixed navbar too (debug: nav top −72, visual viewport +72); the page hears of it only after those frames are drawn, and the browser of Telegram has no setting to keep its bar still (Mini Apps have one, ordinary links do not). Already done: the bounce off in the last screen, the cap placed by the navbar's offsetTop, its scroll-driven animation 1:1 with the scroll (animation-range), its place checked 4 times a second",
       "fix": "none from the page; look again if Telegram changes its browser (test with ?fmcap=debug: the cap turns red)"
+    },
+    {
+      "id": "idcard-stack-rise",
+      "kind": "decision",
+      "what": "On phones (the ID cards as a stack, a column below 35rem) the cards do not drop: they rise 80px into place one after another, the bottom card first, 0.12s apart, 0.7s each (out), turning from −4° to their angle in the stack; the whole stack fades in as one picture (0.55s, the reveal curve). In the stack the angle goes with the place, not the card: the top card straight, then 4°, then 8° (the slot carries it, so a swap turns the cards to their new places and the stack always looks the same). The row keeps the drop and each card's own angle",
+      "decided": "Tim, 2026-10-23 — in the access-cards lab: «on mobile i want cards to move from below, one after another, no drop animation», «the top card end state to be straight and the other cards on equal angles», «on swap they should also change the angle so that the stack stays the same (0, 4, 8)», «when it's a stack there's a moment when cards overlap in their transparency. i don't want that»",
+      "why": "a stack has one card to read; the drop onto it read as a delay before anything moved, and cards fading in one over another showed each other through themselves",
+      "fix if reconsidered": "M.RISE in scripts/motion.js (rise, from, time, beat, fade); the angle per depth in sections.css (.access__slot rotate, 4deg)"
+    },
+    {
+      "id": "idcard-tip-and-light",
+      "kind": "decision",
+      "what": "The ID cards of the row start their drop tipped 20° with the top edge toward the visitor and lie flat again at an even speed by the landing (M.DROP.tip); they fade in slowly at both ends (M.curve.reveal, cubic-bezier(0.5, 0, 0.5, 1); 0.2s as before). A light from the top, 75° above the page, shades a face as the card tips or leans: brighter turned towards it, darker turned away, ×4 at most 45%, nothing lying flat (M.LIGHT). The shadow stays the site's own box-shadow, with a 0.5px hairline of the face's colour as its first layer, so no light line shows between the card's edge and its shadow",
+      "decided": "Tim, 2026-10-23 — the settings of the access-cards lab (light from the top at 75°, shade 4, no gloss; tilt −20°, even, 1× the fall; fade 0.36 of the fall on 0.5, 0, 0.5, 1); «the drop shadow should be consistent with the current website»; «there's a thin white line at the bottom»",
+      "why": "the drop reads as a card falling onto a table: it comes in at an angle and settles flat; the light makes the angle visible on the face",
+      "fix if reconsidered": "M.DROP.tip, M.curve.reveal and M.LIGHT in scripts/motion.js; the hairline is the first layer of the box-shadow of .idcard__face (sections.css). Measured in Chromium at 2×: columns along the cards' bottom edges with a light line 605 → 0; at 1× 331 → 42, at most +15 levels lighter instead of +27"
     }
   ]
 }
