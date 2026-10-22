@@ -52,12 +52,14 @@ const PAGE = `${BOOK.url}/${BOOK.user}/${BOOK.event}`;
 const ID = "fm-book";
 const root = document.documentElement;
 const narrow = matchMedia("(max-width: 47.999em)");     // --phone of media.css: the card comes up from below
+const wide = matchMedia("(min-width: 62em)");           // book.css: the three columns, whose height does not depend on the window
+const SEEN = "fm-book-h";                               // localStorage: the calendar's settled height, three columns
 
 let dlg, box, card, frame, fail;
 let ready = false, failed = false, heard = false, isOpen = false, opened = false, warmedAt = 0, from = null;
 let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, growTimer = 0, firstHeight = 0, shown = 0, byKeys = false;
 let used = false, probe;   // the visitor has used the calendar (the focus went into its frame); probe: an element --h0 tall
-let firstH = 0, changed = false;   // the first height the calendar reported (its skeleton), and whether it has changed since
+let firstH = 0, changed = false, latest = 0;   // latest: the last height the calendar reported   // the first height the calendar reported (its skeleton), and whether it has changed since
 let seenAt = 0;            // when the calendar was first seen: the window open with the calendar in it (performance.now())
 const heights = [];        // what setHeight decided, for fmBook.report(): [ms, height, wait, used, h0]
 // the history: the step the window added (and how long the history was then), and a Back of ours on its way
@@ -91,6 +93,11 @@ function build() {
       "</div>" +
     "</div>";
   dlg.style.setProperty("--rows", weeks());              // the height it will have (book.css: --h0)
+  // the height the calendar had the last time, on this device, for a month of as many weeks (book.css: --h0-seen)
+  try {
+    const seen = JSON.parse(localStorage.getItem(SEEN) || "null");
+    if (seen && seen.rows === weeks() && seen.h > 400 && seen.h < 1000) dlg.style.setProperty("--h0-seen", seen.h + "px");
+  } catch {}
   box = dlg.querySelector(".book__box");
   card = dlg.querySelector(".book__card");
   fail = dlg.querySelector(".book__fail");
@@ -150,6 +157,7 @@ function setReady() {
   ready = true;
   if (isOpen && !seenAt) seenAt = performance.now();
   dlg.classList.add("is-ready");
+  if (latest) apply(latest);                             // its height, set as it fades in (not while the dots were shown)
   window.fmBook.ready = Math.round(performance.now());
 }
 
@@ -178,16 +186,24 @@ function weeks(d = new Date()) {
 //   · any taller page once settled: only once it has stayed so for BOOK.grow (the same next month, later);
 //   · after the visitor has used the calendar (a time chosen, the form opened), BOOK.grow: it does grow then.
 // The crop keeps its height meanwhile, so the moments that are not believed never show. A shorter page: at once.
-function setHeight(h) {
+function apply(h) {
   clearTimeout(growTimer);
-  const h0 = (probe && probe.offsetHeight) || Infinity;
+  const h0 = (probe && probe.offsetHeight) || Infinity, expected = h0 + 24;   // a few px more than --h0 is no surprise
   const wait = h <= shown ? 0
-    : h > Math.max(shown, h0) && !used ? BOOK.trust
-    : dlg.classList.contains("is-still") || h > Math.max(shown, h0) ? BOOK.grow : 0;
+    : h > Math.max(shown, expected) && !used ? BOOK.trust
+    : dlg.classList.contains("is-still") || h > Math.max(shown, expected) ? BOOK.grow : 0;
   heights.push([Math.round(performance.now()), h, wait, used, h0]);
   if (heights.length > 80) heights.shift();
   if (wait) growTimer = setTimeout(() => crop(h), wait);
   else crop(h);
+}
+
+function setHeight(h) {
+  latest = h;
+  // until the calendar is shown, the white card keeps its height (--h0) under the dots: a calendar a few px taller or
+  // shorter is set as it fades in (Tim's video, Oct 23: the card grew 6px under the dots, 649 against 643)
+  if (ready) apply(h);
+  else heights.push([Math.round(performance.now()), h, "hidden", used, probe && probe.offsetHeight]);
   // the white card under it stays until its height has not changed for a second: while the calendar fills in (days,
   // then times) it follows its height smoothly (book.css, .is-still)
   if (!dlg.classList.contains("is-still")) {
@@ -207,9 +223,19 @@ function setHeight(h) {
   settleTimer = setTimeout(() => setReady(), changed ? 250 : Math.max(250, firstHeight + BOOK.skeleton - now));
 }
 
+// the settled height of the three columns, for the next time the window opens (before the visitor has used it: a form
+// or a chosen time is not the calendar's own height). Only a number, no data about the visitor.
+function remember() {
+  if (!ready || used || !wide.matches || !shown) return;
+  try { localStorage.setItem(SEEN, JSON.stringify({ rows: weeks(), h: shown })); } catch {}
+}
+
+let keepTimer = 0;
 function crop(h) {
   shown = h;
   card.style.setProperty("--h", h + "px");
+  clearTimeout(keepTimer);
+  keepTimer = setTimeout(remember, 1000);                // kept once it has stood for a second
 }
 
 addEventListener("message", (e) => {
@@ -338,7 +364,7 @@ function initWarm() {  // runs once the visitor has agreed to the cookies (initB
   // page, so the history gets no step of its own)
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible" || !frame || opened || Date.now() - warmedAt < BOOK.stale) return;
-    ready = false; failed = false; heard = false; firstHeight = 0; firstH = 0; changed = false; used = false; seenAt = 0;
+    ready = false; failed = false; heard = false; firstHeight = 0; firstH = 0; changed = false; latest = 0; used = false; seenAt = 0;
     dlg.classList.remove("is-ready", "is-failed", "is-still");
     warmedAt = Date.now();
     try { frame.contentWindow.location.replace(address(PAGE, BOOK.look)); } catch {}
