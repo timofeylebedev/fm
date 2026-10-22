@@ -224,6 +224,14 @@
       "what": "Safari's bottom bar on iPhone takes no colour from the page: an empty block fixed over the middle of the bottom edge (.bar-guard, base.css; iOS only, 64 × 8px, takes taps), which Safari skips as see-through and then finds nothing fixed or sticky there, so the bar stays plain glass. Before, the bar turned the colour of the stack's cards and kept it after the stack (WebKit hit-tests the bottom edge through clipping and through blocks with nothing sticky in them, so the last card hidden by the stack's overflow still counted). A backdrop filter on the block (Oct 22) made the bar white instead",
       "decided": "Tim, 2026-10-22 — «i don't want it to have any color», then «i want it to have no background» (white was not it either)",
       "why": "the green of «Финансы» stayed in the bar over the sections after the stack. WebKit LocalFrameView::fixedContainerEdges: the bar is coloured only when the hit test at the bottom edge finds a fixed or sticky container; a see-through fixed block that takes taps ends that search with nothing; a backdrop filter counts as glass of many colours (Safari then paints the bar the page colour, white)"
+    },
+    {
+      "id": "telegram-cap-flicker",
+      "kind": "decision",
+      "what": "Known limit, left as it is: in Telegram's browser on iPhone, a hard fling past the end of the page makes the strip behind Telegram's buttons (the white cap, nav.js initCap) flicker for 3–5 frames (about 50–80 ms). Everywhere else the cap holds at the navbar (±1px, measured frame by frame in Tim's recordings with ?fmcap=debug, Oct 23)",
+      "decided": "Tim, 2026-10-23 — «let's do this» (record it and leave it): the top bar is white in general, a split-second flicker on a hard scroll past the end",
+      "why": "the flicker is Telegram's own: in those frames it animates its top bar and moves the whole page, the fixed navbar too (debug: nav top −72, visual viewport +72); the page hears of it only after those frames are drawn, and the browser of Telegram has no setting to keep its bar still (Mini Apps have one, ordinary links do not). Already done: the bounce off in the last screen, the cap placed by the navbar's offsetTop, its scroll-driven animation 1:1 with the scroll (animation-range), its place checked 4 times a second",
+      "fix": "none from the page; look again if Telegram changes its browser (test with ?fmcap=debug: the cap turns red)"
     }
   ]
 }
