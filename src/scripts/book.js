@@ -86,7 +86,7 @@ function build() {
     '<div class="book__box">' +
       '<div class="book__top"><button class="book__close" type="button" aria-label="Закрыть"><i></i><i></i></button></div>' +
       '<div class="book__card">' +
-        '<div class="book__wait" aria-hidden="true"><i></i><i></i><i></i></div>' +
+        '<div class="book__wait" aria-hidden="true"><span><i></i><i></i><i></i><i></i><i></i></span></div>' +
         '<i class="book__h0" aria-hidden="true"></i>' +
         '<p class="book__fail" hidden>Календарь не загрузился. ' +
           `<a href="${address(PAGE)}" target="_blank" rel="noopener">Открыть запись на сайте Планёрки</a></p>` +
