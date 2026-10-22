@@ -33,7 +33,8 @@
    sums), and on scroll only decides what is shown: which title (with its own timed animation, by lines), whose turn it
    is among the drawings, the white label, the progress in the label, and which drawings can be put to sleep.
    The first card comes in once the hero has come in (it takes its turn in the hero's group of motion.js), fading in
-   and rising a little, without a bounce.
+   and rising a little, without a bounce; but if a quarter of it or more is on screen when the page opens (a tall
+   screen, a reload further down), it comes in at once, without waiting for the hero (Tim, Oct 22).
    To try values in the console: fmCards.settings.step = 0.5, then fmCards.update(). ?fmcards=debug shows what the
    script measures (see debug.js). */
 import { gsap, ScrollTrigger, SplitText, refreshSoon } from "./gsap.js";
@@ -48,7 +49,7 @@ const SET = {
   // headings after the CTA share (data-reveal="title")
   title: { in: M.title.time, out: 0.3, stagger: M.title.stagger, rise: M.title.rise, lift: 12 },
   titleLead: 0.12,       // a title shows once the open part reaches this much (0…1 of the card's height) below it; it hides at half that
-  enter: { time: 0.9, rise: 32 }                         // the first card's way in: seconds, px it rises (no bounce: fm-out)
+  enter: { time: 0.9, rise: 32, alone: 0.25 }            // the first card's way in: seconds, px it rises (no bounce: fm-out), and how much of it on screen (0…1) makes it start without waiting for the hero
 };
 const clamp = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const n2 = (v) => +(+v).toFixed(2);
@@ -327,6 +328,10 @@ export function initCards() {
     cue(first, {
       group: hero,
       line: 0.999,                                         // as soon as any of it shows below the hero
+      alone: () => {                                       // a quarter of it on screen: it does not wait for the hero
+        const box = cards[0].el.getBoundingClientRect();
+        return innerHeight - box.top >= box.height * SET.enter.alone;
+      },
       whenReady: (done) => done(),
       play(instant) {
         if (instant) gsap.set(first, { clearProps: "opacity,transform" });

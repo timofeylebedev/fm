@@ -57,7 +57,7 @@ the pinned logos) are also sized by the height directly.
 
 | Role | 320 → 1440 | Used by |
 |---|---|---|
-| `type/hero` | 36 → 64 | the hero title |
+| `type/hero` | 36 → 60 | the hero title |
 | `type/h2` | 28 → 52 | section headings, the CTA title, the card stack titles |
 | `type/card-heading` | 24 → 32 | tool, publication and royalty titles |
 | `type/lead` | 16 → 20 | under the hero and CTA titles |

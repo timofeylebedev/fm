@@ -91,8 +91,8 @@
     {
       "id": "id-card-object",
       "kind": "decision",
-      "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck, corners included: 16px of the card's 240 (the table half that in), so the card keeps its shape at every screen size. Their deck starts below a 35rem column, their own step: the row needs that room",
-      "decided": "2026-10-18; radius/m on 2026-10-18 (Tim); 16px, scaled with the card, on 2026-10-20 (Tim: smaller corners, always in proportion to the card)",
+      "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck, corners included: 24px of the card's 240 (the table half that in), so the card keeps its shape at every screen size. Their deck starts below a 35rem column, their own step: the row needs that room",
+      "decided": "2026-10-18; radius/m on 2026-10-18 (Tim); 16px, scaled with the card, on 2026-10-20 (Tim: smaller corners, always in proportion to the card); 24px on 2026-10-22 (Tim: 24 at most)",
       "why": "their text stays readable at one size; a card is one object, so its corners belong to it, not to the screen"
     },
     {
@@ -105,7 +105,7 @@
     {
       "id": "type-on-the-ladder",
       "kind": "decision",
-      "what": "Every text size ends on the ladder (steps of 2 up to 24, 4 up to 64, 8 up to 128) at 320 and 1440: hero 36 → 64, h2 28 → 52 (also the stack card titles), card-heading 24 → 32, lead 16 → 20, card-tag 14 → 18, body-m 16 → 18, body 16, body-s 14 → 16, ui 14. No modular ratio any more: the levels keep their order and distance by type.relations (at least ×1.125 apart at both ends), checked by build/tokens.mjs",
+      "what": "Every text size ends on the ladder (steps of 2 up to 24, 4 up to 64, 8 up to 128) at 320 and 1440: hero 36 → 60 (60 at most: Tim, 2026-10-22), h2 28 → 52 (also the stack card titles), card-heading 24 → 32, lead 16 → 20, card-tag 14 → 18, body-m 16 → 18, body 16, body-s 14 → 16, ui 14. No modular ratio any more: the levels keep their order and distance by type.relations (at least ×1.125 apart at both ends), checked by build/tokens.mjs",
       "decided": "Tim, 2026-10-18",
       "why": "round end values, sizes chosen by eye (hero 60–64 on a computer, lead 20, h2 = card title)",
       "costs": "lead = body on phones (16), body-m = body = 16 and body-s = ui = 14 on phones"
@@ -120,7 +120,7 @@
     {
       "id": "royalty-by-shape",
       "kind": "decision",
-      "what": "The royalty cards fill their column and arrange themselves by their own shape: narrow — the drawing on top, the title from 70% of the card's width; wide (from a 32rem card) — the title left, the drawing right. Titles at most 12em wide (three short lines)",
+      "what": "The royalty cards fill their column and arrange themselves by their own shape: narrow — the drawing on top, the title from 70% of the card's width; wide (from a 32rem card) — the title left, the drawing right. Titles as wide as the card, at most 14em (three lines, never two long ones; 12em and evened-out lines until 2026-10-22, Tim: full width)",
       "decided": "Tim, 2026-10-18",
       "why": "no title over the drawing at any width (it was, between 621 and 890px), no capped card on a phone"
     },

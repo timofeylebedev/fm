@@ -30,7 +30,8 @@
      · other parts of the page can join a group with motion.cue (the hero's people and chips do, and the first card of
        the stack joins the hero's group, so it comes after the hero). A cue can take its turn at the place of another
        element (at: the people start with the heading), in another section's group (group), and from another line
-       (line: the first card as soon as any of it is on screen). A thing that comes in
+       (line: the first card as soon as any of it is on screen), and need not wait for its group (alone: the first
+       card, when a quarter of it is on screen as it becomes due, comes in at once). A thing that comes in
        gets the class fm-showing when it starts and fm-shown when it has arrived.
    Hover colours and the press of buttons are done by the styles (button.css). "Reduce motion": everything is simply
    shown, nothing leans.
@@ -313,6 +314,7 @@ function flush() {
   fresh.clear();
   const touched = new Set();
   list.forEach((it) => {
+    if (it.alone && it.ready && it.alone()) { play(it, 0); return; }   // a cue that does not wait for its group
     it.box = (it.at || it.el).getBoundingClientRect();
     if (it.at) it.box = { top: it.box.top, left: it.box.left - 0.5 };   // a cue placed at an element goes right before it
     it.group.queue.push(it); touched.add(it.group);
@@ -516,18 +518,19 @@ function ready(it) {
   it.waiters.splice(0).forEach((fn) => fn());
 }
 
-// ── other parts of the page join a group: cue(el, { play(instant), whenReady(done) }) ──
-// play(true): it is shown without its way in. Returns false when there is no way in ("reduce motion"):
-// the caller then plays it itself.
+// ── other parts of the page join a group: cue(el, { play(instant), whenReady(done), alone() }) ──
+// play(true): it is shown without its way in. alone(), if given, is asked when it becomes due: true, and it starts at
+// once instead of waiting for its turn in the group. Returns false when there is no way in ("reduce motion"): the
+// caller then plays it itself.
 export function cue(el, opts) {
-  const c = { el, play: opts.play, whenReady: opts.whenReady, lead: opts.lead != null ? opts.lead : 0, at: opts.at || null, owner: opts.group || null, line: opts.line || 0 };
+  const c = { el, play: opts.play, whenReady: opts.whenReady, lead: opts.lead != null ? opts.lead : 0, at: opts.at || null, owner: opts.group || null, line: opts.line || 0, alone: opts.alone || null };
   if (!booted) { waiting.push(c); return true; }
   if (!live) return false;
   enlist(c);
   return true;
 }
 function enlist(c) {
-  const it = add(c.el, "cue", { play: c.play, lead: c.lead, at: c.at, line: c.line, ready: false });
+  const it = add(c.el, "cue", { play: c.play, lead: c.lead, at: c.at, line: c.line, alone: c.alone, ready: false });
   it.group = groupFor(it.el, c.owner);
   c.whenReady(() => ready(it));
   watch(it);

@@ -34,7 +34,9 @@
      · wide (from 32rem inside the card's padding, a card of about 560px: one card in a row on a column of about 560
        to 690px, a small tablet or a small phone turned sideways): the title on the left, the drawing on the right as a
        square half the card's width, its empty lower part cut off (the card is at least 39% of its width tall).
-   The title is at most 12em wide: three short lines, never two long ones across a wide card. */
+   The title is as wide as its card (Tim, Oct 22: its lines filled, not evened out to a narrower block), but at most
+   14em: the shorter title is 30.6em long in one line, so it always takes three lines, never two long ones across a wide
+   card. */
 .royalty { padding-top: calc(var(--section-y) * 1.6); container: royalty / inline-size; }
 .royalty__cards {
   display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
@@ -54,16 +56,16 @@
 /* sizes by the card's width: --w (100cqi is the width inside the card's padding) */
 .royalty__text {
   --w: calc(100cqi + 2 * var(--radius-m));
-  position: relative; max-width: 12em;
+  position: relative; max-width: 14em;
   margin-top: calc(0.7 * var(--w) - var(--radius-m));                  /* under the drawing */
   font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); color: var(--paper);
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 @container royalty-card (width >= 32rem) {
   .royalty__card > .art { left: auto; right: 0; width: 50%; }
   .royalty__text {
     display: flex; align-items: flex-end;
-    max-width: min(12em, 0.5 * var(--w) - 1.5 * var(--radius-m));     /* beside the drawing, with half a padding to it */
+    max-width: min(14em, 0.5 * var(--w) - 1.5 * var(--radius-m));     /* beside the drawing, with half a padding to it */
     min-height: calc(0.39 * var(--w) - 2 * var(--radius-m));            /* the card: at least 39% of its width tall */
     margin-top: 0;
   }
@@ -131,10 +133,10 @@
 
 .idcard {
   /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are its
-     own, fixed in the object (16px of its 240), so they scale with it and keep the same shape at every screen size
-     (Tim, Oct 20: smaller corners, always in step with the card); the table inside sits half a radius in, with the
+     own, fixed in the object (24px of its 240), so they scale with it and keep the same shape at every screen size
+     (Tim, Oct 20: always in step with the card; Oct 22: 24px at most); the table inside sits half a radius in, with the
      other half as its own radius, so the two curves are concentric */
-  --id-r: 16px;
+  --id-r: 24px;
   --id-inset: calc(var(--id-r) / 2);
   position: relative;
   width: 240px; height: 345px;
@@ -183,7 +185,8 @@
    The features: one column, two from step S, then a row of four from step L (never three: four cards would leave one
    alone on a row). At S every tile already has room for the longest unbreakable piece of its text («не накладывались»,
    9.3em of type/body-s with its non-breaking space) inside its padding; four in a row wait for L, so a tile's text is
-   never a narrow column of six or seven lines.
+   never a narrow column of six or seven lines. A tile's text starts right under its icon, so the texts of a row start
+   on one line (Tim, Oct 22); a shorter one leaves its air at the bottom.
    The ring's block is as tall as the ring needs while it is nearly level (scripts/ring.js); tilted further, on its way
    in and out, its covers reach a little past the block into the section's gaps (overflow visible up and down, cut at
    the sides). */
@@ -198,7 +201,7 @@
 @container releases (width >= 22rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @container releases (width >= 58rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .feature {
-  display: flex; flex-direction: column; justify-content: space-between; gap: var(--feature-gap);
+  display: flex; flex-direction: column; gap: var(--feature-gap);
   padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);
   border-radius: var(--radius-s); background: var(--tint);
 }
@@ -215,15 +218,19 @@
    one (a laptop at 1366×768, a phone turned sideways) the tiles are as big as its height allows, and the window then
    shows more columns. A tap on a logo shows its name (scripts/logos.js), as hovering does. */
 .clients {
+  --clients-y: var(--section-y); --clients-gap: var(--section-gap);
   overflow: hidden;
-  /* on a short screen the section's own spacing gives way first, so the cards can stay big enough to read */
-  padding-block: min(var(--section-y), 6vh); gap: min(var(--section-gap), 6vh);
+  /* the same spacing as every other section (Tim, Oct 22: it was cut to 6% of the screen's height on every screen
+     less than about 1330px tall: 54 instead of 79 on a 1440 × 900 laptop); only on a phone turned sideways does it give way, so
+     the cards can stay big enough to read */
+  @media (--sideways) { --clients-y: min(var(--section-y), 6vh); --clients-gap: min(var(--section-gap), 6vh); }
+  padding-block: var(--clients-y); gap: var(--clients-gap);
 }
 .logos { width: 100%; max-width: var(--column-max); container: logos / inline-size; }
 .logos__track {
   --gap: var(--gap-tiles);
   --cols: 2;
-  --by-height: calc((var(--screen) - 2 * min(var(--section-y), 6vh) - min(var(--section-gap), 6vh) - var(--type-h2) - var(--nav-h) - var(--gap)) / 2);
+  --by-height: calc((var(--screen) - 2 * var(--clients-y) - var(--clients-gap) - var(--type-h2) - var(--nav-h) - var(--gap)) / 2);
   --u: max(100px, min((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols), var(--by-height)));
   display: grid; grid-template-columns: repeat(8, var(--u)); grid-template-rows: repeat(2, var(--u)); gap: var(--gap);
   width: max-content; margin-inline: auto;            /* centred when it fits its window whole; from the left otherwise */
