@@ -49,6 +49,8 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   `src/scripts/scroller.js` (`y()`, `to()`, `max()`, `onScroll()`, `watchSize()`, `ioRoot`). In Safari on a Mac
   the page scrolls inside its own box (`html.boxed`, `.page`) so Safari's bar stays solid; `?fmbox=1` / `?fmbox=0`
   turns the box on or off in any browser. See the comment at the top of scroller.js.
+  On iPhone, Safari's bottom bar takes the background of anything fixed or sticky at the bottom edge (even clipped);
+  `.bar-guard` (base.css) keeps it colourless (decision `safari-bottom-bar`). Don't remove it for a sticky/fixed block.
 - **Motion curves:** one table, `M.curve` in `scripts/motion.js` (`out`, `move`, `leave`, `wave`, `settle`, `fall`,
   `glide`). GSAP uses `"fm-<name>"`; WAAPI/CSS imports `css.out` / `css.move` / `css.leave` from motion.js.
   Never copy the numbers. Every animation respects reduced motion.

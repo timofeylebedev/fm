@@ -25,9 +25,12 @@ export function initTint(nav) {
      · it puts the cap exactly where it belongs (past the ends of the page iOS pulls the page further and springs back;
        at the bottom of the page in Telegram its bars come back and the page can scroll further), by moving it by what
        is missing (its "translate", which adds to the animation's transform);
-     · iOS does not tell the page when it is pulled past its end, so in the browsers built into apps (they have
-       window.webkit.messageHandlers, Safari has not) the bounce is turned off while the last screen of the page is
-       shown (overscroll-behavior), and on again above it;
+     · iOS does not tell the page when it is pulled past its end, so in the browsers built into apps the bounce is
+       turned off while the last screen of the page is shown (overscroll-behavior), and on again above it. Such a
+       browser is known by window.webkit.messageHandlers (an app that talks to its page), or, on an iPhone or iPad, by
+       a user agent without "Safari/" (a bare WKWebView). Telegram's browser seems not to be known by the first: its
+       bounce stayed on, the page went up past its end and the cap with it, and the page showed above the navbar
+       (Tim's screenshot, Oct 22; ?fmcap=debug shows both signs and the user agent). Safari itself, Chrome and the others on iOS say "Safari/" and keep their bounce;
      · the browser moves the cap a frame or two after the page, so while scrolling down quickly it lags a few px above
        the navbar: while scrolling down it reaches DOWN_EXTRA px further under the navbar, back to OVERLAP once the
        scrolling stops.
@@ -56,7 +59,9 @@ export function initCap(nav) {
 
   const root = document.documentElement;
   let queued = 0, max = 0, navTop = 0, lastY = scrollY, down = false, idle = 0, shift = 0, still = false;
-  const inApp = !!(window.webkit && window.webkit.messageHandlers);
+  const ua = navigator.userAgent;
+  const ios = /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const inApp = !!(window.webkit && window.webkit.messageHandlers) || (ios && !/Safari\//.test(ua));
   const place = () => {
     queued = 0;
     const fixed = getComputedStyle(nav).position === "fixed";

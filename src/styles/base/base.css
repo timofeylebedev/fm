@@ -86,6 +86,23 @@ button { margin: 0; padding: 0; border: 0; background: none; font: inherit; colo
   transform: translateY(-200%);
 }
 .skip:focus-visible { transform: none; }
+/* Safari's bottom bar on iPhone (iOS 26) takes a colour from the page: it looks at what is at the middle of the bottom
+   edge of the screen (4px up), and when that is inside something fixed or sticky, the bar takes that thing's background
+   colour. The cards of the stack are sticky, so the bar turned green under «Финансы», and stayed green after it: Safari
+   looks through clipping, so the last card, hidden by the stack's overflow under the section after it, still counted
+   (Tim's screenshot, Oct 22; WebKit, LocalFrameView::fixedContainerEdges). Tim: no colour in that bar.
+   This strip is fixed over the bottom edge, above everything on the page, and has a backdrop filter that changes nothing to the eye:
+   Safari takes a fixed thing with a backdrop filter for glass and then gives the bar no colour of its own, whatever is
+   under it. It is not seen and not touched (pointer-events: none). Only where the bar is (iPhone, iPad). */
+.bar-guard { display: none; }
+@supports (-webkit-touch-callout: none) {
+  .bar-guard {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 250;
+    height: 24px; pointer-events: none;
+    -webkit-backdrop-filter: opacity(0.999); backdrop-filter: opacity(0.999);   /* not 1: the minifier would write opacity(), with no number */
+  }
+}
+
 /* after a reload further down the page, the page stays hidden for a moment, until it is back where the visitor was
    (boot.js): under a white cover, not made transparent itself. With the page itself made transparent and back, Safari
    (on Mac, iPhone, in Telegram) sometimes left a grey section white under its cards (the tools): a repaint it skipped. */
