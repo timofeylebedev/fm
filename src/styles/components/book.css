@@ -123,11 +123,12 @@ html.book-open { overflow: hidden; }
 }
 .book:not(.is-ready) .book__frame, .book.is-failed .book__frame { opacity: 0; }
 
-/* while the calendar is not there yet: three dots, as long as it takes */
+/* while the calendar is not there yet: three dots, as long as it takes, in the middle of the white card (Tim, Oct 22);
+   of the part of it on screen, when it is taller than the screen (phones: the card starts under the close button) */
 .book__wait {
   position: absolute; inset: 0 0 auto; z-index: 1;
-  display: flex; justify-content: center; gap: 8px;
-  padding-top: 160px;
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+  height: min(var(--tall), 100svh - 48px - 3 * var(--inset));
   pointer-events: none;
   transition: opacity 0.2s var(--ease-out);
   & i { width: 8px; height: 8px; border-radius: var(--round); background: var(--purple); animation: book-wait 1.2s ease-in-out infinite both; }

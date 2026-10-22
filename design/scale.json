@@ -12,7 +12,7 @@
 
   "type": {
     "roles": {
-      "type/hero":         { "px": [36, 64], "use": "the hero title" },
+      "type/hero":         { "px": [36, 60], "use": "the hero title (60 at most: Tim, Oct 22)" },
       "type/h2":           { "px": [28, 52], "use": "section headings, the CTA title, the titles of the card stack" },
       "type/card-heading": { "px": [24, 32], "use": "titles of cards: tools, publications, royalty; the 404 title" },
       "type/lead":         { "px": [16, 20], "use": "the text under the hero and the CTA titles" },
@@ -46,7 +46,7 @@
       "section/air-l":   { "px": [56, 112], "css": "--section-air-l", "use": "more air: under the CTA card; above and below the tools and the publications, and from their headings to their cards (Tim, Oct 20)" },
       "space/gap-tiles": { "px": [8, 12], "css": "--gap-tiles", "use": "between tiles: features, logos and stats" },
       "space/gap-cards": { "px": [16, 24], "css": "--gap-cards", "use": "between cards: royalty, tools, publications" },
-      "radius/s":        { "px": [16, 24], "css": "--radius-s", "use": "tiles: features, logos, stats (about 130–250px wide)" },
+      "radius/s":        { "px": [16, 32], "css": "--radius-s", "use": "tiles: features, logos, stats (about 130–250px wide); 32 at most (Tim, Oct 22)" },
       "radius/m":        { "px": [24, 40], "css": "--radius-m", "use": "half-column cards: publications, royalty; the padding of the stack cards; the side padding of the CTA card" },
       "radius/l":        { "px": [32, 56], "css": "--radius-l", "use": "full-column cards: the CTA card, tool cards" },
       "cta/air":         { "px": [64, 128], "css": "--cta-air", "use": "above and below the content of the CTA card (at least): generous at every size" },

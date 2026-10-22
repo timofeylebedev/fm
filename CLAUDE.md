@@ -59,7 +59,7 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
 - **Layout steps:** container queries on the column at S 22rem, M 43rem, L 58rem; any other step must be a written
   "own step" (ID deck 35rem, royalty card 32rem, hero title 10em, video card 400px).
 - **Design grammar (keep it):** tiles radius-s; half-column cards radius-m = padding; full-column cards (CTA, tools)
-  radius-l; the ID cards 16px of their 240 (scaled with them); inner radius = outer − inset; colour on a card is a
+  radius-l; the ID cards 24px of their 240 (scaled with them); inner radius = outer − inset; colour on a card is a
   subject, never a state; one hover timing. No focus ring (Tim, Oct 20: decision `no-focus-ring`).
 - **Media in lazy CSS:** a lazily loaded stylesheet must `@import "../base/media.css"` itself, or Lightning CSS fails
   on the custom media (`--mouse`, `--sideways` …).
