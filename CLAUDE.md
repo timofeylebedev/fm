@@ -92,7 +92,8 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
 - The CSP blocks injected scripts: use `bypassCSP: true` in Playwright contexts.
 - Headless Chromium without a GPU: launch with `--use-gl=swiftshader --enable-unsafe-swiftshader` (as
   `build/audit.mjs` does), at most 2 browser contexts at a time, and judge motion by its curves, not by frame timing.
-- Telegram's browser: `?fmcap=debug` (the white strip above the navbar turns red, a box shows what the browser says). A
+- Telegram's browser: `?fmcap=debug` (the white strip above the navbar turns red, a box shows what the browser says;
+  without it the strip exists only in apps' browsers, never in Safari, where it drifted under the navbar). A
   3–5 frame flicker on a hard fling past the end is Telegram's own (decision `telegram-cap-flicker`): don't chase it.
 - Bigger browser text: DevTools `Page.setFontSizes`. iOS bar changes: `visualViewport.dispatchEvent(new Event("resize"))`.
 - **Safari is the truth for Safari.** Articles about Safari 26 bar tinting were wrong on macOS 27. Tim tests in his

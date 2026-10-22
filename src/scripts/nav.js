@@ -42,7 +42,10 @@ export function initTint(nav) {
      · the browser moves the cap a frame or two after the page, so while scrolling down quickly it lags a few px above
        the navbar: while scrolling down it reaches DOWN_EXTRA px further under the navbar, back to OVERLAP once the
        scrolling stops.
-   Only on phones and tablets, in browsers that can do scroll-driven animations.
+   Only in the browsers built into apps (inApp below), on phones and tablets, in browsers that can do scroll-driven
+   animations. Safari needs no cap (nothing of the page is seen behind its bars), and there it did harm: its own
+   drawing of the 1:1 animation drifted, and the cap crept down under the navbar, about 13px by the end of the card
+   stack, a white band over the page (Tim's video, Oct 23, 01:38).
    Test mode: ?fmcap=debug at the end of the address (the cap turns red; see debug.js). */
 export function initCap(nav) {
   const CAP_PX = 240;                       // how far up it reaches: more than any app's buttons take
@@ -53,7 +56,11 @@ export function initCap(nav) {
   const DEBUG = /[?&]fmcap=debug\b/.test(location.search);
   const touch = matchMedia("(hover: none) and (pointer: coarse)").matches;
   if (DEBUG) import("./debug.js").then((m) => m.capDebug(touch));
-  if (!touch && !DEBUG) return;
+  const ua = navigator.userAgent;
+  const ios = /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  // an app's browser: an app that talks to its page (iOS), a bare WKWebView (iOS, no "Safari/"), an Android WebView ("; wv)")
+  const inApp = !!(window.webkit && window.webkit.messageHandlers) || (ios && !/Safari\//.test(ua)) || /; wv\)/.test(ua);
+  if (!DEBUG && !(touch && inApp)) return;
   if (box) return;                          // the page scrolls in its own box (Safari on a Mac): no app's browser
   if (!CSS.supports("animation-timeline: scroll()")) return;
 
@@ -70,9 +77,6 @@ export function initCap(nav) {
 
   const root = document.documentElement;
   let queued = 0, max = 0, navTop = 0, lastY = scrollY, down = false, idle = 0, shift = 0, still = false;
-  const ua = navigator.userAgent;
-  const ios = /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  const inApp = !!(window.webkit && window.webkit.messageHandlers) || (ios && !/Safari\//.test(ua));
   const place = () => {
     queued = 0;
     const fixed = getComputedStyle(nav).position === "fixed";
