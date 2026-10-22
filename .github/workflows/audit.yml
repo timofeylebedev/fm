@@ -26,7 +26,9 @@ concurrency:
 jobs:
   audit:
     name: audit (${{ matrix.engine }})
-    runs-on: ubuntu-latest
+    # not ubuntu-latest: since Oct 22, 2026 that is Ubuntu 26.04, where Playwright 1.56 cannot install its browsers
+    # ("Playwright does not support chromium on ubuntu26.04-x64"); move on once Playwright supports it
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -51,4 +53,4 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          { echo "### Responsive audit · ${{ matrix.engine }}"; echo; echo '```'; tail -n 60 audit.log 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "### Responsive audit · ${{ matrix.engine }}"; echo; echo '```'; tail -n 60 audit.log 2>/dev/null || echo "(no audit log: an earlier step failed)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
