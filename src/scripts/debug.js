@@ -30,7 +30,7 @@ export function capDebug(touch) {
       "vv: " + (vv ? Math.round(vv.width) + "×" + Math.round(vv.height) + " +" + Math.round(vv.offsetTop) + "  page +" + Math.round(vv.pageTop) : "-")
         + "   nav top: " + (nav ? Math.round(nav.getBoundingClientRect().top) : "-"),
       "scrollY seen: " + Math.round(least) + "…" + Math.round(most) + "   overscroll: " + getComputedStyle(document.documentElement).overscrollBehaviorY,
-      "travel (browser's): " + (window.fmCap ? window.fmCap.state.range : "-"),
+      "nav place (offsetTop) used: " + (window.fmCap ? window.fmCap.state.navTop : "-"),
       navigator.userAgent.replace(/^Mozilla\/5\.0 /, "").slice(0, 90)
     ].join("\n");
   };

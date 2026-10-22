@@ -50,7 +50,9 @@
     --box: 940px;
     --frame: 1024px;
     --top: 60px; --bottom: 21px; --side: 42px; --corner: 40px;
-    --h0: calc(403px + var(--rows, 5) * 48px);          /* 643 for five weeks (Tim's video, Oct 22; 668 on Oct 19), 48px a row of days */
+    /* 649 for five weeks (Tim's video, Oct 23; 643 on Oct 22, 668 on Oct 19), 48px a row of days; once seen on this
+       device, the height the calendar had then (book.js, --h0-seen) */
+    --h0: var(--h0-seen, calc(409px + var(--rows, 5) * 48px));
   }
 
   &::backdrop { background: transparent; }
