@@ -65,10 +65,15 @@ html.book-open { overflow: hidden; }
 
 /* the card and the close button over its corner: in the middle of the screen for the card's final height (computers),
    at the top when it is taller than the screen (phones, tablets) */
+/* --h-center (book.js): the calendar's own height once it is far from --h0 (the visitor went on to the form, 400px
+   taller on computers: it ran off the bottom of the screen, Tim, Oct 23); the card then moves to the middle again,
+   eased. A few px off --h0 does not move it (it changes at the bottom, see above) */
 .book__box {
-  --tall: calc(var(--h0) - var(--top) - var(--bottom));   /* the card */
+  --tall: calc(var(--h-center, var(--h0)) - var(--top) - var(--bottom));   /* the card */
   position: relative; flex: none; width: var(--box);
   margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0;
+  transition: margin-top 0.4s var(--ease-out);
+  @media (--calm) { transition: none; }
 }
 
 /* the close button: above the card's right corner, on the glass. While a tall calendar is scrolled (phones), it stays
