@@ -43,6 +43,7 @@ const BOOK = {
   silent: 4000,          // ms: a frame loaded but silent this long is not the calendar (an error page)
   wait: 12000,           // ms: no calendar this long after the window opened → offer Planerka's page in a new tab
   grow: 300,             // ms: once settled, a taller calendar is believed only after it has stayed so this long (see setHeight)
+  flash: 80,             // ms: after the visitor has used it, a taller page is believed after this long (Planerka's two frames of the next month)
   skeleton: 3000,        // ms: a calendar that never changes from its first height is shown after this long anyway (see setHeight)
   trust: 1500,           // ms: taller than this month's calendar should be, before the visitor has used it: believed after this long
   hash: "#demo"
@@ -59,6 +60,7 @@ let dlg, box, card, frame, fail;
 let ready = false, failed = false, heard = false, isOpen = false, opened = false, warmedAt = 0, from = null;
 let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, growTimer = 0, firstHeight = 0, shown = 0, byKeys = false;
 let used = false, probe;   // the visitor has used the calendar (the focus went into its frame); probe: an element --h0 tall
+let calendarAt = 0, onCalendar = false;   // since when the calendar itself (≈ --h0) is shown again, and whether it is
 let firstH = 0, changed = false, latest = 0;   // latest: the last height the calendar reported   // the first height the calendar reported (its skeleton), and whether it has changed since
 let seenAt = 0;            // when the calendar was first seen: the window open with the calendar in it (performance.now())
 const heights = [];        // what setHeight decided, for fmBook.report(): [ms, height, wait, used, h0]
@@ -188,11 +190,20 @@ function weeks(d = new Date()) {
 // The crop keeps its height meanwhile, so the moments that are not believed never show. A shorter page: at once.
 function apply(h) {
   clearTimeout(growTimer);
+  const now = performance.now();
   const h0 = (probe && probe.offsetHeight) || Infinity, expected = h0 + 24;   // a few px more than --h0 is no surprise
-  const wait = h <= shown ? 0
-    : h > Math.max(shown, expected) && !used ? BOOK.trust
-    : dlg.classList.contains("is-still") || h > Math.max(shown, expected) ? BOOK.grow : 0;
-  heights.push([Math.round(performance.now()), h, wait, used, h0]);
+  // the calendar (a page as tall as --h0) has just come on screen again: Planerka then reports a page ~220px taller for
+  // about a second (the times sliding in), see-through, on load and after «Изменить дату и время» (Tim's video, Oct 23,
+  // 02:34:08: the card was held high for a second after going back). A step the visitor takes from the calendar comes
+  // later than that: they look at it first
+  const calendar = Math.abs(h - h0) <= 24, fresh = now - calendarAt < BOOK.trust;
+  if (calendar && !onCalendar) calendarAt = now;
+  onCalendar = calendar;
+  let wait;
+  if (h <= shown) wait = 0;                              // shorter: at once
+  else if (used) wait = fresh && !calendar ? BOOK.trust : BOOK.flash;   // the visitor's step: almost at once (it was 300 ms late, Tim)
+  else wait = h > Math.max(shown, expected) ? BOOK.trust : dlg.classList.contains("is-still") ? BOOK.grow : 0;
+  heights.push([Math.round(now), h, wait, used, h0]);
   if (heights.length > 80) heights.shift();
   if (wait) growTimer = setTimeout(() => crop(h), wait);
   else crop(h);
