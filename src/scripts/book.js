@@ -43,6 +43,7 @@ const BOOK = {
   silent: 4000,          // ms: a frame loaded but silent this long is not the calendar (an error page)
   wait: 12000,           // ms: no calendar this long after the window opened → offer Planerka's page in a new tab
   grow: 300,             // ms: once settled, a taller calendar is believed only after it has stayed so this long (see setHeight)
+  skeleton: 3000,        // ms: a calendar that never changes from its first height is shown after this long anyway (see setHeight)
   trust: 1500,           // ms: taller than this month's calendar should be, before the visitor has used it: believed after this long
   hash: "#demo"
 };
@@ -56,6 +57,7 @@ let dlg, box, card, frame, fail;
 let ready = false, failed = false, heard = false, isOpen = false, opened = false, warmedAt = 0, from = null;
 let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, growTimer = 0, firstHeight = 0, shown = 0, byKeys = false;
 let used = false, probe;   // the visitor has used the calendar (the focus went into its frame); probe: an element --h0 tall
+let firstH = 0, changed = false;   // the first height the calendar reported (its skeleton), and whether it has changed since
 let seenAt = 0;            // when the calendar was first seen: the window open with the calendar in it (performance.now())
 const heights = [];        // what setHeight decided, for fmBook.report(): [ms, height, wait, used, h0]
 // the history: the step the window added (and how long the history was then), and a Back of ours on its way
@@ -192,13 +194,17 @@ function setHeight(h) {
     clearTimeout(stillTimer);
     stillTimer = setTimeout(() => dlg.classList.add("is-still"), 1000);
   }
-  // shown only once it has settled: while loading, the calendar reports a few heights in a row (its skeleton, then the
-  // days, then the times); it is shown when it has said nothing new for a moment (at most 1.5 s after the first)
+  // shown only once it has filled in. The calendar first reports the height of its skeleton (grey days, as tall as the
+  // real ones), then waits ~1.3 s for its free days; when they come it draws the next month under this one for two
+  // frames and reports that height (Tim's video, Oct 23: the grey skeleton was shown, then November flashed inside the
+  // card). So it is shown once a height different from the first has come and nothing new for 250 ms after it (the
+  // days are in, the flash is over); one that never changes, BOOK.skeleton after its first height
   if (ready) return;
   const now = performance.now();
-  if (!firstHeight) firstHeight = now;
+  if (!firstHeight) { firstHeight = now; firstH = h; }
+  if (Math.abs(h - firstH) > 2) changed = true;
   clearTimeout(settleTimer);
-  settleTimer = setTimeout(() => setReady(), now - firstHeight > 1500 ? 0 : 250);
+  settleTimer = setTimeout(() => setReady(), changed ? 250 : Math.max(250, firstHeight + BOOK.skeleton - now));
 }
 
 function crop(h) {
@@ -332,7 +338,7 @@ function initWarm() {  // runs once the visitor has agreed to the cookies (initB
   // page, so the history gets no step of its own)
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible" || !frame || opened || Date.now() - warmedAt < BOOK.stale) return;
-    ready = false; failed = false; heard = false; firstHeight = 0; used = false; seenAt = 0;
+    ready = false; failed = false; heard = false; firstHeight = 0; firstH = 0; changed = false; used = false; seenAt = 0;
     dlg.classList.remove("is-ready", "is-failed", "is-still");
     warmedAt = Date.now();
     try { frame.contentWindow.location.replace(address(PAGE, BOOK.look)); } catch {}
