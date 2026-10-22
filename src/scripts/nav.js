@@ -18,8 +18,12 @@ export function initTint(nav) {
    sits below the buttons, and in the strip behind them the page is seen scrolling by. Telegram draws only the ordinary
    content of the page in that strip: nothing fixed, nothing sticky.
    So the cap is ordinary content: an empty white block above the top of the page (CAP_PX tall, reaching OVERLAP px
-   under the navbar) that the browser moves down exactly as far as the page has scrolled (a scroll-driven animation over
-   the whole scroll, moving it by --cap-max, which is kept equal to how far the page can scroll). It therefore always
+   under the navbar) that the browser moves down exactly as far as the page has scrolled: a scroll-driven animation
+   that moves it TRAVEL px over the first TRAVEL px of the scroll (animation-range), so 1 px per px of scroll however
+   far the page can scroll. It used to move it by --cap-max over the whole scroll, kept equal to how far the page can
+   scroll; when Telegram hides its bars at the end of the page that distance changes by 83px before the page hears of
+   it, and for a moment the cap was up to 83px too high (Tim's video, Oct 23). Browsers without lengths in
+   animation-range still do it that way. It therefore always
    lies right above the navbar, and in such a browser fills the strip behind the buttons with white. In every other
    browser it is above the top edge of the screen and never seen. What the animation cannot do, the script does:
      · it puts the cap exactly where it belongs (past the ends of the page iOS pulls the page further and springs back;
@@ -42,6 +46,7 @@ export function initTint(nav) {
    Test mode: ?fmcap=debug at the end of the address (the cap turns red; see debug.js). */
 export function initCap(nav) {
   const CAP_PX = 240;                       // how far up it reaches: more than any app's buttons take
+  const TRAVEL = 1e6;                       // px of scroll the animation covers, 1:1 (more than any page scrolls)
   const OVERLAP = 1;                        // how far down it reaches under the navbar
   const DOWN_EXTRA = 40;                    // while scrolling down: px it reaches further under the navbar
   const IDLE_MS = 160;                      // the scrolling counts as stopped after this long without a scroll event
@@ -59,6 +64,8 @@ export function initCap(nav) {
     + "top:" + (-CAP_PX) + "px;height:" + (CAP_PX + OVERLAP) + "px;z-index:200;"
     + "animation:nav-cap 1ms linear both;animation-timeline:scroll(root block);"
     + "background:" + (DEBUG ? "#ff0033" : "#fff") + (DEBUG ? ";z-index:2147483000" : "");
+  const exact = CSS.supports("animation-range", "0px 1px");
+  if (exact) { cap.style.animationRange = "0px " + TRAVEL + "px"; cap.style.setProperty("--cap-max", TRAVEL + "px"); }
   document.body.prepend(cap);
 
   const root = document.documentElement;
@@ -74,7 +81,7 @@ export function initCap(nav) {
     navTop = nav.offsetTop;
     cap.style.top = (navTop - CAP_PX) + "px";
     max = Math.max(0, root.scrollHeight - root.clientHeight);
-    cap.style.setProperty("--cap-max", max + "px");
+    if (!exact) cap.style.setProperty("--cap-max", max + "px");
     fix();
     bounce();
   };

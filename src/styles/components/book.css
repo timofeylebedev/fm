@@ -129,21 +129,31 @@ html.book-open { overflow: hidden; }
 }
 .book:not(.is-ready) .book__frame, .book.is-failed .book__frame { opacity: 0; }
 
-/* while the calendar is not there yet: three dots, as long as it takes, in the middle of the white card (Tim, Oct 22);
-   of the part of it on screen, when it is taller than the screen (phones: the card starts under the close button) */
+/* while the calendar is not there yet: the «signal» loader of Generative Loaders (generative-loaders 0.1.1,
+   InlineLoader variant="signal" size={24}; MIT, © 2026 Kasturi Khanke and contributors), as plain CSS: five bars in
+   a 24px square that rise and fall one after another, in the colour of the text (Tim, Oct 23: in place of the three
+   dots). In the middle of the white card, or of the part of it on screen when it is taller than the screen (phones:
+   the card starts under the close button). Reduce motion: the bars stand still, half high. */
 .book__wait {
   position: absolute; inset: 0 0 auto; z-index: 1;
-  display: flex; justify-content: center; align-items: center; gap: 8px;
+  display: grid; place-items: center;
   height: min(var(--h, var(--h0)) - var(--top) - var(--bottom), 100svh - 48px - 3 * var(--inset));
   pointer-events: none;
+  color: var(--ink);
   transition: opacity 0.2s var(--ease-out);
-  & i { width: 8px; height: 8px; border-radius: var(--round); background: var(--purple); animation: book-wait 1.2s ease-in-out infinite both; }
-  & i:nth-child(2) { animation-delay: 0.15s; }
-  & i:nth-child(3) { animation-delay: 0.3s; }
-  @media (--calm) { & i { animation: none; opacity: 0.6; } }
+  & span { display: flex; align-items: center; justify-content: space-between; width: 24px; height: calc(24px * 0.76); }
+  & i {
+    width: 12%; height: 30%; border-radius: var(--round); background: currentColor;
+    animation: book-wait 1.2s ease-in-out infinite;
+  }
+  & i:nth-child(2) { animation-delay: -0.12s; }
+  & i:nth-child(3) { animation-delay: -0.24s; }
+  & i:nth-child(4) { animation-delay: -0.36s; }
+  & i:nth-child(5) { animation-delay: -0.48s; }
+  @media (--calm) { & i { animation: none; height: 60%; opacity: 0.6; } }
 }
 .book.is-ready .book__wait, .book.is-failed .book__wait { opacity: 0; }
-@keyframes book-wait { 0%, 80%, 100% { opacity: 0.25; scale: 0.8; } 40% { opacity: 1; scale: 1; } }
+@keyframes book-wait { 0%, 100% { height: 25%; opacity: 0.28; } 50% { height: 100%; opacity: 1; } }
 
 /* the calendar did not come (no network, Planerka down, a blocker): the page of Planerka itself, in a new tab. Where
    the dots were, in the middle of the white card (Tim, Oct 22): the sentence, and the link on a line of its own */
