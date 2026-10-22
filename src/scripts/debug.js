@@ -22,7 +22,9 @@ export function capDebug(touch) {
       "cap: " + (r ? Math.round(r.top) + "…" + Math.round(r.bottom) + " (should end at 1)" : "none"),
       "can scroll: " + (document.documentElement.scrollHeight - document.documentElement.clientHeight) + "   cap travel: " + (cap ? cap.style.getPropertyValue("--cap-max") : "none"),
       "correction: " + (cap ? cap.style.translate || "0" : "none") + "   height: " + (cap ? cap.style.height : "none"),
-      "in an app: " + !!(window.webkit && window.webkit.messageHandlers) + "   bounce off: " + (document.documentElement.style.overscrollBehaviorY === "none")
+      "in an app: " + !!(window.webkit && window.webkit.messageHandlers) + "   Safari/ in UA: " + /Safari\//.test(navigator.userAgent)
+        + "   bounce off: " + (document.documentElement.style.overscrollBehaviorY === "none"),
+      navigator.userAgent.replace(/^Mozilla\/5\.0 /, "").slice(0, 90)
     ].join("\n");
   };
   setTimeout(show, 0);

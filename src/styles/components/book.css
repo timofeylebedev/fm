@@ -117,6 +117,8 @@ html.book-open { overflow: hidden; }
 }
 .book.is-ready.is-still .book__card::before { opacity: 0; }
 .book.is-failed .book__card::before { opacity: 1; transition: none; }
+/* nothing to see: as tall as --h0, so book.js can read that height in px (it believes taller calendars only slowly) */
+.book__h0 { position: absolute; top: 0; left: 0; width: 0; height: var(--h0); visibility: hidden; pointer-events: none; }
 .book__frame {
   position: absolute; left: calc(-1 * var(--side)); top: calc(-1 * var(--top));
   display: block; width: var(--frame); height: var(--h, var(--h0));

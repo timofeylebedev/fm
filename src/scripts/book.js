@@ -43,6 +43,7 @@ const BOOK = {
   silent: 4000,          // ms: a frame loaded but silent this long is not the calendar (an error page)
   wait: 12000,           // ms: no calendar this long after the window opened → offer Planerka's page in a new tab
   grow: 300,             // ms: once settled, a taller calendar is believed only after it has stayed so this long (see setHeight)
+  trust: 1500,           // ms: taller than this month's calendar should be, before the visitor has used it: believed after this long
   hash: "#demo"
 };
 const ORIGIN = new URL(BOOK.url).origin;
@@ -54,6 +55,7 @@ const narrow = matchMedia("(max-width: 47.999em)");     // --phone of media.css:
 let dlg, box, card, frame, fail;
 let ready = false, failed = false, heard = false, isOpen = false, opened = false, warmedAt = 0, from = null;
 let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, growTimer = 0, firstHeight = 0, shown = 0, byKeys = false;
+let used = false, probe;   // the visitor has used the calendar (the focus went into its frame); probe: an element --h0 tall
 // the history: the step the window added (and how long the history was then), and a Back of ours on its way
 let pushedAt = 0, backing = false, pushAfterBack = false;
 const messages = [];
@@ -79,6 +81,7 @@ function build() {
       '<div class="book__top"><button class="book__close" type="button" aria-label="Закрыть"><i></i><i></i></button></div>' +
       '<div class="book__card">' +
         '<div class="book__wait" aria-hidden="true"><i></i><i></i><i></i></div>' +
+        '<i class="book__h0" aria-hidden="true"></i>' +
         '<p class="book__fail" hidden>Календарь не загрузился. ' +
           `<a href="${address(PAGE)}" target="_blank" rel="noopener">Открыть запись на сайте Планёрки</a></p>` +
       "</div>" +
@@ -87,6 +90,7 @@ function build() {
   box = dlg.querySelector(".book__box");
   card = dlg.querySelector(".book__card");
   fail = dlg.querySelector(".book__fail");
+  probe = dlg.querySelector(".book__h0");
   document.body.appendChild(dlg);
 
   dlg.querySelector(".book__close").addEventListener("click", () => close());
@@ -114,6 +118,8 @@ function warm(reason) {
   frame.title = "Календарь записи на демо (Планёрка)";
   frame.setAttribute("scrolling", "no");                 // as tall as its content: the window scrolls, not the frame
   frame.addEventListener("load", onLoad);
+  // a click or a tap in the calendar (or Tab into it) takes the focus into the frame: the page loses it
+  addEventListener("blur", () => setTimeout(() => { if (document.activeElement === frame) used = true; }));
   frame.src = address(PAGE, BOOK.look);
   card.prepend(frame);
   warmedAt = Date.now();
@@ -154,12 +160,22 @@ function weeks(d = new Date()) {
 
 // the height of the calendar's page: the frame is that tall, the crop that less the page above the card. Once it has
 // settled, at once, not eased: the calendar's own card has already changed, and a crop catching up with it would trail
-// behind it (book.css eases it only while the calendar fills in). But a taller page is believed only once it has stayed
-// so for a moment (BOOK.grow): when its days arrive, Planerka draws the next month under this one for a frame or two
-// and reports that height (Tim's video, Oct 22); the crop keeps its height meanwhile, so that never shows.
+// behind it (book.css eases it only while the calendar fills in). But a taller page is not always believed at once:
+//   · taller than this month's calendar should be (--h0, book.css), before the visitor has used it: only once it has
+//     stayed so for BOOK.trust. Nothing the visitor has not done makes the calendar grow past that, yet Planerka
+//     reports such heights for a moment while it fills in: about 220px more for about a second when the times of the
+//     first free day slide in (Tim's video «planerka-jump 2», Oct 22: the card grew past the bottom of the screen and
+//     snapped back), and the next month drawn under this one for a frame or two (Tim's video, Oct 22);
+//   · any taller page once settled: only once it has stayed so for BOOK.grow (the same next month, later);
+//   · after the visitor has used the calendar (a time chosen, the form opened), BOOK.grow: it does grow then.
+// The crop keeps its height meanwhile, so the moments that are not believed never show. A shorter page: at once.
 function setHeight(h) {
   clearTimeout(growTimer);
-  if (dlg.classList.contains("is-still") && h > shown) growTimer = setTimeout(() => crop(h), BOOK.grow);
+  const h0 = (probe && probe.offsetHeight) || Infinity;
+  const wait = h <= shown ? 0
+    : h > Math.max(shown, h0) && !used ? BOOK.trust
+    : dlg.classList.contains("is-still") || h > Math.max(shown, h0) ? BOOK.grow : 0;
+  if (wait) growTimer = setTimeout(() => crop(h), wait);
   else crop(h);
   // the white card under it stays until its height has not changed for a second: while the calendar fills in (days,
   // then times) it follows its height smoothly (book.css, .is-still)
@@ -306,7 +322,7 @@ function initWarm() {  // runs once the visitor has agreed to the cookies (initB
   // page, so the history gets no step of its own)
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible" || !frame || opened || Date.now() - warmedAt < BOOK.stale) return;
-    ready = false; failed = false; heard = false; firstHeight = 0;
+    ready = false; failed = false; heard = false; firstHeight = 0; used = false;
     dlg.classList.remove("is-ready", "is-failed", "is-still");
     warmedAt = Date.now();
     try { frame.contentWindow.location.replace(address(PAGE, BOOK.look)); } catch {}
@@ -336,7 +352,7 @@ export function initBook() {
   // without <dialog> (Safari before 15.4) the buttons stay links to the page of Planerka, in a new tab
   if (!links.length || !(window.HTMLDialogElement && HTMLDialogElement.prototype.showModal)) return;
   window.fmBook = { BOOK, messages, warm: () => warm("console"), open: () => open(), close: () => close(),
-    get state() { return { warmed: !!frame, ready, failed, open: isOpen, height: frame && frame.offsetHeight }; } };
+    get state() { return { warmed: !!frame, ready, failed, open: isOpen, used, height: frame && frame.offsetHeight, shown, h0: probe && probe.offsetHeight }; } };
 
   // the links themselves, for a new tab: with the UTM tags of this page
   links.forEach((a) => { a.href = address(PAGE); });

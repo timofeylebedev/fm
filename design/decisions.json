@@ -217,6 +217,13 @@
       "what": "The tools and the publications have more air than the other sections: --section-air-l (56 → 112px) above and below their content and from their headings to their cards, the same as under the CTA card (which had section-y × 1.4, the same numbers). The gap from the publications to «Показать больше» stays --section-gap",
       "decided": "Tim, 2026-10-20 — top and bottom paddings 112 at most (as under the CTA card), the heading gap 112 too, the button's gap unchanged",
       "why": "the two sections after the CTA read as a calmer, more spacious end of the page"
+    },
+    {
+      "id": "safari-bottom-bar",
+      "kind": "decision",
+      "what": "Safari's bottom bar on iPhone takes no colour from the page: a strip fixed over the bottom edge (.bar-guard, base.css; iOS only) with a backdrop filter that changes nothing to the eye, so Safari treats the edge as glass. Before, the bar turned the colour of the stack's cards and kept it after the stack (WebKit hit-tests the bottom edge ignoring clipping, so the last card hidden by the stack's overflow still counted)",
+      "decided": "Tim, 2026-10-22 — «i don't want it to have any color»",
+      "why": "the green of «Финансы» stayed in the bar over the sections after the stack; WebKit LocalFrameView::fixedContainerEdges: a fixed or sticky container with a backdrop filter at the edge gives the bar no colour of its own"
     }
   ]
 }
