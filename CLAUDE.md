@@ -69,7 +69,8 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   only the «ОК» of the cookie notice is consent. Raise `VERSION` in consent.js when the purposes change.
 - **Icons:** `<svg data-icon="name">` in the HTML is replaced with `src/assets/icons/name.svg` at build time.
 - Console tuning objects for trying values live: `fmMotion`, `fmHero`, `fmCards`, `fmStipple`, `fmRoyalty`, `fmPace`,
-  `fmDeck`, `fmAnchor`, `fmCookies`, `fmConsent`. Debug: `?fmcards=debug`, `?fmcap=debug`.
+  `fmDeck`, `fmAnchor`, `fmCookies`, `fmConsent`. Debug: `?fmcards=debug`, `?fmcap=debug`, `?fmhero=debug` (every change of the hero's layout in its first 5 s:
+  `fmHero.log`).
 - **The ring of covers** (`scripts/ring.js` + `scripts/ring-gl.js`): one WebGL canvas, drawn only on a real GPU. In a
   browser without one (headless Chromium here, CI) it is a still 2D picture; add `?fmring=gl` to test the WebGL path
   there. `document.querySelector(".ring").roundCarousel` has `config`, `state()` (with `draws`, `webgl`) and `update()`.

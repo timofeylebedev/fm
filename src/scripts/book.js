@@ -42,6 +42,7 @@ const BOOK = {
   stale: 20 * 60e3,      // ms: a calendar older than this, never opened, is loaded again when the tab comes back
   silent: 4000,          // ms: a frame loaded but silent this long is not the calendar (an error page)
   wait: 12000,           // ms: no calendar this long after the window opened → offer Planerka's page in a new tab
+  grow: 300,             // ms: once settled, a taller calendar is believed only after it has stayed so this long (see setHeight)
   hash: "#demo"
 };
 const ORIGIN = new URL(BOOK.url).origin;
@@ -52,7 +53,7 @@ const narrow = matchMedia("(max-width: 47.999em)");     // --phone of media.css:
 
 let dlg, box, card, frame, fail;
 let ready = false, failed = false, heard = false, isOpen = false, opened = false, warmedAt = 0, from = null;
-let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, firstHeight = 0, byKeys = false;
+let waitTimer = 0, silentTimer = 0, settleTimer = 0, stillTimer = 0, growTimer = 0, firstHeight = 0, shown = 0, byKeys = false;
 // the history: the step the window added (and how long the history was then), and a Back of ours on its way
 let pushedAt = 0, backing = false, pushAfterBack = false;
 const messages = [];
@@ -82,6 +83,7 @@ function build() {
           `<a href="${address(PAGE)}" target="_blank" rel="noopener">Открыть запись на сайте Планёрки</a></p>` +
       "</div>" +
     "</div>";
+  dlg.style.setProperty("--rows", weeks());              // the height it will have (book.css: --h0)
   box = dlg.querySelector(".book__box");
   card = dlg.querySelector(".book__card");
   fail = dlg.querySelector(".book__fail");
@@ -143,12 +145,24 @@ function setFailed() {
   dlg.classList.add("is-failed");
 }
 
-// the height of the calendar's page: the frame is that tall, the crop that less the page above the card. At once, not
-// eased: the calendar's own card has already changed, and a crop catching up with it would trail behind it.
+// the rows of days the calendar opens with: the weeks of this month (Monday first), 4 to 6
+function weeks(d = new Date()) {
+  const first = (new Date(d.getFullYear(), d.getMonth(), 1).getDay() + 6) % 7;
+  const days = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  return Math.ceil((first + days) / 7);
+}
+
+// the height of the calendar's page: the frame is that tall, the crop that less the page above the card. Once it has
+// settled, at once, not eased: the calendar's own card has already changed, and a crop catching up with it would trail
+// behind it (book.css eases it only while the calendar fills in). But a taller page is believed only once it has stayed
+// so for a moment (BOOK.grow): when its days arrive, Planerka draws the next month under this one for a frame or two
+// and reports that height (Tim's video, Oct 22); the crop keeps its height meanwhile, so that never shows.
 function setHeight(h) {
-  card.style.setProperty("--h", h + "px");
-  // the white card of the final size under it stays until its height has not changed for a second: while it fills in
-  // (days, then times) its outline does not move (book.css, .is-still)
+  clearTimeout(growTimer);
+  if (dlg.classList.contains("is-still") && h > shown) growTimer = setTimeout(() => crop(h), BOOK.grow);
+  else crop(h);
+  // the white card under it stays until its height has not changed for a second: while the calendar fills in (days,
+  // then times) it follows its height smoothly (book.css, .is-still)
   if (!dlg.classList.contains("is-still")) {
     clearTimeout(stillTimer);
     stillTimer = setTimeout(() => dlg.classList.add("is-still"), 1000);
@@ -160,6 +174,11 @@ function setHeight(h) {
   if (!firstHeight) firstHeight = now;
   clearTimeout(settleTimer);
   settleTimer = setTimeout(() => setReady(), now - firstHeight > 1500 ? 0 : 250);
+}
+
+function crop(h) {
+  shown = h;
+  card.style.setProperty("--h", h + "px");
 }
 
 addEventListener("message", (e) => {
