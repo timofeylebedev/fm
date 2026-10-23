@@ -34,8 +34,13 @@ const RASTER = [
   { src: "youtube.png", widths: [64], formats: ["webp"], lossless: true },
   // the strip of 12 icons of the hero chips
   { src: "hero-chips.webp", widths: [1152], formats: ["webp"] },
-  // the covers of the ring (shown at about 300 CSS px at most)
-  ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({ src: `cover-${i}.webp`, widths: [640], formats: ["webp"] })),
+  // the covers of the ring (shown at about 300 CSS px at most; the ring's texture is 640 at most). Each cover at the
+  // lowest setting whose SSIMULACRA2 against the 640 px original is 90 or more (no visible loss at 1:1), measured
+  // Oct 23, 2026. AVIF first; the WebP is for browsers without AVIF. First steps is flat colour: near-lossless WebP is
+  // smaller than any AVIF that keeps its letters (14 KB at 92.8 against 31 KB at 91.3), so it has no AVIF.
+  ...Object.entries({ "home": 88, "last-seen": 91, "reminiscence": 58, "love": 75, "rebirth": 87, "m": 64, "lazy-friday": 63 })
+    .map(([n, q]) => ({ src: `cover-${n}.png`, widths: [640], formats: ["avif", "webp"], options: { avif: { quality: q } } })),
+  { src: "cover-first-steps.png", widths: [640], formats: ["webp"], options: { webp: { nearLossless: true, quality: 40 } } },
   // pictures used inside the drawings (art/*.js), at the size they are drawn at 2×
   ...["card-cap", "card-concert", "card-home", "card-hoodie", "card-video", "face-anna", "face-elvira", "face-mark",
       "face-petr", "thumb-home", "thumb-lastseen", "cube", "cube-bg"].map((n) => ({ src: `art-${n}.png`, widths: [null], formats: ["webp"], quality: 88 })),
@@ -80,7 +85,7 @@ for (const job of RASTER) {
       const file = job.widths.length > 1 ? `${name}-${width}.${format}` : `${name}.${format}`;
       const out = join(OUT, file);
       if (await newer(out, src)) { skipped++; continue; }
-      const options = job.lossless ? { lossless: true, effort: 6 } : Object.assign({}, QUALITY[format], job.quality ? { quality: job.quality } : {});
+      const options = job.lossless ? { lossless: true, effort: 6 } : Object.assign({}, QUALITY[format], job.quality ? { quality: job.quality } : {}, job.options?.[format]);
       const data = await sharp(src).resize({ width, withoutEnlargement: true })[format](options).toBuffer();
       await write(out, data, src);
     }
