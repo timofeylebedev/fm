@@ -93,13 +93,15 @@ function rgbOf(css, host) {
 }
 const css = (rgb) => "rgb(" + rgb.map((v) => Math.round(v * 255)).join() + ")";
 
-const loadImage = (src) => new Promise((done) => {
+const loadOne = (src) => new Promise((done) => {
   const img = new Image();
   img.decoding = "async";
   img.onload = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(() => done(img));
   img.onerror = () => done(null);
   img.src = src;
 });
+// a cover is a file or a list of files to try in turn (an AVIF, then a WebP for browsers without AVIF)
+const loadImage = (src) => [].concat(src).reduce((got, s) => got.then((img) => img || loadOne(s)), Promise.resolve(null));
 
 // onDirty: the picture changed by itself (a cover arrived, the GPU came back): ring.js draws it again
 export function createRingView(root, c, onDirty) {

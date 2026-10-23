@@ -4,7 +4,7 @@
 
    This file decides where the ring stands and how it turns; scripts/ring-gl.js draws it on one canvas with WebGL (see
    the comment there). The block gets its height at once, from the maths below, so the page never moves; the drawing
-   code (about 3 KB) and the covers (about 200 KB) are downloaded only when the block comes within one screen of the
+   code (about 3 KB) and the covers (about 370 KB) are downloaded only when the block comes within one screen of the
    visible part of the page. While the block is on screen, a frame costs two numbers sent to the GPU and one draw;
    off screen nothing runs.
 
@@ -17,10 +17,12 @@ import { ioRoot } from "./scroller.js";
 import { pace } from "./pace.js";
 import { calm } from "./motion.js";
 
-const covers = import.meta.glob("../assets/img/cover-*.webp", { eager: true, query: "?url", import: "default" });
+const covers = import.meta.glob("../assets/img/cover-*.{avif,webp}", { eager: true, query: "?url", import: "default" });
 
-// ── the covers, in the order they stand on the ring (3 or more; the files are src/assets/img/cover-*.webp) ──
-const IMAGES = [7, 8, 1, 2, 3, 4, 5, 6].map((n) => covers["../assets/img/cover-" + n + ".webp"]);
+// ── the covers, in the order they stand on the ring (3 or more; the files are src/assets/img/cover-*): each one the
+//    files to try in turn, the AVIF first where there is one (build/images.mjs) ──
+const IMAGES = ["m", "lazy-friday", "home", "last-seen", "reminiscence", "love", "rebirth", "first-steps"]
+  .map((n) => ["avif", "webp"].map((f) => covers[`../assets/img/cover-${n}.${f}`]).filter(Boolean));
 
 // ── settings (same names as in the tuner) ──
 /* CONFIG:START */
