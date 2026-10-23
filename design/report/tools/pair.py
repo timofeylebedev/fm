@@ -1,5 +1,7 @@
 # before/after pairs at a scroll state: python3 pair.py out.jpg W H mob dpr "<js returning scrollY>" [crop x,y,w,h] [wait_ms] [hide_css]
-import asyncio, sys, io, glob
+import asyncio, sys, io, glob, os
+# round 5: FM_PAIR="Round 4|Now" sets the two labels; the stable scrollbar gutter (book.css) is switched off in both, as on phones
+L0, L1 = os.environ.get("FM_PAIR", "Before|After").split("|")
 from PIL import Image, ImageDraw, ImageFont
 from playwright.async_api import async_playwright
 from lib import CH, ARGS, warm
@@ -10,7 +12,7 @@ FONT = (glob.glob('/usr/share/fonts/truetype/google-fonts/Inter*') + glob.glob('
 async def shot(p,url):
     b = await p.chromium.launch(executable_path=CH, args=ARGS)
     ctx = await b.new_context(viewport={"width":W,"height":H}, device_scale_factor=D, is_mobile=mob, has_touch=mob, bypass_csp=True)
-    pg = await ctx.new_page(); await pg.goto(url); await pg.wait_for_timeout(900); await warm(pg)
+    pg = await ctx.new_page(); await pg.goto(url); await pg.add_style_tag(content="html{scrollbar-gutter:auto!important}"); await pg.wait_for_timeout(900); await warm(pg)
     y = await pg.evaluate(js)
     if y is not None:
         # come from a little above, so whatever follows the direction of the scroll sees "down"
@@ -26,7 +28,7 @@ async def main():
     # each side at most 490 wide and 560 tall
     k = min(490/a.width, 560/a.height); a=a.resize((int(a.width*k),int(a.height*k))); b=b.resize(a.size)
     G = Image.new("RGB",(a.width*2+30, a.height+40),"#141414"); d=ImageDraw.Draw(G); f=ImageFont.truetype(FONT,17)
-    d.text((10,10),"Before",fill="#8a8a8a",font=f); d.text((a.width+20,10),"After",fill="#38bdf8",font=f)
+    d.text((10,10),L0,fill="#8a8a8a",font=f); d.text((a.width+20,10),L1,fill="#38bdf8",font=f)
     G.paste(a,(10,34)); G.paste(b,(a.width+20,34))
     G.save(out, quality=82); print(out, G.size)
 asyncio.run(main())

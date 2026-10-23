@@ -36,8 +36,8 @@ B.pre = (b) => el('details', '', `<summary>${esc(b.summary || 'Output')}</summar
 B.grid = (b) => { const g = el('div', b.cols === 2 ? 'grid2 two' : 'grid2'); b.blocks.forEach((x) => g.appendChild(render(x))); return g; };
 B.box = (b) => { const box = el('div', 'box'); if (b.title) box.appendChild(el('h3', '', b.title)); if (b.html) box.appendChild(el('div', 'prose', b.html)); (b.blocks || []).forEach((x) => box.appendChild(render(x))); return box; };
 B.cards = (b) => el('div', b.cols === 2 ? 'grid2 two' : 'grid2', b.items.map((g) => `<div class="box"><h3>${esc(g.title)}</h3><p>${g.html || ''}</p></div>`).join(''));
-B.rules = (b) => el('div', 'rules', b.items.map((r) => `<div class="rule"><span class="${r.ok ? 'ok' : 'no'}">${r.ok ? '✓' : '✗'}</span><div><b>${esc(r.title)}</b><p>${esc(r.how || '')}</p></div><span class="n">${r.n != null ? r.n + ' checked' : ''}</span></div>`).join(''));
-const PILL = { done: 'done', good: 'done', checked: 'done', differently: 'x', written: 'x', new: 'x', decision: 'x', check: 'q', open: 'q', implicit: 'q', exception: 'q', answered: 'x', bad: 'bad', failed: 'bad' };
+B.rules = (b) => el('div', 'rules', b.items.map((r) => `<div class="rule"><span class="${r.ok ? 'ok' : 'no'}">${r.ok ? '✓' : '✗'}</span><div><b>${esc(r.title)}</b><p>${esc(r.how || '')}</p></div><span class="n">${r.n != null ? r.n + ' ' + (r.unit || 'checked') : ''}</span></div>`).join(''));
+const PILL = { major: 'bad', moderate: 'q', minor: 'x', note: 'x', confirmed: 'done', refuted: 'x', adjusted: 'q', done: 'done', good: 'done', checked: 'done', differently: 'x', written: 'x', new: 'x', decision: 'x', check: 'q', open: 'q', implicit: 'q', exception: 'q', answered: 'x', bad: 'bad', failed: 'bad' };
 const pill = (t) => t ? `<span class="pill ${PILL[t] || 'q'}">${esc(t)}</span>` : '';
 B.table = (b) => {
   const t = el('div', 'tbl');

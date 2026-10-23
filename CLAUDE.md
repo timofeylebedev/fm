@@ -41,7 +41,11 @@ npm run tokens        # design/scale.json + tokens.json -> src/styles/base/token
 npm run tokens:sync   # three-way merge with a fresh Figma export (design/README.md)
 npm run images        # assets-src/img -> src/assets/img (AVIF/WebP; commit the outputs)
 npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotli)
+node design/report/tools/rules.mjs   # the system's rules as one check (a prototype, not in CI)
 ```
+
+The review page of the whole system (sizes, layouts, motion, checks, every round) is built from `design/report/`
+(its README has the link and the build); every round updates it in full, the new round first.
 
 ## Rules in the code
 
