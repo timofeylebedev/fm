@@ -137,6 +137,13 @@
   margin-bottom: calc(var(--stack-ph) - var(--stack-a));     /* the section after the stack comes up under the last card */
   @media (--sideways) { --stack-nav: var(--stack-gap); }
 }
+/* The sections after the stack come up over the last card, which stays whole under them while it gives room: they are
+   drawn above the stack (positioned, later on the page) in the page's colour, every one of them, not only the next (a
+   section shorter than a card would let the card show below it). Without a specificity of its own (:where), so a
+   section with its own background (the tools' grey) or position keeps it. In the styles, not set by the script from
+   what it read: Safari can run the script before the stylesheet has come, and the colour it read then was transparent
+   (Tim's screenshots, Oct 2026: the green card under the royalty section). */
+:where(.stack.stack-on ~ *) { position: relative; background-color: var(--paper); }
 /* the stage is hidden itself (Safari would colour its bars after it), the cards are visible again */
 .stack-on .stack__stage {
   --stack-w: calc(min(100%, 1920px) + 2px);

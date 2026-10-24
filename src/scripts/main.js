@@ -17,8 +17,15 @@ import { hasConsent } from "./consent.js";
 import { initBook } from "./book.js";
 import { initPubs } from "./pubs.js";
 
+// Safari may run this script before the page's stylesheet has come (WebKit bug 261655: a module script does not always
+// wait for it, more often with a warm cache). Everything measured then is wrong, and what is measured once stays wrong:
+// the card stack read the page's colour as transparent and lost its strips (Tim's screenshots, Oct 2026). So nothing
+// starts until every stylesheet of the page is in (one that fails to load does not hold the page up).
+await Promise.all([...document.querySelectorAll('link[rel="stylesheet"]')].filter((link) => !link.sheet).map((link) =>
+  new Promise((done) => { link.addEventListener("load", done, { once: true }); link.addEventListener("error", done, { once: true }); })));
+
 const root = document.documentElement;
-root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
+root.classList.add("motion");                   // the main script runs: the safety net of motion.css is off
 
 // Safari on a Mac, where the page scrolls in its own box (scroller.js): the keys that scroll (space, the arrows, Page
 // Down…) scroll what holds the focus, and at first nothing does. The box takes the focus (not drawn, base.css), so they

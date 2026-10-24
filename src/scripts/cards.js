@@ -38,7 +38,6 @@
    To try values in the console: fmCards.settings.step = 0.5, then fmCards.update(). ?fmcards=debug shows what the
    script measures (see debug.js). */
 import { gsap, ScrollTrigger, SplitText, refreshSoon } from "./gsap.js";
-import { paper } from "./scroller.js";
 import { M, calm, tidy, cue } from "./motion.js";
 
 const SET = {
@@ -92,18 +91,7 @@ export function initCards() {
   });
   if (!cards.length) return;
   stage.appendChild(div("stack__collar stack__collar-end"));
-  section.classList.add("stack-on");
-  // the colour of the page (the strips are painted in it); the section after the stack comes up over the last card,
-  // which stays whole under it: it needs a background of its own, and must be drawn above the section of the cards
-  const page = paper() || "#fff";
-  section.style.setProperty("--stack-page", page);
-  // every section after the stack, not only the next one: the last card stays whole under them while it gives room,
-  // so a section shorter than a card (two royalty cards side by side, say) would let the card show below it
-  for (let after = section.nextElementSibling; after; after = after.nextElementSibling) {
-    const b = getComputedStyle(after).backgroundColor;
-    if (!b || b === "transparent" || /rgba\(.*,\s*0\)$/.test(b)) after.style.backgroundColor = page;
-    if (getComputedStyle(after).position === "static") after.style.position = "relative";
-  }
+  section.classList.add("stack-on");               // the strips in the page's colour and the sections after the stack: stack.css
   // the scroll of one step (stack.css uses it for the slots' heights)
   const setStep = () => section.style.setProperty("--stack-step", SET.step);
   setStep();
