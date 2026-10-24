@@ -15,6 +15,7 @@
       "type/hero":         { "px": [36, 60], "use": "the hero title (60 at most: Tim, Oct 22)" },
       "type/h2":           { "px": [28, 52], "use": "section headings, the CTA title, the titles of the card stack" },
       "type/card-heading": { "px": [24, 32], "use": "titles of cards: tools, publications, royalty; the 404 title" },
+      "type/doc-title":    { "px": [40, 40], "use": "the title of the legal documents (40 everywhere: Tim, Oct 24)" },
       "type/lead":         { "px": [16, 20], "use": "the text under the hero and the CTA titles" },
       "type/card-tag":     { "px": [14, 18], "label": true, "use": "the labels of the card stack: a label, set apart by uppercase, weight and its pill, not by size" },
       "type/body-m":       { "px": [16, 18], "use": "the text of the tool cards" },
