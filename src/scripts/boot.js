@@ -5,14 +5,7 @@
   // the page has scripts: what comes in on scroll starts hidden (see motion.css)
   root.classList.add("js");
 
-  /* ── Safari on a Mac: the page scrolls in its own box (scroller.js says why) ──
-     Safari 26 and later (Version/26…), on a Mac (no touch: an iPad says "Macintosh" too, but has touch points), and not
-     another browser that names Safari in its address (Chrome, Edge, Firefox, Opera). ?fmbox=1 / ?fmbox=0 force it. */
-  var force = /[?&]fmbox=([01])/.exec(location.search);
-  var ua = navigator.userAgent, ver = /Version\/(\d+)[\d.]* (Mobile\/\S+ )?Safari\//.exec(ua);
-  var macSafari = /Macintosh/.test(ua) && !navigator.maxTouchPoints && !!ver && +ver[1] >= 26
-    && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Firefox/.test(ua);
-  if (force ? force[1] === "1" : macSafari) root.classList.add("boxed");
+  // Safari on a Mac: the page scrolls in its own box (box.js, which runs before this, gives <html> the class)
   // what scrolls: the page's box once it is there (the body is read later than this script), else the window
   var scroller = function () { return (root.classList.contains("boxed") && document.querySelector("[data-page]")) || null; };
   var scrollY_ = function () { var b = scroller(); return b ? b.scrollTop : scrollY; };

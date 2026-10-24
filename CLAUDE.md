@@ -46,7 +46,7 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
 ## Rules in the code
 
 - **Scrolling:** never read `window.scrollY` or listen to the window's `scroll` in new code. Use
-  `src/scripts/scroller.js` (`y()`, `to()`, `max()`, `onScroll()`, `watchSize()`, `ioRoot`). In Safari on a Mac
+  `src/scripts/scroller.js` (`y()`, `to()`, `max()`, `onScroll()`, `watchSize()`, `ioRoot`). In Safari on a Mac (every page: `scripts/box.js`, inlined in each `<head>`)
   the page scrolls inside its own box (`html.boxed`, `.page`) so Safari's bar stays solid; `?fmbox=1` / `?fmbox=0`
   turns the box on or off in any browser. See the comment at the top of scroller.js.
   On iPhone, Safari's bottom bar takes the background of anything fixed or sticky at the bottom edge (even clipped);

@@ -172,7 +172,7 @@
     {
       "id": "safari-box",
       "kind": "decision",
-      "what": "In Safari 26+ on a Mac the page scrolls in its own box (.page, position fixed, inset 0) instead of the window; everywhere else the window scrolls as before. boot.js gives <html> the class boxed; scroller.js is what every script asks about scrolling; GSAP's ScrollTrigger watches the box (gsap.js), and the logos are held there by position: sticky instead of GSAP's pin. ?fmbox=1 / ?fmbox=0 force it on or off",
+      "what": "In Safari 26+ on a Mac the page scrolls in its own box (.page, position fixed, inset 0) instead of the window; everywhere else the window scrolls as before. box.js gives <html> the class boxed (on every page: the main one, the two legal documents and the 404 since Oct 24); scroller.js is what every script asks about scrolling; GSAP's ScrollTrigger watches the box (gsap.js), and the logos are held there by position: sticky instead of GSAP's pin. ?fmbox=1 / ?fmbox=0 force it on or off",
       "decided": "Tim, 2026-10-19 — wanted a solid Safari bar, as on YouTube and Google Docs",
       "why": "Safari 26+ on a Mac draws its bar as glass over the page and the page shows through while it scrolls. Measured in Tim's Safari on macOS 27: no light header (solid, glass, tone strips) made the bar solid in dark mode; a page whose window does not scroll did, in light and dark mode (the Google Docs way). theme-color is ignored. Checked in Chromium: the boxed page renders pixel for pixel like the normal one at 1440×900, 390×844 and 1366×650"
     },

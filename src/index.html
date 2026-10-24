@@ -29,7 +29,8 @@
   <link rel="preload" href="./assets/fonts/pragmatica-ext-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/golos-400.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- Runs before anything is drawn: reload scroll restore, steady screen height on phones, hero fade-in. See scripts/boot.js -->
+  <!-- Run before anything is drawn: Safari on a Mac scrolls the page in its own box (scripts/box.js); reload scroll restore, steady screen height on phones, hero fade-in. See scripts/boot.js -->
+  <script data-inline src="./scripts/box.js"></script>
   <script data-inline src="./scripts/boot.js"></script>
 
   <link rel="stylesheet" href="./styles/main.css">

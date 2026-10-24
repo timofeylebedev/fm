@@ -9,9 +9,12 @@
   <title>Страница не найдена — Flow Medium</title>
   <meta name="robots" content="noindex">
   <link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+  <script data-inline src="./scripts/box.js"></script>
   <link rel="stylesheet" href="./styles/404.css">
 </head>
 <body>
+<!-- In Safari on a Mac the page is in its own box, as on the main page (scripts/box.js, base.css) -->
+<div class="page" data-page>
   <header class="lost-nav">
     <a href="./" aria-label="Flow Medium, на главную"><svg data-icon="logo" class="lost-nav__logo"></svg></a>
   </header>
@@ -19,5 +22,6 @@
     <h1 class="lost__title">Страница не найдена</h1>
     <a class="lost__home" href="./">На главную<svg class="lost__arrow" viewBox="0 0 8 20" aria-hidden="true"><path d="M1 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </main>
+</div>
 </body>
 </html>
