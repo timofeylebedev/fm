@@ -99,15 +99,20 @@ export default {
       [153.95, 687.98, "M19.64 1.2C-52.35 1.2 109.65 173.2 109.65 101.2", true],          // bottom left: from the bottom edge up to the left edge
       [735.2, 687.98, "M91.2 1.2C163.2 1.2 1.2 173.2 1.2 101.2", false]                   // bottom right: from the right edge down to the bottom edge
     ];
-    // animation: light runs along the lines: they are white, turn light orange and come back.
+    // animation: white crests of light run along the lines; between two crests a line is light orange.
     // A line cannot have a colour that changes along its length, so every line is cut into short pieces;
-    // each piece goes white → light orange → white, a little later than the piece nearer to where the light starts.
+    // each piece goes light orange → white → light orange, a little later than the piece nearer to where the light starts.
     // All the pieces are drawn on one canvas. (As ~300 separately animated SVG lines they kept phones busy on every frame.)
+    // The crests have a soft white glow: the same pieces drawn again, wider and only near the crest, on a second canvas
+    // that the styles blur (.fm-glow). The numbers were tuned by Tim in a preview (Oct 24).
     const PIECE = 9.12;      // length of a piece, px
-    const WAVE = 364.8;      // distance between two white crests, px
-    const PERIOD = 2.6;      // seconds for a crest to travel that distance
-    const FROM = [255, 255, 255], TO = [248, 153, 77];   // white, and the colour at the dimmest point: #F8994D (what 30% white looks like on the orange of the card)
-    // the "ease-in-out" curve of CSS, so the colour changes exactly as it did when the styles animated it
+    const WAVE = 400;        // distance between two white crests, px
+    const PERIOD = 2;        // seconds for a crest to travel that distance
+    const CREST = 0.5;       // the part of the wave that is lit; the rest of it stays light orange
+    const TO = [247, 139, 51];   // the colour between crests: #F78B33 (what 20% white looks like on the orange of the card)
+    const WIDTH = 2;         // width of the lines, px
+    const GLOW = { width: 4, strength: 0.63, focus: 8 };   // the glow: stroke width (px), opacity on the crest, and how fast it falls off around the crest (a power)
+    // the "ease-in-out" curve of CSS: how the colour changes from a crest to the light orange
     const easeInOut = (x) => {
       let lo = 0, hi = 1;
       for (let i = 0; i < 20; i++) {
@@ -117,11 +122,14 @@ export default {
       const t = (lo + hi) / 2;
       return 3 * (1 - t) * t * t + t * t * t;
     };
-    const TONES = 128;       // the colours of one full white → light orange → white change, prepared once
-    const tones = Array.from({ length: TONES }, (unused, i) => {
-      const p = (i + 0.5) / TONES, fade = easeInOut(p < 0.5 ? p * 2 : (1 - p) * 2);
-      return "rgb(" + FROM.map((c, j) => Math.round(c + (TO[j] - c) * fade)).join(",") + ")";
-    });
+    const TONES = 128;       // the colours of one wave, from a crest to the next one, prepared once (and the opacities of its glow)
+    const tones = [], glows = [];
+    for (let i = 0; i < TONES; i++) {
+      const p = (i + 0.5) / TONES, d = Math.min(p, 1 - p);           // d: how far from a crest, in waves
+      const light = d < CREST / 2 ? 1 - easeInOut(d / (CREST / 2)) : 0;
+      tones.push("rgb(" + TO.map((c) => Math.round(c + (255 - c) * light)).join(",") + ")");
+      glows.push("rgba(255,255,255," + (GLOW.strength * Math.pow(light, GLOW.focus)).toFixed(3) + ")");
+    }
     // A line cut into pieces: every piece's shape, and its length along the line from the start
     const cut = (pts) => {
       const cuts = [];
@@ -154,8 +162,8 @@ export default {
       return total;
     });
     // The outline of the documents: its light runs clockwise, from the top left corner.
-    // A closed line has no end, so its waves must fit into it a whole number of times: they are a little shorter than
-    // WAVE (7 in the outline, 347px). They take the same PERIOD, so where the top left line meets the outline
+    // A closed line has no end, so its waves must fit into it a whole number of times: they are a little shorter or longer than
+    // WAVE (6 in the outline, 404px). They take the same PERIOD, so where the top left line meets the outline
     // (on the top edge) the two keep the same colour all the time.
     const BOX = { x: 173.513, y: 210.723, w: 652.974, h: 578.554, r: 21.606 };
     const k = BOX.r * 0.5523, x0 = BOX.x, y0 = BOX.y, x1 = BOX.x + BOX.w, y1 = BOX.y + BOX.h, r = BOX.r;
@@ -167,15 +175,15 @@ export default {
     const meet = loops[6][0] + 109.65 - (x0 + r);                       // where the top left line ends, along the outline
     const shift = totals[6] / WAVE - meet / EDGE_WAVE;
     const edgePieces = edge.cuts.map(({ path, along }) => ({ path, at: along / EDGE_WAVE + shift }));
-    let canvas = null, ctx = null;
+    let canvas = null, ctx = null, glow = null, gctx = null;
+    const tone = (turn, at) => { const p = turn - at; return ((p - Math.floor(p)) * TONES) & (TONES - 1); };
     function tick(time) {
       if (!ctx) return;
       const turn = time / PERIOD;
       ctx.clearRect(0, 0, SIZE, SIZE);
       const draw = (list) => {
         for (let i = 0; i < list.length; i++) {
-          const p = turn - list[i].at;
-          ctx.strokeStyle = STILL ? "#fff" : tones[((p - Math.floor(p)) * TONES) & (TONES - 1)];   // with "reduce motion" the lines stay white
+          ctx.strokeStyle = STILL ? "#fff" : tones[tone(turn, list[i].at)];   // with "reduce motion" the lines stay white
           ctx.stroke(list[i].path);
         }
       };
@@ -186,6 +194,16 @@ export default {
       ctx.stroke(linesPath);
       ctx.globalCompositeOperation = "lighter";
       draw(pieces);
+      if (!gctx) return;                                                 // with "reduce motion" there is no glow
+      gctx.clearRect(0, 0, SIZE, SIZE);
+      const halo = (list) => {
+        for (let i = 0; i < list.length; i++) {
+          const n = tone(turn, list[i].at);
+          if (n > TONES * CREST / 2 && n < TONES * (1 - CREST / 2)) continue;   // between crests: no glow
+          gctx.strokeStyle = glows[n]; gctx.stroke(list[i].path);
+        }
+      };
+      halo(edgePieces); halo(pieces);
     }
     return { html:
       '<div style="left:173.513px;top:210.723px;width:652.974px;height:578.554px;border-radius:21.606px;background:#f56e00"></div>'
@@ -196,11 +214,16 @@ export default {
       + sheet(391.971, 210.723, "Лицензионный<br>договор<br>№ ФМ-011")
       + sheet(391.971, 501.2, "Договор об<br>отчуждении<br>исключительных<br>прав № ФЗ-102")
       + '<canvas class="fm-flow"></canvas>'                    // the lines and the outline lie over the documents and under the button
+      + (STILL ? "" : '<canvas class="fm-glow"></canvas>')      // …and their glow over them
       + '<div class="fm-cta">Оформить права</div>',
-      init(stage) { canvas = stage.querySelector(".fm-flow"); },
+      init(stage) { canvas = stage.querySelector(".fm-flow"); glow = stage.querySelector(".fm-glow"); },
       // The ends of the lines are cut straight, so they stop exactly at the edge of a document.
       // "lighter": where two pieces meet, their colours are added up exactly, so the joint shows neither a gap nor a bead.
-      resize(pixels) { ctx = stageCanvas(canvas, pixels); ctx.lineWidth = 2.4; ctx.lineCap = "butt"; ctx.globalCompositeOperation = "lighter"; },
+      // The glow is blurred anyway, so its canvas has half the pixels a side (a quarter of the memory).
+      resize(pixels) {
+        ctx = stageCanvas(canvas, pixels); ctx.lineWidth = WIDTH; ctx.lineCap = "butt"; ctx.globalCompositeOperation = "lighter";
+        if (glow) { gctx = stageCanvas(glow, Math.max(1, Math.round(pixels / 2))); gctx.lineWidth = GLOW.width; gctx.lineCap = "round"; }
+      },
       tick
     };
   }

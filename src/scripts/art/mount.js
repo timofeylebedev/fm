@@ -37,7 +37,7 @@ const keep = observe("100% 0px", (host, near) => {
 });
 function release(fm) {
   if (!fm.pixels) return;
-  fm.stage.querySelectorAll("canvas.fm-rings, canvas.fm-flow, canvas.fm-split").forEach((canvas) => { canvas.width = canvas.height = 0; });
+  fm.stage.querySelectorAll("canvas.fm-rings, canvas.fm-flow, canvas.fm-glow, canvas.fm-split").forEach((canvas) => { canvas.width = canvas.height = 0; });
   fm.pixels = 0;
 }
 // the lighter mode for weak devices (see pace.js) gives the canvases fewer pixels: size them again
