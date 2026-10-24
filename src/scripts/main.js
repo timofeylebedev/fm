@@ -36,21 +36,24 @@ window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
 const nav = document.querySelector("[data-nav]");
 initDeck();                                      // before the motion: it decides how the ID cards fall (onto a deck or into a row)
 initPubs();                                      // before the motion too: the publications past the first four wait for «Показать больше»
+// the card stack before the motion as well: it makes the page several screens taller, and the motion measures where
+// each heading and text below it is (its first card waits for the hero all the same: cue() keeps it until then)
+initCards();
 initMotion();
 if (nav) { initTint(nav); initHide(nav); }
-initCards();
 initHero();
-requestAnimationFrame(() => setTimeout(() => {
-  initMenu();
-  initPill();
-  if (nav) initCap(nav);
-  initLinkCards();
-  initRing();
-  initLogos();
-  refreshSoon();
-  initAnchor();
-  requestAnimationFrame(() => requestAnimationFrame(() => document.dispatchEvent(new Event("fm:ready"))));
-}, 0));
+// In three tasks, in this order, so a phone can paint and answer a tap in between (together they took half a second there).
+const inTurn = (steps) => { steps.shift()(); if (steps.length) setTimeout(() => inTurn(steps), 0); };
+requestAnimationFrame(() => setTimeout(() => inTurn([
+  () => { initMenu(); initPill(); if (nav) initCap(nav); initLinkCards(); },
+  initRing,
+  () => {
+    initLogos();
+    refreshSoon();
+    initAnchor();
+    requestAnimationFrame(() => requestAnimationFrame(() => document.dispatchEvent(new Event("fm:ready"))));
+  }
+]), 0));
 
 // ── loaded when needed: the dots (WebGL) and the drawings, each when its blocks come within reach ──
 const near = (els, margin, load) => {
@@ -72,13 +75,17 @@ near([...document.querySelectorAll(".art[data-art]")], "300% 0px",
 // ── links to a section of the page: our own smooth scroll (scroll.js) ──
 initScroll();
 
-// ── the scroll animations measure the page again when its height has changed by itself, after it has loaded
-//    (a late font, a picture, an app's browser resizing the page); ScrollTrigger measures only on load and resize ──
+// ── the scroll animations measure the page again when its height has changed by itself: once it has loaded, if it has
+//    changed since the last measuring (a picture or a font that came late), and after that whenever it changes (a late
+//    font, an app's browser resizing the page). ScrollTrigger itself measures only on resize (gsap.js) ──
+const height = pageHeight;
+let measured = -1, busy = false;                 // the page's height at the last measuring (-1: not measured yet)
+ScrollTrigger.addEventListener("refreshInit", () => { busy = true; });
+ScrollTrigger.addEventListener("refresh", () => { busy = false; measured = height(); });
 addEventListener("load", () => setTimeout(() => {
-  const height = pageHeight;
-  let measured = height(), busy = false, timer = 0;
-  ScrollTrigger.addEventListener("refreshInit", () => { busy = true; });
-  ScrollTrigger.addEventListener("refresh", () => { busy = false; measured = height(); });
+  let timer = 0;
+  // not measured yet: refreshSoon() above is still to come, and measures it as it is
+  if (measured >= 0 && !busy && Math.abs(height() - measured) > 2) ScrollTrigger.refresh(true);
   watchSize(new ResizeObserver(() => {
     clearTimeout(timer);
     timer = setTimeout(() => { if (!busy && Math.abs(height() - measured) > 2) ScrollTrigger.refresh(true); }, 300);

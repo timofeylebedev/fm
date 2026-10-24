@@ -431,7 +431,10 @@ function build(it, delay) {
   const el = it.el, on = { delay, onStart: () => began(it), onComplete: () => ended(it) };
   if (it.kind === "chars") {
     const seen = shownOf(it.targets);
-    if (seen.length < it.targets.length) gsap.set(it.targets.filter((p) => seen.indexOf(p) < 0), { yPercent: 0, opacity: 1 });
+    // the letters that are not laid out (the hero's wording for other widths) are shown as they will be at the end; those
+    // never hidden (see hideAll) already are
+    const rest = it.targets.filter((p) => seen.indexOf(p) < 0 && !bare.has(p));
+    if (rest.length) gsap.set(rest, { yPercent: 0, opacity: 1 });
     const kf = {};
     M.chars.wave.forEach(([t, y, o]) => { kf[Math.round(t * 100) + "%"] = o == null ? { yPercent: y } : { yPercent: y, opacity: o }; });
     kf.easeEach = "fm-wave";
@@ -589,13 +592,42 @@ function prepare(it) {
           it.tween.kill();
           it.tween = build(it, Math.max(0, -gone));
           if (gone > 0) it.tween.totalTime(gone);
-        } else gsap.set(parts, it.kind === "title" ? { yPercent: M.title.rise, opacity: 0 }
-          : lines ? { yPercent: M.lines.rise, opacity: 0 } : { yPercent: M.chars.wave[0][1], opacity: 0 });
+        } else { hide(it, first); return; }                   // hidden until its turn: written with the others split now
         gsap.set(it.el, { visibility: "visible" });
         if (first) ready(it);
       }
     });
   });
+}
+// The texts that wait for a font are split together when it arrives. Hidden one by one, each gsap.set would first read
+// its lines' style from the browser, which then works the page's styles out again, as the split before it has changed
+// the page: once per text, a fifth of a second on a phone. So their hidden start is written for all of them at once,
+// right after the last split of that moment (a microtask: before anything is drawn), and only then are they ready.
+// Parts that are not laid out at all (in a display: none block: the hero's wording for other widths) are left as they
+// are: they cannot be seen, and GSAP would show each of them for a moment to read it, laying the page out once per letter.
+// If they come to be laid out (another width), SplitText splits their text again, and they are hidden then.
+const bare = new WeakSet();
+let hiding = null;
+function hide(it, first) {
+  if (!hiding) { hiding = []; queueMicrotask(hideAll); }
+  hiding.push({ it, first });
+}
+function hideAll() {
+  const list = hiding;
+  hiding = null;
+  const from = { title: { yPercent: M.title.rise, opacity: 0 }, lines: { yPercent: M.lines.rise, opacity: 0 },
+    chars: { yPercent: M.chars.wave[0][1], opacity: 0 } };
+  const parts = { title: [], lines: [], chars: [], done: [] };
+  list.forEach(({ it }) => {
+    if (it.state === "play") return;                      // its way in has begun meanwhile: its tween has the lines
+    // shown at once meanwhile (finish): its lines as they are at the end
+    const kind = it.state === "done" ? "done" : it.kind === "title" || it.kind === "lines" ? it.kind : "chars";
+    it.targets.forEach((p) => { if (p.getClientRects().length) parts[kind].push(p); else bare.add(p); });
+  });
+  Object.keys(from).forEach((k) => { if (parts[k].length) gsap.set(parts[k], from[k]); });
+  if (parts.done.length) gsap.set(parts.done, { yPercent: 0, opacity: 1 });
+  gsap.set(list.map(({ it }) => it.el), { visibility: "visible" });
+  list.forEach(({ it, first }) => { if (first) ready(it); });
 }
 function ready(it) {
   it.ready = true;
