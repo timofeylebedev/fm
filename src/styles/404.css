@@ -6,14 +6,15 @@
 @import "./base/fonts.css";
 @import "./base/base.css";
 
-body { display: flex; flex-direction: column; }
 .lost-nav {
   position: fixed; inset: 0 0 auto; z-index: 1;
   padding: var(--nav-pad-y) var(--nav-pad-right) var(--nav-pad-y) var(--nav-pad-left);
 }
+/* in the page's own box (Safari on a Mac, base.css) it sticks to the top of the box instead, as the main navbar does */
+@media screen { html.boxed:has(> body > .page) .lost-nav { position: sticky; top: 0; margin-bottom: calc(-1 * var(--nav-h)); } }
 .lost-nav__logo { width: calc(var(--nav-control) * 4.6); height: var(--nav-control); }
 .lost {
-  flex: 1; min-height: 100vh; min-height: 100svh;
+  min-height: 100vh; min-height: 100svh;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--text-gap);
   padding: var(--section-y) var(--gutter) calc(var(--section-y) * 2);
 }

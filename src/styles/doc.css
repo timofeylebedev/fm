@@ -23,6 +23,9 @@
   background-color: var(--paper-70);                 /* the main navbar's 70% (--glass-nav) of the white behind it */
   -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
 }
+/* in the page's own box (Safari on a Mac, base.css) it sticks to the top of the box instead, as the main navbar does
+   (nav.css): as tall as before, taking no room, and inside the box, so the wheel over it scrolls the page */
+@media screen { html.boxed:has(> body > .page) .doc-nav { position: sticky; top: 0; margin-bottom: calc(-1 * var(--nav-h)); } }
 .doc-nav__home { display: inline-flex; color: var(--ink); border-radius: 8px; }
 .doc-nav__logo { width: calc(var(--nav-control) * 4.6); height: var(--nav-control); }
 
