@@ -120,6 +120,9 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
 - The CSP blocks injected scripts: use `bypassCSP: true` in Playwright contexts.
 - `npm run audit` finds Chromium by `PLAYWRIGHT_CHROMIUM` (in the cloud: `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`
   as of Oct 24, 2026; the folder name changes with Playwright updates: `ls /opt/pw-browsers`).
+- `html { scrollbar-gutter: stable }` (book.css) is filled like a classic 15px scrollbar in headless Chromium, even with
+  `--hide-scrollbars`: a page measured at 390 is 375 wide and layout steps show up 15–20px late. To measure as on a Mac
+  or a phone, take it out of the served CSS (`prep()` in `design/report/tools/lib.py`); the audit keeps it.
 - Headless Chromium without a GPU: launch with `--use-gl=swiftshader --enable-unsafe-swiftshader` (as
   `build/audit.mjs` does), at most 2 browser contexts at a time, and judge motion by its curves, not by frame timing.
 - Telegram's browser: `?fmcap=debug` (the white strip above the navbar turns red, a box shows what the browser says;
