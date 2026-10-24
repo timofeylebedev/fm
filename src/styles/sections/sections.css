@@ -357,11 +357,13 @@
 @keyframes marquee { to { transform: translateX(-738px); } }
 
 /* ── Tools: two white cards ──
-   Side by side (text | picture) from step M; otherwise the text, then the picture under it, exactly as wide as the
-   text (its top part: the bottom of the phone goes past the card's edge, as it does beside the text). The cards are as
-   wide as the column at every size: full-column cards, with --radius-l. Their padding follows the card's own width
-   (--tool-pad: 28px on a phone, about 40 on a 420 one, 64 from a 600px card, their extra air), so a phone keeps a
-   wide enough column of text; under the text, above the picture, the air stays generous (--pad-l at least). */
+   Side by side (text | picture) from step M; otherwise the text, then the whole picture under it (never cut), centred,
+   at most 360px wide, with twice the padding at its sides (own step 27.5rem, a 480 window; once the padding below it).
+   The phone in the picture runs to the card's bottom edge in both layouts. The cards are as wide as the column at every
+   size: full-column cards, with --radius-l. Their padding follows the card's own width over the whole column
+   (--tool-pad: 28px on a phone, about 48 on a 700px card, 64 on the widest, their extra air), so a phone keeps a wide
+   enough column of text and the padding shrinks with the screen at every size; under the text, above the picture, the
+   air stays generous (--pad-l at least). */
 .tools { background: var(--mist); }
 .tools__list {
   display: flex; flex-direction: column; gap: var(--gap-cards);
@@ -385,19 +387,20 @@
 .tool__title { font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); text-wrap: balance; }
 .tool__desc { max-width: 28em; font-size: var(--type-body-m); line-height: var(--lh-text); color: var(--ink-60); }
 .tool__media {
+  --side: var(--pad);
   position: relative;
-  margin: 0 var(--pad);
-  aspect-ratio: 820 / 640;                                              /* the top 71% of the picture */
+  justify-self: center;
+  width: min(100% - 2 * var(--side), 360px);
+  aspect-ratio: 820 / 896;                                              /* the whole picture */
   & picture { position: absolute; inset: 0; }
-  & .tool__img { object-fit: cover; object-position: 50% 0; }
 }
+@container (width >= 27.5rem) { .tool__media { --side: calc(var(--pad) * 2); } }
 @container (width >= 43rem) {
   .tool { grid-template-columns: 1fr 1fr; min-height: var(--tool-min-h); }
   .tool__body { padding: var(--pad) calc(var(--pad) / 2) var(--pad) var(--pad); }
   .tool__media {
-    margin: 0; aspect-ratio: auto;
+    justify-self: stretch; width: auto; aspect-ratio: auto;
     & picture { inset: 32px 24px 0; }
-    & .tool__img { object-fit: contain; object-position: 50% 100%; }
   }
 }
 .tool__img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }

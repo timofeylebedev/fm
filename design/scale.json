@@ -51,7 +51,7 @@
       "radius/l":        { "px": [32, 56], "css": "--radius-l", "use": "full-column cards: the CTA card, tool cards" },
       "cta/air":         { "px": [64, 128], "css": "--cta-air", "use": "above and below the content of the CTA card (at least): generous at every size" },
       "space/pad-l":     { "px": [40, 64], "css": "--pad-l", "use": "the air under the text of a tool card, above its picture (when they stand one under the other)" },
-      "tool/pad":        { "px": [28, 64], "per": { "from": 288, "to": 600 }, "css": "--tool-pad", "use": "padding of the tool cards, by the card's own width: 28px on a 288px card (a 320 phone), about 40 on a 384px one (a 420 phone), 64 from a 600px card — the extra air of a big card (design/decisions.json)" },
+      "tool/pad":        { "px": [28, 64], "per": { "from": 288, "to": 1024 }, "css": "--tool-pad", "use": "padding of the tool cards, by the card's own width across the whole column: 28px on a 288px card (a 320 phone), about 35 on a 430px one (a 480 phone), 48 on a 700px one (a 768 window), 64 on the widest, 1024px (Tim, Oct 24: it shrinks with the screen at every size; design/decisions.json)" },
       "card/text-pad":   { "px": [24, 40], "css": "--card-pad", "use": "padding of a stack card (= radius/m)" },
       "card/text-gap":   { "px": [16, 24], "css": "--card-text-gap", "use": "a stack card's label → its title" },
       "card/tag-pad-y":  { "px": [8, 12], "css": "--card-tag-pad-y" },
