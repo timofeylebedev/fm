@@ -18,9 +18,42 @@ const FORCE = process.argv.includes("--force");
 // quality per format: AVIF and WebP at about the same look as the originals
 const QUALITY = { avif: { quality: 55, effort: 9 }, webp: { quality: 80, effort: 6 }, png: { compressionLevel: 9, palette: true } };
 
+// The hero's settings: [AVIF quality, WebP quality] per width, in two sets (index.html picks one by the screen's density):
+//   HERO_1X for screens under 2× (desktops, laptops at 1.25 and 1.5): the lowest setting at which the file scores
+//     SSIMULACRA2 90 or more against the original at that width, on the hero's sand. Up to 2120 a 1× screen can get the
+//     file, so it is held to that at 1:1; 2650 and 3200 are only ever asked for at 1.25× and 1.5× (a 1× screen needs at
+//     most 2120), so they are scored as seen there (both pictures scaled down by the density), and 80 or more at 1:1.
+//   HERO_2X for screens of 2× and more (phones, tablets, retina laptops): scored as seen at 2×, and 80 or more at 1:1.
+//     No 1400 here: held to that it needs AVIF 79 (44 KB), more than the 1800 (39 KB), which those screens get instead.
+// The files before scored 75–79 at 1:1. Measured Oct 24, 2026; scores of the AVIF: as seen / at 1:1.
+const HERO_1X = {
+  900: [86, 95],    // 90.3                  29 KB
+  1400: [86, 96],   // 90.0                  55 KB
+  1800: [86, 97],   // 90.0                  81 KB
+  2120: [86, 97],   // 90.1                 104 KB
+  2650: [80, 93],   // 1.25×: 90.2 / 88.3   115 KB
+  3200: [75, 92]    // 1.5×: 90.2 / 86.9    126 KB
+};
+const HERO_2X = {
+  1800: [62, 89],   // 90.0 / 81.7           39 KB
+  2120: [62, 86],   // 90.1 / 82.2           49 KB
+  2650: [63, 89],   // 90.1 / 83.0           69 KB
+  3200: [63, 89],   // 90.1 / 83.4           88 KB
+  4096: [64, 89]    // 90.0 / 83.3          135 KB
+};
+const heroQ = (set) => (w) => ({ avif: { quality: set[w][0], chromaSubsampling: "4:4:4" }, webp: { quality: set[w][1], smartSubsample: true } });
+
 const RASTER = [
-  // the hero: a wide picture whose width follows the screen's height (see hero.css); 1800 is for phones
-  { src: "hero-table.webp", widths: [900, 1400, 1800, 2600, 3531], formats: ["avif", "webp"] },
+  // the hero: a wide picture whose width follows the screen's height (see hero.css), shown at most
+  // min(160vw, 2120px, max(196.2vh, 660px)) wide (the sizes in index.html). The original (Tim's, Oct 24, 2026) is
+  // 4096 × 1141, cut at the bottom to the old frame 3.92333 : 1 (4096 × 1044, lossless): the edge of the table and the
+  // people are where they were in the 3531 × 900 one, so hero.css and the chips' places stay. What screens got (browser
+  // windows, Oct 24, 2026): under 2×: 1400 a 1366 × 768 laptop, an 800 px window · 1800 1536 × 864 @ 1.25 ·
+  // 2120 1920 × 1080, 2560 × 1440, 1280 × 800 @ 1.5 · 2× and up: 1800 iPhone SE, Android 412 · 2120 iPhones 390–440 ·
+  // 2650 iPad 820 · 3200 MacBook Air 1440 × 900 · 4096 MacBook Pro 1512 × 982.
+  // Settings: HERO_1X and HERO_2X above.
+  { src: "hero-table.webp", widths: [900, 1400, 1800, 2120, 2650, 3200], formats: ["avif", "webp"], options: heroQ(HERO_1X) },
+  { src: "hero-table.webp", name: "hero-table-2x", widths: [1800, 2120, 2650, 3200, 4096], formats: ["avif", "webp"], options: heroQ(HERO_2X) },
   // the two tool cards: shown at most 462 CSS px wide
   { src: "fm-litmus.png", widths: [480, 820], formats: ["avif", "webp"] },
   { src: "fm-lens.png", widths: [480, 820], formats: ["avif", "webp"] },
@@ -105,7 +138,7 @@ for (const job of RASTER) {
       const file = job.widths.length > 1 ? `${name}-${width}.${format}` : `${name}.${format}`;
       const out = join(OUT, file);
       if (await newer(out, src)) { skipped++; continue; }
-      const options = job.lossless ? { lossless: true, effort: 6 } : Object.assign({}, QUALITY[format], job.quality ? { quality: job.quality } : {}, job.options?.[format]);
+      const options = job.lossless ? { lossless: true, effort: 6 } : Object.assign({}, QUALITY[format], job.quality ? { quality: job.quality } : {}, (typeof job.options === "function" ? job.options(width) : job.options)?.[format]);
       const data = await sharp(src).resize({ width, withoutEnlargement: true })[format](options).toBuffer();
       await write(out, data, src);
     }

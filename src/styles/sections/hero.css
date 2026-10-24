@@ -2,7 +2,7 @@
    (the chips are made and moved by scripts/hero.js).
 
    The section is a column of four parts: the air above the text, the text (title, lead, button), the air below it,
-   and the picture (3531×900, the people at its top) in .hero__stage. Each part has a least and a greatest size, so the
+   and the picture (4096×1044, the people at its top) in .hero__stage. Each part has a least and a greatest size, so the
    section neither shrinks nor stretches past what looks right:
      · the picture: never so wide that the five people would not fit (they take 94% of the width when it is 40.8% of
        the width tall) and never taller than 540px. At least --hero-pic-min (168px on a 320 phone … 300px on a 1440
@@ -111,7 +111,11 @@
    What fades is a cover in the sand colour over it (::after), not the picture: a picture that fades is drawn on a layer
    of its own while it fades and put back into the page when it is done, scaled and placed once more, and that last
    step made the team jump a little at the end of the fade (Tim, Oct 20: «the hero image sometimes shakes»; measured:
-   one changed frame after the fade had ended). The picture itself is drawn once, where it stays. */
+   one changed frame after the fade had ended). The picture itself is drawn once, where it stays.
+   The sizes of the picture in index.html say how wide it can be, so a browser downloads no bigger file than it shows:
+   min(160vw, 2120px, max(196.2vh, 660px)) = 3.92333 × its height, which is at most 40.8vw, 540px, and half the screen's
+   height (168px on screens under 336 tall). Measured true at 2294 screen sizes, 320–2560 wide and 240–1590 tall
+   (Oct 24, 2026). If the hero's sizes change so that the picture could be taller, change the sizes there too. */
 .hero__table {
   position: absolute; left: 50%; bottom: 0;
   width: calc(var(--hero-h) * 3.92333); height: var(--hero-h);
