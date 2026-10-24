@@ -65,18 +65,19 @@ const SVG = (name) => /^(logo-|art-icon-|art-logo-)/.test(name);
 
 // The site's icons and the picture for links shared in messengers (Tim's files, Oct 24, 2026). They keep fixed
 // addresses: public/ for the PNGs and the ICO, src/assets/icons/favicon.svg for the SVG (linked from every page).
-//   icon.png         512 × 512, the mark on a full white square: the iPhone and Android icons and og.png
+//   icon.png         512 × 512, the mark on a full white square: the iPhone and Android icons
+//   og.png           1200 × 630, the picture for links shared in messengers: public/og.png at its own size
 //   favicon-32.png   32 × 32, drawn for that size (more air than icon.png): favicon.ico, cut to a circle (Tim)
 //   fm-logo.svg      the mark alone: favicon.svg, which turns white in dark mode
 // Every PNG is lossless: the smallest of an exact palette and full colour whose pixels are identical to the resized
 // picture (checked on every run; the build stops otherwise).
-const ICON = "icon.png", FAVICON_32 = "favicon-32.png", LOGO = "fm-logo.svg";
+const ICON = "icon.png", OG_SRC = "og.png", FAVICON_32 = "favicon-32.png", LOGO = "fm-logo.svg";
 const APP_ICONS = [
   { out: "apple-touch-icon.png", width: 180 },   // iPhone and iPad home screen: opaque, iOS rounds the corners itself
   { out: "icon-192.png", width: 192 },           // site.webmanifest
   { out: "icon-512.png", width: 512 }            // site.webmanifest
 ];
-const OG = { out: "og.png", width: 1200, height: 630 };   // icon.png at 1:1 in the middle of a white 1200 × 630
+const OG = { out: "og.png", width: 1200, height: 630 };   // og:image width and height in the pages say the same
 const ICO = { out: "favicon.ico", sizes: [16, 32] };      // favicon-32.png in a circle; 16 made from it
 
 const newer = async (out, src) => {
@@ -178,14 +179,15 @@ const circle = (s) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width
     const pic = sharp(await opaque().resize({ width: job.width, kernel: "lanczos3" }).png().toBuffer()).removeAlpha();
     await write(out, await exactPng(pic, job.out), src);
   }
-  const og = join(PUBLIC, OG.out);
-  if (await newer(og, src)) skipped++;
+}
+
+{
+  const src = join(SRC, OG_SRC), out = join(PUBLIC, OG.out);
+  if (await newer(out, src)) skipped++;
   else {
-    const icon = await opaque().png().toBuffer();
-    const { width, height } = await sharp(icon).metadata();
-    const pic = sharp({ create: { width: OG.width, height: OG.height, channels: 3, background: "#ffffff" } })
-      .composite([{ input: icon, left: Math.round((OG.width - width) / 2), top: Math.round((OG.height - height) / 2) }]);
-    await write(og, await exactPng(sharp(await pic.png().toBuffer()).removeAlpha(), OG.out), src);
+    const { width, height } = await sharp(src).metadata();
+    if (width !== OG.width || height !== OG.height) throw new Error(`images: ${OG_SRC} is ${width} × ${height}, not ${OG.width} × ${OG.height}`);
+    await write(out, await exactPng(sharp(src).flatten({ background: "#ffffff" }).removeAlpha(), OG.out), src);
   }
 }
 
