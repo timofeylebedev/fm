@@ -145,8 +145,11 @@ export default {
       }) };
     };
     const pieces = [];       // every piece: its shape, and how far it is from where the colour starts on its line (in waves)
+    const linesPath = new Path2D();                                      // all the lines in one shape (see tick)
     const totals = loops.map(([x, y, d, fromEnd]) => {
-      const { total, cuts } = cut(flatten(d, x, y));
+      const pts = flatten(d, x, y), { total, cuts } = cut(pts);
+      linesPath.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) linesPath.lineTo(pts[i][0], pts[i][1]);
       cuts.forEach(({ path, along }) => pieces.push({ path, at: (fromEnd ? total - along : along) / WAVE }));
       return total;
     });
@@ -164,7 +167,6 @@ export default {
     const meet = loops[6][0] + 109.65 - (x0 + r);                       // where the top left line ends, along the outline
     const shift = totals[6] / WAVE - meet / EDGE_WAVE;
     const edgePieces = edge.cuts.map(({ path, along }) => ({ path, at: along / EDGE_WAVE + shift }));
-    const edgePath = new Path2D(outline);
     let canvas = null, ctx = null;
     function tick(time) {
       if (!ctx) return;
@@ -177,12 +179,13 @@ export default {
           ctx.stroke(list[i].path);
         }
       };
-      draw(pieces);
-      // where a line meets or crosses the outline, the outline is on top (added up, the two would make a bright bead)
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.stroke(edgePath);
-      ctx.globalCompositeOperation = "lighter";
       draw(edgePieces);
+      // the lines lie over the outline: where one meets or crosses it, the outline is cut away under it
+      // (added up, the two would make a bright bead)
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.stroke(linesPath);
+      ctx.globalCompositeOperation = "lighter";
+      draw(pieces);
     }
     return { html:
       '<div style="left:173.513px;top:210.723px;width:652.974px;height:578.554px;border-radius:21.606px;background:#f56e00"></div>'
