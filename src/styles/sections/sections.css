@@ -113,25 +113,27 @@
   .access__stage {
     --k: min(1, tan(atan2(100cqw, 300px)));
     --deck: 1;                                                          /* read by scripts/deck.js */
+    /* each depth under the top card: further right, up, round and smaller (read by deck.js, which moves the cards) */
+    --deck-x: 13px; --deck-y: -7px; --deck-turn: 4deg; --deck-shrink: 0.045;
     height: calc(424px * var(--k));
     touch-action: pan-y;                                                /* the page scrolls up and down; sideways is the deck's */
     user-select: none; -webkit-user-select: none;
   }
   .access__cards { display: block; position: relative; height: 392px; }
-  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) is set by the script, which also moves a card
-     to its new depth by animating --d itself (deck.js): Safari on iPhone did not run a CSS transition here, and the
-     cards jumped up to their new places (Tim's recording, Oct 24). Which card is in front is --z, a whole number, set
-     at once. A swipe moves the slot by --swipe-x and --swipe-turn, in a transform of their own, so it never touches the
-     depth's translate, rotate and scale (GSAP moving the slot itself cleared them) */
+  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) places, turns and sizes it. With scripts the
+     deck (deck.js) moves the slots itself, by their transform only (a depth and a swipe together), so the phone's
+     graphics chip moves them without painting the cards again: a CSS transition did not run in Safari on iPhone, and
+     moving them by CSS variables repainted every card, its shadow and its masked face, on every frame (Tim's
+     recordings, Oct 24). Which card is in front is --z, a whole number, set at once. */
   .access__slot {
     position: absolute; left: 50%; top: 8px;
     width: 270px; height: 376px; margin: 0 0 0 -135px !important;
     z-index: calc(3 - var(--z, var(--d, 0)));
-    translate: calc(var(--d, 0) * 13px) calc(var(--d, 0) * -7px);
-    rotate: calc(var(--d, 0) * 4deg);
-    scale: calc(1 - var(--d, 0) * 0.045);
-    transform: translateX(var(--swipe-x, 0px)) rotate(var(--swipe-turn, 0deg));
+    translate: calc(var(--d, 0) * var(--deck-x)) calc(var(--d, 0) * var(--deck-y));
+    rotate: calc(var(--d, 0) * var(--deck-turn));
+    scale: calc(1 - var(--d, 0) * var(--deck-shrink));
   }
+  .is-deck .access__slot { translate: none; rotate: none; scale: none; will-change: transform; }   /* deck.js moves it */
   .access__slot .idcard { rotate: none; }                              /* straight in its slot (without scripts too) */
   .access__slot--2 { --d: 1; }
   .access__slot--3 { --d: 2; }
