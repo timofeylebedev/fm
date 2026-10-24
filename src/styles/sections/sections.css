@@ -6,7 +6,7 @@
    The blocks inside arrange themselves by the width they get (container queries on their column), not by the screen,
    and they change together, at three shared column widths:
        S  22rem   (a 390 phone)                    features 1 → 2 columns, logos 2 → 3
-       M  43rem   (a 768 window, even with a scrollbar)   logos 3 → 4; royalty, publications and tools 1 → 2
+       M  43rem   (a 768 window, even with a scrollbar)   logos 3 → 4; royalty and publications 1 → 2
        L  58rem   (a 1024 window, even with a scrollbar)  features 2 → 4
    (a classic scrollbar takes about 15px of the column: M and L leave room for it; phones have none)
    The ID cards are the one exception (a deck below a 35rem column): an object of a fixed size, its row needs that room.
@@ -356,7 +356,9 @@
 @keyframes marquee { to { transform: translateX(-738px); } }
 
 /* ── Tools: two white cards ──
-   Side by side (text | picture) from step M; otherwise the text, then the whole picture under it (never cut), centred,
+   Side by side (text | picture) from own step 45.75rem (an 800 window, even with a scrollbar: below it the text
+   column got too narrow); with a least height (--tool-min-h) from step L only, so between the two the card is as tall
+   as its text and the picture never starts below the text's top (Tim, Oct 24); otherwise the text, then the whole picture under it (never cut), centred,
    at most 360px wide, with twice the padding at its sides (own step 27.5rem, a 480 window; once the padding below it).
    The phone in the picture runs to the card's bottom edge in both layouts. The cards are as wide as the column at every
    size: full-column cards, with --radius-l. Their padding follows the card's own width over the whole column
@@ -394,14 +396,15 @@
   & picture { position: absolute; inset: 0; }
 }
 @container (width >= 27.5rem) { .tool__media { --side: calc(var(--pad) * 2); } }
-@container (width >= 43rem) {
-  .tool { grid-template-columns: 1fr 1fr; min-height: var(--tool-min-h); }
+@container (width >= 45.75rem) {
+  .tool { grid-template-columns: 1fr 1fr; }
   .tool__body { padding: var(--pad) calc(var(--pad) / 2) var(--pad) var(--pad); }
   .tool__media {
     justify-self: stretch; width: auto; aspect-ratio: auto;
     & picture { inset: 32px 24px 0; }
   }
 }
+@container (width >= 58rem) { .tool { min-height: var(--tool-min-h); } }
 .tool__img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 
 /* ── Publications: grey cards, links to articles and a video ──

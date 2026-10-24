@@ -71,7 +71,7 @@
       "id": "tool-card-air",
       "kind": "decision",
       "what": "Tool cards are padded by their own width across the whole column (--tool-pad: 28px on a 288px card, about 35 on a 430px one, 48 on a 700px one, 64 on the widest, 1024px): about their radius (radius/l, 32 → 56) on phones, above it from about a 450px card; every other card is padded by its radius. Under the text, above the picture, at least --pad-l (40 → 64). With the picture under the text, the whole picture is shown (never cut), centred, at most 360px wide, with twice the padding at its sides on cards from 27.5rem (a 480 window) and once the padding below that",
-      "decided": "Tim, 2026-10-18 (the air); the padding by the card's width on 2026-10-18 (28–32 on a 320 phone, 40 on a 420 one; it stopped growing at a 600px card); 2026-10-24 (Tim: the padding shrinks with the screen at every size, so it runs to the widest card and a 420 phone gets about 32; the picture under the text is never cut, 2× padding at its sides down to 480px, 360px at most)",
+      "decided": "Tim, 2026-10-18 (the air); the padding by the card's width on 2026-10-18 (28–32 on a 320 phone, 40 on a 420 one; it stopped growing at a 600px card); 2026-10-24 (Tim: the padding shrinks with the screen at every size, so it runs to the widest card and a 420 phone gets about 32; the picture under the text is never cut, 2× padding at its sides down to 480px, 360px at most); 2026-10-24 later (Tim: side by side from an 800 window, not 768; the least height --tool-min-h only from a 1024 one, so below it the card is as tall as its text and the picture does not start below the text's top)",
       "why": "extra air on a big two-column card with a picture, without a narrow column of text on a phone"
     },
     {
@@ -113,7 +113,7 @@
     {
       "id": "layout-steps",
       "kind": "decision",
-      "what": "Blocks change their layout together, at three shared column widths: S 22rem (a 390 screen: features 1 → 2, logos 2 → 3), M 43rem (a 768 window, also with a classic scrollbar: logos 3 → 4; royalty, publications, tools 1 → 2), L 58rem (a 1024 window, also with a scrollbar: features 2 → 4). The ID cards' deck is the one exception (35rem)",
+      "what": "Blocks change their layout together, at three shared column widths: S 22rem (a 390 screen: features 1 → 2, logos 2 → 3), M 43rem (a 768 window, also with a classic scrollbar: logos 3 → 4; royalty, publications 1 → 2), L 58rem (a 1024 window, also with a scrollbar: features 2 → 4; the tool cards' least height). Own steps: the ID cards' deck (35rem); the tool cards side by side from 45.75rem (an 800 window, also with a scrollbar; Tim, 2026-10-24)",
       "decided": "Tim, 2026-10-18",
       "why": "things on the page change at the same moments, not each at its own width"
     },

@@ -77,7 +77,7 @@
       "footer/contact-y": { "px": [40, 32], "css": "--footer-contact-y", "use": "more air on phones, where the contacts stand in a column" },
       "footer/legal-y":  { "px": [24, 16], "css": "--footer-legal-y" },
       "tool/logo-h":     { "px": [20, 28], "css": "--tool-logo-h" },
-      "tool/min-h":      { "px": [400, 480], "css": "--tool-min-h", "size": true, "use": "a tool card's least height when text and picture sit side by side" }
+      "tool/min-h":      { "px": [400, 480], "css": "--tool-min-h", "size": true, "use": "a tool card's least height when text and picture sit side by side, from step L (a 1024 window; Tim, Oct 24)" }
     }
   }
 }
