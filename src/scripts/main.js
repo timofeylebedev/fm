@@ -12,19 +12,20 @@ import { initHero } from "./hero.js";
 import { initRing } from "./ring.js";
 import { initLogos } from "./logos.js";
 import { initDeck } from "./deck.js";
-import { box, height as pageHeight, watchSize, ioRoot } from "./scroller.js";
+import { height as pageHeight, watchSize, ioRoot } from "./scroller.js";
 import { hasConsent } from "./consent.js";
+import { initBook } from "./book.js";
+import { initPubs } from "./pubs.js";
+
+// Safari may run this script before the page's stylesheet has come (WebKit bug 261655: a module script does not always
+// wait for it, more often with a warm cache). Everything measured then is wrong, and what is measured once stays wrong:
+// the card stack read the page's colour as transparent and lost its strips (Tim's screenshots, Oct 2026). So nothing
+// starts until every stylesheet of the page is in (one that fails to load does not hold the page up).
+await Promise.all([...document.querySelectorAll('link[rel="stylesheet"]')].filter((link) => !link.sheet).map((link) =>
+  new Promise((done) => { link.addEventListener("load", done, { once: true }); link.addEventListener("error", done, { once: true }); })));
 
 const root = document.documentElement;
-root.classList.add("motion");                    // the main script runs: the safety net of motion.css is off
-
-// Safari on a Mac, where the page scrolls in its own box (scroller.js): the keys that scroll (space, the arrows, Page
-// Down…) scroll what holds the focus, and at first nothing does. The box takes the focus (not drawn, base.css), so they
-// scroll the page from the start; the first Tab still goes to the skip link, the box's first child.
-if (box) {
-  box.tabIndex = -1;
-  box.focus({ preventScroll: true });
-}
+root.classList.add("motion");                   // the main script runs: the safety net of motion.css is off
 
 // boot.js asks for the page to be measured again (after a reload restores the scroll, or a phone's bars change)
 window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
@@ -34,6 +35,7 @@ window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
 // page has its final height (a reload then scrolls back to where the visitor was).
 const nav = document.querySelector("[data-nav]");
 initDeck();                                      // before the motion: it decides how the ID cards fall (onto a deck or into a row)
+initPubs();                                      // before the motion too: the publications past the first four wait for «Показать больше»
 initMotion();
 if (nav) { initTint(nav); initHide(nav); }
 initCards();
@@ -94,17 +96,9 @@ if (!hasConsent()) {
 // fmCookies.replay() in the console shows the notice again, also to someone who has agreed (cookies.js is then loaded)
 window.fmCookies ??= { replay: () => import("./cookies.js").then((m) => m.showCookies({ delay: 0, force: true })) };
 
-// ── the booking popup of Planerka: its script is loaded once the page has loaded and the browser is free, so it does
-//    not compete with the page. A click before that simply opens the booking page itself (the link's own address). ──
-addEventListener("load", () => (window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(() => {
-  document.querySelectorAll("[data-demo]").forEach((a) => Object.assign(a.dataset, {
-    planerkaEmbed: "popup", planerkaUrl: "https://planerka.app", planerkaUser: "flow-medium-8nzjz3", planerkaEvent: "demo"
-  }));
-  const s = document.createElement("script");
-  s.src = "https://planerka.app/assets/external/embed.js";
-  s.async = true;
-  document.body.appendChild(s);
-}, { timeout: 3000 }));
+// ── the booking of a demo: our own window with the calendar of Planerka, loaded before it is asked for once the
+//    visitor has agreed to the cookies (book.js) ──
+initBook();
 
 // ── the lines of split texts may wrap again once the page is at rest (motion.css, .fm-line) ──
 // While fonts arrive and while the window is being resized, a line made by SplitText keeps to one line (it may stick

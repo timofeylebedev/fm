@@ -5,13 +5,20 @@
    What comes in, and how (the attribute data-reveal in the HTML):
      · chars   a heading: letter by letter, each one up from below its place, a little past it and back (the wave);
      · lines   a text: line by line, up from one line below, calmly (no bounce: text is for reading);
+     · title   a heading line by line, each line fading in and up from below (60% of a line), as the titles of the card
+               stack come (cards.js takes its numbers from M.title); the headings after the CTA (tools, publications);
      · block   a block (a card, a button, a picture): up from 40px below, a little past its place and back (settle),
                fading in during the first half of that;
      · tilt    an ID card of «Гибкая настройка прав доступа»: falls onto the page, as if dropped on a table (DROP below).
                It starts bigger, as if closer, and gets smaller faster and faster until it lands; its shadow is wide and
                faint while it is in the air and tightens as it lands. In the air it drifts up and turns at an even speed;
                when it lands it keeps going a little by its own momentum, sliding and turning a bit further while
-               friction slows it to a stop, at its own angle (--rest in the HTML). No bounce.
+               friction slows it to a stop, at its own angle (--rest in the HTML). No bounce. It starts tipped 10° with
+               its top edge toward you and lies flat by the time it lands; it fades in slowly at both ends (reveal).
+               Where the cards are a stack (a narrow column, deck.js) nothing drops: the cards rise into place from
+               below one after another, the bottom card first, turning from −4° to their angle in the stack, and the
+               stack fades in as one picture, so no card is ever seen through the one above it (RISE below).
+               A light from the top, 75° above the page, shades a card's face as it tips (LIGHT below).
                The cards overlap, and a card that fades in over another one shows that one through itself. So the cards
                come in from the side, as if dealt onto the table: each one fades in next to the card before it, not over
                it, and only slides over it once it is solid (see dealX).
@@ -28,7 +35,8 @@
      · other parts of the page can join a group with motion.cue (the hero's people and chips do, and the first card of
        the stack joins the hero's group, so it comes after the hero). A cue can take its turn at the place of another
        element (at: the people start with the heading), in another section's group (group), and from another line
-       (line: the first card as soon as any of it is on screen). A thing that comes in
+       (line: the first card as soon as any of it is on screen), and need not wait for its group (alone: the first
+       card, when a quarter of it is on screen as it becomes due, comes in at once). A thing that comes in
        gets the class fm-showing when it starts and fm-shown when it has arrived.
    Hover colours and the press of buttons are done by the styles (button.css). "Reduce motion": everything is simply
    shown, nothing leans.
@@ -46,12 +54,14 @@ export const M = {
     wave: [0.5, 0, 0.5, 1],           // each step of the letters' wave
     settle: "M0,0 C0,0.788 0.135,1.212 0.32,1.215 0.5,1.218 0.51,0.847 1,1",  // blocks: about a fifth past their place, then back
     fall: [0.55, 0.085, 0.68, 0.53],  // falling: faster and faster, until it lands (the tilt cards)
+    reveal: [0.5, 0, 0.5, 1],         // a fade in of the ID cards: slow at both ends
     glide: "power1.out"               // sliding to a stop after landing: friction
   },
   // a heading, letter by letter: [moment, % of its height below its place, opacity]: up from 25% below, past its
   // place by 10%, back by 4%, past by 1%, in place; fully visible at 40%
   chars: { time: 1.1, stagger: 0.03, wave: [[0, 25, 0], [0.4, -10, 1], [0.65, 4], [0.85, -1], [1, 0]] },
   lines: { time: 0.9, stagger: 0.1, rise: 100 },        // a text: seconds, between lines, % of a line it comes up from
+  title: { time: 0.9, stagger: 0.07, rise: 60 },      // a heading by lines (and the stack's titles): seconds, between lines, % of a line it comes from (no blur; more travel, from 18: Tim, Oct 20)
   block: { time: 1.0, rise: 40, fade: 0.5 },            // a block: seconds, px it comes up from, the part of its time it fades in
   tilt: { lean: 8, follow: 0.6 },                       // tilt cards: how far they lean to the mouse (°), seconds to follow it
   // a tilt card falling:
@@ -62,7 +72,17 @@ export const M = {
   //   fade   the part of the time in the air it fades in
   //   gap    px between a card that is fading in and the card next to it
   //   air    its shadow in the air: [offset ×, blur ×, opacity ×]
-  DROP: { land: 0.55, scale: 1.15, move: [24, 4.5], glide: [13, 2.5], fade: 0.36, gap: 6, air: [2.4, 2, 0.5] },
+  //   tip    [°, part of the time in the air] it starts tipped (the top edge toward you: −), flat again at an even speed
+  DROP: { land: 0.55, scale: 1.15, move: [24, 4.5], glide: [13, 2.5], fade: 0.36, gap: 6, air: [2.4, 2, 0.5], tip: [-10, 1] },
+  // the ID cards as a stack (a narrow column, deck.js): no drop, each card rises into place
+  //   rise   px it comes up from      from   ° it starts at (it turns to its angle in the stack, sections.css)
+  //   time   seconds to rise          beat   seconds between two cards (the bottom card first)
+  //   fade   seconds the whole stack takes to fade in, as one picture
+  RISE: { rise: 80, from: -4, time: 0.7, beat: 0.12, fade: 0.55 },
+  // the light on the ID cards: where it comes from, seen from above the page ([x, y] on a disc of radius 1: the centre
+  // is straight overhead, the edge low; here from the top, 75° above the page), and how strongly a face turned towards
+  // it brightens (and turned away darkens), up to at most max
+  LIGHT: { from: [-0.077, -0.241], shade: 4, max: 0.45 },
   BEAT: { chars: [0.25, 0.5, 0.6], lines: 0.3, block: 0.14, drop: 0.2, inside: 0.2 },
   LINE: 0.88,                                           // a thing may start once its top is above this part of the screen height
   FONT: 0.3                                             // a text whose turn has come waits at most this long (s) for its font
@@ -112,6 +132,13 @@ export function initMotion() {
     it.rest = parseFloat(getComputedStyle(it.el).getPropertyValue("--rest")) || 0;   // its angle, from the HTML
     it.el.style.rotate = "none";                                                       // from now on GSAP turns it
     shadowOf(it);
+    const face = it.el.querySelector(".idcard__face");
+    if (face && !calm) {                                                                 // the light on its face (shade)
+      it.light = document.createElement("i");
+      it.light.className = "idcard__light";
+      it.light.setAttribute("aria-hidden", "true");
+      face.appendChild(it.light);
+    }
   });
   if (calm) { items.forEach(show); waiting.splice(0).forEach((c) => c.whenReady(() => c.play(true))); return; }
   live = true;
@@ -139,10 +166,26 @@ export function reveal(section) {
   items.filter((it) => it.state !== "done" && section.contains(it.el)).forEach(finish);
 }
 
+// Blocks that were hidden and are shown now (the publications after «Показать больше», pubs.js): they come in as a
+// block does, one after another a block's beat apart, in the order they are in. "Reduce motion": simply there.
+export function arrive(els) {
+  els.forEach((el) => { if (el.fmItem) el.fmItem.state = "done"; el.style.opacity = "1"; el.classList.add("fm-showing", "fm-shown"); });
+  if (calm || !els.length) return;
+  const T = M.block.time;
+  gsap.timeline()
+    .fromTo(els, { y: M.block.rise }, { y: 0, duration: T, ease: "fm-settle", stagger: M.BEAT.block, clearProps: "transform" }, 0)
+    .fromTo(els, { opacity: 0 }, { opacity: 1, duration: T * M.block.fade, ease: "fm-out", stagger: M.BEAT.block }, 0);
+}
+
 // where a tilt card starts, and where it lands (from there it slides on to y 0 and its own angle).
 // It turns the way it will be leaning: towards its angle, and on past 0 to it if it has to.
 const turnWay = (it) => (it.rest < 0 ? -1 : 1);
 const dropLanding = (it) => ({ y: M.DROP.glide[0], rotation: it.rest - turnWay(it) * M.DROP.glide[1] });
+// a card in a stack (deck.js) lies straight in its slot: the slot carries the angle of its depth (sections.css)
+const inDeck = (it) => !!it.el.closest(".is-deck");
+const restOf = (it) => (inDeck(it) ? 0 : it.rest);
+// (deck.js turns the slot by its transform; without it, the styles do)
+const deckAngle = (it) => +gsap.getProperty(it.el.parentElement, "rotation") || parseFloat(getComputedStyle(it.el.parentElement).rotate) || 0;
 const dropStart = (it) => ({ y: M.DROP.move[0] + M.DROP.glide[0], rotation: it.rest - turnWay(it) * (M.DROP.move[1] + M.DROP.glide[1]) });
 
 const rgba = (s) => {
@@ -257,7 +300,7 @@ function show(it) {
   const el = it.el;
   if (it.kind === "block") { if (it.tween) gsap.set(el, { y: 0 }); }
   else if (it.kind === "tilt") {
-    gsap.set(el, { y: 0, scale: 1, rotation: it.rest || 0, opacity: 1, transformPerspective: 800 });
+    gsap.set(el, { x: 0, y: 0, scale: 1, rotation: restOf(it) || 0, rotationX: 0, opacity: 1, transformPerspective: 800 });
     dropShadowDone(it);
   } else if (it.targets) gsap.set(it.targets, { yPercent: 0, opacity: 1 });
   el.style.visibility = "visible";
@@ -299,12 +342,21 @@ function flush() {
   fresh.clear();
   const touched = new Set();
   list.forEach((it) => {
+    if (it.alone && it.ready && it.alone()) { play(it, 0); return; }   // a cue that does not wait for its group
     it.box = (it.at || it.el).getBoundingClientRect();
     if (it.at) it.box = { top: it.box.top, left: it.box.left - 0.5 };   // a cue placed at an element goes right before it
     it.group.queue.push(it); touched.add(it.group);
   });
+  const depth = (it) => (it.kind === "tilt" && inDeck(it) ? parseFloat(getComputedStyle(it.el.parentElement).getPropertyValue("--d")) || 0 : null);
   touched.forEach((g) => {
-    g.queue.sort((a, b) => (Math.abs(a.box.top - b.box.top) > 8 ? a.box.top - b.box.top : a.box.left - b.box.left));
+    g.queue.sort((a, b) => {
+      const da = depth(a), db = depth(b);
+      if (da != null && db != null) return db - da;          // a stack: from the bottom card up
+      // the cards of a row: from left to right, whatever their angles (a card turned 8° reaches higher than the one
+      // before it, and by its top alone it came in before it: 1, 3, 2)
+      if (a.kind === "tilt" && b.kind === "tilt" && a.group === b.group) return a.box.left - b.box.left;
+      return Math.abs(a.box.top - b.box.top) > 8 ? a.box.top - b.box.top : a.box.left - b.box.left;
+    });
     pump(g);
   });
 }
@@ -346,7 +398,9 @@ function lead(it) {
   if (it.lead != null) return it.lead;
   if (it.kind === "chars") { const [lo, part, hi] = M.BEAT.chars; return Math.min(hi, Math.max(lo, shownOf(it.targets).length * M.chars.stagger * part)); }
   if (it.kind === "lines") return (it.targets.length - 1) * M.lines.stagger + M.BEAT.lines;
-  return it.kind === "tilt" ? M.BEAT.drop : M.BEAT.block;
+  if (it.kind === "title") return (it.targets.length - 1) * M.title.stagger + M.BEAT.lines;
+  if (it.kind === "tilt") return inDeck(it) ? M.RISE.beat : M.BEAT.drop;
+  return M.BEAT.block;
 }
 
 function open(g, at) {
@@ -387,7 +441,19 @@ function build(it, delay) {
     return gsap.fromTo(it.targets, { yPercent: M.lines.rise, opacity: 0 },
       Object.assign({ yPercent: 0, opacity: 1, duration: M.lines.time, ease: "fm-out", stagger: M.lines.stagger }, on));
   }
+  if (it.kind === "title") {
+    return gsap.fromTo(it.targets, { yPercent: M.title.rise, opacity: 0 },
+      Object.assign({ yPercent: 0, opacity: 1, duration: M.title.time, ease: "fm-out", stagger: M.title.stagger }, on));
+  }
   const tl = gsap.timeline(on);
+  if (it.kind === "tilt" && inDeck(it)) {
+    // a stack: it rises into place, turning from RISE.from to its angle in the stack (its slot's); no scale, no drift
+    const R = M.RISE;
+    fadeDeck(it, delay);
+    tl.fromTo(el, { x: 0, y: R.rise, scale: 1, rotation: R.from - deckAngle(it), rotationX: 0, opacity: 1, transformPerspective: 800 },
+      { y: 0, rotation: 0, duration: R.time, ease: "fm-out" }, 0);
+    return tl;
+  }
   if (it.kind === "tilt") {
     const D = M.DROP, a = dropStart(it), b = dropLanding(it), X = dealX(it), g = D.glide[0] / (D.move[0] + D.glide[0]);
     a.x = X; b.x = X * g;                                     // the drift to the side, in step with the drift up
@@ -397,7 +463,9 @@ function build(it, delay) {
       .fromTo(el, a, { x: b.x, y: b.y, rotation: b.rotation, duration: D.land, ease: "none" }, 0)        // in the air
       .fromTo(el, { x: b.x, y: b.y }, { x: 0, y: 0, duration: slide(0), ease: "fm-glide", immediateRender: false }, D.land)   // sliding on
       .fromTo(el, { rotation: b.rotation }, { rotation: it.rest, duration: slide(1), ease: "fm-glide", immediateRender: false }, D.land)
-      .fromTo(el, { opacity: 0 }, { opacity: 1, duration: D.land * D.fade, ease: "fm-out" }, 0);
+      .fromTo(el, { opacity: 0 }, { opacity: 1, duration: D.land * D.fade, ease: "fm-reveal" }, 0)
+      // tipped at the start, flat again by the landing; the light on its face follows
+      .fromTo(el, { rotationX: D.tip[0], transformPerspective: 800 }, { rotationX: 0, duration: D.land * D.tip[1], ease: "none", onUpdate: () => shade(it) }, 0);
     const sh = dropShadow(it);
     if (sh) {
       tl.fromTo(sh.air, { opacity: 1 }, { opacity: 0, duration: D.land, ease: "fm-fall" }, 0)
@@ -410,6 +478,43 @@ function build(it, delay) {
   tl.fromTo(el, { y: M.block.rise }, { y: 0, duration: T, ease: "fm-settle" }, 0)
     .fromTo(el, { opacity: 0 }, { opacity: 1, duration: T * M.block.fade, ease: "fm-out" }, 0);
   return tl;
+}
+
+// The stack fades in as one picture: the list of its cards, not each card (a card fading in over another would show that
+// one through itself). When its first card starts, every card still to come is put where it will rise from and made
+// solid, and the list fades in; each card then rises in its turn.
+function fadeDeck(it, delay) {
+  const list = it.el.parentElement.parentElement;
+  if (list.fmFaded) return;
+  list.fmFaded = true;
+  items.filter((o) => o.kind === "tilt" && o.state !== "done" && list.contains(o.el)).forEach((o) => {
+    gsap.set(o.el, { x: 0, y: M.RISE.rise, scale: 1, rotation: M.RISE.from - deckAngle(o), opacity: 1, visibility: "visible" });
+  });
+  gsap.fromTo(list, { opacity: 0 }, { opacity: 1, duration: M.RISE.fade, ease: "fm-reveal", delay, clearProps: "opacity" });
+}
+
+// The light on a card's face: brighter where the face turns towards the light, darker where it turns away, nothing while
+// it lies flat. From the card's angles (GSAP's: turned, then rotationY, then rotationX), as a white or black veil.
+const LIGHT = (() => {
+  const [x, y] = M.LIGHT.from, z = Math.sqrt(Math.max(0.0025, 1 - x * x - y * y)), k = 1 / Math.hypot(x, y, z);
+  return [x * k, y * k, z * k];
+})();
+function shade(it) {
+  if (!it.light) return;
+  const g = (p) => +gsap.getProperty(it.el, p);
+  const m = new DOMMatrix().rotateSelf(0, 0, g("rotation")).rotateSelf(0, g("rotationY"), 0).rotateSelf(g("rotationX"), 0, 0);
+  const lit = m.m31 * LIGHT[0] + m.m32 * LIGHT[1] + m.m33 * LIGHT[2] - LIGHT[2];
+  const a = Math.min(M.LIGHT.max, Math.max(-M.LIGHT.max, lit * M.LIGHT.shade));
+  it.light.style.backgroundColor = Math.abs(a) < 0.002 ? "" : a > 0 ? "rgb(255 255 255 / " + a.toFixed(3) + ")" : "rgb(0 0 0 / " + (-a).toFixed(3) + ")";
+}
+
+// The deck came or went (deck.js): the cards that are already there lie at the angle of where they are now (straight in
+// a stack's slot, their own in a row)
+export function settleTilts() {
+  items.forEach((it) => {
+    if (it.kind !== "tilt" || it.state !== "done") return;
+    gsap.set(it.el, { rotation: restOf(it) });
+  });
 }
 
 // shown at once, without its beat; what is inside it is let in
@@ -456,7 +561,7 @@ function prepare(it) {
   if (!it || it.ready || it.preparing || it.state === "done") return;
   if (it.kind === "cue") return;                          // a cue says itself when it is ready
   it.preparing = true;
-  const lines = it.kind === "lines";
+  const lines = it.kind === "lines" || it.kind === "title";
   const font = lines ? Promise.race([fontOf(it.el), new Promise((go) => { it.hurry = () => setTimeout(go, M.FONT * 1000); })]) : Promise.resolve();
   // the label screen readers hear: SplitText writes the heading's text; a heading with parts for some widths only (the
   // hero's) says in data-label what it reads as
@@ -484,7 +589,8 @@ function prepare(it) {
           it.tween.kill();
           it.tween = build(it, Math.max(0, -gone));
           if (gone > 0) it.tween.totalTime(gone);
-        } else gsap.set(parts, lines ? { yPercent: M.lines.rise, opacity: 0 } : { yPercent: M.chars.wave[0][1], opacity: 0 });
+        } else gsap.set(parts, it.kind === "title" ? { yPercent: M.title.rise, opacity: 0 }
+          : lines ? { yPercent: M.lines.rise, opacity: 0 } : { yPercent: M.chars.wave[0][1], opacity: 0 });
         gsap.set(it.el, { visibility: "visible" });
         if (first) ready(it);
       }
@@ -496,31 +602,34 @@ function ready(it) {
   it.waiters.splice(0).forEach((fn) => fn());
 }
 
-// ── other parts of the page join a group: cue(el, { play(instant), whenReady(done) }) ──
-// play(true): it is shown without its way in. Returns false when there is no way in ("reduce motion"):
-// the caller then plays it itself.
+// ── other parts of the page join a group: cue(el, { play(instant), whenReady(done), alone() }) ──
+// play(true): it is shown without its way in. alone(), if given, is asked when it becomes due: true, and it starts at
+// once instead of waiting for its turn in the group. Returns false when there is no way in ("reduce motion"): the
+// caller then plays it itself.
 export function cue(el, opts) {
-  const c = { el, play: opts.play, whenReady: opts.whenReady, lead: opts.lead != null ? opts.lead : 0, at: opts.at || null, owner: opts.group || null, line: opts.line || 0 };
+  const c = { el, play: opts.play, whenReady: opts.whenReady, lead: opts.lead != null ? opts.lead : 0, at: opts.at || null, owner: opts.group || null, line: opts.line || 0, alone: opts.alone || null };
   if (!booted) { waiting.push(c); return true; }
   if (!live) return false;
   enlist(c);
   return true;
 }
 function enlist(c) {
-  const it = add(c.el, "cue", { play: c.play, lead: c.lead, at: c.at, line: c.line, ready: false });
+  const it = add(c.el, "cue", { play: c.play, lead: c.lead, at: c.at, line: c.line, alone: c.alone, ready: false });
   it.group = groupFor(it.el, c.owner);
   c.whenReady(() => ready(it));
   watch(it);
 }
 
-// ── the ID cards lean towards the mouse, up to 8° ──
+// ── the ID cards lean towards the mouse, up to 8° (not in a stack); the light on their faces follows ──
 function lean() {
   if (!fine) return;
-  items.filter((it) => it.kind === "tilt").forEach(({ el: card }) => {
+  items.filter((it) => it.kind === "tilt").forEach((it) => {
+    const card = it.el, onUpdate = () => shade(it);
     gsap.set(card, { transformPerspective: 800 });
-    const rx = gsap.quickTo(card, "rotationX", { duration: M.tilt.follow, ease: "fm-out" });
-    const ry = gsap.quickTo(card, "rotationY", { duration: M.tilt.follow, ease: "fm-out" });
+    const rx = gsap.quickTo(card, "rotationX", { duration: M.tilt.follow, ease: "fm-out", onUpdate });
+    const ry = gsap.quickTo(card, "rotationY", { duration: M.tilt.follow, ease: "fm-out", onUpdate });
     card.addEventListener("mousemove", (e) => {
+      if (inDeck(it)) return;                                // a stack is swiped, not leaned (deck.js)
       const r = card.getBoundingClientRect();
       ry(((e.clientX - r.left) / r.width - 0.5) * M.tilt.lean * 2);
       rx(-((e.clientY - r.top) / r.height - 0.5) * M.tilt.lean * 2);

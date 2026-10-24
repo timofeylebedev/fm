@@ -8,7 +8,9 @@
 
         320–767   phones, and phones sideways   --phone    the contacts centred, the grey notes in one column (upright)
         768–1023  tablets upright               --tablet   the burger menu, the notes in two columns
-       1024–      laptops, computers             (base)    the links of the navbar, the notes in a row
+       1024–      laptops, computers             (base)    the links of the navbar
+       1080–      wide laptops, computers        (base)    the notes in a row (--notes-cols below: in two columns up to 1079,
+                                                           so the longer «Дизайн и разработка» link never squeezes the row)
 
    Heights are handled without steps: every size of the scale takes the screen's height into account (a screen counts
    as only as big as its height allows), and what is sized by the screen's height (the hero, the cards of the stack,
@@ -21,6 +23,7 @@
    hides while scrolling down (scripts/nav.js) and the card stack sticks to the top of the screen instead of under it. */
 @custom-media --tablet (width < 64em);         /* 1024px */
 @custom-media --phone (width < 48em);          /* 768px */
+@custom-media --notes-cols (width < 67.5em);   /* 1080px: the footer's notes in two columns */
 @custom-media --portrait (orientation: portrait);
 @custom-media --sideways (width < 64em) and (height < 31.25em) and (orientation: landscape);   /* 1024 × 500px */
 @custom-media --mouse (hover: hover) and (pointer: fine);

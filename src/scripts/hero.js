@@ -7,7 +7,7 @@ import { pace } from "./pace.js";
 import { M, calm, cue } from "./motion.js";
 
 // ── the chips ──
-// icon: the cell of hero-chips.webp (0 … 11, from the left); shape: "cover" (rounded square), "round" or "" (the icon has its own shape)
+// icon: the cell of hero-chips (src/assets/img) (0 … 11, from the left); shape: "cover" (rounded square), "round" or "" (the icon has its own shape)
 // dot: the colour of the status dot, or "" for a line without a dot (a sum)
 // Their order here is their order on the table, from right to left.
 const CHIPS = [
@@ -15,13 +15,13 @@ const CHIPS = [
   { icon: 2,  shape: "round", title: "Сборы с концерта",       dot: "",        text: "+ 4 160 000 ₸" },
   { icon: 1,  shape: "",      title: "Лиц. договор № К-011",   dot: "#16d947", text: "Подписан" },
   { icon: 7,  shape: "round", title: "Аванс на клип",          dot: "#16d947", text: "Согласован" },
-  { icon: 3,  shape: "cover", title: "Last Seen Leaving",      dot: "#ffbf00", text: "На модерации" },
+  { icon: 3,  shape: "cover", title: "Last Seen at 8 AM",      dot: "#ffbf00", text: "На модерации" },
   { icon: 4,  shape: "round", title: "Роялти за сентябрь",     dot: "",        text: "+ 865 947 ₽" },
   { icon: 5,  shape: "round", title: "Лицензия для сериала",   dot: "#e366ff", text: "Согласование" },
   { icon: 6,  shape: "cover", title: "Сингл «Любовь»",         dot: "#ffbf00", text: "Сведение" },
   { icon: 9,  shape: "",      title: "Акт № У-067",            dot: "#ffbf00", text: "В разработке" },
   { icon: 10, shape: "round", title: "Продажа мерча",          dot: "",        text: "+ 210 000 ₽" },
-  { icon: 8,  shape: "cover", title: "EP «slow blink»",        dot: "#33a0ff", text: "Отгружен на площадки" },
+  { icon: 8,  shape: "cover", title: "EP «lazy friday»",       dot: "#33a0ff", text: "Отгружен на площадки" },
   { icon: 11, shape: "round", title: "Обложка релиза",         dot: "#33a0ff", text: "На проверке" }
 ];
 
@@ -52,7 +52,10 @@ const HERO = {
   // the way in: the chips that are on screen rise from the table one after another, like the letters of the heading
   enterDelay: 0.1,    // seconds after their turn has come (right after the button's: see "motion" below)
   enterTime: 1.1,     // seconds for one chip (the same as the letters of a heading: fmMotion.M.chars.time)
-  enterStagger: 0.08  // seconds between two chips, from left to right
+  enterStagger: 0.08, // seconds between two chips, from left to right
+  // the team fades in once its picture has kept its size this long (seconds), at most this much after its turn
+  still: 0.12,
+  stillMax: 0.6
 };
 /* HERO:END */
 
@@ -231,7 +234,21 @@ function init(section, picture) {
     measure();
     onLoad.splice(0).forEach((fn) => fn());
   }
-  const people = () => document.documentElement.classList.add("hero-in");
+  // The team fades in at its turn, but only once its picture has kept the same size for a moment (HERO.still): in
+  // Safari, on a first visit (a private window), the picture was laid out about 4% too big for a few frames and took
+  // its size during the fade, as a jump (Tim's video, Oct 22; never seen in Chromium). Its box is read every frame from
+  // its turn on, so a late change of the layout happens under the cover, not in sight.
+  function people() {
+    const t0 = performance.now();
+    let size = "", since = t0;
+    const look = (now) => {
+      const b = picture.getBoundingClientRect(), k = Math.round(b.width) + "×" + Math.round(b.height);
+      if (k !== size) { size = k; since = now; }
+      if (now - since >= HERO.still * 1000 || now - t0 >= HERO.stillMax * 1000) document.documentElement.classList.add("hero-in");
+      else requestAnimationFrame(look);
+    };
+    requestAnimationFrame(look);
+  }
   function rise(instant) {                               // the chips rise
     if (started) return;
     started = true;
@@ -263,8 +280,36 @@ function init(section, picture) {
   }).observe(section);
   measure();
 
+  // ?fmhero=debug: every change of the hero's layout in its first 5 seconds, in the console (fmHero.log)
+  if (/[?&]fmhero=debug\b/.test(location.search)) watchLayout(section, picture);
+
   // For quick experiments in the console: change a value in fmHero.settings, then call fmHero.update()
-  window.fmHero = { settings: HERO, update() { sized = ""; measure(); }, state: () => ({ clock, travel, round, W, H, k, section: Math.round(section.getBoundingClientRect().height) }) };
+  window.fmHero = { settings: HERO, update() { sized = ""; measure(); }, state: () => ({ clock, travel, round, W, H, k, section: Math.round(section.getBoundingClientRect().height) }), log: debugLog };
+}
+
+// ?fmhero=debug: the sizes that decide the picture's, written down each time one of them changes (ms from the start of
+// the page, the boxes in CSS px, the classes on <html>, the fonts that have arrived), so a jump seen in one browser
+// can be traced to what moved
+const debugLog = [];
+function watchLayout(section, picture) {
+  const parts = { hero: section, stage: picture.parentElement, picture, text: section.querySelector(".hero__text"),
+    title: section.querySelector("h1"), lead: section.querySelector(".hero__lead") };
+  let last = "";
+  const look = () => {
+    const row = { ms: Math.round(performance.now()) };
+    for (const [name, el] of Object.entries(parts)) {
+      const b = el && el.getBoundingClientRect();
+      if (b) row[name] = Math.round(b.top) + "+" + Math.round(b.height) + (name === "picture" ? " w" + Math.round(b.width) : "");
+    }
+    row.vh = innerHeight + "/" + document.documentElement.clientWidth;
+    row.html = document.documentElement.className;
+    row.fonts = [...document.fonts].filter((f) => f.status === "loaded").length;
+    const key = JSON.stringify(Object.assign({}, row, { ms: 0 }));
+    if (key !== last) { last = key; debugLog.push(row); console.log("fmhero", row); }
+    if (performance.now() < 5000) requestAnimationFrame(look);
+    else console.table(debugLog);
+  };
+  look();
 }
 
 export function initHero() {

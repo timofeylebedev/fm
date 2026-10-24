@@ -1,16 +1,5 @@
-/* The ring of covers under «Больше релизов, меньше хаоса» (scripts/ring.js): a 3D ring that turns with the scroll.
-   The script sizes everything to the width of the block; these are only the pieces. */
-.ring .rc-tilt { position: absolute; transform-style: preserve-3d; will-change: transform; }
-.ring .rc-ring { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
-.ring .rc-item {
-  position: absolute; inset: 0; transform-style: preserve-3d;
-  transform: rotateY(var(--rc-angle)) translateZ(var(--rc-radius));
-}
-.ring .rc-face {
-  position: absolute; inset: 0; overflow: hidden; border-radius: var(--rc-corner);
-  -webkit-backface-visibility: hidden; backface-visibility: hidden;
-  background: var(--mist) center / cover no-repeat;              /* until the cover has loaded */
-}
-/* the back of each cover: the same picture, faded towards the page colour */
-.ring .rc-back { transform: rotateY(180deg); }
-.ring .rc-back::after { content: ""; position: absolute; inset: 0; background: var(--rc-fade-color); opacity: var(--rc-fade); }
+/* The ring of covers under «Больше релизов, меньше хаоса» (scripts/ring.js, drawn by scripts/ring-gl.js): one canvas.
+   The script sizes the block (its height) and the canvas: as wide as the block, and taller, reaching past it up and
+   down by the room the tilt needs (the block's overflow is visible up and down, sections.css). The canvas never takes
+   clicks or taps, so the heading and the features under its see-through parts work as before. */
+.ring .rc-canvas { position: absolute; left: 0; display: block; pointer-events: none; }

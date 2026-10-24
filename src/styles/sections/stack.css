@@ -9,8 +9,8 @@
 
    The card arranges itself by its own shape (it is a size container, @container card), not by the screen:
      · a wide card (at least 1.3 times as wide as tall: laptops, computers, tablets and phones turned sideways): the text
-       on the left, the drawing on the right as a square as tall as the card (at most 58% of its width), a little past
-       its right edge (the drawings have air of their own around them);
+       on the left in a column as wide as the titles need, the drawing centred in all the card right of it, as a square
+       as big as fits (at most as tall as the card);
      · a tall card (phones, tablets upright, a narrow window), and any card on a screen 1440px tall or taller: the text
        on top, the drawing in all the room below it.
    So the drawing always takes the card's room, on a tall screen as on a short one.
@@ -43,11 +43,20 @@
   background-color: var(--card-bg);
   container: card / size;
 }
+/* The size of the titles (the section headings, but never so big that the longest unbreakable run of a title, 9.7em:
+   «без уточнений —», joined by the no-break spaces of build/typeset, is wider than the card's text: on phones under about
+   350px that is a little less than h2, 26px at 320, 24px at 300), and on a wide card the width of the text column
+   (--card-t): the room the drawing's square leaves, but never wider than the titles need (12.5 of their letters, with
+   the card's padding on both sides). Both are on every part of the card, so the drawing can be centred in the room the
+   text leaves. Container units here are the card's (cards are size containers). */
+.card__text, .card__art {
+  --card-title: min(var(--type-h2), (100cqw - 2 * var(--card-pad)) / 9.8);
+  --card-t: min(100cqw - 0.94 * min(58cqw, 100cqh), 2 * var(--card-pad) + 12.5 * var(--card-title));
+}
 .card__text {
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--card-text-gap);
-  /* beside the drawing: the room the drawing leaves (its square, less the part past the edge) */
-  width: calc(100cqw - min(58cqw, 100cqh) + min(58cqw, 100cqh) * 0.06);
+  width: var(--card-t);                               /* beside the drawing (see above) */
   padding: var(--card-pad) 0 0 var(--card-pad);
 }
 .card__tag {
@@ -56,6 +65,8 @@
   height: var(--tag-h);
   padding: 0 var(--card-tag-pad-x);
   border: 2px solid var(--paper-30); border-radius: var(--round);
+  transition: border-color 0.3s var(--ease-out);
+  @media (--calm) { transition: none; }
 }
 .card__tag-label {
   display: block;
@@ -64,30 +75,27 @@
 }
 /* the titles are counted in their own letters: about 12.5 of them wide, so they break into three or four lines
    of a similar length at every size (text-wrap evens them out) */
-/* the size of the section headings, but never so big that the longest unbreakable run of a title (9.7em: «без
-   уточнений —», joined by the no-break spaces of build/typeset; `npm run typeset -- src/index.html` lists each text's
-   longest run) is wider than the card's text: on phones under about 350px that is a little less than h2 (26px at 320,
-   24px at 300) */
-.card__titles { --card-title: min(var(--type-h2), (100cqw - 2 * var(--card-pad)) / 9.8); width: min(100%, 12.5em); font-size: var(--card-title); }
+.card__titles { width: min(100%, 12.5em); font-size: var(--card-title); }
 .card__title {
   font-family: var(--font-display); font-weight: 700; font-size: 1em; line-height: var(--lh-display); color: var(--paper);
   text-wrap: balance;
 }
 /* The drawing. It is as big as its room allows, within limits, and centred in that room, the same way on a wide card
    as on a tall one:
-     · a wide card: the room is a square on the right, as tall as the card (at most 58% of its width), 6% of it past
-       the edge (the drawings have air of their own around them). On a short screen the drawing does not shrink with the
-       card below --art-min: it then reaches past the card's top and bottom edges, which cut its air, not the drawing;
+     · a wide card: the room is all the card right of the text column (--card-t), as tall as the card. The drawing is a
+       square as big as fits (8% more than the room's width: the drawings have air of their own around them), centred in
+       it, so it never sticks to one side however wide the card is. On a short screen the drawing does not shrink with
+       the card below --art-min: it then reaches past the card's top and bottom edges, which cut its air, not the drawing;
      · a tall card: the room is all the space under the text; the drawing fills it (a little past it: its air), up to
-       --art-max (1080px, about the room of a 1440px tall screen), and stays centred in it when the room is bigger. */
+       --art-max (1080px, about the room of a 1440px tall screen), and stays centred in it when the room is bigger.
+   While a card opens and closes the drawing stays as it is (its size and place with the card open): the card's moving
+   edge covers and uncovers it (Tim, Oct 20). */
 .card__art {
   --art-min: 300px;
   --art-max: 1080px;
-  --s: min(58cqw, 100cqh);
-  position: absolute; top: 0; bottom: 0; right: calc(var(--s) * -0.06);
-  width: var(--s);
+  position: absolute; top: 0; bottom: 0; right: 0; left: var(--card-t);
   & > .art {
-    --side: max(var(--art-min), var(--s));
+    --side: max(var(--art-min), min((100cqw - var(--card-t)) * 1.08, 100cqh));
     position: absolute; left: 50%; top: 50%; width: var(--side); height: var(--side);
     translate: -50% -50%;
   }
@@ -109,8 +117,8 @@
 
 /* ── while the script runs (stack-on) ──
    The browser moves the cards itself, with the page: each card is sticky under the navbar in a block of its own
-   (.stack__slot, made by the script) that is as tall as the scroll the card stays for; the next slot overlaps it
-   from below, so the next card comes up over the old one. Everything here is laid out by the styles alone, from the
+   (.stack__slot, made by the script) that is as tall as the scroll the card stays for; the next slot overlaps it from
+   below, so the next card comes up over the old one. Everything here is laid out by the styles alone, from the
    tokens and the screen's height, so nothing waits for the script when the window changes size, and nothing is
    moved by the script while the page scrolls (the script only decides which title and drawing are shown):
      · --stack-nav: where the cards stick, right under the navbar (on a phone turned sideways, whose navbar hides
@@ -129,17 +137,32 @@
   margin-bottom: calc(var(--stack-ph) - var(--stack-a));     /* the section after the stack comes up under the last card */
   @media (--sideways) { --stack-nav: var(--stack-gap); }
 }
+/* The sections after the stack come up over the last card, which stays whole under them while it gives room: they are
+   drawn above the stack (positioned, later on the page) in the page's colour, every one of them, not only the next (a
+   section shorter than a card would let the card show below it). Without a specificity of its own (:where), so a
+   section with its own background (the tools' grey) or position keeps it. In the styles, not set by the script from
+   what it read: Safari can run the script before the stylesheet has come, and the colour it read then was transparent
+   (Tim's screenshots, Oct 2026: the green card under the royalty section). */
+:where(.stack.stack-on ~ *) { position: relative; background-color: var(--paper); }
 /* the stage is hidden itself (Safari would colour its bars after it), the cards are visible again */
 .stack-on .stack__stage {
   --stack-w: calc(min(100%, 1920px) + 2px);
   display: block; position: relative; padding-top: var(--stack-gap); visibility: hidden; pointer-events: none;
 }
 /* a slot: the card's own height twice (it comes, then gives room), the scroll of its steps (--steps × --stack-step
-   screens, set by the script), less the smallest card; every slot but the first is pulled up under the one before */
+   screens, set by the script), less the smallest card, and the card's place in it (--p: how far below the slot's top the
+   card starts, the pill and the gap; 0 for the first card). Every slot but the first is pulled up under the one before,
+   so that the card is under the pill of the card before, the gap between them, at the moment that card has become a
+   pill. The card is sticky in it; its strips (collar, cap, veil) are in it too, so they keep to the card. */
 .stack-on .stack__slot {
+  --p: 0px;
   display: flow-root; position: relative;
-  height: calc(2 * var(--stack-a) + var(--steps, 1) * var(--stack-step, 0.7) * var(--screen) - var(--stack-ph));
-  & + .stack__slot { margin-top: calc(var(--stack-gap) + var(--stack-ph) - var(--stack-a)); }
+  height: calc(var(--p) + 2 * var(--stack-a) + var(--steps, 1) * var(--stack-step, 0.7) * var(--screen) - var(--stack-ph));
+  padding-top: var(--p);
+  & + .stack__slot {
+    --p: calc(var(--stack-ph) + var(--stack-gap));
+    margin-top: calc(-1 * var(--stack-a));
+  }
 }
 .stack-on .card {
   position: sticky; top: var(--stack-nav);
@@ -158,30 +181,38 @@
 /* for a moment, while the script measures the cards: no transitions */
 .stack-instant .card, .stack-instant .card *, .stack-instant .card__tag { transition: none !important; }
 
-/* The strips in the colour of the page that shape the cards where they meet. Each has the cards' corners cut out of
-   it (--r: the card's radius), and is as wide as the cards. All of them move with the page or are sticky: the browser
-   moves them in the same frame as the cards, so they never lag behind.
+/* The strips in the colour of the page that shape the cards where they meet. Each is as wide as the cards (and 1px
+   more on each side) and has the shape of the card it shapes cut out of it: a hole (::before) with the card's corners,
+   whose shadow (a spread with no blur) is the page colour round it. One shape, one edge: the strips used to be drawn
+   from four background tiles, and on screens whose pixels do not fall on whole CSS px (phones: 3 px to 1) the seams
+   between the tiles let a hairline of the card's colour through. All of them move with the page or are sticky: the
+   browser moves them in the same frame as the cards, so they never lag behind.
      · .stack__collar, at the top of every slot but the first: the gap above the card and the bottom corners of the
        card it comes up over (and the strip at the end, .stack__collar-end, above the section after the stack);
      · .stack__cap, sticky with the card: the page colour outside its top corners, over the card it covers;
-     · .stack__veil, in every slot, drawn over its card: the bottom edge of the card while it comes up. Its corners
-       are cut out where the smallest card ends, and it is sticky at the bottom of the stage: so the card comes up from
-       the bottom of the screen as the smallest card (a pill), until that reaches the bottom of the stage; from then on
-       its bottom edge stays there and only its top keeps coming up, and the card grows. It covers the card before
-       below that edge too. It is only as tall as the gap under the stage, the smallest card and 15vh (in case the
-       screen is taller for a moment than --screen, while an app's bars collapse): where the slot ends it is pushed up
-       with it, and by then the next card has come up over it. */
-.stack__collar, .stack__cap, .stack__veil { --r: var(--card-r); display: block; visibility: visible; pointer-events: none; }
-.stack__collar, .stack__veil {
-  background:
-    radial-gradient(circle var(--r) at 100% 0, transparent calc(var(--r) - 0.5px), var(--stack-page, var(--paper)) calc(var(--r) + 0.5px)) 1px 0 / var(--r) var(--r) no-repeat,
-    radial-gradient(circle var(--r) at 0 0, transparent calc(var(--r) - 0.5px), var(--stack-page, var(--paper)) calc(var(--r) + 0.5px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
-    linear-gradient(var(--stack-page, var(--paper)), var(--stack-page, var(--paper))) 0 var(--r) / 100% 100% no-repeat,
-    linear-gradient(to right, var(--stack-page, var(--paper)) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, var(--paper)) calc(100% - 1px));
+     · .stack__veil, in every slot, drawn over its card: the bottom edge of the card while it comes up. Its hole ends
+       where the smallest card ends, and it is sticky at the bottom of the stage: so the card comes up from the bottom of
+       the screen as the smallest card (a pill), until that reaches the bottom of the stage; from then on its bottom edge
+       stays there and only its top keeps coming up, and the card grows. It covers the card before below that edge too.
+       It is only as tall as the gap under the stage, the smallest card and 15vh (in case the screen is taller for a
+       moment than --screen, while an app's bars collapse): where the slot ends it is pushed up with it, and by then the
+       next card has come up over it.
+   The shadow reaches only as far as the tallest strip (the veil): it used to be 100vmax + 100px (about 1900px on a
+   computer), and Safari on macOS 27 drew none of the strips (Tim's video, Oct 22: the next card came up straight over
+   the one before, with no gap and no rounded edge between them). */
+.stack__collar, .stack__cap, .stack__veil {
+  --r: var(--card-r);
+  display: block; position: relative; overflow: hidden; visibility: visible; pointer-events: none;
+  &::before {
+    content: ""; position: absolute; left: 1px; right: 1px;
+    box-shadow: 0 0 0 calc(var(--stack-gap) + var(--stack-ph) + 15vh + 2 * var(--r)) var(--stack-page, var(--paper));
+  }
 }
+/* the collar and the veil: the hole is the bottom of the card above (its corners in the strip's top r) */
+.stack__collar::before, .stack__veil::before { top: calc(-1 * var(--r)); height: calc(2 * var(--r)); border-radius: 0 0 var(--r) var(--r); }
 .stack__collar {
   position: absolute; left: 50%; translate: -50% 0; width: var(--stack-w);
-  top: calc(-1 * (var(--stack-gap) + var(--r))); height: calc(var(--stack-gap) + 2 * var(--r));
+  top: calc(var(--p, 0px) - var(--stack-gap) - var(--r)); height: calc(var(--stack-gap) + 2 * var(--r));   /* --p: the card's place in its slot */
 }
 .stack__collar-end {
   --stack-w: calc(min(100% - 2 * var(--stack-gap), 1920px) + 2px);
@@ -194,32 +225,32 @@
   margin-top: calc(var(--stack-ph) - var(--r) - var(--stack-a));     /* after the card in the slot: back up over it */
 }
 /* the cap: under a card, sticky with it (it takes no room: its bottom margin), the page colour outside its two top
-   corners. It hides the card before, which is still whole under this one, in those corners. Its quarter circles are a
-   little smaller than the card's corners, so the soft edge of the card's corner is drawn over the page colour. */
+   corners. It hides the card before, which is still whole under this one, in those corners. Its hole is 1.5px inside
+   the card's outline, so the soft edge of the card's corner is drawn over the page colour, never over the card before. */
 .stack__cap {
   position: sticky; top: var(--stack-nav);
   width: var(--stack-w); margin-inline: calc((100% - var(--stack-w)) / 2);
   height: var(--r); margin-bottom: calc(-1 * var(--r));
-  background:
-    radial-gradient(circle var(--r) at 100% 100%, transparent calc(var(--r) - 2px), var(--stack-page, var(--paper)) calc(var(--r) - 1px)) 1px 0 / var(--r) var(--r) no-repeat,
-    radial-gradient(circle var(--r) at 0 100%, transparent calc(var(--r) - 2px), var(--stack-page, var(--paper)) calc(var(--r) - 1px)) calc(100% - 1px) 0 / var(--r) var(--r) no-repeat,
-    linear-gradient(to right, var(--stack-page, var(--paper)) 1px, transparent 1px, transparent calc(100% - 1px), var(--stack-page, var(--paper)) calc(100% - 1px));
+  &::before { left: 2.5px; right: 2.5px; top: 1.5px; height: calc(2 * var(--r)); border-radius: calc(var(--r) - 1.5px) calc(var(--r) - 1.5px) 0 0; }
 }
 
 /* the label: the progress (.card__tag-fill) fills it from the left while the card goes through its steps; the white
-   copy (.card__tag-done, the text in the card's colour) fades in over it when the card is done (is-done).
+   copy (.card__tag-done, the text in the card's colour) fades in over it when the card is done (is-done), inside the
+   label's border, which turns white with it: so the white label has one outer edge only (a white copy laid over the
+   border's own edge let a hairline of the card's colour through round it).
    Both are made by the script. */
 .stack-on .card__tag { isolation: isolate; overflow: visible; }
 .card__tag-fill, .card__tag-done { position: absolute; pointer-events: none; border-radius: inherit; }
 .card__tag-fill { inset: 0; z-index: -1; background: var(--paper-30); clip-path: inset(0 100% 0 0); }
 .card__tag-done {
-  inset: -2px; z-index: 1;
+  inset: 0; z-index: 1;
   display: flex; align-items: center; justify-content: center;
   background: var(--paper);
   opacity: 0; transition: opacity 0.3s var(--ease-out);
   & * { color: var(--card-bg) !important; }
   @media (--calm) { transition: none; }
 }
+.card__tag.is-done { border-color: var(--paper); }
 .card__tag.is-done > .card__tag-done { opacity: 1; }
 
 @media (forced-colors: active) { .card { outline: 1px solid CanvasText; outline-offset: -1px; } }

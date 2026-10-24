@@ -17,13 +17,16 @@
   --ink-50: rgb(0 0 0 / 0.5);
   --ink-40: rgb(0 0 0 / 0.4);
   --ink-30: rgb(0 0 0 / 0.3);
+  --ink-25: rgb(0 0 0 / 0.25);
   --ink-20: rgb(0 0 0 / 0.2);
+  --ink-16: rgb(0 0 0 / 0.16);
   --ink-10: rgb(0 0 0 / 0.1);
   --paper: #ffffff;
   --mist: #f7f7f7;
   --sand: #eeeae9;
   --tint: rgb(0 0 0 / 0.03);
   --tint-hover: rgb(0 0 0 / 0.05);
+  --tint-strong: rgb(0 0 0 / 0.07);
   --purple: #884dff;
   --purple-hover: #7733ff;
   --purple-light: #b596ff;
@@ -42,7 +45,7 @@
   --idcard-line-2: #808080;
   --idcard-face-3: #333333;
   --idcard-line-3: #666666;
-  --type-hero: clamp(2.25rem, calc(2.25rem + (var(--vp) - 20rem) * 28 / 1120), 4rem);
+  --type-hero: clamp(2.25rem, calc(2.25rem + (var(--vp) - 20rem) * 24 / 1120), 3.75rem);
   --type-h2: clamp(1.75rem, calc(1.75rem + (var(--vp) - 20rem) * 24 / 1120), 3.25rem);
   --type-card-tag: clamp(0.875rem, calc(0.875rem + (var(--vp) - 20rem) * 4 / 1120), 1.125rem);
   --type-lead: clamp(1rem, calc(1rem + (var(--vp) - 20rem) * 4 / 1120), 1.25rem);
@@ -69,7 +72,7 @@
   --tool-logo-h: clamp(20px, calc(20px + (var(--vp) - 20rem) * 8 / 1120), 28px);
   --footer-contact-y: clamp(32px, calc(40px + (var(--vp) - 20rem) * -8 / 1120), 40px);
   --footer-legal-y: clamp(16px, calc(24px + (var(--vp) - 20rem) * -8 / 1120), 24px);
-  --radius-s: clamp(16px, calc(16px + (var(--vp) - 20rem) * 8 / 1120), 24px);
+  --radius-s: clamp(16px, calc(16px + (var(--vp) - 20rem) * 16 / 1120), 32px);
   --radius-m: clamp(24px, calc(24px + (var(--vp) - 20rem) * 16 / 1120), 40px);
   --radius-l: clamp(32px, calc(32px + (var(--vp) - 20rem) * 24 / 1120), 56px);
   --type-body: 1rem;
@@ -80,11 +83,16 @@
   --text-gap: clamp(12px, calc(12px + (var(--vp) - 20rem) * 4 / 1120), 16px);
   --action-gap: clamp(20px, calc(20px + (var(--vp) - 20rem) * 4 / 1120), 24px);
   --pub-air: clamp(40px, calc(40px + (var(--vp) - 20rem) * 24 / 1120), 64px);
-  --hero-air-top: clamp(16px, calc(16px + (var(--vp) - 20rem) * 32 / 1120), 48px);
-  --hero-air-bottom: clamp(16px, calc(16px + (var(--vp) - 20rem) * 16 / 1120), 32px);
+  --hero-air-top: clamp(32px, calc(32px + (var(--vp) - 20rem) * 32 / 1120), 64px);
+  --hero-air-bottom: clamp(40px, calc(40px + (var(--vp) - 20rem) * 32 / 1120), 72px);
   --center-air: clamp(0px, calc(8px + (var(--vp) - 20rem) * -8 / 1120), 8px);
   --tool-min-h: clamp(400px, calc(400px + (var(--vp) - 20rem) * 80 / 1120), 480px);
   --cta-air: clamp(64px, calc(64px + (var(--vp) - 20rem) * 64 / 1120), 128px);
-  --tool-pad: clamp(28px, calc(28px + (100cqi - 18rem) * 36 / 312), 64px);
+  --tool-pad: clamp(28px, calc(28px + (100cqi - 18rem) * 36 / 736), 64px);
   --type-note: 0.75rem;
+  --hero-air-max: clamp(64px, calc(64px + (var(--vp) - 20rem) * 64 / 1120), 128px);
+  --hero-pic-min: clamp(168px, calc(168px + (100vw - 20rem) * 132 / 1120), 300px);
+  --hero-text: clamp(224px, calc(224px + (var(--vp) - 20rem) * 36 / 1120), 260px);
+  --section-air-l: clamp(56px, calc(56px + (var(--vp) - 20rem) * 56 / 1120), 112px);
+  --type-doc-title: clamp(1.5rem, calc(1.5rem + (var(--vp) - 20rem) * 16 / 1120), 2.5rem);
 }

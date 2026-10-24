@@ -6,12 +6,12 @@
    The blocks inside arrange themselves by the width they get (container queries on their column), not by the screen,
    and they change together, at three shared column widths:
        S  22rem   (a 390 phone)                    features 1 → 2 columns, logos 2 → 3
-       M  43rem   (a 768 window, even with a scrollbar)   logos 3 → 4; royalty, publications and tools 1 → 2
+       M  43rem   (a 768 window, even with a scrollbar)   logos 3 → 4; royalty and publications 1 → 2
        L  58rem   (a 1024 window, even with a scrollbar)  features 2 → 4
    (a classic scrollbar takes about 15px of the column: M and L leave room for it; phones have none)
    The ID cards are the one exception (a deck below a 35rem column): an object of a fixed size, its row needs that room.
    The cards share one grammar: tiles (features, logos, stats) have --radius-s and --gap-tiles between them,
-   half-column cards (royalty, publications) and the ID cards --radius-m and --gap-cards, full-column cards (tools, CTA)
+   half-column cards (royalty, publications) --radius-m and --gap-cards, full-column cards (tools, CTA)
    --radius-l. A card's padding is its radius (the corners and the text are concentric), except the tool cards, padded
    by their own width (--tool-pad: their extra air, design/decisions.json), and the CTA, whose centred text has
    --radius-m at its sides and generous air above and below (--cta-air). */
@@ -20,6 +20,9 @@
   display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
   padding: var(--section-y) var(--gutter);
 }
+/* the two sections after the CTA have more air: above, below and under their headings, as much as under the CTA card
+   (--section-air-l, 56 → 112; Tim, Oct 20) */
+.tools, .pubs { gap: var(--section-air-l); padding-block: var(--section-air-l); }
 
 /* ── Royalty: two magenta cards with drawings (art/royalty.js) ──
    Half-column cards, made like the publications: the same gap, radius, padding, title and steps (one column, two from
@@ -31,7 +34,9 @@
      · wide (from 32rem inside the card's padding, a card of about 560px: one card in a row on a column of about 560
        to 690px, a small tablet or a small phone turned sideways): the title on the left, the drawing on the right as a
        square half the card's width, its empty lower part cut off (the card is at least 39% of its width tall).
-   The title is at most 12em wide: three short lines, never two long ones across a wide card. */
+   The title is as wide as its card (Tim, Oct 22: its lines filled, not evened out to a narrower block), but at most
+   14em: the shorter title is 30.6em long in one line, so it always takes three lines, never two long ones across a wide
+   card. */
 .royalty { padding-top: calc(var(--section-y) * 1.6); container: royalty / inline-size; }
 .royalty__cards {
   display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
@@ -51,16 +56,16 @@
 /* sizes by the card's width: --w (100cqi is the width inside the card's padding) */
 .royalty__text {
   --w: calc(100cqi + 2 * var(--radius-m));
-  position: relative; max-width: 12em;
+  position: relative; max-width: 14em;
   margin-top: calc(0.7 * var(--w) - var(--radius-m));                  /* under the drawing */
   font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); color: var(--paper);
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 @container royalty-card (width >= 32rem) {
   .royalty__card > .art { left: auto; right: 0; width: 50%; }
   .royalty__text {
     display: flex; align-items: flex-end;
-    max-width: min(12em, 0.5 * var(--w) - 1.5 * var(--radius-m));     /* beside the drawing, with half a padding to it */
+    max-width: min(14em, 0.5 * var(--w) - 1.5 * var(--radius-m));     /* beside the drawing, with half a padding to it */
     min-height: calc(0.39 * var(--w) - 2 * var(--radius-m));            /* the card: at least 39% of its width tall */
     margin-top: 0;
   }
@@ -72,7 +77,9 @@
        overlap at their edges, never over the text of the one under it), then scaled down a little;
      · below a 35rem (560px) column (phones held upright, narrow windows): a deck, one card on top of the others, which you
        swipe away to either side (scripts/deck.js). The deck is scaled down only below a 300px column. Phones turned
-       sideways and tablets held upright have a row, a little smaller.
+       sideways and tablets held upright have a row, a little smaller. In the deck the angle goes with the place: the
+       top card lies straight, each card under it 4° further round (Tim, Oct 23), so after a swap the stack looks the
+       same; the slot carries it, and a card turns with its slot as it moves to its new place.
    The section is the container: 100cqw is its column. It cuts off what goes past its sides (a card swiped away), but
    not above and below: the shadows of the cards reach into the next section (it is drawn over it, z-index), so the
    section keeps the same padding as every other one. */
@@ -106,32 +113,41 @@
   .access__stage {
     --k: min(1, tan(atan2(100cqw, 300px)));
     --deck: 1;                                                          /* read by scripts/deck.js */
+    /* each depth under the top card: further right, up, round and smaller (read by deck.js, which moves the cards) */
+    --deck-x: 13px; --deck-y: -7px; --deck-turn: 4deg; --deck-shrink: 0.045;
     height: calc(424px * var(--k));
     touch-action: pan-y;                                                /* the page scrolls up and down; sideways is the deck's */
     user-select: none; -webkit-user-select: none;
   }
   .access__cards { display: block; position: relative; height: 392px; }
-  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) is set by the script */
+  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) places, turns and sizes it. With scripts the
+     deck (deck.js) moves the slots itself, by their transform only (a depth and a swipe together), so the phone's
+     graphics chip moves them without painting the cards again: a CSS transition did not run in Safari on iPhone, and
+     moving them by CSS variables repainted every card, its shadow and its masked face, on every frame (Tim's
+     recordings, Oct 24). Which card is in front is --z, a whole number, set at once. */
   .access__slot {
     position: absolute; left: 50%; top: 8px;
     width: 270px; height: 376px; margin: 0 0 0 -135px !important;
-    z-index: calc(3 - var(--d, 0));
-    translate: calc(var(--d, 0) * 13px) calc(var(--d, 0) * -7px);
-    scale: calc(1 - var(--d, 0) * 0.045);
-    transition: translate 0.45s var(--ease-out), scale 0.45s var(--ease-out);
-    @media (--calm) { transition: none; }
+    z-index: calc(3 - var(--z, var(--d, 0)));
+    translate: calc(var(--d, 0) * var(--deck-x)) calc(var(--d, 0) * var(--deck-y));
+    rotate: calc(var(--d, 0) * var(--deck-turn));
+    scale: calc(1 - var(--d, 0) * var(--deck-shrink));
   }
+  .is-deck .access__slot { translate: none; rotate: none; scale: none; will-change: transform; }   /* deck.js moves it */
+  .access__slot .idcard { rotate: none; }                              /* straight in its slot (without scripts too) */
   .access__slot--2 { --d: 1; }
   .access__slot--3 { --d: 2; }
-  .access__stage.is-dragging .access__slot { transition: none; }
 }
 
 .idcard {
-  /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are
-     those of the royalty and publication cards (--radius-m); the table inside sits half a radius in, with the other
-     half as its own radius, so the two curves are concentric */
-  --id-r: var(--radius-m);
+  /* an object of a fixed size (its text stays readable), scaled as a whole by the row or the deck. Its corners are its
+     own, fixed in the object (24px of its 240), so they scale with it and keep the same shape at every screen size
+     (Tim, Oct 20: always in step with the card; Oct 22: 24px at most); the table inside sits half a radius in, with the
+     other half as its own radius, so the two curves are concentric */
+  --id-r: 24px;
   --id-inset: calc(var(--id-r) / 2);
+  /* the card less the slot: 48×12px, fully rounded, 12px from the top, centred */
+  --id-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
   position: relative;
   width: 240px; height: 345px;
   border-radius: var(--id-r);
@@ -139,22 +155,30 @@
 }
 /* The card's face. Its colour is a layer of its own (::before) with the slot for the clip cut right through it, so
    what lies under the card (the cards under it in the deck, the page) shows through the slot, as through a real one.
-   The face itself has no colour, only the shadow, which a box-shadow draws outside the card and not in the slot. */
+   The face itself has no colour, only the shadow, which a box-shadow draws outside the card and not in the slot. Its first
+   layer is a hairline of the face's own colour: a box-shadow leaves the card's box empty, so the pixels on the card's
+   edge, only partly covered by the card, showed the white page through them, a thin light line between the card and
+   its shadow (Tim, Oct 23); the hairline covers them. */
 .idcard__face {
   position: relative; isolation: isolate;
   display: flex; flex-direction: column;
   width: 240px; height: 345px;
   border-radius: var(--id-r);
-  box-shadow: 0 24px 24px -16px rgb(0 0 0 / 0.4), 0 0 16px rgb(0 0 0 / 0.02), 0 24px 56px rgb(0 0 0 / 0.1);
+  box-shadow: 0 0 0 0.5px var(--face), 0 24px 24px -16px rgb(0 0 0 / 0.4), 0 0 16px rgb(0 0 0 / 0.02), 0 24px 56px rgb(0 0 0 / 0.1);
   color: var(--paper);
 
   &::before {
     content: ""; position: absolute; inset: 0; z-index: -1;
     border-radius: inherit; background: var(--face);
-    /* the card less the slot: 48×12px, fully rounded, 12px from the top, centred */
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 345'%3E%3Cpath fill-rule='evenodd' d='M0 0h240v345H0z M102 12h36a6 6 0 0 1 0 12h-36a6 6 0 0 1 0-12z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
+    -webkit-mask: var(--id-mask); mask: var(--id-mask);
   }
+}
+/* the light on the face (scripts/motion.js, shade): a white or black veil over all of it, as the card tips towards the
+   light or away from it; none while it lies flat */
+.idcard__light {
+  position: absolute; inset: 0; z-index: 1;
+  border-radius: inherit; pointer-events: none;
+  -webkit-mask: var(--id-mask); mask: var(--id-mask);
 }
 .idcard__face--1 { --line: var(--idcard-line-1); --face: var(--idcard-face-1); }
 .idcard__face--2 { --line: var(--idcard-line-2); --face: var(--idcard-face-2); }
@@ -179,7 +203,8 @@
    The features: one column, two from step S, then a row of four from step L (never three: four cards would leave one
    alone on a row). At S every tile already has room for the longest unbreakable piece of its text («не накладывались»,
    9.3em of type/body-s with its non-breaking space) inside its padding; four in a row wait for L, so a tile's text is
-   never a narrow column of six or seven lines.
+   never a narrow column of six or seven lines. A tile's text starts right under its icon, so the texts of a row start
+   on one line (Tim, Oct 22); a shorter one leaves its air at the bottom.
    The ring's block is as tall as the ring needs while it is nearly level (scripts/ring.js); tilted further, on its way
    in and out, its covers reach a little past the block into the section's gaps (overflow visible up and down, cut at
    the sides). */
@@ -194,7 +219,7 @@
 @container releases (width >= 22rem) { .features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @container releases (width >= 58rem) { .features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .feature {
-  display: flex; flex-direction: column; justify-content: space-between; gap: var(--feature-gap);
+  display: flex; flex-direction: column; gap: var(--feature-gap);
   padding: var(--radius-s) var(--radius-s) calc(var(--radius-s) * 1.33);
   border-radius: var(--radius-s); background: var(--tint);
 }
@@ -211,15 +236,19 @@
    one (a laptop at 1366×768, a phone turned sideways) the tiles are as big as its height allows, and the window then
    shows more columns. A tap on a logo shows its name (scripts/logos.js), as hovering does. */
 .clients {
+  --clients-y: var(--section-y); --clients-gap: var(--section-gap);
   overflow: hidden;
-  /* on a short screen the section's own spacing gives way first, so the cards can stay big enough to read */
-  padding-block: min(var(--section-y), 6vh); gap: min(var(--section-gap), 6vh);
+  /* the same spacing as every other section (Tim, Oct 22: it was cut to 6% of the screen's height on every screen
+     less than about 1330px tall: 54 instead of 79 on a 1440 × 900 laptop); only on a phone turned sideways does it give way, so
+     the cards can stay big enough to read */
+  @media (--sideways) { --clients-y: min(var(--section-y), 6vh); --clients-gap: min(var(--section-gap), 6vh); }
+  padding-block: var(--clients-y); gap: var(--clients-gap);
 }
 .logos { width: 100%; max-width: var(--column-max); container: logos / inline-size; }
 .logos__track {
   --gap: var(--gap-tiles);
   --cols: 2;
-  --by-height: calc((var(--screen) - 2 * min(var(--section-y), 6vh) - min(var(--section-gap), 6vh) - var(--type-h2) - var(--nav-h) - var(--gap)) / 2);
+  --by-height: calc((var(--screen) - 2 * var(--clients-y) - var(--clients-gap) - var(--type-h2) - var(--nav-h) - var(--gap)) / 2);
   --u: max(100px, min((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols), var(--by-height)));
   display: grid; grid-template-columns: repeat(8, var(--u)); grid-template-rows: repeat(2, var(--u)); gap: var(--gap);
   width: max-content; margin-inline: auto;            /* centred when it fits its window whole; from the left otherwise */
@@ -254,15 +283,16 @@
 }
 .stat__number { position: relative; z-index: 1; font-size: calc(var(--u) * 64 / 247); font-weight: 600; line-height: 1; overflow-wrap: anywhere; }
 .stat__label { position: relative; z-index: 1; font-size: max(12px, var(--u) * 24 / 247); font-weight: 500; letter-spacing: var(--tracking-label); text-transform: uppercase; }
-/* the colour of the dots (scripts/stipple.js); without WebGL2 the card fades into it instead */
+/* a stat card is filled with its colour, and white dust moves on it (scripts/stipple.js); without WebGL2 it simply
+   keeps its colour */
 .stat--orange { --dots: var(--orange); }
 .stat--blue { --dots: var(--blue); }
 .stat--green { --dots: var(--green); }
-.stat.no-dots { background-image: linear-gradient(to bottom, rgb(255 255 255 / 0) 10%, var(--dots) 65%); }
+.stat { background: var(--dots); }
 .dots { position: absolute; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
 .no-dots > .dots { visibility: hidden; }
 
-/* ── Call to action: the purple card, with dots along its border (scripts/stipple.js) and a strip of words ──
+/* ── Call to action: the purple card, with white dust in its middle (scripts/stipple.js) and a strip of words ──
    As wide as the column (on phones nearly the whole screen, like the card stack: --inset), and about three quarters
    of the screen's height (at most 680px): on a short screen it never needs scrolling through, on a tall one it never
    becomes a tower. Its content sets the least it can be, with generous air above and below it at every size
@@ -271,7 +301,7 @@
    instead: 1.15 to 1.4 times as tall as wide, within that by the screen's height. */
 .cta {
   display: flex; flex-direction: column; align-items: center;
-  padding: var(--section-y) var(--inset) calc(var(--section-y) * 1.4);
+  padding: var(--section-y) var(--inset) var(--section-air-l);
   @media not (--phone) { padding-inline: var(--gutter); }
 }
 .cta__card {
@@ -289,7 +319,7 @@
   overflow: hidden; border-radius: var(--radius-l);
   background-color: var(--purple);
 
-  /* the dots are drawn behind the content (the card is a world of its own) */
+  /* the dust is drawn behind the content (the card is a world of its own) */
   & > .dots { z-index: -1; }
 }
 .cta__content {
@@ -328,11 +358,15 @@
 @keyframes marquee { to { transform: translateX(-738px); } }
 
 /* ── Tools: two white cards ──
-   Side by side (text | picture) from step M; otherwise the text, then the picture under it, exactly as wide as the
-   text (its top part: the bottom of the phone goes past the card's edge, as it does beside the text). The cards are as
-   wide as the column at every size: full-column cards, with --radius-l. Their padding follows the card's own width
-   (--tool-pad: 28px on a phone, about 40 on a 420 one, 64 from a 600px card, their extra air), so a phone keeps a
-   wide enough column of text; under the text, above the picture, the air stays generous (--pad-l at least). */
+   Side by side (text | picture) from own step 45.75rem (an 800 window, even with a scrollbar: below it the text
+   column got too narrow); with a least height (--tool-min-h) from step L only, so between the two the card is as tall
+   as its text and the picture never starts below the text's top (Tim, Oct 24); otherwise the text, then the whole picture under it (never cut), centred,
+   at most 360px wide, with twice the padding at its sides (own step 27.5rem, a 480 window; once the padding below it).
+   The phone in the picture runs to the card's bottom edge in both layouts. The cards are as wide as the column at every
+   size: full-column cards, with --radius-l. Their padding follows the card's own width over the whole column
+   (--tool-pad: 28px on a phone, about 48 on a 700px card, 64 on the widest, their extra air), so a phone keeps a wide
+   enough column of text and the padding shrinks with the screen at every size; under the text, above the picture, the
+   air stays generous (--pad-l at least). */
 .tools { background: var(--mist); }
 .tools__list {
   display: flex; flex-direction: column; gap: var(--gap-cards);
@@ -356,30 +390,40 @@
 .tool__title { font-size: var(--type-card-heading); font-weight: 600; line-height: var(--lh-heading); text-wrap: balance; }
 .tool__desc { max-width: 28em; font-size: var(--type-body-m); line-height: var(--lh-text); color: var(--ink-60); }
 .tool__media {
+  --side: var(--pad);
   position: relative;
-  margin: 0 var(--pad);
-  aspect-ratio: 820 / 640;                                              /* the top 71% of the picture */
+  justify-self: center;
+  width: min(100% - 2 * var(--side), 360px);
+  aspect-ratio: 820 / 896;                                              /* the whole picture */
   & picture { position: absolute; inset: 0; }
-  & .tool__img { object-fit: cover; object-position: 50% 0; }
 }
-@container (width >= 43rem) {
-  .tool { grid-template-columns: 1fr 1fr; min-height: var(--tool-min-h); }
+@container (width >= 27.5rem) { .tool__media { --side: calc(var(--pad) * 2); } }
+@container (width >= 45.75rem) {
+  .tool { grid-template-columns: 1fr 1fr; }
   .tool__body { padding: var(--pad) calc(var(--pad) / 2) var(--pad) var(--pad); }
   .tool__media {
-    margin: 0; aspect-ratio: auto;
+    justify-self: stretch; width: auto; aspect-ratio: auto;
     & picture { inset: 32px 24px 0; }
-    & .tool__img { object-fit: contain; object-position: 50% 100%; }
   }
 }
+@container (width >= 58rem) { .tool { min-height: var(--tool-min-h); } }
 .tool__img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 
-/* ── Publications: four grey cards, links to articles and a video ──
-   Two columns from step M; one column, as wide as the column, below that. */
-.pubs { padding-bottom: calc(var(--section-y) * 2); container: pubs / inline-size; }
-.pubs__grid {
-  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
+/* ── Publications: grey cards, links to articles and a video ──
+   Two columns from step M; one column, as wide as the column, below that. At most four are shown: with more, the
+   pill «Показать больше» under them shows the next ones (scripts/pubs.js; decision pubs-more), as far below the cards
+   as the heading used to be above them (--section-gap; Tim, Oct 20: it stays so while the heading gets more air). */
+.pubs { container: pubs / inline-size; }
+.pubs__list {
+  display: flex; flex-direction: column; align-items: center; gap: var(--section-gap);
   width: 100%; max-width: var(--column-max);
 }
+.pubs__grid {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap-cards);
+  width: 100%;
+  & > [hidden] { display: none; }
+}
+.pubs__more[hidden] { display: none; }
 @container pubs (width >= 43rem) { .pubs__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pub, .pub__cover {
   display: flex; flex-direction: column; justify-content: space-between;

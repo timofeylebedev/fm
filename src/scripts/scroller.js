@@ -3,7 +3,7 @@
    through, blurred. Safari makes the bar solid only for a page whose window does not scroll (as in Google Docs, where a
    box inside the page scrolls) or whose header at the top is dark. Measured in Safari on macOS 27 (Oct 2026): a light
    header, solid or not, never made the bar solid in dark mode; the box did, in light and dark mode.
-   So there the page scrolls in its own box, .page (boot.js gives <html> the class "boxed", base.css makes .page fill
+   So there the page scrolls in its own box, .page (box.js gives <html> the class "boxed", base.css makes .page fill
    the screen and scroll). Everywhere else nothing changes: .page is an ordinary block and the window scrolls.
    Every script asks this file instead of the window: where the page is scrolled (y), scroll it (to), how far it can go
    (max), listen to its scrolling (onScroll), watch its size (watchSize). GSAP's ScrollTrigger is told in gsap.js.

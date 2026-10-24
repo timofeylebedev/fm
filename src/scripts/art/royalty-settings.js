@@ -24,9 +24,9 @@ export const ROYALTY = {
     overshoot: "M0,0 C0,0.672 0.124,1.171 0.353,1.167 0.559,1.162 0.595,1.006 1,1"   // goes about 17% past its place and settles back
   },
 
-  play: 2.6,                    // seconds for the whole build-up of one drawing
-  wait: 0.3,                    // seconds between "the card is there and the drawing is on screen" and the start
-  seen: 0.35,                   // how much of a drawing's block must be on screen before it starts (0.35 = 35%)
+  play: 1.8,                    // seconds for the whole build-up of one drawing
+  wait: 0,                      // seconds between "the card is there and the drawing is on screen" and the start
+  seen: 0.15,                   // how much of a drawing's block must be on screen before it starts (0.35 = 35%)
 
   // royalty-1, the ring. A share appears and travels round the ring to its place; its label follows it. (Whose turn it is when: "turn" in the drawing.)
   shareGap: 0.2,                // a share starts this long after the one before it

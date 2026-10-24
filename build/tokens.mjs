@@ -126,7 +126,7 @@ export function scaleRoles(sc = read(SCALE)) {
     roles.push({ name, kind: "type", from: r.px[0], to: r.px[1], label: !!r.label, css: r.css || "--" + name.replace("/", "-"), use: r.use });
   }
   for (const [name, r] of Object.entries(sc.space.roles)) {
-    roles.push({ name, kind: r.size ? "size" : "space", from: r.px[0], to: r.px[1], per: r.per, css: r.css, use: r.use });
+    roles.push({ name, kind: r.size ? "size" : "space", from: r.px[0], to: r.px[1], per: r.per, by: r.by, css: r.css, use: r.use });
   }
   return roles;
 }
@@ -155,12 +155,13 @@ export const scaleAt = (role, vp, range, sc) => {
   return role.from + (role.to - role.from) * k;
 };
 // the CSS: clamp(least, value at the start + (screen size − start) × change / range, most); the range in rem (see media.css).
-// A role with "per" follows the width of the block it is used in (100cqi: its container) instead of the screen.
+// A role with "per" follows the width of the block it is used in (100cqi: its container) instead of the screen; one
+// with "by": "width" the screen's width alone (100vw), not its height.
 function scaleCss(role, range) {
   const rem = role.kind === "type";
   const v0 = role.from, v1 = role.to;
   if (Math.abs(v1 - v0) < 1e-6) return len(r4(v0), rem);
-  const [a, b, x] = role.per ? [role.per.from, role.per.to, "100cqi"] : [range.from, range.to, "var(--vp)"];
+  const [a, b, x] = role.per ? [role.per.from, role.per.to, "100cqi"] : [range.from, range.to, role.by === "width" ? "100vw" : "var(--vp)"];
   const L = (v) => len(rem ? v : r4(v), rem);
   // the slope as a fraction (24 / 1120), not a rounded decimal: the size reaches its end value exactly at the range's end
   return `clamp(${L(Math.min(v0, v1))}, calc(${L(v0)} + (${x} - ${r4(a / 16)}rem) * ${r4(v1 - v0)} / ${b - a}), ${L(Math.max(v0, v1))})`;

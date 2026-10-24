@@ -3,9 +3,12 @@
 The landing page of [Flow Medium](https://flowmedium.pro/), a custom static site (no Taptop, no runtime of a builder).
 It is built with [Vite](https://vite.dev) into plain files in `dist/`, which any web server can host.
 
-**Test link:** https://timofeylebedev.github.io/fm-website/ — built and published by GitHub Actions on every push to `main`.
+**Test link:** https://timofeylebedev.github.io/fm/ — built and published by GitHub Actions on every push to `main`.
 
 ## Working on it
+
+The rules Claude (Claude Code or the claude.ai project) follows when it works on the site are in [`CLAUDE.md`](CLAUDE.md).
+
 
 ```sh
 npm install          # once (Node 22 or newer)
@@ -34,8 +37,9 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
 
 ## Changing things
 
-- **A text:** in `src/index.html`. Non-breaking spaces for Russian («в&nbsp;доме», «10&nbsp;000», «Лейбл&nbsp;—») are put in
-  by the build (`build/typograph.js`), so the text can be written normally.
+- **A text:** in `src/index.html`. Where lines may break («в&nbsp;доме», «10&nbsp;000», «Лейбл&nbsp;—», «Dr.&nbsp;Smith») is
+  decided by the build (`build/typeset/`, Russian and English by `lang`), so the text can be written normally;
+  `npm run typeset -- --lint src/*.html` lists quotes, dashes and look-alike letters to fix by hand.
 - **A colour, or a size shared with Figma** (footer, buttons so far): `design/tokens.json`, the same values as the Figma
   variables; `npm run tokens:sync` moves changes both ways. See `design/README.md`.
 - **A font, a curve:** `src/styles/base/tokens.css`. The screen widths are in `src/styles/base/media.css` (with the data behind them).
@@ -44,11 +48,15 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
   The list in `build/images.mjs` says what is made from each original (sizes and formats: AVIF and WebP).
 - **A font:** `assets-src/fonts/`, then `npm run fonts` (needs Python with `pip install fonttools brotli`).
 - **The animations:** every part has its settings at the top of its file in `src/scripts/` (`motion.js` for how
-  headings, texts and cards come in; `hero.js` for the chips; `stipple.js` for the dots; `art/` for the drawings).
+  headings, texts and cards come in; `hero.js` for the chips; `stipple.js` for the dust on the stat cards and the purple card; `art/` for the drawings).
   The console of the browser has the same objects as before for trying values live: `fmMotion`, `fmHero`, `fmCards`,
   `fmStipple`, `fmRoyalty`, `fmPace`.
 - **Something from another site** (an analytics counter, a chat): add its address to `POLICY` in `build/plugins.js`,
-  or the browser will block it (the page allows only its own scripts and the booking popup of Planerka).
+  or the browser will block it (the page allows only its own scripts, and a frame of Planerka for the booking).
+- **The booking of a demo:** `src/scripts/book.js` (its settings: `BOOK` at the top — the Planerka user and event,
+  when the calendar is loaded ahead) and `src/styles/components/book.css`. Every link with `data-demo` opens it;
+  a link to the page with `#demo` opens it straight away. In the console: `fmBook` (`fmBook.state`, `fmBook.open()`,
+  `fmBook.messages`: what the calendar has said).
 
 Test switches for phones, at the end of the address: `?fmcards=debug` (what the card stack measures), `?fmcap=debug`
 (the strip above the navbar in the browsers of apps).

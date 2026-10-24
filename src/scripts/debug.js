@@ -13,7 +13,10 @@ export function capDebug(touch) {
   const line = box("left:0;right:0;top:0;height:3px;padding:0;border-radius:0;background:#ffd400");
   line.textContent = "";
   const info = box("left:8px;top:60px");
+  let most = 0, least = 0;                               // the furthest the page was reported down / up
   const show = () => {
+    const vv = window.visualViewport, nav = document.querySelector("[data-nav]");
+    most = Math.max(most, scrollY); least = Math.min(least, scrollY);
     const cap = document.querySelector(".nav-cap"), r = cap && cap.getBoundingClientRect();
     info.textContent = [
       "fmcap debug",
@@ -22,12 +25,20 @@ export function capDebug(touch) {
       "cap: " + (r ? Math.round(r.top) + "…" + Math.round(r.bottom) + " (should end at 1)" : "none"),
       "can scroll: " + (document.documentElement.scrollHeight - document.documentElement.clientHeight) + "   cap travel: " + (cap ? cap.style.getPropertyValue("--cap-max") : "none"),
       "correction: " + (cap ? cap.style.translate || "0" : "none") + "   height: " + (cap ? cap.style.height : "none"),
-      "in an app: " + !!(window.webkit && window.webkit.messageHandlers) + "   bounce off: " + (document.documentElement.style.overscrollBehaviorY === "none")
+      "in an app: " + !!(window.webkit && window.webkit.messageHandlers) + "   Safari/ in UA: " + /Safari\//.test(navigator.userAgent)
+        + "   bounce off: " + (document.documentElement.style.overscrollBehaviorY === "none"),
+      "vv: " + (vv ? Math.round(vv.width) + "×" + Math.round(vv.height) + " +" + Math.round(vv.offsetTop) + "  page +" + Math.round(vv.pageTop) : "-")
+        + "   nav top: " + (nav ? Math.round(nav.getBoundingClientRect().top) : "-"),
+      "scrollY seen: " + Math.round(least) + "…" + Math.round(most) + "   overscroll: " + getComputedStyle(document.documentElement).overscrollBehaviorY,
+      "nav place (offsetTop) used: " + (window.fmCap ? window.fmCap.state.navTop : "-"),
+      navigator.userAgent.replace(/^Mozilla\/5\.0 /, "").slice(0, 90)
     ].join("\n");
   };
   setTimeout(show, 0);
+  setInterval(show, 500);                                // the cap is corrected after the scroll too: the box keeps up
   addEventListener("scroll", show, { passive: true });
   addEventListener("resize", show);
+  if (window.visualViewport) { visualViewport.addEventListener("resize", show); visualViewport.addEventListener("scroll", show); }
 }
 
 // ?fmcards=debug: what the card stack measures, to compare with what is seen on a phone. "card" is where the top of the

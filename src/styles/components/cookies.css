@@ -53,9 +53,8 @@
   transition: background-color var(--hover-out) var(--ease-out), scale 0.6s var(--ease-settle);
   user-select: none; -webkit-user-select: none;
 }
-/* Figma's hover: black at 7%. No colour token has it (the tints are 3% and 5%, the next ink step 10%), so it is
-   written here, once (design/decisions.json, cookie-notice) */
-@media (--mouse) { .cookies__ok:hover { background-color: rgb(0 0 0 / 0.07); transition-duration: var(--hover-in); } }
+/* Figma's hover: black at 7% (--tint-strong) */
+@media (--mouse) { .cookies__ok:hover { background-color: var(--tint-strong); transition-duration: var(--hover-in); } }
 /* pressed: gives in to 97% and springs back past its size, as every button of the site (button.css) */
 @media (prefers-reduced-motion: no-preference) {
   .cookies__ok:active { scale: 0.97; transition: background-color var(--hover-in) var(--ease-out), scale 0.15s var(--ease-out); }

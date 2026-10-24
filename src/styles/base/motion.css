@@ -2,7 +2,7 @@
    lines, blocks until their turn. Only when scripts run at all: scripts/boot.js puts the class js on <html> before
    anything is drawn. Safety net: if the page's main script never arrives (it puts the class motion on <html> the
    moment it runs), everything is shown after 4 seconds. */
-html.js [data-reveal="chars"], html.js [data-reveal="lines"] { visibility: hidden; }
+html.js :is([data-reveal="chars"], [data-reveal="lines"], [data-reveal="title"]) { visibility: hidden; }
 html.js [data-reveal="block"], html.js [data-reveal="tilt"] { opacity: 0; }
 /* the cards of the stack, until their script has laid them out (otherwise the first card shows full size for a moment) */
 html.js .stack:not(.stack-on) .card { visibility: hidden; }

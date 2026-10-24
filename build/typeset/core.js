@@ -5,8 +5,8 @@
 // question with one answer: may a line break here, or not? The rules answer it one space at a time, looking at the
 // words on both sides, so there are no passes and no chains to miss. A «no» is a no-break space; where two parts touch
 // without a space (a hyphen, a dash between numbers) a «no» is a word joiner, U+2060, which is invisible and keeps the
-// real hyphen (copying and searching still find «e-mail»). Every «no» has a strength: when the words held together
-// grow longer than `cap` letters, the weakest holds are let go first, so a phone never gets a line it cannot fit.
+// real hyphen (copying and searching still find «e-mail»). There is no length limit on what is held together (Tim,
+// Oct 24, 2026): a hold is never let go because the piece it makes is long.
 //
 // The rules are written down in README.md, with the sources they come from.
 import { RU, EN, FUNCTION } from "./words.js";
@@ -193,9 +193,8 @@ export const JOINS = [
 
 // ── deciding ────────────────────────────────────────────────────────────────────────────────────────────────────────
 // options: lang ("ru", "en", …; other languages get only the rules for any language), heading (a heading: shorter
-// lines, a few more holds), cap (the longest piece the holds may make, in letters; null: no limit), rules (names to
-// leave out: { off: ["last-word"] }).
-export function decide(text, { lang = "ru", heading = false, cap = heading ? 16 : 28, off = [] } = {}) {
+// lines, a few more holds), off (names of rules to leave out: { off: ["last-word"] }).
+export function decide(text, { lang = "ru", heading = false, off = [] } = {}) {
   const base = String(lang).toLowerCase().split("-")[0];
   // the rules read the visible tokens: invisible marks (a word joiner, the edge of an inline tag) are left out
   const toks = [];
@@ -229,7 +228,6 @@ export function decide(text, { lang = "ru", heading = false, cap = heading ? 16 
       }
     }
   });
-  if (cap) release(toks, holds, cap);
   return { toks, holds: holds.filter((h) => !h.released), released: holds.filter((h) => h.released) };
 }
 
@@ -258,23 +256,6 @@ const longestPart = (atom) => {
   const at = [0, ...linkBreaks(atom), atom.length];
   return Math.max(...at.slice(1).map((j, n) => j - at[n]));
 };
-
-// the holds of a piece longer than `cap` are let go, the weakest first (of equal ones, the one nearest the middle),
-// until every piece fits or only the must-holds are left
-function release(toks, holds, cap) {
-  for (let guard = 0; guard < 200; guard++) {
-    const loose = (p) => holds.filter((h) => !h.released && h.k >= p.from && h.k <= p.to && h.strength < STRENGTH.must && !h.kept);
-    const long = pieces(toks, holds).find((p) => p.length > cap && loose(p).length);
-    if (!long) return;
-    const inside = loose(long);
-    const weakest = Math.min(...inside.map((h) => h.strength));
-    const mid = (long.from + long.to) / 2;
-    const h = inside.filter((x) => x.strength === weakest).sort((a, b) => Math.abs(a.k - mid) - Math.abs(b.k - mid))[0];
-    // «в Конфиденциальность» in a heading: the word alone is over the limit, letting go would only leave «в» hanging
-    const side = (from, to, step) => { let n = 0; for (let k = from; k >= 0 && k < toks.length && toks[k].t !== "s"; k += step) n += [...toks[k].s].length; return n; };
-    if (Math.max(side(h.k - 1, 0, -1), side(h.k + 1, 0, 1)) >= cap) h.kept = true; else h.released = true;
-  }
-}
 
 // where a long link or e-mail may break: after «//», «@», before «.», «?», «#», «&», after «/» (offsets in the atom)
 export function linkBreaks(atom) {

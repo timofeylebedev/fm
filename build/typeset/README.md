@@ -37,15 +37,21 @@ It replaced `build/typograph.js` (Oct 19, 2026). What changed, measured: see the
    последний» is held word by word (the old typograph missed every second word of a chain).
 5. **Joins.** Where two parts touch with no space but a browser may still break (after a hyphen or a dash), a hold is a
    word joiner (U+2060): invisible, and the real hyphen stays, so copying and searching still find «e-mail».
-6. **A limit.** Holds make longer pieces a line cannot break inside. When a piece grows past **28 letters** in text or
-   **16 in a heading**, the weakest holds in it are let go (of equal ones, the one nearest the middle), until it fits or
-   only *must* holds are left. So a phone never gets a piece wider than its column. A hold beside a word that is too
-   long on its own is kept (letting it go would not make the piece fit, only leave «в» hanging).
+6. **No length limit.** A hold is never let go because the piece it makes is long (Tim, Oct 24, 2026). `npm run
+   typeset -- src/index.html` prints each text's longest piece in brackets, so a long one is easy to spot; the longest
+   on the site's pages are 19 letters on the home page and 18 in a heading of the privacy policy.
 7. **In place.** Only the characters the rules decide on change, at their place in the source; entities (`&nbsp;`,
    `&laquo;`, `&#8209;`) and everything else stay exactly as written.
 
-Strengths: *author* 9 (a no-break space you typed: kept, except next to a link) · *must* 3 (never let go) · *should* 2
-· *nice* 1.
+Strengths (recorded for each hold, shown by `npm run typeset`): *author* 9 (a no-break space you typed: kept, except
+next to a link) · *must* 3 · *should* 2 · *nice* 1.
+
+GSAP's SplitText (checked Oct 24 on the real page and a test page, SplitText 3.15): it keeps every no-break space, and
+lines split by it keep every hold. Three things to know for new texts: in a heading split letter by letter
+(`data-reveal="chars"`) a word joiner would become an empty animated letter, so none is written there; a hold right at
+the edge of an inline tag («в <a>доме</a>») is lost in every split mode, since SplitText makes the tag's text a box of
+its own, so keep links and other tags out of split headings; and a held group wider than the line in a letter-split
+heading breaks between letters (each letter is its own box).
 
 ## The rules
 

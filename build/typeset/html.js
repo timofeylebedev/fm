@@ -105,12 +105,12 @@ const lineCol = (src, at) => {
   return { line: lo + 1, col: at - starts[lo] + 1 };
 };
 
-// options as in core.js (cap, off) + headingCap. Returns { html, report }.
+// options as in core.js (off). Returns { html, report }.
 export function typesetHtml(src, opts = {}) {
   const doc = parse(src, { sourceCodeLocationInfo: true });
   const changes = [], report = [];
   for (const b of blocks(doc, src)) {
-    const o = { ...opts, lang: b.lang || opts.lang || "", heading: b.heading, cap: b.heading ? opts.headingCap ?? 16 : opts.cap ?? 28 };
+    const o = { ...opts, lang: b.lang || opts.lang || "", heading: b.heading };
     // the text's own leading and trailing spaces are not between words
     for (const e of textEdits(b.text, o)) {
       if (e.i === e.j) {

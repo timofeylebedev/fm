@@ -69,11 +69,10 @@ test("English headings hold the small words too", () => check("en", [
   ["Order in releases and projects", "Order in⍽releases and⍽projects"],
 ], { heading: true }));
 
-test("a phone never gets more than it can fit: the weakest holds go first", () => {
+test("no length limit: a long chain of short words stays whole (Tim, Oct 24)", () => {
   const long = "а не в и на по за от до из у о без для над под при про последний";
-  const out = typeset(long, { lang: "ru", cap: 12 });
-  const longest = Math.max(...out.split(/ /).map((p) => p.length));
-  assert.ok(longest <= 12, show(out));
+  assert.ok(!typeset(long, { lang: "ru" }).includes(" "), show(typeset(long, { lang: "ru" })));
+  assert.equal(show(typeset("в Конфиденциальность", { lang: "ru", heading: true })), "в⍽Конфиденциальность");
 });
 
 test("a language without its own rules gets the rules for every language", () => check("de", [
@@ -144,10 +143,6 @@ test("review: English a.m., «no» is not «No.», US phones", () => check("en",
   ["There are no 5-star hotels", "There are no 5-⁀star hotels"],
   ["Call (555) 123-4567 now", "Call (555)⍽123-⁀4567 now"],
 ]));
-
-test("review: a heading never lets a hold go when the word alone is too long", () => {
-  assert.equal(show(typeset("в Конфиденциальность", { lang: "ru", heading: true })), "в⍽Конфиденциальность");
-});
 
 test("review: HTML the parser does not keep as written is left alone", () => {
   assert.equal(html("<p>текст</span> в доме и на столе</p>"), "<p>текст</span> в доме и на столе</p>");

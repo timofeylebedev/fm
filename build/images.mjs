@@ -32,13 +32,29 @@ const RASTER = [
   { src: "institute-mark.png", widths: [152], formats: ["webp"], lossless: true },
   { src: "vk-video.png", widths: [64], formats: ["webp"], lossless: true },
   { src: "youtube.png", widths: [64], formats: ["webp"], lossless: true },
-  // the strip of 12 icons of the hero chips
-  { src: "hero-chips.webp", widths: [1152], formats: ["webp"] },
-  // the covers of the ring (shown at about 300 CSS px at most)
-  ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({ src: `cover-${i}.webp`, widths: [640], formats: ["webp"] })),
+  // the strip of 12 icons of the hero chips (made from the covers of the ring and the icons of the drawings, Oct 24, 2026).
+  // Settings as for the covers below: the lowest at SSIMULACRA2 90 or more. Lossy WebP never gets there (it halves the
+  // colour), so the WebP for browsers without AVIF is near-lossless.
+  { src: "hero-chips.png", widths: [1152], formats: ["avif", "webp"], options: { avif: { quality: 96 }, webp: { nearLossless: true, quality: 60 } } },
+  // the covers of the ring (shown at about 300 CSS px at most; the ring's texture is 640 at most). Each cover at the
+  // lowest setting whose SSIMULACRA2 against the 640 px original is 90 or more (no visible loss at 1:1), measured
+  // Oct 23, 2026. AVIF first; the WebP is for browsers without AVIF. First steps is flat colour: near-lossless WebP is
+  // smaller than any AVIF that keeps its letters (14 KB at 92.8 against 31 KB at 91.3), so it has no AVIF.
+  ...Object.entries({ "home": 88, "last-seen": 91, "reminiscence": 58, "love": 75, "rebirth": 87, "m": 64, "lazy-friday": 63 })
+    .map(([n, q]) => ({ src: `cover-${n}.png`, widths: [640], formats: ["avif", "webp"], options: { avif: { quality: q } } })),
+  { src: "cover-first-steps.png", widths: [640], formats: ["webp"], options: { webp: { nearLossless: true, quality: 40 } } },
   // pictures used inside the drawings (art/*.js), at the size they are drawn at 2×
-  ...["card-cap", "card-concert", "card-home", "card-hoodie", "card-video", "face-anna", "face-elvira", "face-mark",
-      "face-petr", "thumb-home", "thumb-lastseen", "cube", "cube-bg"].map((n) => ({ src: `art-${n}.png`, widths: [null], formats: ["webp"], quality: 88 })),
+  ...["face-anna", "face-elvira", "face-mark", "face-petr", "cube", "cube-bg"].map((n) => ({ src: `art-${n}.png`, widths: [null], formats: ["webp"], quality: 88 })),
+  // the photos of the tiles of s1-1 and the covers in s1-2 and s1-3 (from the ring's covers). A tile is 160 px of the
+  // drawing's 1000, about 180 CSS px on a 1440×900 screen and up to about 200 on big ones: 400 px is 2× of that; the covers
+  // are 3× of their 45 and 26 px. Each at the lowest AVIF setting with SSIMULACRA2 90 or more against the original at that
+  // size (Oct 24, 2026); the WebP next to it, at the usual setting, is for browsers without AVIF (art/shared.js offers
+  // both). The Last Seen cover is so small that no AVIF gets there: near-lossless WebP only.
+  ...Object.entries({ video: 86, hoodie: 76, cap: 88, concert: 90 })
+    .map(([n, q]) => ({ src: `art-card-${n}.png`, widths: [400], formats: ["avif", "webp"], options: { avif: { quality: q } } })),
+  { src: "cover-home.png", name: "art-card-home", widths: [400], formats: ["avif", "webp"], options: { avif: { quality: 88 } } },
+  { src: "cover-home.png", name: "art-thumb-home", widths: [134], formats: ["avif", "webp"], options: { avif: { quality: 92 } } },
+  { src: "cover-last-seen.png", name: "art-thumb-lastseen", widths: [79], formats: ["webp"], options: { webp: { nearLossless: true, quality: 80 } } },
   // shown only if a royalty drawing cannot be drawn (very old browsers)
   { src: "royalty-1.png", widths: [1012], formats: ["webp"] },
   { src: "royalty-2.png", widths: [1012], formats: ["webp"] }
@@ -80,7 +96,7 @@ for (const job of RASTER) {
       const file = job.widths.length > 1 ? `${name}-${width}.${format}` : `${name}.${format}`;
       const out = join(OUT, file);
       if (await newer(out, src)) { skipped++; continue; }
-      const options = job.lossless ? { lossless: true, effort: 6 } : Object.assign({}, QUALITY[format], job.quality ? { quality: job.quality } : {});
+      const options = job.lossless ? { lossless: true, effort: 6 } : Object.assign({}, QUALITY[format], job.quality ? { quality: job.quality } : {}, job.options?.[format]);
       const data = await sharp(src).resize({ width, withoutEnlargement: true })[format](options).toBuffer();
       await write(out, data, src);
     }

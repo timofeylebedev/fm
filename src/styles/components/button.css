@@ -11,7 +11,7 @@
   border-radius: var(--round);
   font-size: var(--type-body); line-height: normal; white-space: nowrap;
   color: var(--paper); background-color: var(--purple);
-  transition: background-color var(--hover-out) var(--ease-out), color var(--hover-out) var(--ease-out);
+  transition: background-color var(--hover-out) var(--ease-out), color var(--hover-out) var(--ease-out), border-color var(--hover-out) var(--ease-out);
   user-select: none; -webkit-user-select: none;
 }
 
@@ -19,6 +19,9 @@
 .btn--orange { --btn-hover: var(--orange-hover); background-color: var(--orange); padding-inline: var(--button-pad-x-alt); }
 .btn--teal { --btn-hover: var(--teal-hover); background-color: var(--teal); padding: 9px var(--button-pad-x-alt) 9px 10px; }
 .btn--white { background-color: var(--paper); color: var(--purple); }
+/* a quiet one, a line only: no colour of its own, a 1px border. Ink 70% on an ink 16% border, under the mouse ink on an
+   ink 25% border (the publications' «Показать больше»; Tim, Oct 20) */
+.btn--line { background-color: transparent; border-color: var(--ink-16); color: var(--ink-70); }
 /* the small one in the navbar */
 .btn--nav { height: var(--nav-control); padding: 9px 16px; font-size: var(--type-ui); }
 .btn__icon { flex: none; width: 20px; height: 20px; }
@@ -26,14 +29,15 @@
 @media (--mouse) {
   .btn:hover, [data-linkcard]:hover .btn { background-color: var(--btn-hover); transition-duration: var(--hover-in); }
   .btn--white:hover, [data-linkcard]:hover .btn--white { background-color: var(--paper); color: var(--purple-hover); }
+  .btn--line:hover { background-color: transparent; border-color: var(--ink-25); color: var(--ink); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .btn {
-    transition: background-color var(--hover-out) var(--ease-out), color var(--hover-out) var(--ease-out), scale 0.6s var(--ease-settle);
+    transition: background-color var(--hover-out) var(--ease-out), color var(--hover-out) var(--ease-out), border-color var(--hover-out) var(--ease-out), scale 0.6s var(--ease-settle);
   }
   .btn:active {
     scale: 0.97;
-    transition: background-color var(--hover-in) var(--ease-out), color var(--hover-in) var(--ease-out), scale 0.15s var(--ease-out);
+    transition: background-color var(--hover-in) var(--ease-out), color var(--hover-in) var(--ease-out), border-color var(--hover-in) var(--ease-out), scale 0.15s var(--ease-out);
   }
 }

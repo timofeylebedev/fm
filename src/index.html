@@ -29,7 +29,8 @@
   <link rel="preload" href="./assets/fonts/pragmatica-ext-700.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="./assets/fonts/golos-400.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- Runs before anything is drawn: reload scroll restore, steady screen height on phones, hero fade-in. See scripts/boot.js -->
+  <!-- Run before anything is drawn: Safari on a Mac scrolls the page in its own box (scripts/box.js); reload scroll restore, steady screen height on phones, hero fade-in. See scripts/boot.js -->
+  <script data-inline src="./scripts/box.js"></script>
   <script data-inline src="./scripts/boot.js"></script>
 
   <link rel="stylesheet" href="./styles/main.css">
@@ -55,6 +56,8 @@
   <svg width="0" height="0" class="sprite" aria-hidden="true"><symbol id="icon-arrow" viewBox="0 0 32 32"><path fill="currentColor" d="M29 24.47a1 1 0 1 1-2 0V6.88L4.7 29.18a1 1 0 1 1-1.4-1.42l22.29-22.3H8a1 1 0 0 1 0-2h20a1 1 0 0 1 1 1z"/></symbol></svg>
 
   <a class="skip" href="#main">Перейти к содержанию</a>
+  <!-- keeps Safari's bottom bar on iPhone from taking the colour of the card stack (base.css, .bar-guard) -->
+  <div class="bar-guard" aria-hidden="true"></div>
 
   <header class="nav" data-nav>
     <div class="nav__row">
@@ -282,7 +285,7 @@
       </div>
     </section>
 
-    <!-- ── Call to action: the purple card with dots (scripts/stipple.js) ── -->
+    <!-- ── Call to action: the purple card with white dust (scripts/stipple.js) ── -->
     <section class="cta">
       <div class="cta__card" data-reveal="block" data-linkcard data-dots="cta">
         <div class="cta__content">
@@ -300,7 +303,7 @@
 
     <!-- ── Tools ── -->
     <section class="tools" id="tools">
-      <div class="head head--center"><h2 class="head__title" data-reveal="chars">Полезные инструменты для вашего лейбла</h2></div>
+      <div class="head head--center"><h2 class="head__title" data-reveal="title">Полезные инструменты для вашего лейбла</h2></div>
       <div class="tools__list">
         <article class="tool" data-reveal="block" data-linkcard>
           <div class="tool__body">
@@ -313,8 +316,8 @@
           </div>
           <div class="tool__media">
             <picture>
-              <source type="image/avif" sizes="(max-width: 767px) calc(100vw - 72px), 462px" srcset="./assets/img/fm-litmus-480.avif 480w, ./assets/img/fm-litmus-820.avif 820w">
-              <img class="tool__img" src="./assets/img/fm-litmus-820.webp" sizes="(max-width: 767px) calc(100vw - 72px), 462px" srcset="./assets/img/fm-litmus-480.webp 480w, ./assets/img/fm-litmus-820.webp 820w" width="820" height="896" alt="Отчёт FM Litmus о проверке текста трека в Telegram" loading="lazy" decoding="async">
+              <source type="image/avif" sizes="(max-width: 799px) min(calc(100vw - 72px), 360px), 462px" srcset="./assets/img/fm-litmus-480.avif 480w, ./assets/img/fm-litmus-820.avif 820w">
+              <img class="tool__img" src="./assets/img/fm-litmus-820.webp" sizes="(max-width: 799px) min(calc(100vw - 72px), 360px), 462px" srcset="./assets/img/fm-litmus-480.webp 480w, ./assets/img/fm-litmus-820.webp 820w" width="820" height="896" alt="Отчёт FM Litmus о проверке текста трека в Telegram" loading="lazy" decoding="async">
             </picture>
           </div>
         </article>
@@ -329,8 +332,8 @@
           </div>
           <div class="tool__media">
             <picture>
-              <source type="image/avif" sizes="(max-width: 767px) calc(100vw - 72px), 462px" srcset="./assets/img/fm-lens-480.avif 480w, ./assets/img/fm-lens-820.avif 820w">
-              <img class="tool__img" src="./assets/img/fm-lens-820.webp" sizes="(max-width: 767px) calc(100vw - 72px), 462px" srcset="./assets/img/fm-lens-480.webp 480w, ./assets/img/fm-lens-820.webp 820w" width="820" height="896" alt="Поиск по архиву отсканированных документов в FM Lens" loading="lazy" decoding="async">
+              <source type="image/avif" sizes="(max-width: 799px) min(calc(100vw - 72px), 360px), 462px" srcset="./assets/img/fm-lens-480.avif 480w, ./assets/img/fm-lens-820.avif 820w">
+              <img class="tool__img" src="./assets/img/fm-lens-820.webp" sizes="(max-width: 799px) min(calc(100vw - 72px), 360px), 462px" srcset="./assets/img/fm-lens-480.webp 480w, ./assets/img/fm-lens-820.webp 820w" width="820" height="896" alt="Поиск по архиву отсканированных документов в FM Lens" loading="lazy" decoding="async">
             </picture>
           </div>
         </article>
@@ -339,66 +342,83 @@
 
     <!-- ── Publications ── -->
     <section class="pubs" id="publications">
-      <div class="head head--center"><h2 class="head__title" data-reveal="chars">Делимся знаниями о музыкальной индустрии</h2></div>
-      <div class="pubs__grid">
-        <a class="pub" href="https://i-m-i.ru/guides/kak-razobratsya-v-royalti-otchetah" target="_blank" rel="noopener" data-reveal="block">
-          <div class="pub__body">
-            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
-            <div class="pub__copy">
-              <h3 class="pub__title">Как разобраться в отчетах по роялти</h3>
-              <p class="pub__desc">Что должно быть в роялти-отчетах, как проверить их корректность, почему один трек может повторяться десятки раз, откуда берутся отрицательные стримы.</p>
-            </div>
-          </div>
-          <div class="pub__foot">
-            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
-          </div>
-        </a>
-        <div class="pub-video" data-reveal="block">
-          <a class="pub__cover" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener">
+      <div class="head head--center"><h2 class="head__title" data-reveal="title">Делимся знаниями о музыкальной индустрии</h2></div>
+      <div class="pubs__list">
+        <div class="pubs__grid" id="pubs-grid" data-pubs>
+          <a class="pub" href="https://i-m-i.ru/guides/kak-razobratsya-v-royalti-otchetah" target="_blank" rel="noopener" data-reveal="block">
             <div class="pub__body">
               <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
               <div class="pub__copy">
-                <h3 class="pub__title">Как получать максимум от треков</h3>
-                <p class="pub__desc">Как подписки на стриминги превращаются в роялти артиста, что определяет цену стрима и почему прямой контракт с платформой не всегда выгоден.</p>
+                <h3 class="pub__title">Как разобраться в отчетах по роялти</h3>
+                <p class="pub__desc">Что должно быть в роялти-отчетах, как проверить их корректность, почему один трек может повторяться десятки раз, откуда берутся отрицательные стримы.</p>
               </div>
             </div>
             <div class="pub__foot">
-              <img class="pub__source pub__source--mark" src="./assets/img/institute-mark.webp" width="76" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-              <img class="pub__source pub__source--full" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
             </div>
           </a>
-          <div class="pub__watch">
-            <a class="pub__platform" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener"><img src="./assets/img/vk-video.webp" width="32" height="32" alt="Смотреть в VK Видео" loading="lazy" decoding="async"></a>
-            <a class="pub__platform" href="https://youtu.be/WegSIuNXDJg" target="_blank" rel="noopener"><img src="./assets/img/youtube.webp" width="32" height="32" alt="Смотреть на YouTube" loading="lazy" decoding="async"></a>
+          <div class="pub-video" data-reveal="block">
+            <a class="pub__cover" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener">
+              <div class="pub__body">
+                <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+                <div class="pub__copy">
+                  <h3 class="pub__title">Как получать максимум от треков</h3>
+                  <p class="pub__desc">Как подписки на стриминги превращаются в роялти артиста, что определяет цену стрима и почему прямой контракт с платформой не всегда выгоден.</p>
+                </div>
+              </div>
+              <div class="pub__foot">
+                <img class="pub__source pub__source--mark" src="./assets/img/institute-mark.webp" width="76" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+                <img class="pub__source pub__source--full" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              </div>
+            </a>
+            <div class="pub__watch">
+              <a class="pub__platform" href="https://vkvideo.ru/video-182191338_456240300" target="_blank" rel="noopener"><img src="./assets/img/vk-video.webp" width="32" height="32" alt="Смотреть в VK Видео" loading="lazy" decoding="async"></a>
+              <a class="pub__platform" href="https://youtu.be/WegSIuNXDJg" target="_blank" rel="noopener"><img src="./assets/img/youtube.webp" width="32" height="32" alt="Смотреть на YouTube" loading="lazy" decoding="async"></a>
+            </div>
           </div>
+          <a class="pub" href="https://i-m-i.ru/post/razbor-2025-leybly" target="_blank" rel="noopener" data-reveal="block">
+            <div class="pub__body">
+              <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+              <div class="pub__copy">
+                <h3 class="pub__title">Трансформация рынка лейблов в России</h3>
+                <p class="pub__desc">Анализ российской музыкальной индустрии за 2022–2025 годы: правовое поле, стриминги, лейблы и дистрибьюторы, концерты и фестивали, артисты, музыкальные тренды.</p>
+              </div>
+            </div>
+            <div class="pub__foot">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+            </div>
+          </a>
+          <a class="pub" href="https://i-m-i.ru/post/razbor-2025-strimingi" target="_blank" rel="noopener" data-reveal="block">
+            <div class="pub__body">
+              <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+              <div class="pub__copy">
+                <h3 class="pub__title">Динамика объема и стоимости стримов в России</h3>
+                <p class="pub__desc">Как экосистемные подписки и рекомендательные системы стали драйверами роста, кто лидирует по доходам и аудитории и как изменилась стоимость стрима.</p>
+              </div>
+            </div>
+            <div class="pub__foot">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+            </div>
+          </a>
+          <!-- a fifth card to try «Показать больше» (Tim, Oct 20): a copy of the first one; replace it with a real publication -->
+          <a class="pub" href="https://i-m-i.ru/guides/kak-razobratsya-v-royalti-otchetah" target="_blank" rel="noopener" data-reveal="block">
+            <div class="pub__body">
+              <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
+              <div class="pub__copy">
+                <h3 class="pub__title">Как разобраться в отчетах по роялти</h3>
+                <p class="pub__desc">Что должно быть в роялти-отчетах, как проверить их корректность, почему один трек может повторяться десятки раз, откуда берутся отрицательные стримы.</p>
+              </div>
+            </div>
+            <div class="pub__foot">
+              <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
+              <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+            </div>
+          </a>
         </div>
-        <a class="pub" href="https://i-m-i.ru/post/razbor-2025-leybly" target="_blank" rel="noopener" data-reveal="block">
-          <div class="pub__body">
-            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
-            <div class="pub__copy">
-              <h3 class="pub__title">Трансформация рынка лейблов в России</h3>
-              <p class="pub__desc">Анализ российской музыкальной индустрии за 2022–2025 годы: правовое поле, стриминги, лейблы и дистрибьюторы, концерты и фестивали, артисты, музыкальные тренды.</p>
-            </div>
-          </div>
-          <div class="pub__foot">
-            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
-          </div>
-        </a>
-        <a class="pub" href="https://i-m-i.ru/post/razbor-2025-strimingi" target="_blank" rel="noopener" data-reveal="block">
-          <div class="pub__body">
-            <p class="pub__author"><img class="pub__avatar" src="./assets/img/author-48.webp" srcset="./assets/img/author-48.webp 2x, ./assets/img/author-72.webp 3x" width="24" height="24" alt="" loading="lazy" decoding="async">Максим Поплавский, CEO</p>
-            <div class="pub__copy">
-              <h3 class="pub__title">Динамика объема и стоимости стримов в России</h3>
-              <p class="pub__desc">Как экосистемные подписки и рекомендательные системы стали драйверами роста, кто лидирует по доходам и аудитории и как изменилась стоимость стрима.</p>
-            </div>
-          </div>
-          <div class="pub__foot">
-            <img class="pub__source" src="./assets/img/institute-logo.webp" width="154" height="24" alt="Институт музыкальных инициатив" loading="lazy" decoding="async">
-            <svg class="pub__arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
-          </div>
-        </a>
+        <button class="btn btn--line pubs__more" type="button" aria-controls="pubs-grid" data-pubs-more data-reveal="block" hidden>Показать больше</button>
       </div>
     </section>
   </main>
@@ -419,7 +439,7 @@
         <p class="footer__note">© 2026, Все права защищены</p>
         <p class="footer__note">ИНН: 780442153483</p>
         <a class="footer__note footer__link" href="privacy_policy_ru">Политика обработки персональных&nbsp;данных</a>
-        <a class="footer__note footer__link" href="https://t.me/tim_lebedev" target="_blank" rel="noopener">Дизайн — Тим Лебедев</a>
+        <a class="footer__note footer__link" href="https://t.me/tim_lebedev" target="_blank" rel="noopener">Дизайн и разработка — Тим Лебедев</a>
       </div>
     </div>
   </footer>
@@ -428,7 +448,7 @@
        (scripts/consent.js). Its links: the cookie part of the policy, and the consent; new tabs, so the notice stays. ── -->
   <template id="cookies">
     <section class="cookies" aria-label="Уведомление о куки">
-      <p class="cookies__text"><a class="cookies__link" href="privacy_policy_ru#cookie" target="_blank" rel="noopener">Используем куки</a>, чтобы делать сайт лучше. Оставаясь, вы даете <a class="cookies__link" href="soglasie_cookie" target="_blank" rel="noopener">согласие на обработку данных</a></p>
+      <p class="cookies__text"><a class="cookies__link" href="privacy_policy_ru#cookie" target="_blank" rel="noopener">Используем куки</a>, чтобы делать сайт лучше. Оставаясь, вы даете <a class="cookies__link" href="cookie_consent" target="_blank" rel="noopener">согласие на обработку данных</a></p>
       <button class="cookies__ok" type="button">
         <span class="cookies__label">ОК</span>
         <svg class="cookies__check" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><path d="M16 24L21.3333 32L32 16" pathLength="1"/></svg>
