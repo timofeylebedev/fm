@@ -184,7 +184,8 @@ const dropLanding = (it) => ({ y: M.DROP.glide[0], rotation: it.rest - turnWay(i
 // a card in a stack (deck.js) lies straight in its slot: the slot carries the angle of its depth (sections.css)
 const inDeck = (it) => !!it.el.closest(".is-deck");
 const restOf = (it) => (inDeck(it) ? 0 : it.rest);
-const deckAngle = (it) => parseFloat(getComputedStyle(it.el.parentElement).rotate) || 0;
+// (deck.js turns the slot by its transform; without it, the styles do)
+const deckAngle = (it) => +gsap.getProperty(it.el.parentElement, "rotation") || parseFloat(getComputedStyle(it.el.parentElement).rotate) || 0;
 const dropStart = (it) => ({ y: M.DROP.move[0] + M.DROP.glide[0], rotation: it.rest - turnWay(it) * (M.DROP.move[1] + M.DROP.glide[1]) });
 
 const rgba = (s) => {
