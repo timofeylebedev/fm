@@ -52,6 +52,10 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   On iPhone, Safari's bottom bar takes the background of anything fixed or sticky at the bottom edge (even clipped);
   `.bar-guard` (base.css: an empty fixed block that takes taps) keeps it plain glass (decision `safari-bottom-bar`);
   never give it a background or a backdrop filter (Safari then paints the bar white).
+- **Styles before scripts:** Safari can run the module script before the stylesheet has applied (WebKit bug 261655),
+  so `main.js` waits for every stylesheet before it starts anything. Even so, never read a computed colour or size once
+  and write it inline for good: put it in the CSS (`var(--paper)`), or measure again on refresh. The card stack's
+  strips vanished "sometimes" for exactly this (Oct 24).
 - **Motion curves:** one table, `M.curve` in `scripts/motion.js` (`out`, `move`, `leave`, `wave`, `settle`, `fall`,
   `glide`). GSAP uses `"fm-<name>"`; WAAPI/CSS imports `css.out` / `css.move` / `css.leave` from motion.js.
   Never copy the numbers. Every animation respects reduced motion.
