@@ -1,6 +1,6 @@
-/* The two legal documents (privacy_policy_ru.html, soglasie_cookie.html): the logo navbar of the 404 page, frosted
-   like the main navbar; the title on the sand of the first screen (as the hero); the text in one reading column on
-   white; the site's footer.
+/* The two legal documents (privacy_policy_ru.html, cookie_consent.html): the logo navbar of the 404 page, frosted
+   like the main navbar; the title and the text in one reading column on white, all in Golos; the site's footer
+   without its line (Tim, Oct 24).
    Sizes come from the scale (design/scale.json) like the rest of the site. One local value: --doc-line, the line
    height of the text (1.5, not --lh-text 1.3): a long legal text is read line after line, not glanced at like the
    page's short texts (design/decisions.json, "doc-pages"). */
@@ -30,28 +30,28 @@
   width: 100%; max-width: calc(var(--doc-measure) + 2 * var(--gutter));
   margin-inline: auto; padding-inline: var(--gutter);
 }
-.doc__head {
-  background: var(--sand);
-  padding-block: calc(var(--nav-h) + var(--section-y)) var(--section-y);
-}
 .doc__title {
-  font-family: var(--font-display); font-weight: 700;
-  font-size: var(--type-card-heading); line-height: var(--lh-heading);
+  font-size: var(--type-doc-title); font-weight: 600; line-height: var(--lh-heading);
   text-wrap: balance;
+  .doc__body > & + * { margin-top: var(--section-gap); }
+  .doc__body > & + .doc__date { margin-top: var(--text-gap); }
 }
-.doc__date { margin-top: var(--text-gap); font-size: var(--type-body); line-height: var(--lh-text); color: var(--ink-60); }
+.doc__date {
+  line-height: var(--lh-text); color: var(--ink-60);
+  .doc__body > & + * { margin-top: var(--section-gap); }
+}
 
 h4 { margin: 0; font: inherit; }                    /* (base.css resets h1–h3 only) */
 
 /* ── the text ─────────────────────────────────────────────────────────────────────────────────────────────────── */
 .doc__body {
-  padding-block: var(--section-y) calc(var(--section-y) * 1.5);
+  padding-block: calc(var(--nav-h) + var(--section-y)) calc(var(--section-y) * 1.5);
   font-size: var(--type-body); line-height: var(--doc-line);
   & > * + * { margin-top: var(--text-gap); }
   & p { text-wrap: pretty; }
   & strong { font-weight: 600; }
   & a {
-    text-decoration: underline 1px var(--ink-30); text-underline-offset: 3px;
+    text-decoration: underline 1px var(--ink-30); text-underline-offset: 5px;
     overflow-wrap: anywhere;                          /* long addresses wrap anywhere instead of pushing the page wide */
     transition: text-decoration-color var(--hover-out) var(--ease-out);
     @media (--mouse) { &:hover { text-decoration-color: var(--ink); transition-duration: var(--hover-in); } }
@@ -60,7 +60,6 @@ h4 { margin: 0; font: inherit; }                    /* (base.css resets h1–h3 
 .doc-h2 {
   font-size: var(--type-lead); font-weight: 600; line-height: var(--lh-heading);
   .doc__body > & { margin-top: var(--section-gap); }
-  .doc__body > &:first-child { margin-top: 0; }
 }
 .doc-h3 {
   font-size: var(--type-body); font-weight: 600; line-height: var(--doc-line);
@@ -73,7 +72,7 @@ h4 { margin: 0; font: inherit; }                    /* (base.css resets h1–h3 
 }
 .doc-note { font-size: var(--type-body-s); color: var(--ink-60); }
 
-/* lists: the marker of the text — (1), 1.1., — or a dot — hangs in its own column */
+/* lists: the marker of the text — 1., 1.1., — or a dot — hangs in its own column */
 .doc-list {
   display: grid; gap: 4px;
   & li {
@@ -95,8 +94,10 @@ h4 { margin: 0; font: inherit; }                    /* (base.css resets h1–h3 
   & > * + * { margin-top: var(--text-gap); }
   & > .doc-list { margin-top: 8px; }
 }
-.doc-card__title { font-family: var(--font-display); font-weight: 700; font-size: var(--type-lead); line-height: var(--lh-heading); }
+.doc-card__title { font-weight: 600; font-size: var(--type-lead); line-height: var(--lh-heading); }
 .doc-card__rule {
   height: 0; margin: calc(var(--text-gap) * 1.5) 0; border: 0; border-top: 1px solid var(--ink-10);
   & + * { margin-top: 0; }
 }
+
+.footer__legal { border-top: 0; }                    /* nothing above it to part from here: the text ends in white */

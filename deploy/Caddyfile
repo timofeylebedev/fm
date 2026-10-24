@@ -10,6 +10,7 @@ flowmedium.pro {
   file_server {
     precompressed br gzip
   }
+  redir /soglasie_cookie /cookie_consent permanent         # the old address of the cookie consent (Tilda's)
   try_files {path} {path}.html {path}/
   handle_errors {
     @404 expression {err.status_code} == 404
