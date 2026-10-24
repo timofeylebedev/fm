@@ -1,5 +1,5 @@
 /* The footer: contacts, then the legal line. Paddings: footer/* of design/scale.json; text: type/body, notes type/ui.
-   The legal notes: in a row on computers (each on one line), in two columns on tablets and phones turned sideways, one under another
+   The legal notes: in a row on computers from 1080px (each on one line), in two columns below that (laptops, tablets, phones turned sideways), one under another
    (centred, like the contacts above them) on phones held upright. */
 
 .footer { display: flex; flex-direction: column; background: var(--mist); }
@@ -32,15 +32,15 @@
 .footer__legal-row {
   display: flex; flex-wrap: wrap; column-gap: 24px; row-gap: 10px;
   width: 100%; max-width: var(--column-max);
-  @media (--tablet) { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; row-gap: 10px; }
+  @media (--notes-cols) { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; grid-auto-flow: column; row-gap: 10px; }
   /* row gaps: 10px, the two links' extra tap height together (.footer__link), so one link never covers the other */
   @media (--phone) and (--portrait) { display: flex; flex-direction: column; align-items: center; row-gap: 10px; text-align: center; }
 }
 .footer__note {
   font-size: var(--type-ui); color: var(--ink-50);
   /* a note is never broken in two: where the row has no room for all of them, a whole note goes to the next line
-     (in the columns of tablets and phones a note may wrap, so only in the row) */
-  @media not (--tablet) { white-space: nowrap; }
+     (in the columns a note may wrap, so only in the row) */
+  @media not (--notes-cols) { white-space: nowrap; }
 }
 .footer__link {
   /* a taller target to tap, the same line: at least 24px (25px for a 12px note, on the narrowest phones). Where two
