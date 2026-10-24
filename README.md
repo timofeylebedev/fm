@@ -37,8 +37,9 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
 
 ## Changing things
 
-- **A text:** in `src/index.html`. Non-breaking spaces for Russian («в&nbsp;доме», «10&nbsp;000», «Лейбл&nbsp;—») are put in
-  by the build (`build/typograph.js`), so the text can be written normally.
+- **A text:** in `src/index.html`. Where lines may break («в&nbsp;доме», «10&nbsp;000», «Лейбл&nbsp;—», «Dr.&nbsp;Smith») is
+  decided by the build (`build/typeset/`, Russian and English by `lang`), so the text can be written normally;
+  `npm run typeset -- --lint src/*.html` lists quotes, dashes and look-alike letters to fix by hand.
 - **A colour, or a size shared with Figma** (footer, buttons so far): `design/tokens.json`, the same values as the Figma
   variables; `npm run tokens:sync` moves changes both ways. See `design/README.md`.
 - **A font, a curve:** `src/styles/base/tokens.css`. The screen widths are in `src/styles/base/media.css` (with the data behind them).

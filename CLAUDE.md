@@ -70,7 +70,11 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   subject, never a state; one hover timing. No focus ring (Tim, Oct 20: decision `no-focus-ring`).
 - **Media in lazy CSS:** a lazily loaded stylesheet must `@import "../base/media.css"` itself, or Lightning CSS fails
   on the custom media (`--mouse`, `--sideways` …).
-- **Texts:** write Russian normally in the HTML; `build/typograph.js` adds the non-breaking spaces.
+- **Texts:** write them normally in the HTML; `build/typeset/` decides where lines may break (no-break spaces, word
+  joiners, `<wbr>` in links) by each text's `lang` (Russian and English rules; README there). It never changes a
+  visible letter: `npm run typeset -- --lint src/*.html` lists what a proofreader would fix. No length limit on held
+  pieces (Tim). Keep links and other inline tags out of headings split by GSAP: SplitText loses a hold at a tag's edge.
+  `npm run test:typeset` after changing a rule.
 - **Third-party scripts:** add the domain to `POLICY` in `build/plugins.js` (the build writes a strict CSP with script
   hashes). Anything optional (analytics, Planerka preload) starts only from `onConsent()` in `scripts/consent.js`:
   only the «ОК» of the cookie notice is consent. Raise `VERSION` in consent.js when the purposes change.

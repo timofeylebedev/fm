@@ -185,6 +185,14 @@
       "fix": "when the text is revised, edit it in the two pages directly"
     },
     {
+      "id": "typeset",
+      "kind": "decision",
+      "what": "Where lines may break is decided by build/typeset (it replaced build/typograph.js): one answer per space, by the language of each text (lang), Russian and English rules plus rules for any language; no-break spaces and word joiners only. Letters you can see are never changed by the build: straight quotes, a hyphen for a dash, look-alike letters are reported (npm run typeset -- --lint) and changed only with --fix. No length limit on what is held together (Tim, 2026-10-24: «let's not set limits for that»)",
+      "decided": "Claude, 2026-10-19; Tim, 2026-10-24 (no length limits, merged)",
+      "why": "the old typograph missed every second word of a chain («а⍽не в последний»), held numbers to the wrong word («3⍽Политики»), treated РФ/ПД and Latin words as Russian prepositions, double-escaped entities (&#8209;) and had no English rules. Measured in Chromium at 9 widths: lines ending in a short Russian word 108 → 0; on an English sample at 17 widths, faults 114 (old) / 151 (none) → 0",
+      "fix": "a rule that misbehaves: switch it off for one text with data-typeset=off, or fix its test in build/typeset/test.mjs first"
+    },
+    {
       "id": "hero-bounds",
       "kind": "decision",
       "what": "The hero has least and greatest sizes for its parts (picture, air above and below the text). On tall screens it stops growing and the first card shows more under it (390×844: 574px instead of 826); on screens shorter than about 690px it is taller than the screen rather than squeezing the picture (1366×650: 673px, the team 291px tall instead of 249, no pill of the first card on the first screen)",

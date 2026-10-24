@@ -44,7 +44,7 @@
   container: card / size;
 }
 /* The size of the titles (the section headings, but never so big that the longest unbreakable run of a title, 9.7em:
-   «без уточнений —», joined by the typograph's non-breaking spaces, is wider than the card's text: on phones under about
+   «без уточнений —», joined by the no-break spaces of build/typeset, is wider than the card's text: on phones under about
    350px that is a little less than h2, 26px at 320, 24px at 300), and on a wide card the width of the text column
    (--card-t): the room the drawing's square leaves, but never wider than the titles need (12.5 of their letters, with
    the card's padding on both sides). Both are on every part of the card, so the drawing can be centred in the room the
