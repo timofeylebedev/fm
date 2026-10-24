@@ -1,6 +1,6 @@
 /* The two legal documents (privacy_policy_ru.html, cookie_consent.html): the logo navbar of the 404 page, frosted
-   like the main navbar; the title and the text in one reading column on white, all in Golos; the site's footer
-   without its line (Tim, Oct 24).
+   like the main navbar and, as there, the colour behind it at 70% (white: the page is white under it); the title and
+   the text in one reading column on white, all in Golos; the site's footer without its line (Tim, Oct 24).
    Sizes come from the scale (design/scale.json) like the rest of the site. One local value: --doc-line, the line
    height of the text (1.5, not --lh-text 1.3): a long legal text is read line after line, not glanced at like the
    page's short texts (design/decisions.json, "doc-pages"). */
@@ -20,7 +20,7 @@
   position: fixed; inset: 0 0 auto; z-index: 10;
   display: flex; align-items: center;
   padding: var(--nav-pad-y) var(--nav-pad-right) var(--nav-pad-y) var(--nav-pad-left);
-  background-color: var(--glass-nav);
+  background-color: var(--paper-70);                 /* the main navbar's 70% (--glass-nav) of the white behind it */
   -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
 }
 .doc-nav__home { display: inline-flex; color: var(--ink); border-radius: 8px; }

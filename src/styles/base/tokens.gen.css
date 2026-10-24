@@ -94,5 +94,5 @@
   --hero-pic-min: clamp(168px, calc(168px + (100vw - 20rem) * 132 / 1120), 300px);
   --hero-text: clamp(224px, calc(224px + (var(--vp) - 20rem) * 36 / 1120), 260px);
   --section-air-l: clamp(56px, calc(56px + (var(--vp) - 20rem) * 56 / 1120), 112px);
-  --type-doc-title: 2.5rem;
+  --type-doc-title: clamp(1.5rem, calc(1.5rem + (var(--vp) - 20rem) * 16 / 1120), 2.5rem);
 }
