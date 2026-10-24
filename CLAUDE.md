@@ -56,6 +56,12 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   so `main.js` waits for every stylesheet before it starts anything. Even so, never read a computed colour or size once
   and write it inline for good: put it in the CSS (`var(--paper)`), or measure again on refresh. The card stack's
   strips vanished "sometimes" for exactly this (Oct 24).
+- **Start-up cost (phones):** ScrollTrigger does not measure on DOMContentLoaded or load by itself (`gsap.js`): the page
+  is measured by `refreshSoon()` after the deferred start in `main.js`, and after the load only if its height changed.
+  Never `gsap.set` freshly split lines one text at a time (each set reads styles back, so the page is re-styled once per
+  text): batch them (`hideAll` in motion.js) or write their style directly (`settle` in cards.js). Split a text once,
+  not again until its width or its own font changes. Heavy work goes in tasks of its own (`inTurn` in main.js,
+  `pause()` in art/mount.js). Measure with Lighthouse mobile, 3 runs, median TBT (PR #54: 758 → 476 ms).
 - **Motion curves:** one table, `M.curve` in `scripts/motion.js` (`out`, `move`, `leave`, `wave`, `settle`, `fall`,
   `glide`). GSAP uses `"fm-<name>"`; WAAPI/CSS imports `css.out` / `css.move` / `css.leave` from motion.js.
   Never copy the numbers. Every animation respects reduced motion.
@@ -98,6 +104,8 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   the page stays usable; add `?fmdust=full` for its real look (slow), and step it in tests with `fmStipple.advance(sec)`
   (`fmStipple.replay()` pushes it in again, `fmStipple.level(n | "auto")` sets the engine's ladder).
 - The CSP blocks injected scripts: use `bypassCSP: true` in Playwright contexts.
+- `npm run audit` finds Chromium by `PLAYWRIGHT_CHROMIUM` (in the cloud: `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`
+  as of Oct 24, 2026; the folder name changes with Playwright updates: `ls /opt/pw-browsers`).
 - Headless Chromium without a GPU: launch with `--use-gl=swiftshader --enable-unsafe-swiftshader` (as
   `build/audit.mjs` does), at most 2 browser contexts at a time, and judge motion by its curves, not by frame timing.
 - Telegram's browser: `?fmcap=debug` (the white strip above the navbar turns red, a box shows what the browser says;

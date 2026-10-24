@@ -97,20 +97,33 @@ export function initCards() {
   setStep();
 
   // ── the titles: split into lines, which come and go one after another ──
-  // a title's lines where they belong right now, without animation (after a split, and at the start)
+  // a title's lines where they belong right now, without animation (after a split, and at the start). The lines are new
+  // elements after every split, with nothing of GSAP's on them yet, so their style is written as it is: a gsap.set would
+  // first read each line's style from the browser, which then has to work out the page's styles again for every title
+  // (once per title, as the splits change the page in between): a third of a second on a phone, at the start
   const settle = (title) => {
     title.size = null;                                       // measured again (see sizeOf)
-    gsap.set(title.lines, { yPercent: 0, opacity: title.on ? 1 : 0 });
+    const o = title.on ? "1" : "0";
+    title.lines.forEach((line) => { line.style.opacity = o; });
     title.el.classList.add("is-split");                     // shown (stack.css): as visible as its card, no more
   };
-  cards.forEach((c) => c.titles.forEach((title) => {
-    tidy(title.el);
-    // split again by refresh() below (when the width or the fonts change, with every card at its full size), not by SplitText itself
+  // split by refresh() below, the first time and again when the width or the titles' font changes (with every card at its
+  // full size), not by SplitText itself
+  const splitTitle = (title) => {
+    if (title.split) { title.split.split(); return; }
     title.split = SplitText.create(title.el, {
       type: "lines", linesClass: "fm-line", reduceWhiteSpace: false,
       onSplit(self) { title.lines = self.lines; settle(title); }
     });
-  }));
+  };
+  cards.forEach((c) => c.titles.forEach((title) => tidy(title.el)));
+  // the font of the titles, to know when it has arrived: lines measured in the stand-in font are split again then (a
+  // font for other texts, the body's, does not change where a title's lines break). Only the first family is asked
+  // about: the size-matched stand-in after it (fonts.css) is a local font that may never be loaded at all
+  const titleStyle = getComputedStyle(cards[0].titles[0].el);
+  const titleFont = titleStyle.fontStyle + " " + titleStyle.fontWeight + " 16px " + titleStyle.fontFamily.split(",")[0];
+  const titleText = cards.map((c) => c.titles.map((t) => t.el.textContent).join("")).join("").slice(0, 200) || "a";
+  const titleFontIn = () => { try { return document.fonts.check(titleFont, titleText); } catch { return true; } };
 
   function showTitle(c, k, dir) {
     if (k === c.title) return;
@@ -137,7 +150,7 @@ export function initCards() {
   const navBottom = () => parseFloat(getComputedStyle(stage.querySelector(".card")).top) || 0;
 
   // ── measuring (whenever ScrollTrigger measures the page) ──
-  let V = 0, gap = 0, navH = 0, padTop = 0, fontsDone = 0;
+  let V = 0, gap = 0, navH = 0, padTop = 0;
   const offsetIn = (el, root) => {                           // where el is inside root, as laid out (transforms do not count)
     let x = 0, y = 0;
     for (let n = el; n && n !== root; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
@@ -284,17 +297,20 @@ export function initCards() {
     });
   }
 
-  // measured with every card at its full size (nothing is drawn in between). The titles are split into lines again
-  // when it is needed: the cards or their titles have another width (a title's width also depends on the card's
-  // height: wide and tall cards lay out their text differently), or a font has arrived since the last split.
+  // measured with every card at its full size (nothing is drawn in between). The titles are split into lines the first
+  // time and again when it is needed: the cards or their titles have another width (a title's width also depends on the
+  // card's height: wide and tall cards lay out their text differently), or the titles' font has arrived since the last
+  // split. Every title is split first and measured after (sizeOf), so the page is laid out once for the measuring, not
+  // once per title.
   let splitFor = "";
   function refresh() {
     section.classList.add("stack-instant");                  // no transitions while everything is put in place
     measure();
-    const key = cards.map((c) => c.el.offsetWidth + ":" + c.titles[0].el.offsetWidth).join() + "/" + fontsDone;
+    const key = cards.map((c) => c.el.offsetWidth + ":" + c.titles[0].el.offsetWidth).join() + "/" + titleFontIn();
     const resplit = key !== splitFor;
     splitFor = key;
-    cards.forEach((c) => c.titles.forEach((title) => { if (resplit) title.split.split(); sizeOf(c, title); }));
+    if (resplit) cards.forEach((c) => c.titles.forEach(splitTitle));
+    cards.forEach((c) => c.titles.forEach((title) => sizeOf(c, title)));
     if (V) draw(target());
     void section.offsetWidth;
     requestAnimationFrame(() => section.classList.remove("stack-instant"));
@@ -307,7 +323,7 @@ export function initCards() {
   refresh();
   addEventListener("resize", () => { if (V) { measure(); draw(target()); } });   // at once, not only at the next measuring
   // the label and the titles are measured in the font that shows: once a font has arrived, measure again
-  document.fonts.addEventListener("loadingdone", () => { fontsDone++; refresh(); });
+  document.fonts.addEventListener("loadingdone", refresh);
 
   // the first card comes in after the hero (see the top): it waits, hidden, for its turn in the hero's group
   const hero = section.previousElementSibling, first = cards[0].slot;

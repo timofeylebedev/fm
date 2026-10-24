@@ -195,19 +195,24 @@ function takeTurns(hosts) {
   sync();
 }
 
-// the drawings of one card: their file is downloaded (once), then they are all built, measured and started together
+// a moment for the browser between two drawings (to paint, to answer a tap): a card's drawings took a quarter of a
+// second together on a phone, in one go
+const pause = () => (window.scheduler && scheduler.yield ? scheduler.yield() : new Promise((go) => setTimeout(go, 0)));
+// the drawings of one card: their file is downloaded (once), then they are built one at a time, each in a task of its
+// own (still hidden: is-away), and measured and started together
 async function mountCard(card) {
   if (card.done) return;
   card.done = true;
   const files = {};
   await Promise.all([...new Set(card.hosts.map(([, key]) => fileOf(key)))].map(async (f) => { files[f] = (await FILES[f]()).default; }));
   const built = [];
-  card.hosts.forEach(([host, key]) => {
+  for (const [i, [host, key]] of card.hosts.entries()) {
+    if (i) await pause();
     try { mount(host, key, files[fileOf(key)]); built.push(host); } catch (err) {
       host.classList.add("is-failed");                     // art.css shows a picture instead, where there is one
       console.warn("art: " + key + " was not drawn", err);
     }
-  });
+  }
   built.forEach(finish);
   if (built.length) takeTurns(built);
 }

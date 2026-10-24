@@ -96,8 +96,9 @@ function measureBounds(c, n) {
 }
 
 // Other scroll animations on the page measured it before the carousel took up space: ask them to re-measure.
-// Not while the page is still loading: ScrollTrigger re-measures everything by itself when loading is over,
-// and one more full pass at that moment only made the start heavier.
+// Not while the page is still loading: when loading is over, main.js has everything re-measured if the page's height
+// has changed since the last measuring (which this does), and one more full pass at that moment only made the start
+// heavier.
 const refreshScrollTriggers = () => { if (document.readyState === "complete") refreshSoon(); };
 
 function init(root) {
