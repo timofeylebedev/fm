@@ -13,7 +13,7 @@
                It starts bigger, as if closer, and gets smaller faster and faster until it lands; its shadow is wide and
                faint while it is in the air and tightens as it lands. In the air it drifts up and turns at an even speed;
                when it lands it keeps going a little by its own momentum, sliding and turning a bit further while
-               friction slows it to a stop, at its own angle (--rest in the HTML). No bounce. It starts tipped 20° with
+               friction slows it to a stop, at its own angle (--rest in the HTML). No bounce. It starts tipped 10° with
                its top edge toward you and lies flat by the time it lands; it fades in slowly at both ends (reveal).
                Where the cards are a stack (a narrow column, deck.js) nothing drops: the cards rise into place from
                below one after another, the bottom card first, turning from −4° to their angle in the stack, and the
@@ -73,7 +73,7 @@ export const M = {
   //   gap    px between a card that is fading in and the card next to it
   //   air    its shadow in the air: [offset ×, blur ×, opacity ×]
   //   tip    [°, part of the time in the air] it starts tipped (the top edge toward you: −), flat again at an even speed
-  DROP: { land: 0.55, scale: 1.15, move: [24, 4.5], glide: [13, 2.5], fade: 0.36, gap: 6, air: [2.4, 2, 0.5], tip: [-20, 1] },
+  DROP: { land: 0.55, scale: 1.15, move: [24, 4.5], glide: [13, 2.5], fade: 0.36, gap: 6, air: [2.4, 2, 0.5], tip: [-10, 1] },
   // the ID cards as a stack (a narrow column, deck.js): no drop, each card rises into place
   //   rise   px it comes up from      from   ° it starts at (it turns to its angle in the stack, sections.css)
   //   time   seconds to rise          beat   seconds between two cards (the bottom card first)
@@ -351,6 +351,9 @@ function flush() {
     g.queue.sort((a, b) => {
       const da = depth(a), db = depth(b);
       if (da != null && db != null) return db - da;          // a stack: from the bottom card up
+      // the cards of a row: from left to right, whatever their angles (a card turned 8° reaches higher than the one
+      // before it, and by its top alone it came in before it: 1, 3, 2)
+      if (a.kind === "tilt" && b.kind === "tilt" && a.group === b.group) return a.box.left - b.box.left;
       return Math.abs(a.box.top - b.box.top) > 8 ? a.box.top - b.box.top : a.box.left - b.box.left;
     });
     pump(g);
