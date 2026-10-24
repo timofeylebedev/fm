@@ -45,6 +45,9 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
 - **Checking the page:** `npm run build && npm run audit` — sideways scroll, cut-off text, text under 12px, small tap targets and axe-core at nine screen sizes (two of them with the browser's text at 24px), in Chromium (`npx playwright install chromium` once; `FM_ENGINE=firefox` or `webkit` for the other engines). It also runs on every pull request (`.github/workflows/audit.yml`).
 - **A picture:** put the new original into `assets-src/img/` under the same name, run `npm run images`, commit the new files.
   The list in `build/images.mjs` says what is made from each original (sizes and formats: AVIF and WebP).
+- **The icons and the link picture:** three originals in `assets-src/img/` — `icon.png` (512 × 512: iPhone and Android
+  icons, `og.png`), `favicon-32.png` (32 × 32: `favicon.ico`, cut to a circle) and `fm-logo.svg` (`favicon.svg`). Replace
+  one, run `npm run images`, commit. The PNGs come out lossless (the build checks every pixel).
 - **A font:** `assets-src/fonts/`, then `npm run fonts` (needs Python with `pip install fonttools brotli`).
 - **The animations:** every part has its settings at the top of its file in `src/scripts/` (`motion.js` for how
   headings, texts and cards come in; `hero.js` for the chips; `stipple.js` for the dust on the stat cards and the purple card; `art/` for the drawings).

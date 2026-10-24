@@ -63,13 +63,21 @@ const RASTER = [
 // SVG files: cleaned up and minified. Their size and viewBox are kept (they are used as pictures).
 const SVG = (name) => /^(logo-|art-icon-|art-logo-)/.test(name);
 
-// Files that keep a fixed address (public/): the picture for links shared in messengers, and the icons of the site
-const PUBLIC_FILES = [
-  { src: "og.png", out: "og.png", width: 1200, format: "png" },
-  { src: "favicon.png", out: "apple-touch-icon.png", width: 180, format: "png" },
-  { src: "favicon.png", out: "icon-192.png", width: 192, format: "png" },
-  { src: "favicon.png", out: "icon-512.png", width: 512, format: "png" }
+// The site's icons and the picture for links shared in messengers (Tim's files, Oct 24, 2026). They keep fixed
+// addresses: public/ for the PNGs and the ICO, src/assets/icons/favicon.svg for the SVG (linked from every page).
+//   icon.png         512 × 512, the mark on a full white square: the iPhone and Android icons and og.png
+//   favicon-32.png   32 × 32, drawn for that size (more air than icon.png): favicon.ico, cut to a circle (Tim)
+//   fm-logo.svg      the mark alone: favicon.svg, which turns white in dark mode
+// Every PNG is lossless: the smallest of an exact palette and full colour whose pixels are identical to the resized
+// picture (checked on every run; the build stops otherwise).
+const ICON = "icon.png", FAVICON_32 = "favicon-32.png", LOGO = "fm-logo.svg";
+const APP_ICONS = [
+  { out: "apple-touch-icon.png", width: 180 },   // iPhone and iPad home screen: opaque, iOS rounds the corners itself
+  { out: "icon-192.png", width: 192 },           // site.webmanifest
+  { out: "icon-512.png", width: 512 }            // site.webmanifest
 ];
+const OG = { out: "og.png", width: 1200, height: 630 };   // icon.png at 1:1 in the middle of a white 1200 × 630
+const ICO = { out: "favicon.ico", sizes: [16, 32] };      // favicon-32.png in a circle; 16 made from it
 
 const newer = async (out, src) => {
   if (FORCE) return false;
@@ -113,11 +121,102 @@ for (const file of (await readdir(SRC)).filter((f) => f.endsWith(".svg") && SVG(
   await write(out, Buffer.from(data), src);
 }
 
-for (const job of PUBLIC_FILES) {
-  const src = join(SRC, job.src), out = join(PUBLIC, job.out);
-  if (await newer(out, src)) { skipped++; continue; }
-  const data = await sharp(src).resize({ width: job.width }).png(QUALITY.png).toBuffer();
-  await write(out, data, src);
+// --- the icons and og.png ---
+
+// The smallest lossless PNG of a picture: an exact palette if the picture has 256 colours or fewer, else full colour.
+// Each candidate is decoded and compared with the picture pixel by pixel; one that differs is never used.
+// { rgba: true } skips the palette (the PNGs inside favicon.ico: some ICO readers only take 32-bit RGBA there).
+async function exactPng(pipeline, name, { rgba = false } = {}) {
+  const ref = await pipeline.clone().ensureAlpha().raw().toBuffer();
+  const tries = [
+    ...(rgba ? [] : [pipeline.clone().png({ palette: true, colours: 256, dither: 0, effort: 10, compressionLevel: 9 })]),
+    pipeline.clone().png({ palette: false, compressionLevel: 9, adaptiveFiltering: true, effort: 10 })
+  ];
+  // identical, except that a fully transparent pixel may carry any colour
+  const same = (a, b) => {
+    for (let i = 0; i < a.length; i += 4) {
+      if (a[i + 3] !== b[i + 3]) return false;
+      if (a[i + 3] && (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2])) return false;
+    }
+    return a.length === b.length;
+  };
+  let best = null;
+  for (const t of tries) {
+    const data = await t.toBuffer();
+    const back = await sharp(data).ensureAlpha().raw().toBuffer();
+    if (same(back, ref) && (!best || data.length < best.length)) best = data;
+  }
+  if (!best) throw new Error(`images: no lossless PNG for ${name}`);
+  return best;
+}
+
+// favicon.ico with PNG entries (every browser since IE 11 / Windows Vista reads them)
+function icoFile(entries) {
+  const head = Buffer.alloc(6 + 16 * entries.length);
+  head.writeUInt16LE(0, 0); head.writeUInt16LE(1, 2); head.writeUInt16LE(entries.length, 4);
+  let offset = head.length;
+  entries.forEach(({ size, data }, i) => {
+    const e = 6 + 16 * i;
+    head.writeUInt8(size % 256, e); head.writeUInt8(size % 256, e + 1);   // 0 means 256
+    head.writeUInt8(0, e + 2); head.writeUInt8(0, e + 3);
+    head.writeUInt16LE(1, e + 4); head.writeUInt16LE(32, e + 6);
+    head.writeUInt32LE(data.length, e + 8); head.writeUInt32LE(offset, e + 12);
+    offset += data.length;
+  });
+  return Buffer.concat([head, ...entries.map((x) => x.data)]);
+}
+
+// a smooth circle filling the square, as an alpha mask
+const circle = (s) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}"><circle cx="${s / 2}" cy="${s / 2}" r="${s / 2}"/></svg>`);
+
+{
+  const src = join(SRC, ICON);
+  const opaque = () => sharp(src).flatten({ background: "#ffffff" });
+  for (const job of APP_ICONS) {
+    const out = join(PUBLIC, job.out);
+    if (await newer(out, src)) { skipped++; continue; }
+    const pic = sharp(await opaque().resize({ width: job.width, kernel: "lanczos3" }).png().toBuffer()).removeAlpha();
+    await write(out, await exactPng(pic, job.out), src);
+  }
+  const og = join(PUBLIC, OG.out);
+  if (await newer(og, src)) skipped++;
+  else {
+    const icon = await opaque().png().toBuffer();
+    const { width, height } = await sharp(icon).metadata();
+    const pic = sharp({ create: { width: OG.width, height: OG.height, channels: 3, background: "#ffffff" } })
+      .composite([{ input: icon, left: Math.round((OG.width - width) / 2), top: Math.round((OG.height - height) / 2) }]);
+    await write(og, await exactPng(sharp(await pic.png().toBuffer()).removeAlpha(), OG.out), src);
+  }
+}
+
+{
+  const src = join(SRC, FAVICON_32), out = join(PUBLIC, ICO.out);
+  if (await newer(out, src)) skipped++;
+  else {
+    const entries = [];
+    for (const size of ICO.sizes) {
+      const square = await sharp(src).flatten({ background: "#ffffff" }).resize({ width: size, kernel: "lanczos3" }).removeAlpha().toBuffer();
+      const round = await sharp(square).joinChannel(await sharp(circle(size)).extractChannel("alpha").toBuffer()).png().toBuffer();
+      entries.push({ size, data: await exactPng(sharp(round), `${ICO.out} ${size}`, { rgba: true }) });
+    }
+    await write(out, icoFile(entries), src);
+  }
+}
+
+{
+  // favicon.svg: the mark, square viewBox (centred), black, white when the browser is dark
+  const src = join(SRC, LOGO), out = new URL("../src/assets/icons/favicon.svg", import.meta.url).pathname;
+  if (await newer(out, src)) skipped++;
+  else {
+    const svg = await readFile(src, "utf8");
+    const [, , w, h] = svg.match(/viewBox="([^"]+)"/)[1].split(/\s+/).map(Number);
+    const side = Math.max(w, h);
+    const square = svg
+      .replace(/<svg[^>]*>/, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${(w - side) / 2} ${(h - side) / 2} ${side} ${side}"><style>path{fill:#000}@media (prefers-color-scheme:dark){path{fill:#fff}}</style>`)
+      .replace(/\s*fill="[^"]*"/g, "");
+    const { data } = optimize(square, { multipass: true, floatPrecision: 3, plugins: [{ name: "preset-default", params: { overrides: { inlineStyles: false, minifyStyles: false } } }] });
+    await write(out, Buffer.from(data), src);
+  }
 }
 
 const kb = (b) => (b / 1024).toFixed(0) + " KB";
