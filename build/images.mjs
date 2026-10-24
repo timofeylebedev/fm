@@ -43,6 +43,9 @@ const HERO_2X = {
 };
 const heroQ = (set) => (w) => ({ avif: { quality: set[w][0], chromaSubsampling: "4:4:4" }, webp: { quality: set[w][1], smartSubsample: true } });
 
+// an AVIF setting: a quality, or [quality, bit depth] (10-bit keeps fine grain at a smaller size than 8-bit)
+const avif = (q) => Array.isArray(q) ? { quality: q[0], bitdepth: q[1] } : { quality: q };
+
 const RASTER = [
   // the hero: a wide picture whose width follows the screen's height (see hero.css), shown at most
   // min(160vw, 2120px, max(196.2vh, 660px)) wide (the sizes in index.html). The original (Tim's, Oct 24, 2026) is
@@ -68,13 +71,18 @@ const RASTER = [
   // the strip of 12 icons of the hero chips (made from the covers of the ring and the icons of the drawings, Oct 24, 2026).
   // Settings as for the covers below: the lowest at SSIMULACRA2 90 or more. Lossy WebP never gets there (it halves the
   // colour), so the WebP for browsers without AVIF is near-lossless.
-  { src: "hero-chips.png", widths: [1152], formats: ["avif", "webp"], options: { avif: { quality: 96 }, webp: { nearLossless: true, quality: 60 } } },
+  // Oct 24, 2026, the new Home cover in the first cell: 10-bit AVIF at 92 (31 KB) instead of 8-bit at 96 (34 KB); every
+  // cell scores the same or better than before, the worst 82.6 against 81.9 (cell by cell, at 1:1). Only the Home icon
+  // is below 90 (83: the film grain at 96 px, 82 before with the old cover too); 90 would take 60 KB.
+  { src: "hero-chips.png", widths: [1152], formats: ["avif", "webp"], options: { avif: { quality: 92, bitdepth: 10 }, webp: { nearLossless: true, quality: 60 } } },
   // the covers of the ring (shown at about 300 CSS px at most; the ring's texture is 640 at most). Each cover at the
   // lowest setting whose SSIMULACRA2 against the 640 px original is 90 or more (no visible loss at 1:1), measured
   // Oct 23, 2026. AVIF first; the WebP is for browsers without AVIF. First steps is flat colour: near-lossless WebP is
   // smaller than any AVIF that keeps its letters (14 KB at 92.8 against 31 KB at 91.3), so it has no AVIF.
-  ...Object.entries({ "home": 88, "last-seen": 91, "reminiscence": 58, "love": 75, "rebirth": 87, "m": 64, "lazy-friday": 63 })
-    .map(([n, q]) => ({ src: `cover-${n}.png`, widths: [640], formats: ["avif", "webp"], options: { avif: { quality: q } } })),
+  // The Home cover was replaced on Oct 24, 2026 (a photo with film grain): 10-bit AVIF keeps grain better for its size,
+  // so it is 10-bit at 86 (100 KB, 90.6); the best 8-bit was 92 (136 KB, 90.5).
+  ...Object.entries({ "home": [86, 10], "last-seen": 91, "reminiscence": 58, "love": 75, "rebirth": 87, "m": 64, "lazy-friday": 63 })
+    .map(([n, q]) => ({ src: `cover-${n}.png`, widths: [640], formats: ["avif", "webp"], options: { avif: avif(q) } })),
   { src: "cover-first-steps.png", widths: [640], formats: ["webp"], options: { webp: { nearLossless: true, quality: 40 } } },
   // pictures used inside the drawings (art/*.js), at the size they are drawn at 2×
   ...["face-anna", "face-elvira", "face-mark", "face-petr", "cube", "cube-bg"].map((n) => ({ src: `art-${n}.png`, widths: [null], formats: ["webp"], quality: 88 })),
@@ -85,8 +93,10 @@ const RASTER = [
   // both). The Last Seen cover is so small that no AVIF gets there: near-lossless WebP only.
   ...Object.entries({ video: 86, hoodie: 76, cap: 88, concert: 90 })
     .map(([n, q]) => ({ src: `art-card-${n}.png`, widths: [400], formats: ["avif", "webp"], options: { avif: { quality: q } } })),
-  { src: "cover-home.png", name: "art-card-home", widths: [400], formats: ["avif", "webp"], options: { avif: { quality: 88 } } },
-  { src: "cover-home.png", name: "art-thumb-home", widths: [134], formats: ["avif", "webp"], options: { avif: { quality: 92 } } },
+  // the Home cover (new on Oct 24, 2026) in 10-bit, as in the ring: tile 86 (39 KB, 90.6; 8-bit needed 92, 53 KB),
+  // thumbnail 88 (4.9 KB, 90.2; 8-bit 91, 5.0 KB)
+  { src: "cover-home.png", name: "art-card-home", widths: [400], formats: ["avif", "webp"], options: { avif: avif([86, 10]) } },
+  { src: "cover-home.png", name: "art-thumb-home", widths: [134], formats: ["avif", "webp"], options: { avif: avif([88, 10]) } },
   { src: "cover-last-seen.png", name: "art-thumb-lastseen", widths: [79], formats: ["webp"], options: { webp: { nearLossless: true, quality: 80 } } },
   // shown only if a royalty drawing cannot be drawn (very old browsers)
   { src: "royalty-1.png", widths: [1012], formats: ["webp"] },
