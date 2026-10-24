@@ -153,10 +153,13 @@ html.hero-loaded:not(.motion) .hero__table::after { opacity: 0; }
   will-change: transform, opacity;
   font-size: calc(15 * var(--u)); line-height: 1.15; white-space: nowrap;
 
-  /* the icon: one cell of the strip hero-chips.webp (12 icons side by side); the script sets which one */
+  /* the icon: one cell of the strip hero-chips (12 icons side by side; AVIF, or WebP where there is no AVIF); the script sets which one */
   & > i {
     flex: none; width: calc(40 * var(--u)); height: calc(40 * var(--u));
     background: url("../../assets/img/hero-chips.webp") 0 0 / 1200% 100% no-repeat;
+    @supports (background-image: image-set(url("x.avif") type("image/avif"))) {
+      background-image: image-set(url("../../assets/img/hero-chips.avif") type("image/avif"), url("../../assets/img/hero-chips.webp") type("image/webp"));
+    }
     &.is-cover { border-radius: calc(8 * var(--u)); }
     &.is-round { border-radius: 50%; }
   }

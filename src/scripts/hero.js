@@ -7,7 +7,7 @@ import { pace } from "./pace.js";
 import { M, calm, cue } from "./motion.js";
 
 // ── the chips ──
-// icon: the cell of hero-chips.webp (0 … 11, from the left); shape: "cover" (rounded square), "round" or "" (the icon has its own shape)
+// icon: the cell of hero-chips (src/assets/img) (0 … 11, from the left); shape: "cover" (rounded square), "round" or "" (the icon has its own shape)
 // dot: the colour of the status dot, or "" for a line without a dot (a sum)
 // Their order here is their order on the table, from right to left.
 const CHIPS = [
@@ -15,13 +15,13 @@ const CHIPS = [
   { icon: 2,  shape: "round", title: "Сборы с концерта",       dot: "",        text: "+ 4 160 000 ₸" },
   { icon: 1,  shape: "",      title: "Лиц. договор № К-011",   dot: "#16d947", text: "Подписан" },
   { icon: 7,  shape: "round", title: "Аванс на клип",          dot: "#16d947", text: "Согласован" },
-  { icon: 3,  shape: "cover", title: "Last Seen Leaving",      dot: "#ffbf00", text: "На модерации" },
+  { icon: 3,  shape: "cover", title: "Last Seen at 8 AM",      dot: "#ffbf00", text: "На модерации" },
   { icon: 4,  shape: "round", title: "Роялти за сентябрь",     dot: "",        text: "+ 865 947 ₽" },
   { icon: 5,  shape: "round", title: "Лицензия для сериала",   dot: "#e366ff", text: "Согласование" },
   { icon: 6,  shape: "cover", title: "Сингл «Любовь»",         dot: "#ffbf00", text: "Сведение" },
   { icon: 9,  shape: "",      title: "Акт № У-067",            dot: "#ffbf00", text: "В разработке" },
   { icon: 10, shape: "round", title: "Продажа мерча",          dot: "",        text: "+ 210 000 ₽" },
-  { icon: 8,  shape: "cover", title: "EP «slow blink»",        dot: "#33a0ff", text: "Отгружен на площадки" },
+  { icon: 8,  shape: "cover", title: "EP «lazy friday»",       dot: "#33a0ff", text: "Отгружен на площадки" },
   { icon: 11, shape: "round", title: "Обложка релиза",         dot: "#33a0ff", text: "На проверке" }
 ];
 

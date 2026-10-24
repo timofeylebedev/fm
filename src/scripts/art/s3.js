@@ -239,11 +239,11 @@ export default {
   "s3-2"() {
     // distance from the right edge, vertical centre, where the tail starts in Figma, icon colour, icon file, sum, label — bottom layer first
     const rows = [
-      [206.55, 599.47, 77.79, "#ff8019", "art-icon-brush.svg", "− 35 000 ₽", "Обложка релиза"],
-      [271.49, 500, -5.11, "#e366ff", "art-icon-star.svg", "+ 4 160 000 ₸", "Сборы с концерта"],
-      [148.53, 400.52, 63.97, "#8861ff", "art-icon-copyright.svg", "+ $6 000", "Лицензия для сериала"],
-      [341.95, 301.05, -32.74, "#33a0ff", "art-icon-video.svg", "− 180 000 ₽", "Аванс на клип"],
-      [380.63, 698.95, -88, "#ffbf00", "art-icon-tshirt.svg", "+ 210 000 ₽", "Продажа мерча"]
+      [206.55, 599.47, 77.79, "#f74a5e", "art-icon-brush.svg", "− 35 000 ₽", "Обложка релиза"],
+      [271.49, 500, -5.11, "#c34bdb", "art-icon-star.svg", "+ 4 160 000 ₸", "Сборы с концерта"],
+      [148.53, 400.52, 63.97, "#007deb", "art-icon-copyright.svg", "+ $6 000", "Лицензия для сериала"],
+      [341.95, 301.05, -32.74, "#0095b2", "art-icon-video.svg", "− 180 000 ₽", "Аванс на клип"],
+      [380.63, 698.95, -88, "#ffa100", "art-icon-tshirt.svg", "+ 210 000 ₽", "Продажа мерча"]
     ];
     // Every tail and every payment sits in an empty wrapper of its own (.fm-fly: a line across the stage at the row's centre),
     // and the animation moves the wrappers. That is much less work for the browser than moving the pills themselves.
