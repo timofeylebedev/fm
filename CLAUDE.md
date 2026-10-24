@@ -64,7 +64,7 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   the ladder 0 2 … 24 28 … 64 72 … 128, or if two type roles in `type.relations` are closer than ×1.125.
 - **Colours:** from tokens only (`design/tokens.json` → `tokens.gen.css`), one ink in alpha steps (`--ink-20` …).
 - **Layout steps:** container queries on the column at S 22rem, M 43rem, L 58rem; any other step must be a written
-  "own step" (ID deck 35rem, royalty card 32rem, hero title 10em, video card 400px, tool picture 27.5rem).
+  "own step" (ID deck 35rem, royalty card 32rem, hero title 10em, video card 400px, tool picture 27.5rem, tool cards side by side 45.75rem).
 - **Design grammar (keep it):** tiles radius-s; half-column cards radius-m = padding; full-column cards (CTA, tools)
   radius-l; the ID cards 24px of their 240 (scaled with them); inner radius = outer − inset; colour on a card is a
   subject, never a state; one hover timing. No focus ring (Tim, Oct 20: decision `no-focus-ring`).
