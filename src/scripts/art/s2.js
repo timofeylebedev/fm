@@ -82,6 +82,7 @@ export default {
   "s2-2"() {
     const lines = '<span class="fm-lines">' + "<i></i>".repeat(9) + '<i style="width:116.431px"></i></span>';
     const sheet = (x, y, title) => '<div class="fm-sheet" style="' + at(x, y) + '"><b class="fm-num">' + title + "</b>" + lines + "</div>";
+    // The documents lie on the orange of the card, with one outline around all six (drawn with the lines, see BOX below).
     // The lines around the documents: position, path, and where the colour runs.
     // Each path starts at the edge of a document. The six big ones end under the button, and their colour runs from the
     // button outwards (true = the colour starts at the end of the path). The four small ones go from one edge of the
@@ -121,9 +122,9 @@ export default {
       const p = (i + 0.5) / TONES, fade = easeInOut(p < 0.5 ? p * 2 : (1 - p) * 2);
       return "rgb(" + FROM.map((c, j) => Math.round(c + (TO[j] - c) * fade)).join(",") + ")";
     });
-    const pieces = [];       // every piece: its shape, and how far it is from where the colour starts on its line (in waves)
-    loops.forEach(([x, y, d, fromEnd]) => {
-      const pts = flatten(d, x, y), cuts = [];
+    // A line cut into pieces: every piece's shape, and its length along the line from the start
+    const cut = (pts) => {
+      const cuts = [];
       let piece = [pts[0]], run = 0;
       for (let i = 1; i < pts.length; i++) {
         let a = pts[i - 1], length = Math.hypot(pts[i][0] - a[0], pts[i][1] - a[1]);
@@ -136,33 +137,62 @@ export default {
       }
       if (run > 0.25) cuts.push(piece); else run = PIECE;
       const total = (cuts.length - 1) * PIECE + run;                     // length of the whole line
-      cuts.forEach((points, n) => {
+      return { total, cuts: cuts.map((points, n) => {
         const path = new Path2D();
         path.moveTo(points[0][0], points[0][1]);
         for (let i = 1; i < points.length; i++) path.lineTo(points[i][0], points[i][1]);
-        pieces.push({ path, at: (fromEnd ? total - n * PIECE : n * PIECE) / WAVE });
-      });
+        return { path, along: n * PIECE };
+      }) };
+    };
+    const pieces = [];       // every piece: its shape, and how far it is from where the colour starts on its line (in waves)
+    const totals = loops.map(([x, y, d, fromEnd]) => {
+      const { total, cuts } = cut(flatten(d, x, y));
+      cuts.forEach(({ path, along }) => pieces.push({ path, at: (fromEnd ? total - along : along) / WAVE }));
+      return total;
     });
+    // The outline of the documents: its light runs clockwise, from the top left corner.
+    // A closed line has no end, so its waves must fit into it a whole number of times: they are a little shorter than
+    // WAVE (7 in the outline, 347px). They take the same PERIOD, so where the top left line meets the outline
+    // (on the top edge) the two keep the same colour all the time.
+    const BOX = { x: 173.513, y: 210.723, w: 652.974, h: 578.554, r: 21.606 };
+    const k = BOX.r * 0.5523, x0 = BOX.x, y0 = BOX.y, x1 = BOX.x + BOX.w, y1 = BOX.y + BOX.h, r = BOX.r;
+    const outline = "M" + (x0 + r) + " " + y0 + "H" + (x1 - r) + "C" + (x1 - r + k) + " " + y0 + " " + x1 + " " + (y0 + r - k) + " " + x1 + " " + (y0 + r)
+      + "V" + (y1 - r) + "C" + x1 + " " + (y1 - r + k) + " " + (x1 - r + k) + " " + y1 + " " + (x1 - r) + " " + y1
+      + "H" + (x0 + r) + "C" + (x0 + r - k) + " " + y1 + " " + x0 + " " + (y1 - r + k) + " " + x0 + " " + (y1 - r)
+      + "V" + (y0 + r) + "C" + x0 + " " + (y0 + r - k) + " " + (x0 + r - k) + " " + y0 + " " + (x0 + r) + " " + y0;
+    const edge = cut(flatten(outline, 0, 0)), EDGE_WAVE = edge.total / Math.round(edge.total / WAVE);
+    const meet = loops[6][0] + 109.65 - (x0 + r);                       // where the top left line ends, along the outline
+    const shift = totals[6] / WAVE - meet / EDGE_WAVE;
+    const edgePieces = edge.cuts.map(({ path, along }) => ({ path, at: along / EDGE_WAVE + shift }));
+    const edgePath = new Path2D(outline);
     let canvas = null, ctx = null;
     function tick(time) {
       if (!ctx) return;
       const turn = time / PERIOD;
       ctx.clearRect(0, 0, SIZE, SIZE);
-      for (let i = 0; i < pieces.length; i++) {
-        const p = turn - pieces[i].at;
-        ctx.strokeStyle = STILL ? "#fff" : tones[((p - Math.floor(p)) * TONES) & (TONES - 1)];   // with "reduce motion" the lines stay white
-        ctx.stroke(pieces[i].path);
-      }
+      const draw = (list) => {
+        for (let i = 0; i < list.length; i++) {
+          const p = turn - list[i].at;
+          ctx.strokeStyle = STILL ? "#fff" : tones[((p - Math.floor(p)) * TONES) & (TONES - 1)];   // with "reduce motion" the lines stay white
+          ctx.stroke(list[i].path);
+        }
+      };
+      draw(pieces);
+      // where a line meets or crosses the outline, the outline is on top (added up, the two would make a bright bead)
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.stroke(edgePath);
+      ctx.globalCompositeOperation = "lighter";
+      draw(edgePieces);
     }
     return { html:
-      '<div style="left:173.513px;top:210.723px;width:652.974px;height:578.554px;background:linear-gradient(153.509deg,rgba(255,255,255,.9),rgba(255,255,255,.1)),#f56e00"></div>'
+      '<div style="left:173.513px;top:210.723px;width:652.974px;height:578.554px;border-radius:21.606px;background:#f56e00"></div>'
       + sheet(173.513, 210.723, "Приложение №3<br>к лицензионному<br>договору<br>№ ФМ-011")
       + sheet(173.513, 501.2, "Лицензионный<br>договор<br>№ ФМ-012")
       + sheet(610.429, 210.723, "Договор об<br>отчуждении<br>исключительных<br>прав № ИП-045")
       + sheet(610.429, 501.2, "Приложение № 2<br>к Лицензионному<br>договору<br>№ ФМ-012")
       + sheet(391.971, 210.723, "Лицензионный<br>договор<br>№ ФМ-011")
       + sheet(391.971, 501.2, "Договор об<br>отчуждении<br>исключительных<br>прав № ФЗ-102")
-      + '<canvas class="fm-flow"></canvas>'                    // the lines lie over the documents and under the button
+      + '<canvas class="fm-flow"></canvas>'                    // the lines and the outline lie over the documents and under the button
       + '<div class="fm-cta">Оформить права</div>',
       init(stage) { canvas = stage.querySelector(".fm-flow"); },
       // The ends of the lines are cut straight, so they stop exactly at the edge of a document.
