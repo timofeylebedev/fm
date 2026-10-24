@@ -1,0 +1,303 @@
+{
+ "when": "2026-10-24T18:42:53.985Z",
+ "results": [
+  {
+   "id": "ladder",
+   "title": "Every size ends on the ladder",
+   "how": "50 roles of scale.json, both ends, against 0 2 … 24 28 … 64 72 … 128",
+   "ok": true,
+   "n": 0,
+   "fails": [],
+   "note": ""
+  },
+  {
+   "id": "relations",
+   "title": "Neighbouring text levels at least ×1.125 apart",
+   "how": "6 pairs of type.relations at 320 and 1440 (a ratio of two lines moves only between its two ends)",
+   "ok": true,
+   "n": 0,
+   "fails": [],
+   "note": ""
+  },
+  {
+   "id": "no-swallowed-css",
+   "title": "No CSS hidden inside a comment",
+   "how": "every comment of 20 stylesheets: rules inside, unbalanced marks",
+   "ok": true,
+   "n": 0,
+   "fails": [],
+   "note": ""
+  },
+  {
+   "id": "colour-tokens",
+   "title": "Colours from the tokens only",
+   "how": "literal #hex / rgb() / hsl() / oklch() in the page's stylesheets (tokens.css definitions and the drawings' art.css left out)",
+   "ok": false,
+   "n": 4,
+   "fails": [
+    "src/styles/sections/hero.css:151 rgb(90 60 30 / 0.06)",
+    "src/styles/sections/sections.css:167 rgb(0 0 0 / 0.4)",
+    "src/styles/sections/sections.css:167 rgb(0 0 0 / 0.02)",
+    "src/styles/sections/sections.css:167 rgb(0 0 0 / 0.1)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "type-from-scale",
+   "title": "Text sizes from the scale",
+   "how": "every font-size: a --type-* role, em or %, the fit sizes (--hero-title, --cta-title, --card-title) or an object's own unit (--u, --fm-px)",
+   "ok": false,
+   "n": 2,
+   "fails": [
+    "src/styles/sections/sections.css:191 24px",
+    "src/styles/sections/sections.css:198 13px"
+   ],
+   "note": "Objects scaled as a whole (the ID cards' 24/13px, the tiles' --u, the hero chips' --u, the drawings' --fm-px) are pictures of UI, not page text."
+  },
+  {
+   "id": "fluid-from-scale",
+   "title": "Spacing, radii and type never own vw/cq/clamp()",
+   "how": "margin, padding, gaps, radii, font-size and inset declarations in every stylesheet",
+   "ok": false,
+   "n": 1,
+   "fails": [
+    "src/styles/components/book.css:74 margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0"
+   ],
+   "note": ""
+  },
+  {
+   "id": "tokens-wired",
+   "title": "Every var() defined, every token used",
+   "how": "179 custom properties used, 106 tokens in tokens.css + tokens.gen.css",
+   "ok": false,
+   "n": 4,
+   "fails": [
+    "used, never defined: --i (src/styles/art/art.css)",
+    "used, never defined: --turn (src/styles/art/art.css)",
+    "defined, never used: --ink-40",
+    "defined, never used: --purple-light"
+   ],
+   "note": ""
+  },
+  {
+   "id": "layout-steps",
+   "title": "Layouts change only at S, M, L or a written own step",
+   "how": "13 width container queries against S 22rem, M 43rem, L 58rem and the own steps written in CLAUDE.md (35rem, 32rem, 10em, 400px, 27.5rem, 45.75rem)",
+   "ok": true,
+   "n": 0,
+   "fails": [],
+   "note": ""
+  },
+  {
+   "id": "media-steps",
+   "title": "Screen steps only from media.css",
+   "how": "7 custom media (--tablet, --phone, --notes-cols, --portrait, --sideways, --mouse, --calm); raw width queries elsewhere",
+   "ok": false,
+   "n": 1,
+   "fails": [
+    "src/styles/components/book.css:49 @media (width >= 62em)"
+   ],
+   "note": ""
+  },
+  {
+   "id": "curves",
+   "title": "Curves from one table (motion.js)",
+   "how": "cubic-bezier() and named eases in the page's stylesheets and scripts, outside motion.js and the --ease tokens",
+   "ok": false,
+   "n": 6,
+   "fails": [
+    "src/styles/components/book.css:152 ease-in-out",
+    "scripts/cookies.js:30 cubic-bezier(0.65, 0, 0.35, 1)",
+    "scripts/deck.js:166 ease: \"power2.inOut\"",
+    "scripts/glide.js:15 cubic-bezier(x1, y1, x2, y2)",
+    "scripts/logos.js:30 ease: \"none\"",
+    "scripts/logos.js:61 ease: \"none\""
+   ],
+   "note": ""
+  },
+  {
+   "id": "decisions",
+   "title": "Every decision complete",
+   "how": "30 entries: id, kind, what, decided, why; the rule and a fix for each exception; ids unique",
+   "ok": true,
+   "n": 0,
+   "fails": [],
+   "note": ""
+  }
+ ],
+ "relations": [
+  {
+   "label": "hero / h2",
+   "k0": 1.2857142857142858,
+   "k1": 1.1538461538461537
+  },
+  {
+   "label": "h2 / card-heading",
+   "k0": 1.1666666666666667,
+   "k1": 1.625
+  },
+  {
+   "label": "card-heading / lead",
+   "k0": 1.5,
+   "k1": 1.6
+  },
+  {
+   "label": "card-heading / body-m",
+   "k0": 1.5,
+   "k1": 1.7777777777777777
+  },
+  {
+   "label": "body / ui",
+   "k0": 1.1428571428571428,
+   "k1": 1.1428571428571428
+  },
+  {
+   "label": "ui / note",
+   "k0": 1.1666666666666667,
+   "k1": 1.1666666666666667
+  }
+ ],
+ "steps": [
+  {
+   "f": "src/styles/sections/hero.css",
+   "at": 75,
+   "name": "hero-copy",
+   "v": "10em"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 45,
+   "name": "royalty",
+   "v": "43rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 64,
+   "name": "royalty-card",
+   "v": "32rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 112,
+   "name": "access",
+   "v": "35rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 219,
+   "name": "releases",
+   "v": "22rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 220,
+   "name": "releases",
+   "v": "58rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 256,
+   "name": "logos",
+   "v": "22rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 257,
+   "name": "logos",
+   "v": "43rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 400,
+   "name": "",
+   "v": "27.5rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 401,
+   "name": "",
+   "v": "45.75rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 409,
+   "name": "",
+   "v": "58rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 427,
+   "name": "pubs",
+   "v": "43rem"
+  },
+  {
+   "f": "src/styles/sections/sections.css",
+   "at": 448,
+   "name": "",
+   "v": "400px"
+  }
+ ],
+ "customMedia": [
+  {
+   "name": "--tablet",
+   "q": "(width < 64em)"
+  },
+  {
+   "name": "--phone",
+   "q": "(width < 48em)"
+  },
+  {
+   "name": "--notes-cols",
+   "q": "(width < 67.5em)"
+  },
+  {
+   "name": "--portrait",
+   "q": "(orientation: portrait)"
+  },
+  {
+   "name": "--sideways",
+   "q": "(width < 64em) and (height < 31.25em) and (orientation: landscape)"
+  },
+  {
+   "name": "--mouse",
+   "q": "(hover: hover) and (pointer: fine)"
+  },
+  {
+   "name": "--calm",
+   "q": "(prefers-reduced-motion: reduce)"
+  }
+ ],
+ "ladder": [
+  0,
+  2,
+  4,
+  6,
+  8,
+  10,
+  12,
+  14,
+  16,
+  18,
+  20,
+  22,
+  24,
+  28,
+  32,
+  36,
+  40,
+  44,
+  48,
+  52,
+  56,
+  60,
+  64,
+  72,
+  80,
+  88,
+  96,
+  104,
+  112,
+  120,
+  128
+ ]
+}

@@ -1,15 +1,18 @@
-# before/after pairs at a scroll state: python3 pair.py out.jpg W H mob dpr "<js returning scrollY>" [crop x,y,w,h] [wait_ms] [hide_css]
-import asyncio, sys, io, glob
+# before/after pairs at a scroll state: python3 pair.py out.jpg W H mob dpr "<js returning scrollY>" [crop x,y,w,h] [wait_ms]
+# env: FM_CALM=1 reduced motion (every reveal done, loops still), FM_PATH=page (e.g. privacy_policy_ru), FM_OLD / FM_NEW base urls
+import asyncio, sys, io, glob, os
 from PIL import Image, ImageDraw, ImageFont
 from playwright.async_api import async_playwright
-from lib import CH, ARGS, warm
+from lib import CH, ARGS, warm, prep
 out,W,H,mob,D,js = sys.argv[1],int(sys.argv[2]),int(sys.argv[3]),sys.argv[4]=="1",float(sys.argv[5]),sys.argv[6]
 crop = tuple(map(int,sys.argv[7].split(','))) if len(sys.argv)>7 and sys.argv[7] else None
 WAIT = int(sys.argv[8]) if len(sys.argv)>8 else 900
 FONT = (glob.glob('/usr/share/fonts/truetype/google-fonts/Inter*') + glob.glob('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'))[0]
 async def shot(p,url):
     b = await p.chromium.launch(executable_path=CH, args=ARGS)
-    ctx = await b.new_context(viewport={"width":W,"height":H}, device_scale_factor=D, is_mobile=mob, has_touch=mob, bypass_csp=True)
+    ctx = await b.new_context(viewport={"width":W,"height":H}, device_scale_factor=D, is_mobile=mob, has_touch=mob, bypass_csp=True,
+                              reduced_motion='reduce' if os.environ.get('FM_CALM') else 'no-preference')
+    await prep(ctx)
     pg = await ctx.new_page(); await pg.goto(url); await pg.wait_for_timeout(900); await warm(pg)
     y = await pg.evaluate(js)
     if y is not None:
@@ -22,7 +25,8 @@ async def shot(p,url):
     return im
 async def main():
     async with async_playwright() as p:
-        a,b = await asyncio.gather(shot(p,"http://localhost:8001/"), shot(p,"http://localhost:8002/"))
+        path = os.environ.get("FM_PATH", "")
+        a,b = await asyncio.gather(shot(p,os.environ.get("FM_OLD","http://127.0.0.1:8001/")+path), shot(p,os.environ.get("FM_NEW","http://127.0.0.1:8002/")+path))
     # each side at most 490 wide and 560 tall
     k = min(490/a.width, 560/a.height); a=a.resize((int(a.width*k),int(a.height*k))); b=b.resize(a.size)
     G = Image.new("RGB",(a.width*2+30, a.height+40),"#141414"); d=ImageDraw.Draw(G); f=ImageFont.truetype(FONT,17)

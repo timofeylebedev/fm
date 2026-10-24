@@ -1,0 +1,51 @@
+
+> audit
+> node build/audit.mjs
+
+engine: chromium 153.0.8010.12
+320×568: text over canvases: 3 of 8 measured (the others are outside the screen or the logo window)
+320×568: ok; 0 cut, 0 small, 0 targets
+390×844: ok; 0 cut, 0 small, 0 targets
+768×1024: ok; 0 cut, 0 small, 0 targets
+844×390: ok; 0 cut, 0 small, 0 targets
+1024×768: ok; 0 cut, 0 small, 0 targets
+1366×650: ok; 0 cut, 0 small, 0 targets
+1920×1080: text over canvases: 8 of 8 measured (the others are outside the screen or the logo window)
+1920×1080: ok; 0 cut, 0 small, 0 targets
+390×844 (text 24px): ok; 0 cut, 0 small, 0 targets
+1366×650 (text 24px): ok; 0 cut, 0 small, 0 targets
+
+Kept as designed (design/decisions.json): 6 exception(s), not counted as problems
+  · cta-light-middle: CTA card: the white title and the white text sit on the purple card (#884dff) with white dust moving over it (15%, scripts/stipple.js; until Oct 19, 2026 on the light purple #b596ff between purple dots)
+      WCAG 1.4.3 text contrast (3 : 1 large, 4.5 : 1 text), 1.4.11 focus indicator 3 : 1 — Tim, 2026-10-18 — kept for now; why: the look of the card: white dust over its text; fix if reconsidered: invClear in STIPPLE_CTA (the dust thins out round each text line: quietPad), or less dust (invOpacity); the focus ring can be ink on this card (8.8 : 1)
+      this run: 320×568: «Созвонитесь с нами на по» 4.45 : 1 over the canvas (needs 4.5)
+  · stack-and-stat-colours: White text on the colours of the card stack and the stats: the orange «Документы» and green «Финансы» cards, their labels (also over the progress fill), the orange, green and blue stats
+      WCAG 1.4.3 text contrast: the labels are 500, not bold, so they need 4.5 : 1 — Tim, 2026-10-17 (orange) and 2026-10-18 (green, the progress fill); why: the brand colours of the subjects; fix if reconsidered: text-safe shades for text-bearing surfaces: orange #c25700, green #008a25 (4.5 : 1)
+      this run: 320×568: axe color-contrast on .card__tag-label
+      this run: 320×568: «Договоров» 2.93 : 1 over the canvas (needs 4.5)
+      this run: 1920×1080: «>20 000» 2.95 : 1 over the canvas (needs 3)
+      this run: 1920×1080: «Договоров» 2.95 : 1 over the canvas (needs 3)
+  · teal-orange-buttons: White text on the teal (Telegram-бот) and orange (FM Lens demo) buttons
+      WCAG 1.4.3 text contrast 4.5 : 1 — Tim, 2026-10-17; why: the brand colours of the two tools; fix if reconsidered: teal #00819b, orange #c25700
+      this run: 320×568: axe color-contrast on .btn--teal
+      this run: 320×568: axe color-contrast on .btn--orange
+      this run: 1920×1080: axe color-contrast on .btn--teal
+      this run: 1920×1080: axe color-contrast on .btn--orange
+  · footer-notes: The grey notes of the footer (ink 50% on the footer grey)
+      WCAG 1.4.3 text contrast 4.5 : 1 — Tim, 2026-10-17; ink 50% on 2026-10-18; why: a quiet legal line; fix if reconsidered: ink 60% (5.6 : 1)
+      this run: 320×568: axe color-contrast on .footer__note:nth-child(1)
+      this run: 320×568: axe color-contrast on .footer__note:nth-child(2)
+      this run: 320×568: axe color-contrast on a[href$="privacy_policy_ru"]
+      this run: 320×568: axe color-contrast on a[href$="tim_lebedev"]
+      this run: 1920×1080: axe color-contrast on .footer__note:nth-child(1)
+      this run: 1920×1080: axe color-contrast on .footer__note:nth-child(2)
+  · endless-motion: Things that move by themselves without end and have no pause switch: the CTA's strip of words, the hero chips, the ring's idle spin, the dust of the stats and the CTA, the loops in the drawings. They all stop for visitors who turned on "reduce motion"
+      WCAG 2.2.2 Pause, Stop, Hide (moving content that lasts more than 5 seconds can be paused) — Tim, 2026-10-18 — no pause switch, the strip keeps its loop; why: the look of the page; reduce motion covers the visitors who need it; fix if reconsidered: a site-wide pause switch (remembered), or the strip moved by the scroll
+  · no-focus-ring: No focus ring anywhere on the page (links, buttons, the publications the focus moves to after «Показать больше», the booking window's close button). Only the system's high-contrast modes (forced colours) keep a ring, in the system's colour. The skip link still appears when it is reached with Tab
+      WCAG 2.4.7 Focus Visible (and 2.4.11 Focus Not Obscured relies on seeing the focus) — Tim, 2026-10-20 — remove all design for focus states; why: the purple ring showed on the publication the focus moves to after «Показать больше», and on other elements; the look of the page; fix if reconsidered: base.css: :focus-visible { outline: 2px solid var(--purple); outline-offset: 3px } (the ring before Oct 20), or a quieter one (ink 30%, 2px)
+
+All checks passed.
+
+real	5m39.378s
+user	0m7.951s
+sys	0m2.110s
