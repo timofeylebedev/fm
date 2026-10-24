@@ -6,8 +6,9 @@
    layer. The pointer stirs the air, a press throws the dust out.
    When a card first comes into view, its dust is pushed in: up from the bottom of a stat card, out of the middle of the
    purple card, in uneven lumps, and falls back into place.
-   The look was tuned in the Card Dust Lab (Oct 19, 2026, «Push in 2 · 19 Oct»); the settings below are its values and
-   keep its names and units, so a block from the lab's «Copy settings» can be pasted over them.
+   The look was tuned in the Card Dust Lab (Oct 19, 2026, «Push in 2 · 19 Oct»; the purple card again on Oct 25, with
+   its dimmed middle); the settings below are its values and keep its names and units, so a block from the lab's
+   «Copy settings» can be pasted over them (the purple card's own unit, `unit`, is the site's: see STIPPLE_CTA).
    Without WebGL2 a card simply keeps its colour. With "reduce motion" the dust is shown at rest and nothing moves. */
 import { pace } from "./pace.js";
 import { ioRoot, onScroll } from "./scroller.js";
@@ -101,19 +102,34 @@ const STIPPLE = {
 /* STIPPLE:END */
 
 // The purple card. Its dust is one body in the middle of the card (behind the title), thrown outwards on the beat and
-// falling back into the middle. Settings that differ from the stat cards' or are its own:
+// falling back into the middle; the middle is dimmed back towards the card's colour, so the text keeps its ground.
+// Settings that differ from the stat cards' or are its own (the lab's CTA «Copy settings» of Oct 25, 2026):
 /* STIPPLE_CTA:START */
 const STIPPLE_CTA = Object.assign({}, STIPPLE, {
-  core: 70, reach: 100,
+  // its unit is its own: a share of the card's height (in the lab, where it was tuned, a stat card was 36.5% of the
+  // purple card's height). So the body and everything else measured in units keep the same share of the card on
+  // every screen, whatever the stat cards do: the body's width follows the card's width, its height the card's height
+  unit: 36.5,         // % of the card's height
+  core: 70, reach: 150,
+  bands: 4,
   spin: 6,            // degrees per second the columns of the track travel round the body
-  srcW: 76,           // % the body's proportions: its width…
-  srcH: 60,           // % …against its height, as shares of the card
+  srcW: 40,           // % the body's proportions: its width…
+  srcH: 30,           // % …against its height, as shares of the card
   taper: 0,           // % 0 = an oval body, 100 = a lens with pointed ends
   srcY: 0,            // % moves the centre up or down
   arrLump: 100,
-  invOpacity: 15,
-  invClear: 0,        // (the text is not cleared on this card)
-  quietPad: 60,       // % of a unit round each text line where the dust would thin out with invClear
+  invAmount: 100,
+  invOpacity: 25,
+  invClear: 75,       // % the dust thins out round each text line and the button…
+  quietPad: 60,       // % of a unit: …this far round them
+  // the dimmed middle: the card's colour laid over the dust, strongest in the middle and fading out to the oval's edge
+  dim: 1,             // 1 = on
+  dimColor: "var(--purple)",
+  dimAmount: 89,      // % in the very middle
+  dimW: 80,           // % of the card's width the oval reaches across…
+  dimH: 80,           // % …and of its height
+  dimSoft: 100,       // % 0 = a hard-edged oval, 100 = it fades all the way from the middle
+  dimY: 0,            // % moves it up or down
   background: "var(--purple)"
 });
 delete STIPPLE_CTA.cascade;
@@ -324,7 +340,7 @@ void main(){ vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)
 // into a streak along its motion; nearer = bigger (perspective)
 const DRAWP = `
 uniform float uSizeMin, uSizeMax, uSkew, uSizeEdge, uStars, uStarSize, uStreak, uTwinkle, uGlint, uThin, uDof, uLife, uFlash, uClear;
-uniform vec4 uQuiet[8]; uniform float uQuietN, uQuietPad;
+uniform vec4 uQuiet[16]; uniform float uQuietN, uQuietPad;
 vec2 projP(vec3 P, out float s){ s = uLens/max(uLens - P.z, 0.05); return uRes*0.5 + (P.xy - uRes*0.5)*s; }
 void drawParams(vec4 A, vec4 B, vec4 C, float id, out vec4 D1, out vec4 D2){
   D1 = vec4(0.0); D2 = vec4(0.0);
@@ -355,7 +371,7 @@ void drawParams(vec4 A, vec4 B, vec4 C, float id, out vec4 D1, out vec4 D2){
   if (uShape > 0.5) {
     // the middle body: the dust thins out round each text line (uQuiet) when uClear is set
     float q = 1e9;
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 16; i++) {
       if (float(i) >= uQuietN) break;
       vec4 R = uQuiet[i]; vec2 c = 0.5*(R.xy + R.zw), hb = 0.5*(R.zw - R.xy);
       vec2 o = abs(head - c) - hb;
@@ -534,6 +550,16 @@ void main(){
   float a = (1.0 - smoothstep(vRad - vSoft, vRad + vSoft, dd))*vA;
   o = vec4(mix(uCol, uAcc, clamp(vGl, 0.0, 1.0)), a);
 }`;
+// the dimmed middle of the purple card: its colour over everything drawn, at uAmt in the middle, fading out to nothing
+// at the edge of the oval (centre uC, half size uHalf, px)
+const FRAG_DIM = `#version 300 es
+precision highp float;
+uniform vec2 uC, uHalf; uniform float uSoft, uAmt; uniform vec3 uCol;
+out vec4 o;
+void main(){
+  float r = length((gl_FragCoord.xy - uC)/max(uHalf, vec2(1.0)));
+  o = vec4(uCol, uAmt*(1.0 - smoothstep(1.0 - max(uSoft, 0.002), 1.0, r)));
+}`;
 
 /* the air: a small stable-fluids grid (Stam 1999; GPU Gems ch. 38). Velocity in grid cells per second */
 const FL = (body) => `#version 300 es
@@ -673,7 +699,8 @@ class Card {
     // (?fmdust=full keeps every speck there too, for tests of the look)
     if (/SwiftShader|llvmpipe|softpipe|Software/i.test(String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER))) && !/[?&]fmdust=full/.test(location.search)) { MAX_SPECKS = 6000; engine.auto = false; engine.level = 2; }
     try {
-      this.progs = { edge: this.link(VERT_FULL, FRAG_EDGE), upd: this.link(UPDATE, FRAG_NULL, ["vA", "vB", "vC", "vD1", "vD2"]), draw: this.link(VERT_DRAW, FRAG_DRAW) };
+      this.progs = { edge: this.link(VERT_FULL, FRAG_EDGE), upd: this.link(UPDATE, FRAG_NULL, ["vA", "vB", "vC", "vD1", "vD2"]), draw: this.link(VERT_DRAW, FRAG_DRAW),
+        dim: this.middle ? this.link(VERT_FULL, FRAG_DIM) : null };
     } catch (err) { console.warn("stipple:", err); this.failed = true; this.host.classList.add("no-dots"); return; }
     this.vao0 = gl.createVertexArray();
     this.levelTex = gl.createTexture();
@@ -714,7 +741,16 @@ class Card {
     const v = this.set.settings;
     this.bg = color(v.background || getComputedStyle(this.host).getPropertyValue("--dots"), [0.53, 0.3, 1]);
     this.dust = color(v.dust, [1, 1, 1]);
+    this.dimCol = color(v.dimColor, this.bg);
     this.dirty = true;
+  }
+  // the ruler, CSS px: a stat card's height (unit) and width; on the purple card its own, a share of its height
+  // (a stat card's proportions kept for the width, 2.05 : 1 as in the lab)
+  ruler() {
+    const v = this.set.settings;
+    if (!v.unit) return metrics;
+    const unit = Math.max(1, this.host.clientHeight * v.unit / 100);
+    return { unit, statW: unit * 2.05 };
   }
   // (true when the canvas changed size)
   resize() {
@@ -733,26 +769,37 @@ class Card {
   // the boxes of the text lines and the button (canvas px, y up), for the dust to keep clear of them (invClear)
   measureText() {
     const r0 = this.host.getBoundingClientRect(), out = [], k = this.dpr, H = this.canvas.height;
-    const add = (r) => { if (r.width > 1 && r.height > 1 && out.length < 8) out.push([(r.left - r0.left) * k, H - (r.bottom - r0.top) * k, (r.right - r0.left) * k, H - (r.top - r0.top) * k]); };
-    this.host.querySelectorAll(".cta__title, .cta__lead").forEach((e) => { const rg = document.createRange(); rg.selectNodeContents(e); [...rg.getClientRects()].forEach(add); });
+    const add = (r) => { if (r.width > 1 && r.height > 1 && out.length < 16) out.push([(r.left - r0.left) * k, H - (r.bottom - r0.top) * k, (r.right - r0.left) * k, H - (r.top - r0.top) * k]); };
     this.host.querySelectorAll(".btn").forEach((e) => add(e.getBoundingClientRect()));
+    // the texts line by line: a split heading gives a box per letter, so the boxes are joined into one per line
+    this.host.querySelectorAll(".cta__title, .cta__lead").forEach((e) => {
+      const rg = document.createRange(); rg.selectNodeContents(e);
+      const lines = [];
+      for (const r of rg.getClientRects()) {
+        if (r.width <= 1 || r.height <= 1) continue;
+        const l = lines.find((q) => Math.min(q.bottom, r.bottom) - Math.max(q.top, r.top) > 0.5 * Math.min(q.bottom - q.top, r.height));
+        if (l) { l.left = Math.min(l.left, r.left); l.right = Math.max(l.right, r.right); l.top = Math.min(l.top, r.top); l.bottom = Math.max(l.bottom, r.bottom); }
+        else lines.push({ left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+      }
+      lines.forEach((l) => add({ left: l.left, right: l.right, top: l.top, bottom: l.bottom, width: l.right - l.left, height: l.bottom - l.top }));
+    });
     this.quiet = out; this.quietAt = performance.now();
   }
   geom(v) {
-    const W = this.canvas.width, H = this.canvas.height, unit = metrics.unit * this.dpr;
+    const W = this.canvas.width, H = this.canvas.height, r = this.ruler(), unit = r.unit * this.dpr, statW = r.statW * this.dpr;
     const inner = this.middle ? innerBox(v, W, H, unit) : null;
     const len = inner ? inner.len : W;
     const bands = Math.max(1, Math.round(v.bands));
-    const cols = this.middle ? Math.max(1, Math.min(MAX_COLS, Math.round(len / (metrics.statW * this.dpr / bands)))) : Math.min(MAX_COLS, bands);
-    return { W, H, len, cols, colPx: len / cols, unit, inner };
+    const cols = this.middle ? Math.max(1, Math.min(MAX_COLS, Math.round(len / (statW / bands)))) : Math.min(MAX_COLS, bands);
+    return { W, H, len, cols, colPx: len / cols, unit, statW, inner };
   }
   // the two buffers of speck states, sized for the amount
   ensureFlow(v, g) {
     const gl = this.gl;
-    const want = v.amount * v.invAmount / 100 * (g.len / this.dpr) * metrics.unit / 10000;
+    const want = v.amount * v.invAmount / 100 * (g.len / this.dpr) * (g.unit / this.dpr) / 10000;
     const n = Math.max(1, Math.min(MAX_SPECKS, Math.round(want)));
     this.boost = Math.max(1, want / n);                 // past the most specks a card may have, each is that much stronger
-    const key = n + "/" + g.W + "x" + g.H + "/" + metrics.unit;
+    const key = n + "/" + g.W + "x" + g.H + "/" + Math.round(g.unit / this.dpr);
     if (key === this.flowKey) return;
     // the same card at another resolution (render scale, browser zoom): keep the specks, scale their positions once
     if (this.fbuf && Math.abs(this.N - n) <= Math.max(2, this.N * 0.005) && this.flowW && Math.abs(g.W / g.H - this.flowW / this.flowH) < 0.01 && !this.restart) {
@@ -786,7 +833,7 @@ class Card {
   /* ── the air ── */
   makeFluid(g) {
     const gl = this.gl;
-    const cell = Math.max(metrics.statW * this.dpr / 160, Math.max(g.W, g.H) / 512) * (engine.level >= 2 ? 1.6 : 1);
+    const cell = Math.max(g.statW / 160,Math.max(g.W, g.H) / 512) * (engine.level >= 2 ? 1.6 : 1);
     const gw = Math.max(8, Math.round(g.W / cell)), gh = Math.max(8, Math.round(g.H / cell));
     const key = gw + "x" + gh;
     // (the same grid for another canvas size, e.g. level 4: its cells change size)
@@ -864,7 +911,7 @@ class Card {
       this.splats.push({ x: x + nx * g.unit * 0.05, y: y + ny * g.unit * 0.05, vx: dx * sp, vy: dy * sp, r: v.puffW / 100 * g.unit });
     };
     // counts are per stat-card width of edge: the purple card's body is longer and gets as many per length
-    const per = g.len / (metrics.statW * this.dpr);
+    const per = g.len / g.statW;
     const count = (x) => { const n = Math.floor(x); return n + (this.rng() < x - n ? 1 : 0); };
     if (this.arrGust && this.arrive < 1 && this.arrive * 2.2 > v.arrSpread / 2000) {
       this.arrGust = 0;
@@ -1039,6 +1086,15 @@ class Card {
     gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, Math.max(1, Math.round(this.N * keep)));
+    // the dimmed middle (purple card): the card's colour laid over the dust behind the text
+    if (this.progs.dim && v.dim && v.dimAmount > 0) {
+      const W = this.canvas.width, H = this.canvas.height;
+      gl.bindVertexArray(this.vao0);
+      this.apply(this.progs.dim, { uC: [W / 2, H / 2 * (1 + (v.dimY || 0) / 100)], uHalf: [v.dimW / 100 * W / 2, v.dimH / 100 * H / 2],
+        uSoft: v.dimSoft / 100, uAmt: v.dimAmount / 100, uCol: this.dimCol });
+      gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
     gl.disable(gl.BLEND);
     gl.bindVertexArray(null);
   }
