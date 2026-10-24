@@ -118,6 +118,13 @@
       "why": "things on the page change at the same moments, not each at its own width"
     },
     {
+      "id": "footer-notes-1080",
+      "kind": "decision",
+      "what": "The footer's grey notes go from two columns to one row at a 1080 window (--notes-cols, 67.5em), not at 1024 with the navbar; the last note reads «Дизайн и разработка — Тим Лебедев»",
+      "decided": "Tim, 2026-10-24",
+      "why": "with the longer last link the four notes, each on one line, need more than a 1024 window's column"
+    },
+    {
       "id": "royalty-by-shape",
       "kind": "decision",
       "what": "The royalty cards fill their column and arrange themselves by their own shape: narrow — the drawing on top, the title from 70% of the card's width; wide (from a 32rem card) — the title left, the drawing right. Titles as wide as the card, at most 14em (three lines, never two long ones; 12em and evened-out lines until 2026-10-22, Tim: full width)",
