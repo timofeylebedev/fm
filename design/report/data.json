@@ -24,9 +24,9 @@
        "text": "every finding of round 5 (Oct 23) is still there: the 18 pull requests merged since worked on other things"
       },
       {
-       "n": "6",
+       "n": "9",
        "unit": "new findings",
-       "text": "2 small fixes (nothing visible), 4 questions for you; none blocks a visitor"
+       "text": "3 small fixes (nothing visible), 6 questions for you; none blocks a visitor"
       },
       {
        "n": "0",
@@ -42,7 +42,7 @@
     },
     {
      "type": "html",
-     "html": "<p><b>In one sentence:</b> the system holds, and today's work kept to it: every new size went into the scale (one role changed, one added), every new layout step was written down as an own step, and every departure has a decision. What is new is small: today's own steps tip the balance from shared to own (G2), the typesetter's longer held pieces cost the feature tiles a line (G1), and a few things grew beside the system (shadows written out by hand, a decorative text size with no decision). Round 5's list is untouched, so the first thing to do is still its one pull request of small fixes and its four questions.</p>"
+     "html": "<p><b>In one sentence:</b> the system holds, and today's work kept to it: every new size went into the scale (one role changed, one added), every new layout step was written down as an own step, and every departure has a decision. What is new is small: today's own steps tip the balance from shared to own (G2), the typesetter's longer held pieces cost the feature tiles a line (G1), a few things grew beside the system (shadows and script colours written out by hand, a decorative text size with no decision), and the independent review found two places where the type hierarchy gives way: big browser text (G7) and the legal page on phones (G8). Round 5's list is untouched, so the first thing to do is still its one pull request of small fixes and its four questions.</p>"
     },
     {
      "type": "table",
@@ -102,7 +102,7 @@
       ],
       [
        "<b>F5</b>",
-       "<b>Curves outside the one table; reveal = wave</b><br><span style='color:var(--muted)'>still open: cookies.js's checkmark cubic-bezier(0.65, 0, 0.35, 1), deck.js's power2.inOut hint, book.css's ease-in-out loader, <code>reveal</code> = <code>wave</code>.</span>",
+       "<b>Curves outside the one table; reveal = wave</b><br><span style='color:var(--muted)'>still open, and the review found more: menu.js's own CustomEases menuIn / menuOut (0.42, 0, 1, 1 and 0, 0, 0.58, 1), deck.js's power2.in / power1.out / power2.inOut, cookies.js's checkmark cubic-bezier(0.65, 0, 0.35, 1), book.css's ease-in-out loader; <code>reveal</code> = <code>wave</code> (its numbers are also written in decision idcard-tip-and-light). The lint now finds all seven.</span>",
        "<span class='pill q'>1 minor</span>",
        "<span class='pill q'>open</span>"
       ],
@@ -180,38 +180,56 @@
       [
        "<b>G1</b>",
        "<b>The typesetter costs the feature tiles a line</b><br><span style='color:var(--muted)'>With no length limits (#17, merged today), «а⍽не⍽в⍽последний момент» and «что⍽в⍽работе» are held whole; in a 184px text column two of the four descriptions now take 4 lines instead of 3 (1440×1100 and 420 wide). The row aligns, so every feature tile grew 258 → 278px at 1440 and 199 → 216 at 420. Other blocks: no size moved by more than 0.6px.</span>",
-       "Goes with F3: give the feature text more width (padding capped at 24 while the radius stays 32 brings it to 199px and back to 3 lines), or accept the line. The typesetter itself is right to hold the pieces.",
+       "Goes with F3. Tested: the tiles' side padding capped at 24 while the radius stays 32 gives the text 199px (was 183) and the lines are back to 3/2/3/3 with a 258px row at 1440 and at 1280×800 (245px); phones do not change (their padding is under 24 already). Or accept the line. The typesetter itself is right to hold the pieces.",
        "<span class='pill q'>1 minor</span> <span class='pill x'>high</span> <span class='pill q'>question</span>"
       ],
       [
        "<b>G2</b>",
-       "<b>Own layout steps now outnumber the shared ones</b><br><span style='color:var(--muted)'>Two own container steps and one page step came in today: the tool picture's 27.5rem, the tools side by side at 45.75rem (#40, #45) and the footer notes at 1080 (#50). CLAUDE.md now lists 6 own steps next to the 3 shared (S, M, L), and the page changes layout at 11 widths (390, 420, 610, 620, 740, 770, 790, 990, 1024, 1080, 1380; 9 on Oct 23). Between 740 and 790 royalty and publications are two columns while the tools are still stacked.</span>",
+       "<b>Own layout steps now outnumber the shared ones</b><br><span style='color:var(--muted)'>Two own container steps and one page step came in today: the tool picture's 27.5rem, the tools side by side at 45.75rem (#40, #45) and the footer notes at 1080 (#50). CLAUDE.md now lists 6 own steps next to the 3 shared (S, M, L), and the page changes layout at 11 widths (390, 420, 610, 620, 740, 770, 790, 990, 1024, 1080, 1380; 9 on Oct 23). Between 740 and 784 royalty and publications are two columns while the tools are still stacked (the review: tools side by side at 784, 800 with a classic scrollbar). CLAUDE.md's list of own steps does not name 62em (booking) or 67.5em (footer notes).</span>",
        "Each step was your call and is written down. If you want fewer moments of change: a fourth shared step (M+ ≈ 46rem) that the tools and the ID deck (F1 suggests moving it to ~47rem) share.",
        "<span class='pill q'>1 minor</span> <span class='pill x'>medium</span> <span class='pill q'>question</span>"
       ],
       [
        "<b>G3</b>",
        "<b>In tool cards the title is as close to the logo as to its text</b><br><span style='color:var(--muted)'><code>.tool__copy</code> is one flex column with one gap, <code>--text-gap</code> 12 → 16: brand logo → title 16, title → text 16 at 1440 (12/12 on phones). Elsewhere (hero, CTA, publications) the heading → text gap is the closest one around a heading.</span>",
-       "Logo → title one step more (e.g. 20 → 24), title → text stays <code>--text-gap</code>. Visible: look at it first.",
-       "<span class='pill q'>1 minor</span> <span class='pill x'>medium</span> <span class='pill q'>question</span>"
+       "Weakened by the review: the 20–28px logo reads as an eyebrow, and an eyebrow, title and text at one gap is a common, legible pattern. Only if you see it: logo → title one step more.",
+       "<span class='pill q'>0 note</span> <span class='pill x'>low</span> <span class='pill q'>question</span>"
       ],
       [
        "<b>G4</b>",
-       "<b>Shadows have no tokens</b><br><span style='color:var(--muted)'>The floating shadow <code>0 4px 16px var(--ink-10)</code> is written out 3 times (menu pills, cookie notice, booking close button). The ID card's four-layer shadow and the hero chips' warm shadow are the only literal colours left in the page's stylesheets (round 5 listed them as allowed).</span>",
-       "<code>--shadow-float</code> (3 uses) and <code>--shadow-object</code> (ID cards) in tokens.css; the chips' warm one as <code>--shadow-chip</code>. Patch, nothing visible.",
+       "<b>Shadows, and some script colours, have no tokens</b><br><span style='color:var(--muted)'>The floating shadow <code>0 4px 16px var(--ink-10)</code> is written out 3 times (menu pills, cookie notice, booking close button). The ID card's four-layer shadow and the hero chips' warm shadow are the only literal colours left in the page's stylesheets (round 5 listed them as allowed). The review found the same in scripts: hero.js's chip status dots (#16d947, #ffbf00, #e366ff, #33a0ff) and SHADE (168, 122, 86), nav.js's cap #fff (round 5's F6).</span>",
+       "<code>--shadow-float</code> (3 uses) and <code>--shadow-object</code> (ID cards) in tokens.css, the chips' warm one as <code>--shadow-chip</code>; the cap's #fff → <code>var(--paper)</code>. The chips' dot colours are content of a picture and can stay (a line in the decision of G5). Patch, nothing visible.",
        "<span class='pill q'>1 minor</span> <span class='pill x'>high</span> <span class='pill done'>fix</span>"
       ],
       [
        "<b>G5</b>",
        "<b>Decorative text under 12px has no decision</b><br><span style='color:var(--muted)'>The hero chips' text is drawn at 8.1px on phones and 12.2px on computers (13–15 × the hero's own unit, 0.62 → 1.2); they are a picture (<code>aria-hidden</code>), and the audit skips <code>.hero-chips</code> and the drawings without printing why.</span>",
        "A decision <code>decorative-small-text</code>, so the audit prints it with its sizes each run (like the six exceptions). Patch.",
-       "<span class='pill q'>0 note</span> <span class='pill x'>high</span> <span class='pill done'>fix</span>"
+       "<span class='pill q'>1 minor</span> <span class='pill x'>high</span> <span class='pill done'>fix</span>"
       ],
       [
        "<b>G6</b>",
-       "<b>The stats' figures are bigger than their section heading</b><br><span style='color:var(--muted)'>Stat numbers are 64/247 of a tile: 64px at 1440, above «Три года музыки» (h2, 52); 48.6 vs 48.4 at 1366×650; 29 vs 29.5 on a 390 phone. Their labels sit at the 12px floor on phones and sideways phones.</span>",
-       "Probably meant (figures as display); then nothing, and the grammar says so.",
-       "<span class='pill q'>1 minor</span> <span class='pill x'>low</span> <span class='pill q'>question</span>"
+       "<b>The stats' figures are the biggest text on phones and jump at the column steps</b><br><span style='color:var(--muted)'>Stat numbers are 64/247 of a tile, not a type role: 64px at 1440, above «Три года музыки» (h2, 52); from 320 to 387 they are 36.3–44.2px, bigger than the hero title (36–37.4). They follow the logo columns, so they drop 44.2 → 29.1 at 388 (−34%) and 57.6 → 42.9 at 740 (−26%) in one pixel of width. Their labels sit at the 12px floor on phones and sideways phones.</span>",
+       "If figures as display is meant: a decision, and perhaps a cap such as min(tile share, type/hero) so they never pass the hero title. Otherwise a type role for stat numbers (e.g. 28 → 52) that the tile does not scale.",
+       "<span class='pill q'>2 moderate</span> <span class='pill x'>medium</span> <span class='pill q'>question</span>"
+      ],
+      [
+       "<b>G7</b>",
+       "<b>With the browser's text at 24px the headings turn upside down</b><br><span style='color:var(--muted)'>From the review, 320×640 with a 24px default text size: the hero title is 37.8 (capped by fit, width / 7.2) while the section headings are 42 (they grow with rem); the stack titles are 26.1 (capped by fit) under the tool and publication titles at 36 (33.3 vs 36 at 390). At 20px text the order holds.</span>",
+       "Cap the levels below by the ones above as well as by fit: h2 ≤ hero, card-heading ≤ the stack title, in their min(). This is the round-2 question «h2 ≤ h1 on short screens» again, now for big browser text.",
+       "<span class='pill q'>2 moderate</span> <span class='pill x'>high</span> <span class='pill q'>question</span>"
+      ],
+      [
+       "<b>G8</b>",
+       "<b>On phones the legal page's heading levels look the same</b><br><span style='color:var(--muted)'>From the review: at 320–390 <code>.doc-h2</code>, <code>.doc-h3</code>, <code>.doc-h4</code> / <code>.doc-group</code> and <code>.doc-card__title</code> are all 16px, weight 600, told apart only by their top margins (32 / 12 / 18). The h2 uses <code>type/lead</code>, which equals body on phones (on purpose for leads, decision type-on-the-ladder), so here a level disappears. At 1440×800: 19.1 vs 16.</span>",
+       "Give the document's h2 <code>type/card-heading</code> (24 → 32) or its own role (e.g. 20 → 24), so the sections read apart from their subsections on phones.",
+       "<span class='pill q'>2 moderate</span> <span class='pill x'>high</span> <span class='pill q'>question</span>"
+      ],
+      [
+       "<b>G9</b>",
+       "<b>The recorded contrast of the stats and the CTA is a little optimistic</b><br><span style='color:var(--muted)'>From the review, sampled from pixels with the text hidden (median / 5th percentile, 6 000 specks): the orange stat number 2.65 / 1.48 at 390 and 2.95 at 1440 (the decision says 2.95, the plain colour); green 3.1–3.8, blue 4.8–6.6; the CTA lead median 4.61 but 1.8–2.0 at the 5th percentile, where white specks sit under the letters. Reduced motion about the same. Covered by stack-and-stat-colours and cta-light-middle.</span>",
+       "Record the measured medians and the worst percentile in those two decisions (the audit can print the 5th percentile next to the median), so the exceptions show what visitors get.",
+       "<span class='pill q'>1 minor</span> <span class='pill x'>medium</span> <span class='pill done'>fix</span>"
       ]
      ]
     },
@@ -224,7 +242,8 @@
       "<b>Hover:</b> one grammar everywhere (0.2s in, 0.45s out, <code>--ease-out</code>), also on the legal pages' links; no focus ring (decision), the skip link still slides in on Tab.",
       "<b>Text colour:</b> 7 text colours on the page, all from the ink and paper tokens plus purple (the white CTA button) and blue (the stack label on its fill).",
       "<b>Layout:</b> 0 sideways scroll at every width and height; every width container query is at S, M, L or a written own step (13 queries, today's two included).",
-      "<b>Contrast:</b> the six audited exceptions are the recorded ones; this run the CTA lead measured 4.45 : 1 over the dust at 320×568 (needs 4.5, cta-light-middle) and the orange stat 2.93–2.95 (stack-and-stat-colours).",
+      "<b>Contrast:</b> the six audited exceptions are the recorded ones; this run the CTA lead measured 4.45 : 1 over the dust at 320×568 (needs 4.5, cta-light-middle) and the orange stat 2.93–2.95 (stack-and-stat-colours); the review's pixel sampling is a little lower (G9).",
+      "<b>With a classic scrollbar</b> (the gutter left in, as on Windows): the steps hold where they are written — M at 754–758, tools at 800, features four columns at 1006, the footer's row at 1080 (the review).",
       "<b>Legal pages:</b> the title is on its own role (24 → 40), text 16/24 in a 672px column (63 characters a line), no sideways scroll at 320–1440.",
       "<b>Not sampled:</b> Safari and Firefox (no WebKit or Firefox here; the CI audit runs both as warnings), real GPUs (the ring and the dust are software-rendered), the booking window against the real Planerka, dark mode (the site has none)."
      ]
@@ -29435,7 +29454,7 @@
       },
       {
        "title": "Curves from one table",
-       "how": "cubic-bezier() and named eases in the page's stylesheets and scripts, outside motion.js and the --ease tokens — this round: 6 found: src/styles/components/book.css:152 ease-in-out; scripts/cookies.js:30 cubic-bezier(0.65, 0, 0.35, 1); scripts/deck.js:166 ease: \"power2.inOut\"; scripts/glide.js:15 cubic-bezier(x1, y1, x2, y2); scripts/logos.js:30 ease: \"none\"; scripts/logos.js:61 ease: \"none\". logos.js \"none\" is the scrub (linear on purpose), glide.js the function itself, book.css the ported loader: kept; the rest: F5.",
+       "how": "cubic-bezier() and named eases in the page's stylesheets and scripts, outside motion.js and the --ease tokens — this round: 7 found: src/styles/components/book.css:152 ease-in-out; scripts/cookies.js:30 cubic-bezier(0.65, 0, 0.35, 1); scripts/deck.js:78 ease = \"power2.in\"; scripts/deck.js:80 ease = \"power1.out\"; scripts/deck.js:166 ease: \"power2.inOut\"; scripts/menu.js:18 CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\". Since the review the lint also reads eases written as ease = \"…\" and own CustomEases; logos.js's \"none\" (the scrub) and comments are left out. book.css's is the ported loader; the rest: F5.",
        "ok": false,
        "n": null
       },
@@ -29715,8 +29734,25 @@
     {
      "type": "list",
      "title": "Independent review",
-     "sub": "",
-     "items": []
+     "sub": "A separate agent that had not seen this round re-measured every candidate finding on both builds (about 50 minutes, 81 measurements) and looked for what was missed. Its verdicts and what was done:",
+     "items": [
+      "<b>F-list re-checks (mine) and A1–A12 (the review):</b> the agent re-measured every candidate on both builds, with overlay scrollbars and with the 15px gutter.",
+      "<b>Tile corners (now part of F3):</b> confirmed as measured, a question not a defect (Tim's «32 at most»). Missed and added: a stat tile is two columns wide (506px at 1440), as wide as a publication, yet radius 32 vs 40 — the tiers go by role, not by size; scale.json's «about 130–250px» is out of date for the stats.",
+      "<b>Curves (F5):</b> confirmed and wider: menu.js's CustomEases and deck.js's <code>ease = \"power2.in\"</code> / <code>\"power1.out\"</code> were missed by the lint. Fixed in rules.mjs this round (it now finds 7, and no longer flags glide.js's comment or the scrub's \"none\").",
+      "<b>Shadows (G4):</b> confirmed for the CSS; the claim «the only literal colours» was wrong for the scripts (hero.js chip dots and SHADE, nav.js #fff). Reworded.",
+      "<b>Dead tokens (F7):</b> confirmed; tokens.json still describes ink/40 as «Footer notes» (the notes use ink 50). Both are Figma variables, so removing them removes them there too.",
+      "<b>Hairline pairs:</b> weakened (both are recorded decisions); dropped as a finding. Noted instead: link underlines differ by page (legal ink 30 → 100 at 5px, cookie 20 → 30 at 3px, booking purple at 3px).",
+      "<b>62em (F10):</b> weakened: tied to Planerka's 1024px frame, so a written third-party exception rather than a design step.",
+      "<b>Tool card gap (G3):</b> weakened to a note: the logo reads as an eyebrow.",
+      "<b>Feature texts (F3, G1):</b> confirmed; «pre-existing» only half right: the 4-column text went 200 → 184px with the corners on Oct 22. One column (320–387) takes 2 lines; the 2-column switch lands on the most common phone width.",
+      "<b>Gutter (F2):</b> the framing corrected: Windows and Linux visitors with classic scrollbars do see the 15px, because the page always scrolls; the gutter only matters while the booking window locks scrolling. So headless numbers with the gutter are right for Windows; the report's numbers are for Mac and phones. Phone contexts are unaffected.",
+      "<b>Decorative chips (G5):</b> confirmed: 8.4–9.0px on phones, 12.4–13.8 at 1440.",
+      "<b>Stats (G6):</b> confirmed and stronger: bigger than the hero title on phones, and −34% / −26% jumps at the logo column steps. Raised to severity 2.",
+      "<b>Own steps (G2):</b> confirmed, recorded in decisions; CLAUDE.md does not name 62em or 67.5em.",
+      "<b>New from the review:</b> G7 (24px browser text inverts h1/h2 and the stack titles), G8 (the legal page's heading levels all 16px on phones), G9 (pixel-sampled contrast over the dust lower than recorded), and the feature padding's coupling to the radius (part of F3).",
+      "<b>Since-round-4 claims:</b> all confirmed (hero 63 → 59.1 at 1440×900, feature radius 23.7 → 31.4, tool padding 64 → 55.2 at 900 and 35.7 → 31.3 at 390, tools stacked at 768×1024 with 433 → 711px cards, the footer at 1080). No sideways scroll 320–1920 in 4px steps, with and without the gutter, at 568×320, 844×390, 1366×650, 2560×1440 and with 24px browser text.",
+      "<b>Not checked by the review:</b> real Safari and iOS, a real Windows scrollbar, Firefox and WebKit, the full dust and the GPU ring, motion by eye, Figma."
+     ]
     },
     {
      "type": "pre",
@@ -29733,9 +29769,9 @@
     {
      "type": "list",
      "items": [
-      "<b>One pull request of small fixes</b> (round 5's F5 curves, F6 the cap through scroller.js, F7 dead tokens, F8 the multiplied paddings as roles, F10 62em in media.css, F13 a 24px target, F15 scroll the revealed card into view; and G4 shadow tokens, G5 a decision for decorative text). Nothing visible; then <code>rules.mjs</code> can become <code>npm run rules</code> in CI (asked since round 3). Say go.",
+      "<b>One pull request of small fixes</b> (round 5's F5 curves, F6 the cap through scroller.js, F7 dead tokens, F8 the multiplied paddings as roles, F10 62em in media.css, F13 a 24px target, F15 scroll the revealed card into view; and G4 shadow tokens, G5 a decision for decorative text, G9 the measured contrast in two decisions). Nothing visible; then <code>rules.mjs</code> can become <code>npm run rules</code> in CI (asked since round 3). Say go.",
       "<b>Decide F1:</b> the ID cards' text under 12px between 610 and 750 wide (the deck up to a ~47rem column, or the row overlapping more before it scales). With G2: a shared step there would serve the deck and the tools at once.",
-      "<b>Questions:</b> F3 + G1 (tile padding = radius, or padding capped at 24 so the feature texts get their width and their line back), F4 (three or four lines for the royalty titles), F9 (the footer's order on phones), F14 (the cookie notice over the hero button at 568×320), G3 (the tool card's logo gap), G6 (the stats' figures).",
+      "<b>Questions:</b> F3 + G1 (tile padding = radius, or padding capped at 24 so the feature texts get their width and their line back), G6 (the stats' figures: display, or a type role), G7 (caps so h2 never passes the hero with big browser text), G8 (a bigger h2 for the legal pages), F4 (three or four lines for the royalty titles), F9 (the footer's order on phones), F14 (the cookie notice over the hero button at 568×320).",
       "<b>In your Safari (from round 5's F2 and today's PRs):</b> Show scroll bars: Always, then the booking window: an empty strip at the right edge? Then the stack's strips after several reloads, the ID deck's swipes compared with the lab, the legal pages' bar, the hero on reload.",
       "<b>Still open from earlier rounds:</b> which Planerka account (the free one shows Planerka's ribbon); the fifth publication is a copy; the Figma push of the scale and the new tokens (Figma was out of scope again); the cookie notice's text («Оставаясь…» vs consent by «ОК»); <code>robots.txt</code> still blocks all crawlers for the launch."
      ]

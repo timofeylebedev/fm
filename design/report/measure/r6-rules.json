@@ -1,5 +1,5 @@
 {
- "when": "2026-10-24T18:42:53.985Z",
+ "when": "2026-10-24T19:31:15.067Z",
  "results": [
   {
    "id": "ladder",
@@ -104,14 +104,15 @@
    "title": "Curves from one table (motion.js)",
    "how": "cubic-bezier() and named eases in the page's stylesheets and scripts, outside motion.js and the --ease tokens",
    "ok": false,
-   "n": 6,
+   "n": 7,
    "fails": [
     "src/styles/components/book.css:152 ease-in-out",
     "scripts/cookies.js:30 cubic-bezier(0.65, 0, 0.35, 1)",
+    "scripts/deck.js:78 ease = \"power2.in\"",
+    "scripts/deck.js:80 ease = \"power1.out\"",
     "scripts/deck.js:166 ease: \"power2.inOut\"",
-    "scripts/glide.js:15 cubic-bezier(x1, y1, x2, y2)",
-    "scripts/logos.js:30 ease: \"none\"",
-    "scripts/logos.js:61 ease: \"none\""
+    "scripts/menu.js:18 CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"",
+    "scripts/menu.js:19 CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\""
    ],
    "note": ""
   },

@@ -149,9 +149,12 @@ for (const [f, s0] of Object.entries(css)) {
   }
 }
 const jsFiles = readdirSync("src/scripts").filter((f) => f.endsWith(".js") && f !== "motion.js");
+const stripJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/(^|[^:"'`])\/\/[^\n]*/g, (m, p) => p + " ".repeat(m.length - p.length));
 for (const f of jsFiles) {
-  const s = read(join("src/scripts", f));
-  for (const m of s.matchAll(/cubic-bezier\([^)]*\)|ease:\s*["'](power\d|sine|expo|circ|back|elastic|none)[^"']*["']/g)) curves.push(`scripts/${f}:${lineOf(s, m.index)} ${m[0]}`);
+  const s = stripJs(read(join("src/scripts", f)));
+  // literal curves, GSAP eases by name (ease: "…" or ease = "…"; "none" is the even scrub of scroll-linked motion), own CustomEases
+  for (const m of s.matchAll(/cubic-bezier\(\s*[\d.]+[^)]*\)|ease\s*[:=]\s*["'](power\d|sine|expo|circ|back|elastic)[^"']*["']|CustomEase\.create\(\s*["'][^"']+["']\s*,\s*["'][\d.,\s]+["']/g))
+    curves.push(`scripts/${f}:${lineOf(s, m.index)} ${m[0]}`);
 }
 rule("curves", "Curves from one table (motion.js)", "cubic-bezier() and named eases in the page's stylesheets and scripts, outside motion.js and the --ease tokens", curves);
 
