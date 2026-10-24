@@ -88,7 +88,7 @@
   --center-air: clamp(0px, calc(8px + (var(--vp) - 20rem) * -8 / 1120), 8px);
   --tool-min-h: clamp(400px, calc(400px + (var(--vp) - 20rem) * 80 / 1120), 480px);
   --cta-air: clamp(64px, calc(64px + (var(--vp) - 20rem) * 64 / 1120), 128px);
-  --tool-pad: clamp(28px, calc(28px + (100cqi - 18rem) * 36 / 312), 64px);
+  --tool-pad: clamp(28px, calc(28px + (100cqi - 18rem) * 36 / 736), 64px);
   --type-note: 0.75rem;
   --hero-air-max: clamp(64px, calc(64px + (var(--vp) - 20rem) * 64 / 1120), 128px);
   --hero-pic-min: clamp(168px, calc(168px + (100vw - 20rem) * 132 / 1120), 300px);
