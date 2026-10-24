@@ -118,24 +118,23 @@
     user-select: none; -webkit-user-select: none;
   }
   .access__cards { display: block; position: relative; height: 392px; }
-  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) is set by the script. A swipe moves the slot
-     by --swipe-x and --swipe-turn (deck.js), in a transform of their own, so it never touches the depth's translate,
-     rotate and scale (GSAP moving the slot itself cleared them: after a swap the card at the bottom lost its place) */
+  /* every card in the same place; how deep it lies (--d: 0 on top, 1, 2) is set by the script, which also moves a card
+     to its new depth by animating --d itself (deck.js): Safari on iPhone did not run a CSS transition here, and the
+     cards jumped up to their new places (Tim's recording, Oct 24). Which card is in front is --z, a whole number, set
+     at once. A swipe moves the slot by --swipe-x and --swipe-turn, in a transform of their own, so it never touches the
+     depth's translate, rotate and scale (GSAP moving the slot itself cleared them) */
   .access__slot {
     position: absolute; left: 50%; top: 8px;
     width: 270px; height: 376px; margin: 0 0 0 -135px !important;
-    z-index: calc(3 - var(--d, 0));
+    z-index: calc(3 - var(--z, var(--d, 0)));
     translate: calc(var(--d, 0) * 13px) calc(var(--d, 0) * -7px);
     rotate: calc(var(--d, 0) * 4deg);
     scale: calc(1 - var(--d, 0) * 0.045);
     transform: translateX(var(--swipe-x, 0px)) rotate(var(--swipe-turn, 0deg));
-    transition: translate 0.45s var(--ease-out), rotate 0.45s var(--ease-out), scale 0.45s var(--ease-out);
-    @media (--calm) { transition: none; }
   }
   .access__slot .idcard { rotate: none; }                              /* straight in its slot (without scripts too) */
   .access__slot--2 { --d: 1; }
   .access__slot--3 { --d: 2; }
-  .access__stage.is-dragging .access__slot { transition: none; }
 }
 
 .idcard {

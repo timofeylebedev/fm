@@ -11,8 +11,8 @@
        brings the bottom card back on top from the left;
      · the first time the deck comes on screen, the top card nudges to the left and back once, to show it can be swiped.
    Where the cards stand in a row again (a wider screen, a phone turned), the deck lets go of them.
-   How deep each card lies is --d on its slot (0 on top); the styles place, turn and size it by that, with a transition
-   (the top card straight, each one under it 4° further round). A swipe moves the slot by --swipe-x (px) and --swipe-turn
+   How deep each card lies is --d on its slot (0 on top); the styles place, turn and size it by that (the top card
+   straight, each one under it 4° further round), and this script moves --d to a card's new depth (paint). A swipe moves the slot by --swipe-x (px) and --swipe-turn
    (°), a transform of its own: GSAP moving the slot itself would clear the depth's translate, rotate and scale. */
 import { gsap, CustomEase } from "./gsap.js";
 import { calm, settleTilts } from "./motion.js";
@@ -22,7 +22,8 @@ const SET = {
   flick: 0.3,       // or this fast at the end (px per ms; about what phones themselves count as a flick)
   lean: 0.045,      // degrees the card turns per px it is pulled
   out: 0.3,         // seconds to leave
-  back: 0.5         // seconds to settle into its new place
+  back: 0.5,        // seconds to settle into its new place
+  move: 0.45        // seconds the other cards take to move to their new places (place, size and angle: their depth)
 };
 
 export function initDeck() {
@@ -35,7 +36,14 @@ export function initDeck() {
   let flight = null;                                        // the card change under way (a GSAP tween), if any
 
   const width = () => slots[order[0]].offsetWidth || 270;
-  const paint = () => order.forEach((slot, d) => slots[slot].style.setProperty("--d", d));
+  // each card's depth: which one is in front (--z) changes at once; where it lies, how big and how turned (--d) moves
+  // there, animated by GSAP frame by frame (a CSS transition on them did not run in Safari on iPhone: the cards jumped)
+  const paint = (move = true) => order.forEach((slot, d) => {
+    const s = slots[slot];
+    s.style.setProperty("--z", d);
+    if (move && !calm) gsap.to(s, { "--d": d, duration: SET.move, ease: "fm-out", overwrite: "auto" });
+    else { gsap.killTweensOf(s, "--d"); s.style.setProperty("--d", d); }
+  });
   // the swipe's place and turn of a slot (see the top); tweened by GSAP as CSS variables
   const at = (x, turn) => ({ "--swipe-x": x + "px", "--swipe-turn": turn + "deg" });
   const xOf = (slot) => parseFloat(gsap.getProperty(slot, "--swipe-x")) || 0;
@@ -127,10 +135,10 @@ export function initDeck() {
     if (deck === on) return;
     on = deck;
     stage.classList.toggle("is-deck", on);
-    if (on) { stage.tabIndex = 0; paint(); gsap.set(slots, home); }   // the swipe starts from 0 (GSAP needs a value to tween from)
+    if (on) { stage.tabIndex = 0; paint(false); gsap.set(slots, home); }   // the swipe starts from 0 (GSAP needs a value to tween from)
     else {
       stage.removeAttribute("tabindex");
-      slots.forEach((s) => { gsap.killTweensOf(s); ["--d", "--swipe-x", "--swipe-turn"].forEach((v) => s.style.removeProperty(v)); });
+      slots.forEach((s) => { gsap.killTweensOf(s); ["--d", "--z", "--swipe-x", "--swipe-turn"].forEach((v) => s.style.removeProperty(v)); });
     }
     settleTilts();                                          // the cards already there: straight in a slot, or their own angle in a row
   }
