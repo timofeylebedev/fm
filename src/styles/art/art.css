@@ -32,6 +32,7 @@
 .fm-stage *, .fm-stage *::before, .fm-stage *::after { box-sizing: border-box; margin: 0; padding: 0; }
 .fm-stage div, .fm-stage svg, .fm-stage img, .fm-stage canvas { position: absolute; }
 .fm-stage img { display: block; max-width: none; object-fit: cover; }
+.fm-stage picture { display: contents; }                       /* only chooses the file: the <img> in it is placed as usual */
 .fm-stage img[src$=".svg"] { object-fit: contain; }           /* an icon file is never cropped */
 .fm-stage svg { display: block; overflow: visible; }
 .fm-stage b, .fm-stage i { display: block; flex: none; font-weight: inherit; font-style: normal; }
@@ -74,6 +75,12 @@
    at the same time the whole tile swells between 35% and 100% of that, more slowly (fm-dim).
    Together: a tile is never brighter than 30% and never darker than about 4%.
    The script gives every tile its own two speeds and its own start, so no two tiles keep in step. */
+.fm-card { overflow: hidden; }                                  /* a tile with content: its photo is cut to the rounded corners */
+.fm-price {                                                     /* the price on a tile of merch (Figma: 36 high, 10 from the corner) */
+  position: absolute; left: calc(10 * var(--fm-px)); bottom: calc(10 * var(--fm-px));
+  height: calc(36 * var(--fm-px)); padding: 0 calc(16 * var(--fm-px)); display: flex; align-items: center;
+  border-radius: 1000px; background: #fff; font-size: calc(16 * var(--fm-px)); line-height: 1.2;
+}
 .fm-blink { animation: fm-dim 1.5s ease-in-out infinite alternate; }
 .fm-blink > i { width: 100%; height: 100%; border-radius: inherit; background: #fff; animation: fm-shimmer 0.7s ease-in-out infinite alternate; }
 @keyframes fm-shimmer { from { opacity: 0.12; } to { opacity: 0.3; } }

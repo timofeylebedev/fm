@@ -6,15 +6,20 @@ export const STILL = calm;
 
 // The pictures of the drawings (src/assets/img/art-*): a drawing names a file as it was uploaded ("art-face-mark.png"),
 // and gets the address of its optimized copy (.webp, or the .svg itself). Small files come inlined.
-const FILES = import.meta.glob("../../assets/img/art-*.{webp,svg}", { eager: true, query: "?url", import: "default" });
-const file = (name) => FILES["../../assets/img/" + name.replace(/\.png$/, ".webp")];
+// A photo that also has an AVIF (build/images.mjs) is given as a <picture>: the AVIF first, the WebP for browsers without it.
+const FILES = import.meta.glob("../../assets/img/art-*.{avif,webp,svg}", { eager: true, query: "?url", import: "default" });
+const file = (name, format) => FILES["../../assets/img/" + name.replace(/\.png$/, "." + (format || "webp"))];
 
 export const SIZE = 1000;                       // an illustration is drawn on a 1000×1000 stage, in the px of the Figma frame
                                          // (a drawing made in a frame of another size says so itself: see "size" in royalty-1)
 export const LIMIT = 2000;                      // …and is never laid out or painted with more than this many px a side
 export const at = (x, y) => "left:" + x + "px;top:" + y + "px";
 // a picture from the uploaded files. Extra classes: fm-in = flows inside its parent, fm-face = square photo cropped to a circle
-export const pic = (name, style, classes) => '<img' + (classes ? ' class="' + classes + '"' : "") + ' src="' + file(name) + '" alt="" decoding="async" style="' + style + '">';
+export const pic = (name, style, classes) => {
+  const img = '<img' + (classes ? ' class="' + classes + '"' : "") + ' src="' + file(name) + '" alt="" decoding="async" style="' + style + '">';
+  const avif = /\.png$/.test(name) && file(name, "avif");
+  return avif ? '<picture><source type="image/avif" srcset="' + avif + '">' + img + "</picture>" : img;
+};
 
 // On the page the stage is not as wide as in Figma. It is laid out at about the size it has on screen, and one Figma px
 // is var(--fm-px) long there (the script sets --fm-px for every drawing, see fit() below).

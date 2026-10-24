@@ -20,17 +20,18 @@ export default {
       return '<div class="fm-tile fm-blink" style="' + at(x, y) + ";opacity:" + alpha + ";animation-duration:" + swell.toFixed(2) + "s;animation-delay:" + (-rnd() * 2 * swell - 1).toFixed(2) + 's">'
         + '<i style="animation-duration:' + flicker.toFixed(2) + "s;animation-delay:" + (-rnd() * 2 * flicker - 1).toFixed(2) + 's"></i></div>';
     };
-    // a tile with content: one flat picture (photo, play button, price, date are all part of the file)
-    const card = (x, y, name) => pic(name, at(x, y), "fm-tile");
+    // a tile with content: the photo, and on it a play button, a price or a date (Figma: s1-image-1). The price is text.
+    const card = (x, y, name, over) => '<div class="fm-tile fm-card" style="' + at(x, y) + '">' + pic(name, "left:0;top:0;width:100%;height:100%") + (over || "") + "</div>";
+    const price = (sum) => '<span class="fm-price">' + sum + "</span>";
     return { html:
       tile(420, 68, 0.2, 5, 2) + tile(772, 245, 0.2, 8, 6) + tile(68, 421, 0.2, 0, 7) + tile(772, 421, 0.3, 3, 0)
       + tile(68, 597, 0.1, 6, 3) + tile(244, 772, 0.2, 10, 1) + tile(772, 772, 0.2, 7, 5)
       + tile(420, 245, 0.3, 1, 9) + tile(596, 421, 0.1, 9, 4) + tile(244, 597, 0.3, 2, 8) + tile(596, 597, 0.3, 4, 10)
-      + card(244, 244, "art-card-video.png")
-      + card(596, 244, "art-card-hoodie.png")
-      + card(244, 420, "art-card-cap.png")
+      + card(244, 244, "art-card-video.png", pic("art-icon-play.svg", "left:15.38px;bottom:13.16px;width:34.41px;height:33.568px"))
+      + card(596, 244, "art-card-hoodie.png", price("3200 ₽"))
+      + card(244, 420, "art-card-cap.png", price("1590 ₽"))
       + card(420, 420, "art-card-home.png")
-      + card(420, 596, "art-card-concert.png")
+      + card(420, 596, "art-card-concert.png", pic("art-icon-day.svg", "left:13.16px;bottom:13.16px;width:42.105px;height:42.105px"))
     };
   },
 
@@ -193,7 +194,7 @@ export default {
       + bar(296.053, 6.579, 0.1, 17) + bar(197.368, 9.868, 0.2, 16) + bar(98.684, 13.158, 0.4, 15)
       + bar(197.368, 19.737, 0.5, 14) + bar(394.737, 23.026, 0.6, 13) + bar(263.158, 26.316, 0.8, 12)
       + msg(476.974, 11, 6.579, who("Анна Смирнова", "создала проект:", 0.7),
-          chip("<b>" + pic("art-thumb-lastseen.png", "width:26.316px;height:26.316px;border-radius:4.934px", "fm-in") + "</b>Last Seen Leaving", "gap:4.934px;padding:3.289px 9.868px 3.289px 3.289px;border-radius:9.868px"),
+          chip("<b>" + pic("art-thumb-lastseen.png", "width:26.316px;height:26.316px;border-radius:4.934px", "fm-in") + "</b>Last Seen at 8 AM", "gap:4.934px;padding:3.289px 9.868px 3.289px 3.289px;border-radius:9.868px"),
           face("art-face-anna.png", 437.63, -45.92, 0))
       + date("8 авг", 39.474, 10)
       + msg(532.895, 9, 6.579, who("Марк Новиков", "изменил статус:", 0.6),
