@@ -14,6 +14,9 @@ rules Claude follows. The site's history, open PRs and open questions live in th
   on every push and removes it when the PR is closed (`rossjrw/pr-preview-action`). Pages serves the `gh-pages`
   branch: the site at its root, the previews in `pr-preview/` (main's publish keeps them). Give Tim the preview link
   in the PR description; it needs no other branch.
+- **The review page of the design system** (every colour, size, step, shadow, curve and decision, and each review round):
+  `design/report/site/index.html` (opens from the clone), published at https://timofeylebedev.github.io/fm/report/.
+  Its data is read from the repo by `node design/report/build-site.mjs` (`design/report/README.md`).
 - Owner and reviewer: Tim (timofeylebedev). The site's language is Russian; talk to Tim in the language he writes in.
 - The design lives in Figma: https://www.figma.com/design/JTfxQeW8liN3knCO3GWtns/website-2.0 (Figma Pro plan:
   no Variables REST API, so variables go through the Figma MCP tool `use_figma`).
@@ -46,6 +49,7 @@ npm run tokens        # design/scale.json + tokens.json -> src/styles/base/token
 npm run tokens:sync   # three-way merge with a fresh Figma export (design/README.md)
 npm run images        # assets-src/img -> src/assets/img (AVIF/WebP; commit the outputs)
 npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotli)
+node design/report/build-site.mjs   # the review page of the system (design/report/site/, README there)
 ```
 
 ## Rules in the code
@@ -120,6 +124,9 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
 - The CSP blocks injected scripts: use `bypassCSP: true` in Playwright contexts.
 - `npm run audit` finds Chromium by `PLAYWRIGHT_CHROMIUM` (in the cloud: `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`
   as of Oct 24, 2026; the folder name changes with Playwright updates: `ls /opt/pw-browsers`).
+- `html { scrollbar-gutter: stable }` (book.css) is filled like a classic 15px scrollbar in headless Chromium, even with
+  `--hide-scrollbars`: a page measured at 390 is 375 wide and layout steps show up 15–20px late. To measure as on a Mac
+  or a phone, take it out of the served CSS (`prep()` in `design/report/tools/lib.py`); the audit keeps it.
 - Headless Chromium without a GPU: launch with `--use-gl=swiftshader --enable-unsafe-swiftshader` (as
   `build/audit.mjs` does), at most 2 browser contexts at a time, and judge motion by its curves, not by frame timing.
 - Telegram's browser: `?fmcap=debug` (the white strip above the navbar turns red, a box shows what the browser says;

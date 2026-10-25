@@ -42,6 +42,16 @@ jobs:
       - if: github.event.action != 'closed'
         run: npm run check
 
+      # the review page of the system (design/report/site), at /report/: its data read again from this commit
+      - name: Build the review page
+        if: github.event.action != 'closed'
+        env:
+          FM_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        # never stops the site's deploy: if the page's data cannot be built, the committed copy is published
+        run: |
+          node design/report/build-site.mjs || echo "::warning::the review page's data could not be rebuilt; the committed copy is published"
+          cp -R design/report/site dist/report
+
       # GitHub Pages compresses by itself, so the .br/.gz copies are left out;
       # .nojekyll tells Pages to serve the files as they are.
       - name: Prepare for GitHub Pages

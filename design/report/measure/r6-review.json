@@ -1,0 +1,21 @@
+{
+ "sub": "A separate agent that had not seen this round re-measured every candidate finding on both builds (about 50 minutes, 81 measurements) and looked for what was missed. Its verdicts and what was done:",
+ "items": [
+  "<b>F-list re-checks (mine) and A1–A12 (the review):</b> the agent re-measured every candidate on both builds, with overlay scrollbars and with the 15px gutter.",
+  "<b>Tile corners (now part of F3):</b> confirmed as measured, a question not a defect (Tim's «32 at most»). Missed and added: a stat tile is two columns wide (506px at 1440), as wide as a publication, yet radius 32 vs 40 — the tiers go by role, not by size; scale.json's «about 130–250px» is out of date for the stats.",
+  "<b>Curves (F5):</b> confirmed and wider: menu.js's CustomEases and deck.js's <code>ease = \"power2.in\"</code> / <code>\"power1.out\"</code> were missed by the lint. Fixed in rules.mjs this round (it now finds 7, and no longer flags glide.js's comment or the scrub's \"none\").",
+  "<b>Shadows (G4):</b> confirmed for the CSS; the claim «the only literal colours» was wrong for the scripts (hero.js chip dots and SHADE, nav.js #fff). Reworded.",
+  "<b>Dead tokens (F7):</b> confirmed; tokens.json still describes ink/40 as «Footer notes» (the notes use ink 50). Both are Figma variables, so removing them removes them there too.",
+  "<b>Hairline pairs:</b> weakened (both are recorded decisions); dropped as a finding. Noted instead: link underlines differ by page (legal ink 30 → 100 at 5px, cookie 20 → 30 at 3px, booking purple at 3px).",
+  "<b>62em (F10):</b> weakened: tied to Planerka's 1024px frame, so a written third-party exception rather than a design step.",
+  "<b>Tool card gap (G3):</b> weakened to a note: the logo reads as an eyebrow.",
+  "<b>Feature texts (F3, G1):</b> confirmed; «pre-existing» only half right: the 4-column text went 200 → 184px with the corners on Oct 22. One column (320–387) takes 2 lines; the 2-column switch lands on the most common phone width.",
+  "<b>Gutter (F2):</b> the framing corrected: Windows and Linux visitors with classic scrollbars do see the 15px, because the page always scrolls; the gutter only matters while the booking window locks scrolling. So headless numbers with the gutter are right for Windows; the report's numbers are for Mac and phones. Phone contexts are unaffected.",
+  "<b>Decorative chips (G5):</b> confirmed: 8.4–9.0px on phones, 12.4–13.8 at 1440.",
+  "<b>Stats (G6):</b> confirmed and stronger: bigger than the hero title on phones, and −34% / −26% jumps at the logo column steps. Raised to severity 2.",
+  "<b>Own steps (G2):</b> confirmed, recorded in decisions; CLAUDE.md does not name 62em or 67.5em.",
+  "<b>New from the review:</b> G7 (24px browser text inverts h1/h2 and the stack titles), G8 (the legal page's heading levels all 16px on phones), G9 (pixel-sampled contrast over the dust lower than recorded), and the feature padding's coupling to the radius (part of F3).",
+  "<b>Since-round-4 claims:</b> all confirmed (hero 63 → 59.1 at 1440×900, feature radius 23.7 → 31.4, tool padding 64 → 55.2 at 900 and 35.7 → 31.3 at 390, tools stacked at 768×1024 with 433 → 711px cards, the footer at 1080). No sideways scroll 320–1920 in 4px steps, with and without the gutter, at 568×320, 844×390, 1366×650, 2560×1440 and with 24px browser text.",
+  "<b>Not checked by the review:</b> real Safari and iOS, a real Windows scrollbar, Firefox and WebKit, the full dust and the GPU ring, motion by eye, Figma."
+ ]
+}
