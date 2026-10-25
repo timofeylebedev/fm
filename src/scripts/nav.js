@@ -3,6 +3,7 @@
 import { followTint } from "./tint.js";
 import { box, y as pageY, max as pageMax, onScroll as onPageScroll } from "./scroller.js";
 import { glider, bezier } from "./glide.js";
+import { whenLoaded } from "./loaded.js";
 
 /* ── tint ──
    The navbar takes the colour of the section that is behind it, at its own transparency (70%): behind the hero it is
@@ -114,7 +115,7 @@ export function initCap(nav) {
   const later = () => { if (!queued) queued = requestAnimationFrame(place); };
   place();
   addEventListener("resize", place);
-  addEventListener("load", later);
+  whenLoaded(later);
   if (window.visualViewport) visualViewport.addEventListener("resize", place);
   new ResizeObserver(later).observe(document.body);
   if (inApp) setInterval(() => { if (!document.hidden) { fix(); bounce(); } }, 250);

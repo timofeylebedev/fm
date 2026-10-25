@@ -108,9 +108,11 @@ export function inlineCss(pages = ["index.html"]) {
             // image-set() may also name its files as bare strings: image-set("./a.avif" 1x type("image/avif"), …)
             .replace(/(image-set\()([^;}]*)/g, (m, open, list) => open + list.replace(/(["'])\.\/(?!assets\/)/g, "$1./" + dir))
             .replace(/<\/style/gi, "<\\/style");
-          // every file the stylesheet names must now be a file of the build: a form of address not rewritten above
-          // would otherwise point next to the page, and its picture or font would quietly not load
-          for (const [, ref] of css.matchAll(/(?:url\(\s*["']?|image-set\([^;}]*?["'])\.\/([^"')\s]+)/g))
+          // every file the stylesheet names must now be a file of the build, and no relative address may be left that
+          // was not rewritten: it would point next to the page, and its picture or font would quietly not load
+          const left = css.match(/(?:url\(\s*["']?|["'])\.\/(?!assets\/)[^"')\s]*/);
+          if (left) throw new Error(`fm-inline-css: ${file} has an address not rewritten for the page: ${left[0]}`);
+          for (const [, ref] of css.matchAll(/\.\/(assets\/[^"')\s,]+)/g))
             if (!ctx.bundle[ref]) throw new Error(`fm-inline-css: ${file} names ./${ref}, which is not in the build`);
           delete ctx.bundle[file];                                   // nothing else uses it
           return "<style>" + css + "</style>";
@@ -128,9 +130,8 @@ export function inlineCss(pages = ["index.html"]) {
 // (frame-ancestors cannot be set from the page itself: the server sends it, see deploy/.)
 const POLICY = {
   "default-src": ["'self'"],
-  // 'unsafe-inline' is for old browsers only: a browser that knows script hashes ignores it once a hash is listed, and the
-  // page's own inline scripts are listed by their hashes (PageSpeed's CSP check asks for it, Oct 25)
-  "script-src": ["'self'", "'unsafe-inline'"],
+  // (+ 'unsafe-inline' on pages with inline scripts, see csp() below)
+  "script-src": ["'self'"],
   "style-src": ["'self'", "'unsafe-inline'"],          // the drawings and GSAP set styles on the elements they move
   "img-src": ["'self'", "data:", "blob:"],
   "font-src": ["'self'"],
@@ -149,7 +150,10 @@ export function csp() {
       handler(html) {
         const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
           .map(([, code]) => "'sha256-" + createHash("sha256").update(code).digest("base64") + "'");
-        const policy = Object.entries(POLICY).map(([k, v]) => k + " " + (k === "script-src" ? v.concat(hashes) : v).join(" ")).join("; ");
+        // 'unsafe-inline' is for old browsers only: a browser that knows script hashes ignores it once a hash is listed
+        // (PageSpeed's CSP check asks for it, Oct 25). So it is added only where there is a hash: on a page without one it
+        // would really allow inline scripts (independent review, Oct 25).
+        const policy = Object.entries(POLICY).map(([k, v]) => k + " " + (k === "script-src" ? v.concat(hashes.length ? ["'unsafe-inline'"] : [], hashes) : v).join(" ")).join("; ");
         return html.replace(/<meta charset="utf-8">/i, (m) => m + '<meta http-equiv="Content-Security-Policy" content="' + policy + '">');
       }
     }

@@ -67,12 +67,15 @@ npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotl
   text): batch them (`hideAll` in motion.js) or write their style directly (`settle` in cards.js). Split a text once,
   not again until its width or its own font changes. Heavy work goes in tasks of its own (`inTurn` in main.js,
   `pause()` in art/mount.js). Measure with Lighthouse mobile, 3 runs, median TBT (PR #54: 758 → 476 ms).
-  The first frame is drawn before main.js starts its work (the `await` near its top): keep anything a script must do
-  before that frame above it, and keep it tiny. Drawings far from the screen are built only after the visitor's first
-  own move (art/mount.js), never just because the page has loaded. The home page's stylesheet is put inside the page by
-  the build (`inlineCss` in build/plugins.js; the build stops if a file it names is missing). For PageSpeed numbers in
-  the cloud, serve dist/ with ~60 ms of delay per response: with none, the page paints before the scripts run and the
-  numbers look better than on GitHub Pages (Oct 25, 2026: mobile 79 → 92, TBT 485 → 198 ms, SI 3.9 → 2.7 s).
+  The first frame is drawn before main.js starts its work (the `await` near its top; not when the address names a
+  section, whose jump needs the full page): keep anything a script must do before that frame above it, and keep it
+  tiny. So the page's `load` may already have fired when a module starts: use `whenLoaded(fn)` (scripts/loaded.js),
+  never a bare `addEventListener("load", …)`. Drawings far from the screen are built only after the visitor's first own
+  move and a quiet second (art/mount.js), never just because the page has loaded. The home page's stylesheet is put
+  inside the page by the build (`inlineCss` in build/plugins.js; the build stops if an address in it is not rewritten
+  or names a missing file). For PageSpeed numbers in the cloud, serve dist/ with ~60 ms of delay per response: with
+  none, the page paints before the scripts run and the numbers look better than on GitHub Pages (Oct 25, 2026, PR #61:
+  mobile 79 → 91.5, TBT 474 → 234 ms, SI 3.8 → 2.8 s; PageSpeed on the preview 99).
 - **Motion curves:** one table, `M.curve` in `scripts/motion.js` (`out`, `move`, `leave`, `wave`, `settle`, `fall`,
   `glide`). GSAP uses `"fm-<name>"`; WAAPI/CSS imports `css.out` / `css.move` / `css.leave` from motion.js.
   Never copy the numbers. Every animation respects reduced motion.

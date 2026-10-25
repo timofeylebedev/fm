@@ -14,6 +14,7 @@
 import { M, css } from "./motion.js";
 import { y as scrollY, height, onScroll } from "./scroller.js";
 import { bezier, glider } from "./glide.js";
+import { whenLoaded } from "./loaded.js";
 
 const MIN = 250, MAX = 650;          // ms: the shortest move, and a move across the whole row
 const LINE = 0.4;                    // where a section counts as reached (see above)
@@ -131,6 +132,6 @@ export function initPill() {
   span = spanOf();
   if (shown(row)) go(pick(), true);
   new ResizeObserver(settle).observe(row);
-  addEventListener("load", settle);
+  whenLoaded(settle);
   document.fonts.ready.then(settle);
 }
