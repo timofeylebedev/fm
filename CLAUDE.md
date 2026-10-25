@@ -9,6 +9,11 @@ rules Claude follows. The site's history, open PRs and open questions live in th
 - The landing page of Flow Medium, a custom static Vite site (rebuilt from Taptop, same design and motion).
 - `main` is the live site: every push to `main` builds and publishes to https://timofeylebedev.github.io/fm/
   (`.github/workflows/deploy.yml`). The real host (flowmedium.pro) is not decided; settings for it are in `deploy/`.
+- **Every pull request gets a preview:** the same workflow publishes it to
+  `https://timofeylebedev.github.io/fm/pr-preview/pr-<number>/`, posts the link as a comment on the PR, updates it
+  on every push and removes it when the PR is closed (`rossjrw/pr-preview-action`). Pages serves the `gh-pages`
+  branch: the site at its root, the previews in `pr-preview/` (main's publish keeps them). Give Tim the preview link
+  in the PR description; it needs no other branch.
 - Owner and reviewer: Tim (timofeylebedev). The site's language is Russian; talk to Tim in the language he writes in.
 - The design lives in Figma: https://www.figma.com/design/JTfxQeW8liN3knCO3GWtns/website-2.0 (Figma Pro plan:
   no Variables REST API, so variables go through the Figma MCP tool `use_figma`).
@@ -130,8 +135,7 @@ Web code syntax is `var(--name)`. Pull: run `design/figma/pull.js` with `use_fig
   force-push without asking.
 - **Claude in the cloud (claude.ai project "FM")**: same repo, but the shell can't reach figma.com or planerka.app,
   `gh pr create` fails (open PRs with `gh api repos/timofeylebedev/fm/pulls`), branches can't be deleted, and
-  there is no Firefox/WebKit. To show Tim a build there, push `dist/` (without `.br`/`.gz`) to a throwaway branch and
-  link `https://raw.githack.com/timofeylebedev/fm/<branch>/index.html`. Since Oct 2026 githack puts a notice
-  page in front and the page's pictures do not load there (seen Oct 20 in the Claude app's browser: the images are sent
-  off-site and the site's CSP blocks them), so for anything with pictures Tim runs the branch locally instead.
+  there is no Firefox/WebKit. To show Tim a build, open the PR: its preview link (see "The project") is the build,
+  pictures included. The old way (`dist/` pushed to a throwaway branch and served through raw.githack.com) is not
+  needed any more: githack puts a notice page in front and the page's pictures do not load there.
 - Whichever side changes a rule here, update this file in the same PR, so both read the same thing.

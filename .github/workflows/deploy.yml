@@ -1,18 +1,21 @@
-# Builds the site on every push to main and publishes it on GitHub Pages (the test link).
-# Once: Settings → Pages → Build and deployment → Source: "GitHub Actions".
-# Pull requests are built and checked too (HTML validation), but not published.
+# Builds the site and publishes it on GitHub Pages, from the gh-pages branch.
+# - A push to main publishes the site itself at the root: https://timofeylebedev.github.io/fm/
+# - Every pull request is published as a preview in pr-preview/pr-<number>/
+#   (https://timofeylebedev.github.io/fm/pr-preview/pr-<number>/). The link is posted as a comment on the
+#   pull request, updated on every push, and the preview is removed when the pull request is merged or closed.
+# Once: Settings → Pages → Build and deployment → Source: "Deploy from a branch", branch gh-pages, folder / (root).
 name: Build and deploy
 
 on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, reopened, synchronize, closed]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write       # push to the gh-pages branch
+  pull-requests: write  # the preview link comment
 
 # one run at a time per branch or pull request: a push to a pull request never cancels a deploy of main
 concurrency:
@@ -20,29 +23,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  site:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
+        if: github.event.action != 'closed'
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npm run check
-      - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
-        with:
-          path: dist
+      - if: github.event.action != 'closed'
+        run: npm ci
+      - if: github.event.action != 'closed'
+        run: npm run build
+      - if: github.event.action != 'closed'
+        run: npm run check
 
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # GitHub Pages compresses by itself, so the .br/.gz copies are left out;
+      # .nojekyll tells Pages to serve the files as they are.
+      - name: Prepare for GitHub Pages
+        if: github.event.action != 'closed'
+        run: |
+          find dist \( -name '*.br' -o -name '*.gz' \) -delete
+          touch dist/.nojekyll
+
+      # main → the root of the site; the open previews in pr-preview/ are kept
+      - name: Publish the site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+          clean-exclude: pr-preview/
+          force: false
+
+      # pull request → its preview (and its removal when the pull request is closed)
+      - name: Publish the preview
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: auto
