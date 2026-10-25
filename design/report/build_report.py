@@ -18,6 +18,7 @@ def main():
     eng = open(opt('--engine', os.path.join(here, 'engine.js')), encoding='utf-8').read()
     data = json.load(open(data_path, encoding='utf-8'))
     base = os.path.dirname(os.path.abspath(data_path))
+    if os.path.isdir(os.path.join(base, 'site', 'shots')): base = os.path.join(base, 'site')   # the pictures live with the page
     def embed(o):
         if isinstance(o, dict):
             for k, v in o.items():

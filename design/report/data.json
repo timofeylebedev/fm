@@ -6,7 +6,50 @@
   "eyebrow": "Round 6 · the analysis of Oct 24 · main at <a href='https://github.com/timofeylebedev/fm/commit/bd0566f'>bd0566f</a> (PR #53) · code only",
   "title": "The whole system on Oct 24: what holds, what is still open, what today changed",
   "lede": "Everything about the site's sizes, layouts and motion in one place, re-measured today: a design-system analysis of the live code (Figma left out), round 5's fifteen findings re-checked, what the 16 pull requests since round 5 changed, the scale, the areas at real screen sizes, every size at every width and height, the responsive map, the curves, the grammar and the checks. Rounds 5, 4 and 3 are kept at the end.",
-  "footer": "Measured on the built site in Chromium 153 (software rendering, overlay scrollbars: the stable scrollbar gutter taken out), October 24, 2026. Before = main at edeb745 (the build of round 5, Oct 23); now = main at bd0566f (PR #53). Round 5 compared edeb745 with round 4's 7a1ef87, round 4 PR #13 with 9b44400, round 3 PR #8 with 80cbebb."
+  "footer": "Measured on the built site in Chromium 153 (software rendering, overlay scrollbars: the stable scrollbar gutter taken out), October 24, 2026. Before = main at edeb745 (the build of round 5, Oct 23); now = main at bd0566f (PR #53). Round 5 compared edeb745 with round 4's 7a1ef87, round 4 PR #13 with 9b44400, round 3 PR #8 with 80cbebb.",
+  "since": "edeb7451a61f14972f8fda6ea73dc630701349e6",
+  "sinceLabel": "round 5 (Oct 23)",
+  "rounds": [
+   {
+    "n": 6,
+    "date": "Oct 24",
+    "title": "Round 6: the analysis of Oct 24",
+    "about": "A design-system analysis of main at bd0566f (code only), round 5's findings re-checked, and what the 16 pull requests since round 5 changed.",
+    "sections": [
+     "round6",
+     "since",
+     "checks",
+     "next"
+    ]
+   },
+   {
+    "n": 5,
+    "date": "Oct 23",
+    "title": "Round 5: the audit of Oct 23",
+    "about": "The audit of main at edeb745: fifteen findings.",
+    "sections": [
+     "round5"
+    ]
+   },
+   {
+    "n": 4,
+    "date": "Oct 20",
+    "title": "Round 4: navbar, hero, card stack (PR #13)",
+    "about": "Tim's thirteen comments on the navbar, the hero and the card stack.",
+    "sections": [
+     "round4"
+    ]
+   },
+   {
+    "n": 3,
+    "date": "Oct 18",
+    "title": "Round 3: one ladder for type and space (PR #8)",
+    "about": "One ladder, shared layout steps S / M / L, royalty by shape, the stack cards as pills.",
+    "sections": [
+     "round3"
+    ]
+   }
+  ]
  },
  "sections": [
   {

@@ -42,6 +42,13 @@ jobs:
       - if: github.event.action != 'closed'
         run: npm run check
 
+      # the review page of the system (design/report/site), at /report/: its data read again from this commit
+      - name: Build the review page
+        if: github.event.action != 'closed'
+        run: |
+          node design/report/build-site.mjs
+          cp -R design/report/site dist/report
+
       # GitHub Pages compresses by itself, so the .br/.gz copies are left out;
       # .nojekyll tells Pages to serve the files as they are.
       - name: Prepare for GitHub Pages
