@@ -17,9 +17,11 @@ permissions:
   contents: write       # push to the gh-pages branch
   pull-requests: write  # the preview link comment
 
-# one run at a time per branch or pull request: a push to a pull request never cancels a deploy of main
+# One run at a time per pull request (by its number) or per branch, so a pull request never cancels a deploy of
+# main. Not github.ref alone: when a pull request is merged, its "closed" run (the preview's removal) has the ref
+# refs/heads/main, and it cancelled main's deploy that way (PR #59, Oct 25).
 concurrency:
-  group: pages-${{ github.ref }}
+  group: pages-${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || github.ref }}
   cancel-in-progress: true
 
 jobs:
