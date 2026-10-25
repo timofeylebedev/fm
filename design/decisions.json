@@ -2,7 +2,8 @@
   "$about": [
     "Design decisions that depart from a rule on purpose, so nobody 'fixes' them by accident and everyone can see them (and reconsider them). Read by build/audit.mjs: an exception with an 'audit' entry is not reported as a failure, but it is measured and printed under 'Kept as designed' on every run, with the value of that run.",
     "kind: exception = it fails a check (contrast, …) and is kept; decision = a deliberate choice the system's general rule does not make by itself.",
-    "audit.axe: the axe rule and the elements it may fail on (a regular expression on the target). audit.pixels: which texts drawn over a canvas this exception covers. The audit finds every text over a canvas by itself (axe cannot see a canvas) and measures it from the pixels behind it; one that fails and is not covered here is a failure."
+    "audit.axe: the axe rule and the elements it may fail on (a regular expression on the target). audit.pixels: which texts drawn over a canvas this exception covers. The audit finds every text over a canvas by itself (axe cannot see a canvas) and measures it from the pixels behind it; one that fails and is not covered here is a failure.",
+    "checks (since Oct 26, 2026): the measured checks of design/checks/ this decision covers: [{ rule, match (a regular expression on the item's place and text), band: [least, greatest] of its value (optional) }]. A covered item is «accepted»: shown with its value on every deploy, not a finding. When the value leaves the band, when nothing matches any more (the exception may not be needed), or after `until` (a date), the decision comes back to the report's «What needs you»."
   ],
   "decisions": [
     {
@@ -93,7 +94,13 @@
       "kind": "decision",
       "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck, corners included: 24px of the card's 240 (the table half that in), so the card keeps its shape at every screen size. Their deck starts below a 35rem column, their own step: the row needs that room",
       "decided": "2026-10-18; radius/m on 2026-10-18 (Tim); 16px, scaled with the card, on 2026-10-20 (Tim: smaller corners, always in proportion to the card); 24px on 2026-10-22 (Tim: 24 at most)",
-      "why": "their text stays readable at one size; a card is one object, so its corners belong to it, not to the screen"
+      "why": "their text stays readable at one size; a card is one object, so its corners belong to it, not to the screen",
+      "checks": [
+        {
+          "rule": "shape.radii",
+          "match": "idcard"
+        }
+      ]
     },
     {
       "id": "body-16",
@@ -159,7 +166,13 @@
       "kind": "decision",
       "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (7% under the mouse: --tint-strong); its links underlined 1px, 3px under the baseline, in ink 20% (Tim, Oct 19; Figma has 10%), ink 30% under the mouse, as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25; after «ОК» the text stays, «ОК» turns into a drawn checkmark, the card sets off 0.15 s before the drawing ends and goes down below the screen edge while fading (0.45 s, the 'leave' curve of motion.js, as the stack titles leave)",
       "decided": "Tim, 2026-10-19 — the Figma section 'cookies'; the exit (text stays, card goes down with an existing curve) on his request",
-      "why": "a small note in the corner that should look the same everywhere; 1.3 is the line height of all small text on the site"
+      "why": "a small note in the corner that should look the same everywhere; 1.3 is the line height of all small text on the site",
+      "checks": [
+        {
+          "rule": "shape.radii",
+          "match": "cookies"
+        }
+      ]
     },
     {
       "id": "consent-by-ok",

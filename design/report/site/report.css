@@ -351,3 +351,44 @@ input[type="range"] { accent-color: var(--accent); }
 .steps b { color: var(--fg); }
 .ex { font-family: "Golos", sans-serif; background: #fff; color: #000; padding: 1px 6px; border-radius: 4px; white-space: nowrap; display: inline-block; margin: 1px 0; }
 .ex .m { color: #884dff; font-weight: 600; }
+
+/* ── the checks (design/checks): rule cards, «What needs you», questions, history ── */
+.tabs .dot.fail { background: var(--bad); }
+.tabs .dot.warn { background: var(--warn); }
+.side__n { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); font-size: 11.5px; font-weight: 600; text-align: center; line-height: 18px; vertical-align: 1px; }
+.side__nav a { position: relative; }
+.checks__list, .needs { display: grid; gap: 10px; }
+.check, .need, .ask { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--line-2); border-radius: var(--r); padding: 14px 16px; min-width: 0; }
+.check.s-fail, .need.s-fail { border-left-color: var(--bad); }
+.check.s-warn, .need.s-warn { border-left-color: var(--warn); }
+.check.s-pass { border-left-color: var(--good); }
+.check.s-info, .need.s-info { border-left-color: var(--accent); }
+.ask { border-left-color: var(--warn); }
+.ask.re { border-left-color: var(--bad); }
+.check__top, .need__top, .ask__top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.check__top b, .need__top b { font-weight: 600; }
+.check__kind { font-size: 11.5px; color: var(--faint); border: 1px solid var(--line-2); border-radius: 999px; padding: 0 7px; }
+.check__v { font-variant-numeric: tabular-nums; color: var(--fg); font-weight: 600; }
+.check__v .was { color: var(--faint); font-weight: 400; text-decoration: line-through; margin-left: 4px; }
+.check__how, .need__why { margin: 6px 0 0; color: var(--muted); font-size: 13.5px; max-width: 110ch; }
+.check .tbl, .check details { margin-top: 10px; }
+.check details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+.check tr.acc td { color: var(--faint); }
+.scn { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.scn i { font-style: normal; color: var(--faint); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px; }
+.need__s { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+.need__s li { overflow-wrap: anywhere; }
+.ask__q { margin: 8px 0 0; font-size: 15px; max-width: 90ch; }
+.ask__do { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.btn-ans, .btn-ghost { font: 500 13px var(--font); border-radius: 999px; padding: 7px 14px; cursor: pointer; text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+.btn-ans { background: var(--surface-3); color: var(--fg); border: 1px solid var(--line-2); }
+.btn-ans:hover { background: #333; }
+.btn-ghost { background: none; color: var(--accent-2); border: 1px solid var(--line-2); }
+.ask__note { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; font-size: 12.5px; color: var(--faint); }
+.ask__note input { flex: 1 1 220px; min-width: 0; background: var(--bg); color: var(--fg); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 10px; font: 13px var(--font); }
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 8px; }
+.kinds div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.kinds span { color: var(--muted); font-size: 13px; }
+.toast { position: fixed; left: 50%; bottom: 20px; translate: -50% 20px; opacity: 0; pointer-events: none; background: var(--fg); color: var(--bg); font-weight: 500; font-size: 13.5px; padding: 10px 16px; border-radius: 999px; transition: opacity 0.2s, translate 0.2s; z-index: 80; max-width: calc(100vw - 32px); }
+.toast.on { opacity: 1; translate: -50% 0; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }

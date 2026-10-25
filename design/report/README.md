@@ -4,9 +4,15 @@ The review page of the whole system, as a small static site in `site/`: open `si
 from the clone (no server needed), or online at https://timofeylebedev.github.io/fm/report/ (every push to `main`
 publishes it with the site; a pull request's preview has it at `…/pr-preview/pr-<number>/report/`).
 
-A sidebar with three kinds of page:
+A sidebar with these pages:
 
-- **The system** — the system as it is now, in tabs: colour (tiles), type (each role on the ladder, a text drawn at its
+- **What needs you** (the first page) — from the design system's checks (`design/checks/`, measured on every deploy):
+  rules that fail, decisions whose measured value moved, questions for Tim (a look on a device, a choice) with answer
+  buttons that copy a line for a chat with Claude, warnings, and what fixed itself since the last deploy of main.
+- **History** — every deploy of main, measured: failures, the shares of the rules, the weight of a first visit.
+
+- **The system** — the system as it is now, in tabs, each with the checks of its areas at the top (icons & pictures,
+  components, behaviour and page health are tabs of the checks): colour (tiles), type (each role on the ladder, a text drawn at its
   size, a screen width and height slider from the range's least to its greatest), space, layout (every container query
   and page step), shadows, motion (curves you can play, durations), responsive (every measured size at every width and
   height, zoomable, each line named with its least and greatest value), blocks, grammar, decisions. Only the current
@@ -25,6 +31,10 @@ A sidebar with three kinds of page:
     picture, the map, the blocks, motion) come from the latest round in `data.json`.
   - `site/typeset.js` (`window.Typeset`): `build/typeset/core.js` and `lint.js` bundled for the browser (rolldown).
   - `site/fonts/`: the site's fonts, for the specimens.
+  - the checks: `design/checks/out/state.json` when they were just run (`npm run checks`), else the last deploy of
+    main's from the `report-data` branch (fetched by itself); the responsive picture and map come from the same record's
+    sweep. `site/state.json` and `site/history.json` are written for agents and not committed. In CI the job `checks`
+    of deploy.yml measures, then builds and publishes this page again.
 - `site/shots/`: the rounds' before/after pictures (JPEG, about 1000px wide); `r3-*` round 3's, `r5a-*` round 5's,
   `r6-*` round 6's, the rest round 4's.
 - `data.json`: `meta` (with `rounds`: which sections make each round's page, and `since`) and `sections` of typed blocks
