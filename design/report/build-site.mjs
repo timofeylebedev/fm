@@ -22,7 +22,7 @@ const ROOT = path.resolve(HERE, "../..");
 const SITE = path.join(HERE, "site");
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
 const git = (...a) => execFileSync("git", a, { cwd: ROOT, encoding: "utf8", maxBuffer: 64 << 20 });
-const atBase = (p) => { try { return git("show", `${SINCE}:${p}`); } catch { return null; } };
+const atBase = (p) => { if (typeof NO_BASE !== "undefined" && NO_BASE) return null; try { return git("show", `${SINCE}:${p}`); } catch { return null; } };
 // a shallow clone (GitHub's checkout) has no baseline commit: fetch that one commit, or nothing can be marked new
 const haveBase = () => { try { git("cat-file", "-e", `${SINCE}^{commit}`); return true; } catch { return false; } };
 
@@ -31,10 +31,25 @@ const args = process.argv.slice(2);
 const SINCE = args.includes("--since") ? args[args.indexOf("--since") + 1] : data.meta.since || "edeb7451a61f14972f8fda6ea73dc630701349e6";
 const SINCE_LABEL = data.meta.sinceLabel || "round 5 (Oct 23)";
 if (!haveBase()) { try { git("fetch", "--depth=1", "origin", SINCE); } catch {} }
-if (!haveBase()) { console.error(`build-site: commit ${SINCE} is not here and could not be fetched: nothing would be marked new`); process.exit(1); }
+const NO_BASE = !haveBase();
+if (NO_BASE) console.warn(`build-site: commit ${SINCE} is not here and could not be fetched: the page is built without "new" marks`);
 const sec = Object.fromEntries(data.sections.map((s) => [s.id, s]));
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// the system shows only what is now: old values and relative dates out of the measured texts
+const nowOnly = (html) => typeof html !== "string" ? html : html
+  .replace(/<span class='was'>[^<]*<\/span>\s*/g, "")
+  .replace(/\s*\((?:was|before:?) [^()]*\)/g, "")                     // «(was 0.8s / 18%)»
+  .replace(/,\s*was [\d.]+(?:px)?(?=[,;.)]|$)/g, "")                    // «31 at 390, was 36»
+  .replace(/\s*\((?:today|since today)\)/g, "")
+  .replace(/;\s*[^;()]*\bbefore\)/g, ")")                               // «(…; Pragmatica 700, 24 → 32 before)»
+  .replace(/\s+since today(?=[.,;)])/g, "")
+  .replace(/\btoday's\b/g, "the")
+  .replace(/\b[Ss]ince today,?\s*/g, "");
+const cleanAll = (o) => { if (Array.isArray(o)) return o.map(cleanAll); if (o && typeof o === "object") { for (const k of Object.keys(o)) if (k !== "sweep") o[k] = cleanAll(o[k]); return o; } return nowOnly(o); };
+
+// with no baseline nothing is marked (rather than everything)
+const unmark = (o) => { if (NO_BASE && o) { o.isNew = false; o.was = null; o.changed = false; } return o; };
 
 // ── the rounds: each a page of its own ──────────────────────────────────────────────────────────────────────────────
 const rounds = (data.meta.rounds || []).map((r) => ({ ...r, sections: r.sections.map((id) => clone(sec[id])).filter(Boolean) }));
@@ -178,7 +193,7 @@ const containers = stepsNow.map((s) => {
   const was = isNew ? stepsThen.find((t) => t.file === s.file && t.container === s.container && t.first === s.first &&
     !taken.has(t) && !stepsNow.some((n) => n.cond === t.cond && n.container === t.container)) : null;
   if (was) taken.add(was);
-  return { ...s, value: v, px: /rem|em/.test(v) ? parseFloat(v) * 16 : parseFloat(v) || null, step: SHARED[v] || "own",
+  return { ...s, value: v, px: /rem$/.test(v) ? parseFloat(v) * 16 : /px$/.test(v) ? parseFloat(v) : null, em: /\dem$/.test(v), step: SHARED[v] || "own",
     isNew, was: was ? was.cond : null };
 });
 // the page's own steps (media.css), with the comment after each
@@ -201,22 +216,21 @@ const prevData = (() => { try { return JSON.parse(read("design/report/measure/pu
 const prevMotion = prevData.sections.find((s) => s.id === "motion") || { blocks: [] };
 const motion = clone(sec.motion);
 const blockOf = (s, type) => s.blocks.find((b) => b.type === type);
-const prevCurves = blockOf(prevMotion, "curves")?.items || [], prevDur = blockOf(prevMotion, "durations")?.rows || [];
+const prevCurves = blockOf(prevMotion, "curves")?.items || [];
 const curvePart = (c) => ({ bez: c.bez, path: c.path, linear: c.linear, wave: c.wave, fn: c.fn });
 blockOf(motion, "curves").items.forEach((c) => {
   const was = prevCurves.find((p) => p.name === c.name);
   c.isNew = !was; c.changed = !!was && !same(curvePart(was), curvePart(c));
 });
-blockOf(motion, "durations").rows.forEach((r) => {
-  const was = prevDur.find((p) => p.name === r.name);
-  // durations were renamed between rounds: only a match by name that changed is marked
-  r.changed = !!was && (was.s !== r.s || was.label !== r.label);
-});
+// durations: their names and notes were rewritten between rounds, so no text comparison can tell a real change from a
+// new wording; the round lists what changed (meta.motionChanged: name → what)
+const MOTION_CHANGED = data.meta.motionChanged || {};
+blockOf(motion, "durations").rows.forEach((r) => { if (MOTION_CHANGED[r.name]) { r.changed = true; r.what = MOTION_CHANGED[r.name]; } });
 motion.blocks = motion.blocks.filter((b) => b.type !== "cards");
-const motionCards = blockOf(sec.motion, "cards");
+cleanAll(motion.blocks);
+const motionCards = cleanAll(clone(blockOf(sec.motion, "cards")));
 
 // ── measured: the whole responsive picture and the map, now only ───────────────────────────────────────────────────
-const nowOnly = (html) => typeof html === "string" ? html.replace(/<span class='was'>[^<]*<\/span>\s*/g, "") : html;
 const picture = clone(blockOf(sec.picture, "picture"));
 delete picture.sweep.before;
 const map = clone(blockOf(sec.map, "map"));
@@ -232,11 +246,8 @@ const SUBS = {
 const blocks = ["hero", "stack", "tools", "tiles", "footer", "navbar"].map((id) => {
   const s = clone(sec[id]);
   s.sub = SUBS[id];
-  s.blocks.forEach((b) => {
-    if (b.rows) b.rows = b.rows.map((row) => Array.isArray(row) ? row.map(nowOnly) : row);
-    if (b.items) b.items.forEach((it) => { if (it.html) it.html = it.html.replace(/\s*\((today|since today)\)/g, ""); });
-    if (b.title === "At real screen sizes") b.sub = (b.sub || "").replace(/\s*Old values struck through\.?/i, "");
-  });
+  cleanAll(s.blocks);
+  s.blocks.forEach((b) => { if (b.title === "At real screen sizes") b.sub = (b.sub || "").replace(/\s*Old values struck through\.?/i, ""); });
   return s;
 });
 
@@ -253,17 +264,20 @@ for (const ln of readme.split("\n")) {
 }
 const typesetDecision = decisions.find((d) => d.id === "typeset") || null;
 
+[...colour.flatMap((g) => g.tokens), ...typeRoles, ...spaceRoles, ...containers, ...pageSteps, ...shadows, ...shadows.flatMap((x) => x.uses), ...decisions, ...blockOf(motion, "curves").items].forEach(unmark);
+
 // the colours the stylesheets name (the shadow tiles are drawn with them)
 const cssVars = { face: "var(--idcard-face-1)" };
 for (const f of ["src/styles/base/tokens.gen.css", "src/styles/base/tokens.css"])
   for (const m of read(f).matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\))\s*;/g)) cssVars[m[1]] ??= m[2];
 
 // ── write ───────────────────────────────────────────────────────────────────────────────────────────────────────────
-const head = git("rev-parse", "--short", "HEAD").trim();
+const head = (process.env.FM_HEAD_SHA || git("rev-parse", "HEAD").trim()).slice(0, 7);
+const built = git("log", "-1", "--format=%cs").trim();
 // the branch it was built from (GitHub's checkout of a pull request has no branch of its own)
 const ref = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || git("rev-parse", "--abbrev-ref", "HEAD").trim();
 const REPORT = {
-  meta: { ...data.meta, built: new Date().toISOString().slice(0, 10), head, ref, since: SINCE, sinceLabel: SINCE_LABEL },
+  meta: { ...data.meta, built, head, ref, noBase: NO_BASE, since: SINCE, sinceLabel: SINCE_LABEL },
   rounds,
   system: {
     colour, colourWhere: clone(sec.system.blocks.find((b) => b.title === "Colour")),
@@ -271,7 +285,7 @@ const REPORT = {
     type: typeRoles, space: spaceRoles, removed: { type: removedRoles("type"), space: removedRoles("space") },
     heightLine: clone(sec.system.blocks.find((b) => b.type === "grid")?.blocks?.find((b) => b.title === "The screen's size")),
     containers, pageSteps, map, shadows, cssVars, motion, motionCards, picture, blocks,
-    grammar: clone(sec.grammar), decisions,
+    grammar: cleanAll(clone(sec.grammar)), decisions,
   },
   typeset: { rules: rulesBy, decision: typesetDecision },
 };

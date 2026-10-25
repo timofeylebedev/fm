@@ -79,8 +79,9 @@ B.shots = (b) => {
 };
 const lb = $("#lb");
 const lbShow = (i) => { LB.at = (i + LB.items.length) % LB.items.length; const s = LB.items[LB.at]; $("#lb-img").src = s.src; $("#lb-img").alt = s.title; $("#lb-cap").innerHTML = `<b>${esc(s.title)}</b>${s.text || ""}`; };
-const lbOpen = (i, from) => { LB.from = from; lbShow(i); lb.hidden = false; document.body.style.overflow = "hidden"; $("#lb-close").focus(); };
-const lbClose = () => { lb.hidden = true; document.body.style.overflow = ""; if (LB.from) LB.from.focus(); };
+const behind = (on) => ["#main", "#side", ".mbar", ".skip"].forEach((q) => { const n = $(q); if (n) n.inert = on; });
+const lbOpen = (i, from) => { LB.from = from; lbShow(i); lb.hidden = false; behind(true); document.body.style.overflow = "hidden"; $("#lb-close").focus(); };
+const lbClose = (quiet) => { lb.hidden = true; behind(false); syncSide(); document.body.style.overflow = ""; if (LB.from && !quiet) LB.from.focus(); };
 $("#lb-close").addEventListener("click", lbClose);
 $("#lb-prev").addEventListener("click", () => lbShow(LB.at - 1));
 $("#lb-next").addEventListener("click", () => lbShow(LB.at + 1));
@@ -200,7 +201,7 @@ B.durations = (b) => {
   let last = "";
   rows.forEach((r, i) => {
     const y = 6 + i * rowH, c = r.kind === "loop" ? css("--warn") : r.kind === "scroll" ? css("--faint") : css("--accent");
-    s += `<text x="0" y="${y + 14}" fill="${r.group !== last ? css("--fg") : css("--muted")}" font-size="12">${esc(r.name)}${r.changed ? ` <tspan fill="${css("--new")}" font-weight="600">· changed</tspan>` : ""}</text>`; last = r.group;
+    s += `<text x="0" y="${y + 14}" fill="${r.group !== last ? css("--fg") : css("--muted")}" font-size="12">${esc(r.name)}${r.changed ? ` <tspan fill="${css("--new")}" font-weight="600">· changed<title>${esc(r.what || "changed " + SINCE)}</title></tspan>` : ""}</text>`; last = r.group;
     s += `<rect x="${X(0)}" y="${y + 3}" width="${Math.max(2, X(r.s) - X(0))}" height="14" rx="3" fill="${c}"><title>${esc(r.name)}: ${r.s}s</title></rect>`;
     if (r.stagger) s += `<rect x="${X(r.s)}" y="${y + 3}" width="${X(r.s + 4 * r.stagger) - X(r.s)}" height="14" rx="3" fill="${c}" opacity="0.35"/>`;
     if (r.s > max) s += `<text x="${X(max) - 8}" y="${y + 14}" fill="#1a1405" font-size="11" font-weight="600" text-anchor="end">${esc(r.label || r.s + "s")}</text>`;
@@ -279,10 +280,11 @@ function zchart(o) {
   const series = o.series.map((s) => { const ys = s.pts.map((p) => p[1]); return { ...s, mn: Math.min(...ys), mx: Math.max(...ys) }; });
   const allX = series.flatMap((s) => s.pts.map((p) => p[0]));
   const fx0 = Math.min(...allX), fx1 = Math.max(...allX);
-  const ty = (y) => st.log ? Math.log2(Math.max(y, 0.5)) : y;
+  let logFloor = 1;                                                      // a value ≤ 0 lies on the floor of a log scale
+  const ty = (y) => st.log ? Math.log2(Math.max(y, logFloor)) : y;
   const yExt = () => {
     const vis = series.filter((s) => !st.off.has(s.key)), ys = (vis.length ? vis : series).flatMap((s) => s.pts.map((p) => p[1]));
-    if (st.log) { const pos = ys.filter((v) => v > 0); return [Math.log2(2 ** Math.floor(Math.log2(Math.max(1, Math.min(...pos))))), Math.log2(Math.max(...ys) * 1.12)]; }
+    if (st.log) { const pos = ys.filter((v) => v > 0); logFloor = 2 ** Math.floor(Math.log2(Math.max(1, Math.min(...pos)))); return [Math.log2(logFloor), Math.log2(Math.max(...ys) * 1.12)]; }
     return [0, Math.max(...ys) * 1.06 || 1];
   };
   let fy = yExt();
@@ -302,7 +304,7 @@ function zchart(o) {
   };
   function draw() {
     const W = Math.max(320, plot.clientWidth || 800);
-    const labW = W < 640 ? 130 : 230, L = 46, Rt = W - labW, T = 12;
+    const labW = W < 640 ? Math.round(Math.min(190, W * 0.46)) : 230, L = 46, Rt = W - labW, T = 12;
     const vis = series.filter((s) => !st.off.has(s.key));
     const H = Math.max(o.height || 460, Math.min(1400, vis.length * 14 + 60));
     const Bt = H - 30;
@@ -406,6 +408,11 @@ function zchart(o) {
   svg.addEventListener("dblclick", () => { st.k = 1; st.cu = st.cv = 0.5; draw(); });
   const logIn = $(".log", root);
   if (logIn) logIn.addEventListener("change", () => { st.log = logIn.checked; fy = yExt(); st.k = 1; st.cu = st.cv = 0.5; save(); draw(); });
+  // Safari on a Mac sends a trackpad pinch as gesture events, not as a wheel with Ctrl
+  let g0 = 1;
+  svg.addEventListener("gesturestart", (e) => { e.preventDefault(); g0 = st.k; });
+  svg.addEventListener("gesturechange", (e) => { e.preventDefault(); const [px, py] = local(e); zoomAt(g0 * e.scale, px, py); });
+  svg.addEventListener("gestureend", (e) => e.preventDefault());
   svg.addEventListener("wheel", (e) => {
     if (!(e.ctrlKey || e.metaKey)) return;                             // a plain scroll scrolls the page
     e.preventDefault();
@@ -458,7 +465,8 @@ function zchart(o) {
   drawLegend();
   root._draw = draw;
   root._set = (patch) => { Object.assign(o, patch); if (patch.series) { /* not used */ } draw(); };
-  new ResizeObserver(() => draw()).observe(plot);
+  const ro = new ResizeObserver(() => draw()); ro.observe(plot);
+  root._dispose = () => ro.disconnect(); onLeave(root._dispose);
   requestAnimationFrame(draw);
   return root;
 }
@@ -484,10 +492,11 @@ const screenBar = (onChange) => {
   bar.innerHTML = `<label class="slider"><span>Screen width</span><input type="range" min="${RG.from}" max="${RG.to}" step="1" value="${screen.w}" data-k="w"><output></output></label>
     <label class="slider"><span>Screen height</span><input type="range" min="${RG.height.from}" max="${RG.height.to}" step="1" value="${screen.h}" data-k="h"><output></output></label>
     <div class="sum"></div>`;
+  const slope = (RG.to - RG.from) / (RG.height.to - RG.height.from), icpt = RG.from - slope * RG.height.from;
   const upd = () => {
     $$("input", bar).forEach((i) => { i.nextElementSibling.textContent = i.value + "px"; });
     const vp = vpOf(screen.w, screen.h);
-    $(".sum", bar).innerHTML = `This screen counts as <b>${r1(vp)}</b> (${vp < screen.w ? "its height holds it back: " : ""}size = min(width, 2 × height − 400)). The range runs from ${RG.from} to ${RG.to}; ${RG.height.from} tall counts as ${RG.from}, ${RG.height.to} tall as ${RG.to}.`;
+    $(".sum", bar).innerHTML = `This screen counts as <b>${r1(vp)}</b> (${vp < screen.w ? "its height holds it back: " : ""}size = min(width, ${slope} × height ${icpt < 0 ? "−" : "+"} ${Math.abs(icpt)})). The range runs from ${RG.from} to ${RG.to}; ${RG.height.from} tall counts as ${RG.from}, ${RG.height.to} tall as ${RG.to}.`;
   };
   bar.addEventListener("input", (e) => { const i = e.target; if (!i.dataset.k) return; screen[i.dataset.k] = +i.value; store.set(i.dataset.k, +i.value); upd(); onChange(); });
   upd();
@@ -511,7 +520,7 @@ function ladderRows(roles, { min = 0, max, at }) {
       const y = top + i * rowH + 12, [a, b] = r.px, v = at(r), c = PAL[i % PAL.length];
       s += `<text x="0" y="${y + 4}" fill="${css("--muted")}" font-size="12">${esc(r.name)}</text>`;
       s += `<line x1="${X(Math.min(a, b))}" x2="${X(Math.max(a, b))}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="4" stroke-linecap="round" opacity="0.45"/>`;
-      [a, b].forEach((e) => { s += `<circle cx="${X(e)}" cy="${y}" r="4" fill="${css("--bg")}" stroke="${c}" stroke-width="2"><title>${esc(r.name)}: ${e} ${e === a ? "at 320" : "at 1440"}${LADDER.includes(e) ? " (on the ladder)" : ""}</title></circle>`; });
+      [a, b].forEach((e) => { s += `<circle cx="${X(e)}" cy="${y}" r="4" fill="${css("--bg")}" stroke="${c}" stroke-width="2"><title>${esc(r.name)}: ${e} ${a === b ? "at every width" : e === a ? "at " + RG.from : "at " + RG.to}${LADDER.includes(e) ? " (on the ladder)" : ""}</title></circle>`; });
       s += `<circle cx="${X(v)}" cy="${y}" r="5.5" fill="${c}"><title>${esc(r.name)}: ${r1(v)} on this screen</title></circle>`;
       if (b > max || a > max) s += `<text x="${W - rr}" y="${y + 4}" fill="${css("--faint")}" font-size="10.5" text-anchor="end">→ ${Math.max(a, b)}</text>`;
     });
@@ -615,7 +624,7 @@ function typeTab(panel) {
     });
     drawRel();
     if (!chart) return;
-    if (screen.h !== chartH) { const n = makeChart(); chart.replaceWith(n); chart = n; } else chart._set({ marker: screen.w });
+    if (screen.h !== chartH) { const n = makeChart(); chart._dispose?.(); chart.replaceWith(n); chart = n; } else chart._set({ marker: screen.w });
   };
   panel.appendChild(screenBar(() => update()));
   const lb = el("div", "block"); lb.innerHTML = `<h3>On the ladder</h3><p class="sub">Steps of 2 up to 24, of 4 up to 64, of 8 up to 128. Each role runs from its size at 320 to its size at 1440 (both on the ladder); the filled dot is the size on this screen.</p>`;
@@ -694,7 +703,7 @@ function layoutTab(panel) {
   const t = el("div", "block");
   t.innerHTML = `<h3>Container steps</h3><p class="sub">Every <code>@container</code> query in the stylesheets. Shared steps are the column's S 22rem, M 43rem, L 58rem; any other is an own step (CLAUDE.md lists them).</p>`;
   t.appendChild(B.table({ stack: true, columns: [{ label: "Container" }, { label: "When" }, { label: "Step" }, { label: "What changes", muted: true }, { label: "Where", muted: true }],
-    rows: S.containers.map((c) => [`<code>${esc(c.container)}</code>`, `<code>${esc(c.cond)}</code>${c.px ? ` <span class="note">${r1(c.px)}px</span>` : ""} ${newPill(c, c.was ? `new ${SINCE}: was ${c.was}` : "")}${c.was ? ` <span class="was">was ${esc(c.was)}</span>` : ""}`,
+    rows: S.containers.map((c) => [`<code>${esc(c.container)}</code>`, `<code>${esc(c.cond)}</code>${c.px ? ` <span class="note">${r1(c.px)}px</span>` : c.em ? ` <span class="note">em of its own text</span>` : ""} ${newPill(c, c.was ? `new ${SINCE}: was ${c.was}` : "")}${c.was ? ` <span class="was">was ${esc(c.was)}</span>` : ""}`,
       c.step === "own" ? '<span class="pill q">own</span>' : `<span class="pill x">${c.step}</span>`, c.first ? `<code>${esc(c.first)}</code>` : "—", `${esc(c.file)}:${c.line}`]) }));
   panel.appendChild(t);
   const m = el("div", "block");
@@ -707,7 +716,7 @@ function layoutTab(panel) {
 }
 
 function shadowsTab(panel) {
-  panelHead(panel, "Shadows", "Every shadow in the stylesheets, drawn with its own value on the ground it sits on, with the places that use it. There are no shadow tokens yet (round 6, G4: --shadow-float, --shadow-object, --shadow-chip proposed).");
+  panelHead(panel, "Shadows", "Every shadow in the stylesheets, drawn with its own value on the ground it sits on, with the places that use it. There are no shadow tokens yet (round 6, G4: --shadow-float, --shadow-object, --shadow-chip proposed). Not listed: the ID card\'s shadow in the air, which scripts/motion.js derives from the object shadow while the card falls (M.DROP).");
   const vars = Object.entries(S.cssVars || {}).map(([k, v]) => `--${k}:${v}`).join(";");
   const grid = el("div", "shadows"); grid.setAttribute("style", vars);
   S.shadows.forEach((s) => {
@@ -722,7 +731,7 @@ function shadowsTab(panel) {
 }
 
 function motionTab(panel) {
-  panelHead(panel, "Motion", "The curves (time across, progress up; press or hover one to see it move) and every duration on one scale, from the code (round 6's reading of scripts/motion.js and the stylesheets). Curves and durations that differ from round 5 are marked.");
+  panelHead(panel, "Motion", "The curves (time across, progress up; press or hover one to see it move) and every duration on one scale, from the code (round 6's reading of scripts/motion.js and the stylesheets). Curves are compared with round 5\'s reading; the durations marked changed are the ones round 6 found changed.");
   S.motion.blocks.forEach((b) => panel.appendChild(render(b)));
   if (S.motionCards) panel.appendChild(render(S.motionCards));
 }
@@ -810,7 +819,10 @@ function typesetPage() {
       let j = i; while (j < text.length && /\s/.test(text[j]) === sp) j++;
       if (sp) {
         const e = byAt.get(i), h = holds.get(i);
-        out += e && e.to === "\u00A0" ? `<span class="hold" data-key="${pi}:${i}" title="${esc(h ? h.rule + " · " + strengthName(h.strength) : e.rule)}">\u00A0</span>` : /\u00A0/.test(text.slice(i, j)) ? "\u00A0" : " ";
+        const typed = new RegExp("\\u00A0").test(text.slice(i, j));
+        if (e && e.to === " ") out += " ";                                 // a no-break space the typesetter lets go (next to a link)
+        else if ((e && e.to === "\u00A0") || (useTs && typed && h)) out += `<span class="hold" data-key="${pi}:${i}" title="${esc(h ? h.rule + " · " + strengthName(h.strength) : e.rule)}">\u00A0</span>`;
+        else out += typed ? "\u00A0" : " ";
       } else {
         let w = "";
         for (let k = i; k < j; k++) {
@@ -881,7 +893,7 @@ function typesetPage() {
         if (h.kind === "join") rows.push([`<span class="ex">${esc(L ? L.s : "")}${esc(d.toks[h.k].s)}<span class="m">⁀</span>${esc(R ? R.s : "")}</span>`, `<code>${esc(h.rule)}</code>`, strengthName(h.strength), "word joiner"]);
         else rows.push([`<span class="ex" data-key="${pi}:${d.toks[h.k].i}">${esc(L ? L.s : "")}<span class="m">⍽</span>${esc(R ? R.s : "")}</span>`, `<code>${esc(h.rule)}</code>`, strengthName(h.strength), "no-break space"]);
       });
-      TS.edits(p, opts).filter((e) => e.wbr || e.rule === "phone").forEach((e) => rows.push([`<span class="ex">${esc(p.slice(Math.max(0, e.i - 8), e.i))}<span class="m">${e.wbr ? "¦" : "⍽"}</span>${esc(p.slice(e.j, e.j + 8))}</span>`, `<code>${esc(e.rule)}</code>`, e.wbr ? "—" : "must", e.wbr ? "a break hint in a link" : e.to === TS.WJ ? "word joiner" : "no-break space"]));
+      TS.edits(p, opts).filter((e) => e.wbr || e.rule === "phone").forEach((e) => rows.push([`<span class="ex">${esc(p.slice(Math.max(0, e.i - 8), e.i))}<span class="m">${e.wbr ? "¦" : e.to === "\u2060" ? "⁀" : "⍽"}</span>${esc(p.slice(e.j, e.j + 8))}</span>`, `<code>${esc(e.rule)}</code>`, e.wbr ? "—" : "must", e.wbr ? "a break hint in a link" : e.to === TS.WJ ? "word joiner" : "no-break space"]));
     });
     holdsBox.innerHTML = "";
     holdsBox.appendChild(rows.length ? B.table({ stack: true, columns: [{ label: "Where" }, { label: "Rule" }, { label: "Strength" }, { label: "Written as", muted: true }], rows }) : el("p", "note", "No holds in this text."));
@@ -897,7 +909,8 @@ function typesetPage() {
   holdsBox.addEventListener("pointerleave", () => $$(".hold.hi", set).forEach((h) => h.classList.remove("hi")));
   if (document.fonts) document.fonts.ready.then(draw);
   draw();
-  addEventListener("resize", () => requestAnimationFrame(draw));
+  const onResize = () => requestAnimationFrame(draw);
+  addEventListener("resize", onResize); onLeave(() => removeEventListener("resize", onResize));
 
   // ── how it works ──
   const how = el("section", "sec"); how.id = "how";
@@ -961,60 +974,81 @@ function roundPage(n) {
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
    The sidebar and the routes
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
-const nav = $("#side-nav");
+const nav = $("#side-nav"), main = $("#main");
 nav.innerHTML = `<a href="#system/colour" data-page="system">The system<small>as it is now, in tabs</small></a>
   <a href="#typesetter" data-page="typesetter">The typesetter<small>how lines may break</small></a>
   <div class="side__group" id="rounds-h">Rounds</div>
   ${D.rounds.map((r) => `<a href="#round-${r.n}" data-page="round-${r.n}">Round ${r.n} · ${esc(r.date)}<small>${esc(r.title.replace(/^Round \d+:\s*/, ""))}</small></a>`).join("")}`;
 $("#side-foot").innerHTML = `Built ${esc(D.meta.built)} from ${esc(D.meta.ref || "main")} at <a href="https://github.com/timofeylebedev/fm/commit/${esc(D.meta.head)}">${esc(D.meta.head)}</a>.<br>Source: <a href="https://github.com/timofeylebedev/fm/tree/main/design/report">design/report</a>`;
 const side = $("#side"), scrim = $("#scrim"), menuBtn = $("#menu-open");
+const narrow = matchMedia("(width < 900px)");
 const openMenu = (on) => {
   side.classList.toggle("open", on); scrim.hidden = !on; menuBtn.setAttribute("aria-expanded", on);
+  syncSide();
   if (on) $("a[aria-current]", nav)?.focus(); else if (document.activeElement && side.contains(document.activeElement)) menuBtn.focus();
 };
+function syncSide() {
+  const open = side.classList.contains("open");
+  side.inert = narrow.matches && !open;
+  main.inert = narrow.matches && open; $(".mbar").inert = narrow.matches && open; $(".skip").inert = narrow.matches && open;
+}
+narrow.addEventListener("change", () => { if (!narrow.matches) openMenu(false); syncSide(); });
+syncSide();
 menuBtn.addEventListener("click", () => openMenu(true));
 $("#menu-close").addEventListener("click", () => openMenu(false));
 scrim.addEventListener("click", () => openMenu(false));
 addEventListener("keydown", (e) => { if (e.key === "Escape" && side.classList.contains("open")) openMenu(false); });
 nav.addEventListener("click", (e) => { if (e.target.closest("a")) openMenu(false); });
 
-const main = $("#main");
 let current = "";
-function go(hash, opt = {}) { if (location.hash !== hash) { history.pushState(null, "", hash); } route(opt); }
+function go(hash, opt = {}) { if (location.hash !== hash) history.pushState(null, "", hash); route(opt); }
+// what a page set up outside itself (listeners on the window, observers) is undone when the next page is built
+const LEAVE = [];
+const onLeave = (fn) => LEAVE.push(fn);
 function route(opt = {}) {
   const prevItems = LB.items; LB.items = [];               // the pictures of the page about to be built
+  if (!lb.hidden) lbClose(true);
   const h = decodeURIComponent(location.hash.slice(1)) || "system/" + store.get("tab", "colour");
-  let pageKey, node, title, anchor = null;
-  if (h.startsWith("system")) {
-    const tab = h.split("/")[1] && TABS.some(([k]) => k === h.split("/")[1]) ? h.split("/")[1] : store.get("tab", "colour");
+  let pageKey, title, anchor = null, shown;
+  const m = h.match(/^round-(\d+)(?:\/(.+))?$/);
+  if (h === "system" || h.startsWith("system/")) {
+    const want = h.split("/")[1], tab = TABS.some(([k]) => k === want) ? want : store.get("tab", "colour");
     store.set("tab", tab);
-    pageKey = "system"; title = "The system · " + TABS.find(([k]) => k === tab)[1];
+    pageKey = "system"; title = "The system · " + TABS.find(([k]) => k === tab)[1]; shown = "system/" + tab;
     const keep = opt.keepScroll && current === "system" ? scrollY : null;
     swap(systemPage(tab), title);
     // a new tab starts at its top, under the tabs, without the page jumping up to its head
     if (keep != null) { const bar = $(".tabs", main), mb = $(".mbar"); scrollTo(0, Math.min(keep, bar.offsetTop - (mb.offsetHeight || 0))); }
     else scrollTo(0, 0);
+    const sel = $("#tab-" + tab), bar = $(".tabs", main);
+    if (bar) document.documentElement.style.setProperty("--tabs-h", bar.offsetHeight + "px");   // the screen bar sits right under the tabs                // the chosen tab in view in its strip
+    if (sel && bar) bar.scrollLeft = Math.max(0, sel.offsetLeft - (bar.clientWidth - sel.offsetWidth) / 2);
     if (opt.focusTab) $("#tab-" + opt.focusTab)?.focus();
   } else if (h === "typesetter") {
-    pageKey = "typesetter"; title = "The typesetter"; swap(typesetPage(), title); scrollTo(0, 0);
+    pageKey = "typesetter"; title = "The typesetter"; shown = h; swap(typesetPage(), title); scrollTo(0, 0);
   } else {
-    const m = h.match(/^round-(\d+)(?:\/(.+))?$/);
-    const n = m ? m[1] : D.rounds[0].n; anchor = m && m[2];
-    pageKey = "round-" + n; title = "Round " + n;
-    if (current !== pageKey) { swap(roundPage(n), "Round " + n); scrollTo(0, 0); } else LB.items = prevItems;
-    if (anchor) { const t = document.getElementById(`r${n}-${anchor}`); if (t) t.scrollIntoView({ behavior: opt.smooth && !calm() ? "smooth" : "auto" }); }
+    const r = (m && D.rounds.find((x) => String(x.n) === m[1])) || D.rounds[0];
+    anchor = m && String(r.n) === m[1] ? m[2] : null;
+    pageKey = "round-" + r.n; title = "Round " + r.n; shown = pageKey + (anchor ? "/" + anchor : "");
+    if (current !== pageKey) { swap(roundPage(r.n), title); scrollTo(0, 0); } else LB.items = prevItems;
+    if (anchor) { const t = document.getElementById(`r${r.n}-${anchor}`); if (t) t.scrollIntoView({ behavior: opt.smooth && !calm() ? "smooth" : "auto" }); }
   }
+  // an address that names nothing (an old tab, a round that is not there) is put right
+  if (location.hash && location.hash.slice(1) !== shown) history.replaceState(null, "", "#" + shown);
   current = pageKey;
   $$("a", nav).forEach((a) => { if (a.dataset.page === pageKey) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   $("#mbar-title").textContent = title || "";
 }
 function swap(node, title) {
   hideTip();
+  LEAVE.splice(0).forEach((fn) => { try { fn(); } catch (e) {} });
   main.innerHTML = "";
   main.appendChild(node);
   document.title = (title ? title + " · " : "") + "Flow Medium";
 }
-addEventListener("popstate", () => route({ smooth: true }));
+// back and forward fire both popstate and hashchange for a hash: one is enough
 addEventListener("hashchange", () => route({ smooth: true }));
+// the skip link goes to the page itself, not to an address
+$(".skip").addEventListener("click", (e) => { e.preventDefault(); main.focus(); });
 route();
 })();
