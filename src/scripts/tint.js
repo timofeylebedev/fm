@@ -13,6 +13,7 @@
    Returns { refresh, stop }: stop() lets the element go (its listeners are removed, its colour stays as it was). */
 import { ScrollTrigger } from "./gsap.js";
 import { onScroll, offScroll, watchSize, paper } from "./scroller.js";   // the window, or the page's box (Safari on a Mac)
+import { whenLoaded } from "./loaded.js";
 
 const SECTIONS = "main > section, [data-page] > footer";
 
@@ -64,7 +65,7 @@ export function followTint(el, fallbackAlpha = 0.7, onColour = null) {
   refresh();
   onScroll(later);
   addEventListener("resize", refresh);
-  addEventListener("load", refresh);
+  whenLoaded(refresh);
   const ro = new ResizeObserver(later);               // the page grew or shrank (pictures, the card stack, a pinned block)
   watchSize(ro);
   ScrollTrigger.addEventListener("refresh", later);   // pinned blocks were measured and placed again

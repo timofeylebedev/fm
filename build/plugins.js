@@ -85,6 +85,43 @@ export function minifyPages() {
   };
 }
 
+// The home page's stylesheet, put inside the page (<style>) instead of a file of its own: a phone on a slow connection
+// can then draw the page as soon as the HTML has come, without one more round trip to the server first (PageSpeed,
+// Oct 25: "render-blocking request", ≈ 0.45 s on slow 4G). The stylesheet is 11 KB compressed, so the page grows from
+// ≈ 14 to ≈ 25 KB. Its addresses (fonts, pictures) are written relative to the stylesheet's folder (assets/), so they
+// are rewritten for the page's own folder. Runs after minifyPages: the CSS is already minified by Lightning CSS, and the
+// HTML minifier's own CSS minifier does not know all of it (container queries, nesting fallbacks).
+export function inlineCss(pages = ["index.html"]) {
+  return {
+    name: "fm-inline-css",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(html, ctx) {
+        if (!ctx.bundle || !pages.includes(ctx.filename.split("/").pop())) return html;
+        return html.replace(/<link rel="stylesheet"(?: crossorigin)? href="\.\/(assets\/[^"]+\.css)">/g, (tag, file) => {
+          const asset = ctx.bundle[file];
+          if (!asset || asset.type !== "asset") return tag;
+          const dir = file.slice(0, file.lastIndexOf("/") + 1);       // "assets/"
+          const css = String(asset.source)
+            .replace(/url\((["']?)\.\/([^"')]+)\1\)/g, (m, q, path) => "url(" + q + "./" + dir + path + q + ")")
+            // image-set() may also name its files as bare strings: image-set("./a.avif" 1x type("image/avif"), …)
+            .replace(/(image-set\()([^;}]*)/g, (m, open, list) => open + list.replace(/(["'])\.\/(?!assets\/)/g, "$1./" + dir))
+            .replace(/<\/style/gi, "<\\/style");
+          // every file the stylesheet names must now be a file of the build, and no relative address may be left that
+          // was not rewritten: it would point next to the page, and its picture or font would quietly not load
+          const left = css.match(/(?:url\(\s*["']?|["'])\.\/(?!assets\/)[^"')\s]*/);
+          if (left) throw new Error(`fm-inline-css: ${file} has an address not rewritten for the page: ${left[0]}`);
+          for (const [, ref] of css.matchAll(/\.\/(assets\/[^"')\s,]+)/g))
+            if (!ctx.bundle[ref]) throw new Error(`fm-inline-css: ${file} names ./${ref}, which is not in the build`);
+          delete ctx.bundle[file];                                   // nothing else uses it
+          return "<style>" + css + "</style>";
+        });
+      }
+    }
+  };
+}
+
 // A Content Security Policy for every page, written into it when the site is built: the page may run only its own
 // scripts (and the inline ones it was built with: their hashes are worked out here), and frame only the booking page of
 // Planerka (scripts/book.js; no script of Planerka runs on the page itself). Whatever else tried to run (an injected
@@ -93,6 +130,7 @@ export function minifyPages() {
 // (frame-ancestors cannot be set from the page itself: the server sends it, see deploy/.)
 const POLICY = {
   "default-src": ["'self'"],
+  // (+ 'unsafe-inline' on pages with inline scripts, see csp() below)
   "script-src": ["'self'"],
   "style-src": ["'self'", "'unsafe-inline'"],          // the drawings and GSAP set styles on the elements they move
   "img-src": ["'self'", "data:", "blob:"],
@@ -112,7 +150,10 @@ export function csp() {
       handler(html) {
         const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
           .map(([, code]) => "'sha256-" + createHash("sha256").update(code).digest("base64") + "'");
-        const policy = Object.entries(POLICY).map(([k, v]) => k + " " + (k === "script-src" ? v.concat(hashes) : v).join(" ")).join("; ");
+        // 'unsafe-inline' is for old browsers only: a browser that knows script hashes ignores it once a hash is listed
+        // (PageSpeed's CSP check asks for it, Oct 25). So it is added only where there is a hash: on a page without one it
+        // would really allow inline scripts (independent review, Oct 25).
+        const policy = Object.entries(POLICY).map(([k, v]) => k + " " + (k === "script-src" ? v.concat(hashes.length ? ["'unsafe-inline'"] : [], hashes) : v).join(" ")).join("; ");
         return html.replace(/<meta charset="utf-8">/i, (m) => m + '<meta http-equiv="Content-Security-Policy" content="' + policy + '">');
       }
     }

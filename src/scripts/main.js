@@ -16,16 +16,51 @@ import { height as pageHeight, watchSize, ioRoot } from "./scroller.js";
 import { hasConsent } from "./consent.js";
 import { initBook } from "./book.js";
 import { initPubs } from "./pubs.js";
+import { whenLoaded } from "./loaded.js";
 
 // Safari may run this script before the page's stylesheet has come (WebKit bug 261655: a module script does not always
 // wait for it, more often with a warm cache). Everything measured then is wrong, and what is measured once stays wrong:
 // the card stack read the page's colour as transparent and lost its strips (Tim's screenshots, Oct 2026). So nothing
-// starts until every stylesheet of the page is in (one that fails to load does not hold the page up).
+// starts until every stylesheet of the page is in (one that fails to load does not hold the page up). The home page's
+// own stylesheet is inside the page since Oct 25 (inlineCss in build/plugins.js), so it is always in; this covers any
+// page that links one.
 await Promise.all([...document.querySelectorAll('link[rel="stylesheet"]')].filter((link) => !link.sheet).map((link) =>
   new Promise((done) => { link.addEventListener("load", done, { once: true }); link.addEventListener("error", done, { once: true }); })));
 
 const root = document.documentElement;
+
+// The hero's picture may have loaded before this script runs (a slow script, a cached picture): hero.css then starts to
+// show it without waiting for a script (hero-loaded:not(.motion)), and .motion below puts the sand cover back over it
+// until its turn. If a frame has been drawn since (boot.js sets fmHeroSeen in the first frame after the picture
+// loaded), the team has been seen and stays shown (else it was seen, covered and shown again: 2 loads in 12 on main,
+// Oct 25). If not, nothing of it has been drawn yet: the cover goes back up at once, without its transition (hero-snap
+// in hero.css), and the team comes in at its turn as designed.
+if (root.classList.contains("hero-loaded") && !root.classList.contains("hero-in")) {
+  if (window.fmHeroSeen) root.classList.add("hero-in");
+  else {
+    const table = document.querySelector("[data-hero-table]");
+    root.classList.add("hero-snap", "motion");
+    if (table) getComputedStyle(table, "::after").opacity;   // the cover is put back now, with no transition…
+    root.classList.remove("hero-snap");                       // …and fades as usual from here on
+  }
+}
 root.classList.add("motion");                   // the main script runs: the safety net of motion.css is off
+
+// The first frame is drawn before any of the work below starts (the navbar, the hero's picture and everything that does
+// not wait for a script). When the page, its stylesheet and these scripts all arrive at once (a fast line, a warm cache),
+// the browser would otherwise run all of the start-up first and draw only after it: on a phone that held the first
+// picture of the page back by the whole start-up (PageSpeed, Oct 25: first paint after the page had loaded, 1.6 s;
+// LCP "element render delay" 2 s). What is hidden until a script shows it (the split headings, the card stack) stays
+// hidden in that frame, as it is anyway while the scripts load. .motion above comes first on purpose: without it
+// the hero's picture would start to fade in for that one frame (hero.css, hero-loaded:not(.motion)).
+// Not when the address names a section (a link from elsewhere to /#clients): the browser jumps there in its first
+// frame, so the page must have its full height by then (the card stack adds several screens), as before.
+// A tab opened in the background draws no frames: there it starts after a moment all the same.
+const arrivingAt = (() => { try { return location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch { return null; } })();
+if (!arrivingAt) await new Promise((go) => {
+  const late = setTimeout(go, 100);
+  requestAnimationFrame(() => setTimeout(() => { clearTimeout(late); go(); }, 0));
+});
 
 // boot.js asks for the page to be measured again (after a reload restores the scroll, or a phone's bars change)
 window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
@@ -82,7 +117,7 @@ const height = pageHeight;
 let measured = -1, busy = false;                 // the page's height at the last measuring (-1: not measured yet)
 ScrollTrigger.addEventListener("refreshInit", () => { busy = true; });
 ScrollTrigger.addEventListener("refresh", () => { busy = false; measured = height(); });
-addEventListener("load", () => setTimeout(() => {
+whenLoaded(() => setTimeout(() => {
   let timer = 0;
   // not measured yet: refreshSoon() above is still to come, and measures it as it is
   if (measured >= 0 && !busy && Math.abs(height() - measured) > 2) ScrollTrigger.refresh(true);

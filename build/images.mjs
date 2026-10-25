@@ -28,6 +28,7 @@ const QUALITY = { avif: { quality: 55, effort: 9 }, webp: { quality: 80, effort:
 // The files before scored 75–79 at 1:1. Measured Oct 24, 2026; scores of the AVIF: as seen / at 1:1.
 const HERO_1X = {
   900: [86, 95],    // 90.3                  29 KB
+  1200: [86, 96],   // 90.0                  45 KB (Oct 25: for 1.5–1.9× phones, which needed 1100–1200 and got the 1400)
   1400: [86, 96],   // 90.0                  55 KB
   1800: [86, 97],   // 90.0                  81 KB
   2120: [86, 97],   // 90.1                 104 KB
@@ -55,7 +56,7 @@ const RASTER = [
   // 2120 1920 × 1080, 2560 × 1440, 1280 × 800 @ 1.5 · 2× and up: 1800 iPhone SE, Android 412 · 2120 iPhones 390–440 ·
   // 2650 iPad 820 · 3200 MacBook Air 1440 × 900 · 4096 MacBook Pro 1512 × 982.
   // Settings: HERO_1X and HERO_2X above.
-  { src: "hero-table.webp", widths: [900, 1400, 1800, 2120, 2650, 3200], formats: ["avif", "webp"], options: heroQ(HERO_1X) },
+  { src: "hero-table.webp", widths: [900, 1200, 1400, 1800, 2120, 2650, 3200], formats: ["avif", "webp"], options: heroQ(HERO_1X) },
   { src: "hero-table.webp", name: "hero-table-2x", widths: [1800, 2120, 2650, 3200, 4096], formats: ["avif", "webp"], options: heroQ(HERO_2X) },
   // the two tool cards: shown at most 462 CSS px wide
   { src: "fm-litmus.png", widths: [480, 820], formats: ["avif", "webp"] },

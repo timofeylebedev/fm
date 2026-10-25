@@ -131,6 +131,8 @@
 }
 html.hero-in .hero__table::after,
 html.hero-loaded:not(.motion) .hero__table::after { opacity: 0; }
+/* main.js puts the cover back at once (no fade) when the picture had loaded before it ran but nothing was drawn yet */
+html.hero-snap .hero__table::after { transition: none; }
 
 /* the chips: scripts/hero.js puts them into .hero-chips, a layer as high as the picture, along the bottom of the stage.
    Every size here is a number of --u: one px of a chip at its full size (see --hero-u above). A chip is laid out at

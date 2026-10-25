@@ -112,6 +112,10 @@
 
   /* ── The hero picture fades in once it has loaded (see hero.css), even before the other scripts have arrived ── */
   document.addEventListener("load", function (e) {
-    if (e.target.classList && e.target.classList.contains("hero__img")) root.classList.add("hero-loaded");
+    if (!(e.target.classList && e.target.classList.contains("hero__img"))) return;
+    root.classList.add("hero-loaded");
+    // a frame drawn from now on shows the picture (until main.js has run, see hero.css): main.js reads this to know
+    // whether the team has been seen already, and keeps it shown if so (see the top of main.js)
+    requestAnimationFrame(function () { window.fmHeroSeen = true; });
   }, true);
 })();

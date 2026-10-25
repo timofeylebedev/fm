@@ -4,15 +4,15 @@
 
    When they are built: building all ten at once kept weak phones busy for more than a second. So the drawings of one
    card are built together (they take turns there) when the card comes within one and a half screens of the visible
-   part of the page, and the cards that are still far away are built one by one after the page has loaded, whenever the
-   browser has nothing else to do. Until then a block is simply empty: it is far from the screen anyway.
+   part of the page, and the cards that are still far away are built one by one after the page has loaded and the visitor
+   has made a first move of their own (see initArt), whenever the browser has nothing else to do. Until then a block is simply empty: it is far from the screen anyway.
 
    Animation: a drawing moves only while it is the one shown in its card and its block is on screen: then its stage has
    the class is-live (the CSS animations run only under that class) and its tick(time, dt, px) is called on every frame.
    Each drawing has its own clock that stops while it is not live, so it carries on where it left off. A drawing whose
    animation has an end (the royalty ones) returns false from tick when it is over, and is not called again. */
 import { pace } from "../pace.js";
-import { ioRoot } from "../scroller.js";
+import { ioRoot, onScroll, offScroll } from "../scroller.js";
 import { SIZE, LIMIT, unit, toUnits, STILL } from "./shared.js";
 import { ROYALTY } from "./royalty-settings.js";
 import "../../styles/art/art.css";        // the styles of the drawings come with them
@@ -242,6 +242,25 @@ export function initArt() {
     await mountCard(card);
     idle(next, { timeout: 3000 });
   };
-  const later = () => idle(next, { timeout: 3000 });
-  if (document.readyState === "complete") later(); else addEventListener("load", later);
+  // The far cards are built only once the visitor has done something themselves (moved the mouse or a finger, a key, the
+  // wheel, a scroll), has then left the page alone for a moment (QUIET), and the page has loaded: a page that is only
+  // being loaded (a phone on a slow line, PageSpeed) is not kept busy with drawings many screens below, nor their
+  // pictures sent down the same slow line as the first screen (PageSpeed, Oct 25: the drawings' files were the longest
+  // chain of the load, ≈ 3 s, and their building came late in it); and the building does not land in the middle of the
+  // first scroll, where it made frames of up to 0.3 s on a slow phone (independent review, Oct 25). The cards near the
+  // screen do not wait for this: they come with the observer above, 1.5 screens ahead.
+  const QUIET = 1000;
+  const moves = ["pointermove", "pointerdown", "keydown", "touchstart", "wheel"];
+  let moved = false, timer = 0, done = false;
+  const go = () => {
+    if (done || !moved || document.readyState !== "complete") return;
+    done = true;
+    moves.forEach((type) => removeEventListener(type, onMove, true));
+    offScroll(onMove);
+    idle(next, { timeout: 3000 });
+  };
+  const onMove = () => { moved = true; clearTimeout(timer); timer = setTimeout(go, QUIET); };
+  moves.forEach((type) => addEventListener(type, onMove, { capture: true, passive: true }));
+  onScroll(onMove);
+  if (document.readyState !== "complete") addEventListener("load", () => { clearTimeout(timer); timer = setTimeout(go, QUIET); }, { once: true });
 }
