@@ -85,6 +85,41 @@ export function minifyPages() {
   };
 }
 
+// The home page's stylesheet, put inside the page (<style>) instead of a file of its own: a phone on a slow connection
+// can then draw the page as soon as the HTML has come, without one more round trip to the server first (PageSpeed,
+// Oct 25: "render-blocking request", ≈ 0.45 s on slow 4G). The stylesheet is 11 KB compressed, so the page grows from
+// ≈ 14 to ≈ 25 KB. Its addresses (fonts, pictures) are written relative to the stylesheet's folder (assets/), so they
+// are rewritten for the page's own folder. Runs after minifyPages: the CSS is already minified by Lightning CSS, and the
+// HTML minifier's own CSS minifier does not know all of it (container queries, nesting fallbacks).
+export function inlineCss(pages = ["index.html"]) {
+  return {
+    name: "fm-inline-css",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(html, ctx) {
+        if (!ctx.bundle || !pages.includes(ctx.filename.split("/").pop())) return html;
+        return html.replace(/<link rel="stylesheet"(?: crossorigin)? href="\.\/(assets\/[^"]+\.css)">/g, (tag, file) => {
+          const asset = ctx.bundle[file];
+          if (!asset || asset.type !== "asset") return tag;
+          const dir = file.slice(0, file.lastIndexOf("/") + 1);       // "assets/"
+          const css = String(asset.source)
+            .replace(/url\((["']?)\.\/([^"')]+)\1\)/g, (m, q, path) => "url(" + q + "./" + dir + path + q + ")")
+            // image-set() may also name its files as bare strings: image-set("./a.avif" 1x type("image/avif"), …)
+            .replace(/(image-set\()([^;}]*)/g, (m, open, list) => open + list.replace(/(["'])\.\/(?!assets\/)/g, "$1./" + dir))
+            .replace(/<\/style/gi, "<\\/style");
+          // every file the stylesheet names must now be a file of the build: a form of address not rewritten above
+          // would otherwise point next to the page, and its picture or font would quietly not load
+          for (const [, ref] of css.matchAll(/(?:url\(\s*["']?|image-set\([^;}]*?["'])\.\/([^"')\s]+)/g))
+            if (!ctx.bundle[ref]) throw new Error(`fm-inline-css: ${file} names ./${ref}, which is not in the build`);
+          delete ctx.bundle[file];                                   // nothing else uses it
+          return "<style>" + css + "</style>";
+        });
+      }
+    }
+  };
+}
+
 // A Content Security Policy for every page, written into it when the site is built: the page may run only its own
 // scripts (and the inline ones it was built with: their hashes are worked out here), and frame only the booking page of
 // Planerka (scripts/book.js; no script of Planerka runs on the page itself). Whatever else tried to run (an injected
@@ -93,7 +128,9 @@ export function minifyPages() {
 // (frame-ancestors cannot be set from the page itself: the server sends it, see deploy/.)
 const POLICY = {
   "default-src": ["'self'"],
-  "script-src": ["'self'"],
+  // 'unsafe-inline' is for old browsers only: a browser that knows script hashes ignores it once a hash is listed, and the
+  // page's own inline scripts are listed by their hashes (PageSpeed's CSP check asks for it, Oct 25)
+  "script-src": ["'self'", "'unsafe-inline'"],
   "style-src": ["'self'", "'unsafe-inline'"],          // the drawings and GSAP set styles on the elements they move
   "img-src": ["'self'", "data:", "blob:"],
   "font-src": ["'self'"],

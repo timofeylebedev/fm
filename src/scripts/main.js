@@ -18,14 +18,36 @@ import { initBook } from "./book.js";
 import { initPubs } from "./pubs.js";
 
 // Safari may run this script before the page's stylesheet has come (WebKit bug 261655: a module script does not always
-// wait for it, more often with a warm cache). Everything measured then is wrong, and what is measured once stays wrong:
+// wait for it, more often with a warm cache). The home page's stylesheet is inside the page since Oct 25 (inlineCss in
+// build/plugins.js), so there it is always in; this still covers any page that links one. Everything measured then is wrong, and what is measured once stays wrong:
 // the card stack read the page's colour as transparent and lost its strips (Tim's screenshots, Oct 2026). So nothing
 // starts until every stylesheet of the page is in (one that fails to load does not hold the page up).
 await Promise.all([...document.querySelectorAll('link[rel="stylesheet"]')].filter((link) => !link.sheet).map((link) =>
   new Promise((done) => { link.addEventListener("load", done, { once: true }); link.addEventListener("error", done, { once: true }); })));
 
 const root = document.documentElement;
+// The hero's picture may already be on screen: when it loads before this script runs (a slow script, a cached picture),
+// hero.css shows it without waiting for a script (hero-loaded:not(.motion)). .motion below would put the sand cover
+// back over it until its turn: the team was seen, then faded out and in again (measured Oct 25: 2 loads in 12 on main).
+// So a picture that has started to show stays shown.
+{
+  const table = document.querySelector("[data-hero-table]");
+  if (table && root.classList.contains("hero-loaded") && parseFloat(getComputedStyle(table, "::after").opacity) < 0.99) root.classList.add("hero-in");
+}
 root.classList.add("motion");                   // the main script runs: the safety net of motion.css is off
+
+// The first frame is drawn before any of the work below starts (the navbar, the hero's picture and everything that does
+// not wait for a script). When the page, its stylesheet and these scripts all arrive at once (a fast line, a warm cache),
+// the browser would otherwise run all of the start-up first and draw only after it: on a phone that held the first
+// picture of the page back by the whole start-up (PageSpeed, Oct 25: first paint after the page had loaded, 1.6 s;
+// LCP "element render delay" 2 s). What is hidden until a script shows it (the split headings, the card stack) stays
+// hidden in that frame, as it is anyway while the scripts load. .motion above comes first on purpose: without it
+// the hero's picture would start to fade in for that one frame (hero.css, hero-loaded:not(.motion)).
+// A tab opened in the background draws no frames: there it starts after a moment all the same.
+await new Promise((go) => {
+  const late = setTimeout(go, 100);
+  requestAnimationFrame(() => setTimeout(() => { clearTimeout(late); go(); }, 0));
+});
 
 // boot.js asks for the page to be measured again (after a reload restores the scroll, or a phone's bars change)
 window.fmRefresh = (soft) => ScrollTrigger.refresh(soft);
