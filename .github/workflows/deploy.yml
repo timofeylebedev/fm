@@ -152,3 +152,16 @@ jobs:
         if: always()
         run: |
           { echo "### Design-system checks"; echo; echo '```'; node -e 'const s=require("./design/checks/out/state.json");const m=s.summary;console.log(`${m.rules} rules: ${m.pass} pass, ${m.warn} warn, ${m.fail} fail; ${m.findings} findings (${m.new} new, ${m.fixed} fixed); ${m.questions} questions open`);for(const n of s.needs.slice(0,15))console.log(`${n.severity.padEnd(4)} ${n.title.slice(0,100)} — ${n.why}`)' 2>/dev/null || echo "(no state: an earlier step failed)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  # a closed pull request: its last run is taken off the report-data branch
+  forget:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # the keeper as main has it (a closed pull request's own branch may be gone)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node design/checks/keep.mjs --forget ${{ github.event.pull_request.number }}

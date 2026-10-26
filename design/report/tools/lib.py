@@ -7,10 +7,12 @@ ARGS = ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--hide-scrollbar
 async def overlay(route):
     # main's html has scrollbar-gutter: stable (book.css, since the booking window): headless Chromium fills it like a
     # classic 15px scrollbar even with --hide-scrollbars. Measure as with overlay scrollbars (a Mac, a phone) unless FM_GUTTER=1.
+    # The home page's stylesheet is inside its HTML since PR #61 (inlineCss), so pages are rewritten too, not only .css.
+    if route.request.resource_type not in ("document", "stylesheet"): return await route.fallback()
     r = await route.fetch(); body = (await r.text()).replace("scrollbar-gutter:stable", "scrollbar-gutter:auto")
     await route.fulfill(response=r, body=body)
 async def prep(ctx):
-    if not os.environ.get("FM_GUTTER"): await ctx.route("**/*.css", overlay)
+    if not os.environ.get("FM_GUTTER"): await ctx.route("**/*", overlay)
     return ctx
 async def page(p, w, h, mobile=False, url="http://localhost:8001/", calm=False):
     b = await p.chromium.launch(executable_path=CH, args=ARGS)

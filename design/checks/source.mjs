@@ -103,6 +103,8 @@ export function sourceRules() {
       + readdirSync("src/scripts/art").filter((f) => f.endsWith(".js")).map((f) => read(join("src/scripts/art", f))).join("\n");
     const html = readdirSync("src").filter((f) => f.endsWith(".html")).map((f) => read(join("src", f))).join("\n");
     for (const m of js.matchAll(/["'`](--[\w-]+)["'`]|setProperty\(\s*["'`](--[\w-]+)/g)) defined.add(m[1] || m[2]);
+    // set inside an inline style written by a script ('…;--i:' + i, `--turn:${x}`)
+    for (const m of js.matchAll(/["'`;\s](--[\w-]+)\s*:/g)) defined.add(m[1]);
     for (const m of html.matchAll(/style="[^"]*?(--[\w-]+)\s*:/g)) defined.add(m[1]);
     for (const [f, s] of pageCss) for (const m of s.matchAll(/var\(\s*(--[\w-]+)\s*([,)])/g)) {
       if (!used.has(m[1])) used.set(m[1], []);

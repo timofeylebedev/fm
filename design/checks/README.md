@@ -50,13 +50,22 @@ node design/checks/answer.mjs <id> "<answer>" ["note"]     # record Tim's answer
 
 Locally (the cloud workspace, Claude Code on the Mac) the measurements run in headless Chromium without a GPU: frame
 timings and the cost of effects are not measured there (the device runs, a later step, will). `scrollbar-gutter: stable`
-is taken out of the served CSS, so the page is measured as on a Mac or a phone (overlay scrollbars).
+is taken out of the served CSS and pages (the home page's stylesheet is inside its HTML), so the page is measured as on a
+Mac or a phone (overlay scrollbars). Pages are loaded with `?fmbox=0`: Playwright's WebKit presents itself as Safari on a
+Mac, where box.js would scroll the page in its own box and the window would never scroll. The collector is run at the top
+of every section and a screen at a time through the tall ones (the stack's cards show only in view), and the snapshots
+are joined.
+
+A step that fails (`record.errors`) or did not run makes its rules «could not run» (never a pass); their last findings
+are kept, and such a run never becomes main's baseline (`keep.mjs` puts it under `broken/`).
 
 ## In CI
 
 `.github/workflows/deploy.yml`, job `checks`, after the site is published: build, measure (Chromium, then WebKit sizes
-only), state against `report-data`'s `latest/`, keep the record, rebuild the review page with it, publish `/report/`
-again (main) or the preview (a pull request). It never fails the site's deploy.
+and pages only), state against `report-data`'s `latest/`, keep the record, rebuild the review page with it, publish
+`/report/` again (main) or the preview (a pull request). It never fails the site's deploy. `latest/` and `history/` are
+written only from main; a manual run on another branch goes to `branch/<name>/`; a closed pull request's `pr/<n>/` is
+removed (job `forget`).
 
 ## A new rule
 

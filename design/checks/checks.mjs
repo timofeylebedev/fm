@@ -36,6 +36,10 @@ export function roleAt(scale, role, w, h) {
   return role.px[0] + (role.px[1] - role.px[0]) * k;
 }
 
+// the step of measure.mjs each rule's input comes from (a rule whose step failed or did not run cannot say anything)
+export const STEP_OF = (id) => /^(type|colour|fills|shape|effects|layers|align|ratios|icons|images|states|components)\./.test(id) ? "sizes"
+  : /^fallback\./.test(id) ? "modes" : /^privacy\./.test(id) ? "privacy" : /^logic\./.test(id) ? "scenarios" : /^weight\./.test(id) ? "weight" : /^health\./.test(id) ? "pages" : null;
+
 export function measuredRules({ rec, prev, scale, tokens, cfg }) {
   const out = [];
   const rule = (o) => { out.push(o); return o; };
@@ -55,13 +59,13 @@ export function measuredRules({ rec, prev, scale, tokens, cfg }) {
         const hit = values.find(([, v]) => Math.abs(v - t.px) <= 0.6);
         if (hit) { on += t.n; continue; }
         const nearest = values.slice().sort((a, b) => Math.abs(a[1] - t.px) - Math.abs(b[1] - t.px))[0];
-        items.push({ key: `${t.where[0]}|${t.px}`, where: t.where.slice(0, 3).join(", "), what: `${t.px}px ${t.family} ${t.weight}`, value: t.px, at: k, note: `nearest role ${nearest[0]} = ${r2(nearest[1])}px` });
+        items.push({ key: `${t.where[0]}|${t.px}`, where: t.where.slice(0, 3).join(", "), what: `${t.px}px ${t.family} ${t.weight}`, value: t.px, n: t.n, at: k, note: `nearest role ${nearest[0]} = ${r2(nearest[1])}px` });
       }
     }
     const share = all ? on / all : 1;
     rule({ id: "type.roles", area: "Type", kind: "share", title: "Text is set in the roles of the scale",
       how: "Every text holder at every measured size: its size against each role of design/scale.json at that screen (±0.6px). Objects sized as a whole or fitted to their box (hero, CTA and stack titles, ID cards, tiles) are left out.",
-      value: pct(share), unit: "% of text holders", pass: 97, warn: 90, status: share * 100 >= 97 ? "pass" : share * 100 >= 90 ? "warn" : "fail", items: dedupe(items) });
+      value: pct(share), unit: "% of text holders", on, total: all, pass: 97, warn: 90, status: share * 100 >= 97 ? "pass" : share * 100 >= 90 ? "warn" : "fail", items: dedupe(items) });
   }
   {
     const items = [], long = [];
@@ -83,10 +87,10 @@ export function measuredRules({ rec, prev, scale, tokens, cfg }) {
       all += c.n;
       const hit = palette.find(([, p]) => sameColour(c.rgba, p));
       if (hit) { on += c.n; continue; }
-      items.push({ key: c.rgba.join(","), where: c.where.slice(0, 3).join(", "), what: `rgba(${c.rgba.join(", ")}) as ${Object.keys(c.props).join(", ")}`, value: c.n, at: k });
+      items.push({ key: c.rgba.join(","), where: c.where.slice(0, 3).join(", "), what: `rgba(${c.rgba.join(", ")}) as ${Object.keys(c.props).join(", ")}`, value: c.n, n: c.n, at: k });
     }
     const share = all ? on / all : 1;
-    rule({ id: "colour.palette", area: "Colour", kind: "share", title: "Every colour drawn is a token", how: "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of design/tokens.json (±1.5 a channel, ±1.5% alpha).", value: pct(share), unit: "% of colour uses", pass: 99, warn: 95, status: share * 100 >= 99 ? "pass" : share * 100 >= 95 ? "warn" : "fail", items: dedupe(items) });
+    rule({ id: "colour.palette", area: "Colour", kind: "share", title: "Every colour drawn is a token", how: "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of design/tokens.json (±1.5 a channel, ±1.5% alpha).", value: pct(share), unit: "% of colour uses", on, total: all, pass: 99, warn: 95, status: share * 100 >= 99 ? "pass" : share * 100 >= 95 ? "warn" : "fail", items: dedupe(items) });
   }
   {
     const kinds = {};
@@ -104,11 +108,11 @@ export function measuredRules({ rec, prev, scale, tokens, cfg }) {
       for (const r of rec.at[k].radii) {
         all += r.n;
         if (r.pill || values.some(([, v]) => Math.abs(v - r.px) <= 0.6) || objects.some((o) => r.sel.includes(o))) { on += r.n; continue; }
-        items.push({ key: r.sel + "|" + r.px, where: r.sel, what: `radius ${r.px}px on a ${Math.round(r.w)}×${Math.round(r.h)} box`, value: r.px, at: k, note: `roles here: ${values.map(([n, v]) => n.slice(7) + " " + r2(v)).join(", ")}` });
+        items.push({ key: r.sel + "|" + r.px, where: r.sel, what: `radius ${r.px}px on a ${Math.round(r.w)}×${Math.round(r.h)} box`, value: r.px, n: r.n, at: k, note: `roles here: ${values.map(([n, v]) => n.slice(7) + " " + r2(v)).join(", ")}` });
       }
     }
     const share = all ? on / all : 1;
-    rule({ id: "shape.radii", area: "Shape", kind: "share", title: "Corners are radius roles (or pills)", how: "Every rounded box: its corner against radius/s, m, l at that screen (±0.6px), a pill (half its height), or a listed object. Inner corners (outer − inset) show up here as their own values.", value: pct(share), unit: "% of rounded boxes", pass: 90, warn: 75, status: share * 100 >= 90 ? "pass" : share * 100 >= 75 ? "warn" : "fail", items: dedupe(items) });
+    rule({ id: "shape.radii", area: "Shape", kind: "share", title: "Corners are radius roles (or pills)", how: "Every rounded box: its corner against radius/s, m, l at that screen (±0.6px), a pill (half its height), or a listed object. Inner corners (outer − inset) show up here as their own values.", value: pct(share), unit: "% of rounded boxes", on, total: all, pass: 90, warn: 75, status: share * 100 >= 90 ? "pass" : share * 100 >= 75 ? "warn" : "fail", items: dedupe(items) });
     const widths = new Map();
     for (const k of sizes) for (const b of rec.at[k].borders) { const x = widths.get(b.px) || { n: 0, where: new Set() }; x.n = Math.max(x.n, b.n); b.where.forEach((w) => x.where.add(w)); widths.set(b.px, x); }
     rule({ id: "shape.borders", area: "Shape", kind: "convention", title: "Few border widths", how: "Distinct border widths drawn at all sizes; more than 2 warns.", value: widths.size, unit: "widths", warn: 2, status: widths.size > 2 ? "warn" : "pass",
@@ -157,20 +161,21 @@ export function measuredRules({ rec, prev, scale, tokens, cfg }) {
       const s = `${Math.round(i.w)}×${Math.round(i.h)}`; const x = sizesSeen.get(s) || new Set(); x.add(i.sel); sizesSeen.set(s, x);
       if (!i.inherits) notInherit.push({ key: i.sel, where: i.sel, what: "drawn in its own colour, not the text's (currentColor)", at: k });
     }
-    rule({ id: "icons.colour", area: "Icons", kind: "share", title: "Icons take the colour of their text", how: "Inline icons outside the drawings: every fill and stroke equals the icon's own color (currentColor), so an icon follows its button's state.", value: dedupe(notInherit).length, unit: "in their own colour", status: notInherit.length ? "warn" : "pass", items: dedupe(notInherit) });
+    rule({ id: "icons.colour", area: "Icons", kind: "tolerance", title: "Icons take the colour of their text", how: "Inline icons outside the drawings: every fill and stroke equals the icon's own color (currentColor), so an icon follows its button's state.", value: dedupe(notInherit).length, unit: "in their own colour", status: notInherit.length ? "warn" : "pass", items: dedupe(notInherit) });
     rule({ id: "icons.sizes", area: "Icons", kind: "convention", title: "Few icon sizes", how: "Distinct sizes the inline icons are drawn at; more than 5 warns.", value: sizesSeen.size, unit: "sizes", warn: 5, status: sizesSeen.size > 5 ? "warn" : "pass", items: [...sizesSeen].map(([s, v]) => ({ key: s, where: [...v].slice(0, 5).join(", "), what: s })) });
   }
 
   // ── Images ────────────────────────────────────────────────────────────────────────────────────────────────────
   {
     const blur = [], heavy = [], format = [], alt = [], first = [];
+    const plain = (src) => src.replace(/-[\w-]{8}(?=\.\w+$)/, "");      // the file's name without the build's hash
     for (const k of sizes) for (const i of rec.at[k].images) {
-      if (i.alt === null) alt.push({ key: i.src, where: i.sel, what: `${i.src}: no alt attribute`, at: k });
+      if (i.alt === null) alt.push({ key: plain(i.src), where: i.sel, what: `${i.src}: no alt attribute`, at: k });
       if (i.art || i.k == null || !i.shown) continue;
-      if (i.k < 0.95) blur.push({ key: i.src.replace(/-[\w]{8}\./, "."), where: i.sel, what: `${i.src}: ${i.file[0]}px wide for ${Math.round(i.w * rec.at[k].dpr)} device px (×${rec.at[k].dpr})`, value: i.k, at: k });
-      if (i.k > 2.5) heavy.push({ key: i.src.replace(/-[\w]{8}\./, "."), where: i.sel, what: `${i.src}: ${i.file[0]}px wide for ${Math.round(i.w * rec.at[k].dpr)} device px`, value: i.k, at: k });
-      if (!/avif|webp|svg/.test(i.format)) format.push({ key: i.src, where: i.sel, what: `${i.src} (${i.format})`, at: k });
-      if (i.first && i.loading === "lazy") first.push({ key: i.src, where: i.sel, what: `${i.src} is on the first screen but waits (loading=lazy)`, at: k });
+      if (i.k < 0.95) blur.push({ key: plain(i.src), where: i.sel, what: `${i.src}: ${i.file[0]}px wide for ${Math.round(i.w * rec.at[k].dpr)} device px (×${rec.at[k].dpr})`, value: i.k, at: k });
+      if (i.k > 2.5) heavy.push({ key: plain(i.src), where: i.sel, what: `${i.src}: ${i.file[0]}px wide for ${Math.round(i.w * rec.at[k].dpr)} device px`, value: i.k, at: k });
+      if (!/avif|webp|svg/.test(i.format)) format.push({ key: plain(i.src), where: i.sel, what: `${i.src} (${i.format})`, at: k });
+      if (i.first && i.loading === "lazy") first.push({ key: plain(i.src), where: i.sel, what: `${i.src} is on the first screen but waits (loading=lazy)`, at: k });
     }
     rule({ id: "images.sharp", area: "Images", kind: "tolerance", title: "Pictures are sharp", how: "Every picture outside the drawings: the file's width against the device pixels it covers (its drawn width × the screen's pixel ratio: 3 on phones, 2 on tablets and the 1440 laptop). Below 0.95 it is upscaled.", value: dedupe(blur).length, unit: "upscaled", status: blur.length ? "warn" : "pass", items: dedupe(blur) });
     rule({ id: "images.weight", area: "Images", kind: "tolerance", title: "Pictures are not much bigger than drawn", how: "The same ratio above 2.5: the file is far bigger than the screen can show (bytes for nothing).", value: dedupe(heavy).length, unit: "too big", status: heavy.length ? "warn" : "pass", items: dedupe(heavy) });
@@ -250,7 +255,7 @@ export function measuredRules({ rec, prev, scale, tokens, cfg }) {
       if (t < 10 || t > 65) head.push({ key: where + "title", where, what: `title of ${t} characters (10–65)` });
       if (p.want === 200 && (d < 50 || d > 170)) head.push({ key: where + "desc", where, what: `description of ${d} characters (50–170)` });
       let last = 0; for (const x of h.headings) { if (last && x.level > last + 1) { head.push({ key: where + "skip" + x.text, where, what: `h${last} → h${x.level} «${x.text}» skips a level` }); } last = x.level; }
-      h.anchors.filter((a) => !a.ok).forEach((a) => head.push({ key: where + a.href, where, what: `a link to ${a.href}, which names nothing on the page` }));
+      h.anchors.filter((a) => !a.ok && !/^#top$/i.test(a.href)).forEach((a) => head.push({ key: where + a.href, where, what: `a link to ${a.href}, which names nothing on the page` }));
       if (p.path === "" && !h.og.image) head.push({ key: "og", where, what: "no og:image" });
       if (p.path === "" && !h.manifest) head.push({ key: "manifest", where, what: "no web manifest" });
     }
@@ -281,6 +286,6 @@ export function measuredRules({ rec, prev, scale, tokens, cfg }) {
 // one item per key (the same thing seen at several sizes): the sizes are joined
 function dedupe(items) {
   const by = new Map();
-  for (const x of items) { const y = by.get(x.key); if (!y) by.set(x.key, { ...x, at: x.at ? [x.at] : [] }); else if (x.at && !y.at.includes(x.at)) y.at.push(x.at); }
+  for (const x of items) { const y = by.get(x.key); if (!y) by.set(x.key, { ...x, at: x.at ? [x.at] : [] }); else { if (x.at && !y.at.includes(x.at)) y.at.push(x.at); if (x.n != null) y.n = (y.n || 0) + x.n; } }
   return [...by.values()].map((x) => ({ ...x, at: x.at.join(" ") }));
 }

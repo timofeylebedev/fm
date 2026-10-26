@@ -279,7 +279,9 @@ for (const f of ["src/styles/base/tokens.gen.css", "src/styles/base/tokens.css"]
 // ── the checks: this commit's (just run), or the last deploy of main's (report-data) ─────────────────────────────
 const OUT = path.join(ROOT, "design/checks/out");
 const local = (f) => (fs.existsSync(path.join(OUT, f)) ? fs.readFileSync(path.join(OUT, f), "utf8") : null);
-let checksState = local("state.json"), checksRecord = local("record-chromium.json"), checksFrom = checksState ? "this build" : null;
+let checksState = local("state.json"), checksRecord = local("record-chromium.json"), checksFrom = null;
+// a local run is «this build» only when it measured this very commit; an older one says whose it is
+if (checksState) { const c = JSON.parse(checksState).commit || "", h = (process.env.FM_HEAD_SHA || tryGit("rev-parse", "HEAD") || "").trim(); checksFrom = c && h && c.slice(0, 7) === h.slice(0, 7) ? "this build" : `a local run of ${c.slice(0, 7) || "an unknown commit"}`; }
 if (!tryGit("rev-parse", "--verify", "-q", "refs/remotes/origin/report-data")) tryGit("fetch", "--depth=1", "origin", "+refs/heads/report-data:refs/remotes/origin/report-data");
 if (!checksState) { checksState = tryGit("show", "origin/report-data:latest/state.json"); checksRecord = tryGit("show", "origin/report-data:latest/record-chromium.json"); if (checksState) checksFrom = "the last deploy of main"; }
 const historyIdx = tryGit("show", "origin/report-data:history/index.json");

@@ -31,6 +31,8 @@ const QUICK = !!opt("quick", false);
 const ONLY = typeof opt("only", "") === "string" && opt("only", "") ? opt("only").split(",") : null;
 const OUT = resolve(opt("out", join(ROOT, "design/checks/out", `record-${ENGINE}.json`)));
 const COLLECT = readFileSync(join(import.meta.dirname, "collect.js"), "utf8");
+// the version of the consent the site asks for now (a stored answer of an older version does not count)
+const CONSENT_VERSION = +((readFileSync(join(ROOT, cfg.consent.source || "src/scripts/consent.js"), "utf8").match(/VERSION\s*=\s*(\d+)/) || [, 1])[1]);
 const t0 = Date.now();
 const log = (...a) => console.log(`[${((Date.now() - t0) / 1000).toFixed(0).padStart(4)}s]`, ...a);
 if (!existsSync(join(DIST, "index.html"))) { console.error("measure: no dist/index.html — run `npm run build` first"); process.exit(2); }
@@ -60,13 +62,21 @@ const version = browser.version();
 log(`engine ${ENGINE} ${version}${QUICK ? " (quick)" : ""}`);
 
 // main's html has scrollbar-gutter: stable (book.css): headless Chromium fills it like a classic 15px scrollbar. The
-// checks measure as on a Mac or a phone (overlay scrollbars): the rule is taken out of the served CSS.
-const overlay = async (route) => { try { const r = await route.fetch(); const body = (await r.text()).replace(/scrollbar-gutter:\s*stable/g, "scrollbar-gutter:auto"); await route.fulfill({ response: r, body }); } catch { await route.continue().catch(() => {}); } };
+// checks measure as on a Mac or a phone (overlay scrollbars): the rule is taken out of the served CSS, and out of the
+// pages themselves (the home page's stylesheet is put inside its HTML by the build: inlineCss, PR #61).
+const overlay = async (route) => {
+  const t = route.request().resourceType();
+  if (!route.request().url().startsWith(URL0) || (t !== "document" && t !== "stylesheet")) return route.fallback();
+  try { const r = await route.fetch(); const body = (await r.text()).replace(/scrollbar-gutter:\s*stable/g, "scrollbar-gutter:auto"); await route.fulfill({ response: r, body }); } catch { await route.fallback().catch(() => {}); }
+};
+// Safari on a Mac scrolls the page in its own box (box.js): Playwright's WebKit says it is that Safari, and then the
+// window never scrolls and nothing seems to overflow. The checks measure the page as the window scrolls it (?fmbox=0).
+const Q = "?fmbox=0", PAGE = URL0 + Q;
 // nothing leaves this machine: other hosts are answered with nothing, but every request is recorded
 const offline = (ctx, seen) => ctx.route((u) => !u.href.startsWith(URL0), (route) => { seen?.push(route.request().url()); return route.fulfill({ status: 204, body: "" }); });
 async function context(b, { w, h, dpr = 1, touch = false, ...more } = {}) {
   const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, hasTouch: touch, isMobile: touch && chromium, bypassCSP: true, ...more });
-  await ctx.route("**/*.css", overlay);
+  await ctx.route("**/*", overlay);
   return ctx;
 }
 const wait = (page, ms) => page.waitForTimeout(ms);
@@ -91,7 +101,7 @@ if (!QUICK) await step("sweep", async () => {
   const run = async (sizes, axis) => {
     const ctx = await context(browser, { w: sizes[0][0], h: sizes[0][1] }), page = await ctx.newPage();
     await offline(ctx); await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(URL0, { waitUntil: "load" });
+    await page.goto(PAGE, { waitUntil: "load" });
     await page.addStyleTag({ content: ".art{visibility:hidden!important} canvas,.dots{display:none!important}" });
     await wait(page, 800); await warm(page);
     const out = [];
@@ -109,15 +119,38 @@ if (!QUICK) await step("sweep", async () => {
 });
 
 // ── sizes ──
+// snapshots of the collector at several scroll positions, joined: a thing counts once (by its key), with the most
+// copies seen at one time and every place it was seen
+function merge(shots) {
+  const by = (list, key) => { const m = new Map(); for (const x of list) { const k = key(x), y = m.get(k); if (!y) m.set(k, { ...x, where: [...(x.where || [])] }); else { y.n = Math.max(y.n || 0, x.n || 0); for (const w of x.where || []) if (y.where.length < 6 && !y.where.includes(w)) y.where.push(w); if (x.props) for (const [p, v] of Object.entries(x.props)) y.props[p] = Math.max(y.props[p] || 0, v); } } return [...m.values()]; };
+  const uniq = (list) => { const m = new Map(); for (const x of list) m.set(JSON.stringify(x), x); return [...m.values()]; };
+  const all = (k) => shots.flatMap((s) => s[k] || []);
+  const first = shots[0];
+  const comps = new Map(); for (const c of all("components")) { const y = comps.get(c.name); if (!y || c.n > y.n) comps.set(c.name, c); }
+  return {
+    vw: first.vw, vh: first.vh, dpr: first.dpr, n: Math.max(...shots.map((s) => s.n)),
+    text: by(all("text"), (t) => `${t.px}|${t.family}|${t.weight}|${t.lh}|${t.object}`), colours: by(all("colours"), (c) => c.rgba.join(",")), fills: by(all("fills"), (f) => f.kind),
+    radii: by(all("radii"), (r) => `${r.sel}|${r.px}`), borders: by(all("borders"), (b) => String(b.px)), shadows: by(all("shadows"), (x) => x.prop + x.value),
+    effects: uniq(all("effects")), layers: uniq(all("layers")), z: by(all("z"), (x) => String(x.z)), contexts: Math.max(...shots.map((s) => s.contexts)),
+    icons: uniq(all("icons")), images: by(all("images").map((i) => ({ ...i, where: [i.sel] })), (i) => i.sel + i.src).map(({ where, ...i }) => i), ratios: uniq(all("ratios")),
+    edges: { lines: first.edges.lines, near: uniq(all("edges").flatMap((e) => e.near)), n: Math.max(...shots.map((s) => s.edges.n)) },
+    typo: uniq(all("typo")), components: [...comps.values()], interact: by(all("interact"), (x) => String(x.ms)), overflow: Math.max(...shots.map((s) => s.overflow)),
+  };
+}
 await step("sizes", async () => {
   for (const s of cfg.sizes) {
     const ctx = await context(browser, s), page = await ctx.newPage(), errors = [];
     await offline(ctx); page.on("pageerror", (e) => errors.push(String(e.message || e).slice(0, 200)));
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(URL0, { waitUntil: "load" }); await wait(page, 900); await warm(page);
+    await page.goto(PAGE, { waitUntil: "load" }); await wait(page, 900); await warm(page);
     await withCollector(page);
-    const m = await page.evaluate(async (c) => await window.__dsCollect(c), collectCfg);
-    m.errors = errors;
+    // what shows only in view (the stack's cards, pinned blocks) is measured where it shows: at the top of every
+    // section, and a screen at a time through the ones taller than the screen; the snapshots are joined
+    const stops = await page.evaluate((h) => { const ys = new Set([0]); for (const e of document.querySelectorAll("main > section, body > footer")) { const r = e.getBoundingClientRect(), top = r.top + scrollY; ys.add(Math.max(0, Math.round(top - 80))); for (let y = top + h; y < top + r.height - h / 2; y += h) ys.add(Math.round(y)); } return [...ys].sort((a, b) => a - b); }, s.h);
+    const shots = [];
+    for (const y of stops) { await page.evaluate((y) => scrollTo(0, y), y); await wait(page, 450); shots.push(await page.evaluate(async (c) => await window.__dsCollect(c), collectCfg)); }
+    const m = merge(shots);
+    m.errors = errors; m.stops = stops.length;
     record.at[`${s.w}x${s.h}`] = m;
     await ctx.close();
   }
@@ -142,11 +175,12 @@ if (!QUICK) await step("modes", async () => {
       const ctx = await context(b, { ...s, ...opts }), page = await ctx.newPage(), errors = [];
       await offline(ctx); page.on("pageerror", (e) => errors.push(String(e.message || e).slice(0, 200)));
       if (prep) await prep(ctx, page);
-      await page.goto(URL0, { waitUntil: "load" }); await wait(page, 1200); await warm(page); await wait(page, 1500);
+      await page.goto(PAGE, { waitUntil: "load" }); await wait(page, 1200); await warm(page); await wait(page, 1500);
       const r = await page.evaluate(pageText); r.errors = errors;
       if (name === "fonts" || name === "normal") {
-        r.boxes = await page.evaluate(() => [...document.querySelectorAll("main h1, main h2, main h3, main p, .btn")].filter((e) => e.getClientRects().length && !e.closest(".art, .fm-stage, .hero-chips"))
-          .map((e) => { const b = e.getBoundingClientRect(), lh = parseFloat(getComputedStyle(e).lineHeight) || parseFloat(getComputedStyle(e).fontSize) * 1.2; return { sel: e.tagName.toLowerCase() + "." + (e.className.toString().split(" ")[0] || ""), w: Math.round(b.width), h: Math.round(b.height), lines: Math.round(b.height / lh), text: (e.getAttribute("aria-label") || e.textContent).trim().replace(/\s+/g, " ").slice(0, 24) }; }));
+        // the texts as drawn: their width and their lines (the line boxes of the text itself); fitted titles left out
+        r.boxes = await page.evaluate((objects) => [...document.querySelectorAll("main h1, main h2, main h3, main p, .btn")].filter((e) => e.getClientRects().length && !e.closest(".art, .fm-stage, .hero-chips") && !e.closest(objects))
+          .map((e) => { const b = e.getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(e); const tops = new Set([...rg.getClientRects()].filter((r) => r.width > 1).map((r) => Math.round(r.top / 4))); return { sel: e.tagName.toLowerCase() + "." + (e.className.toString().split(" ")[0] || ""), w: Math.round(b.width), h: Math.round(b.height), lines: tops.size, text: (e.getAttribute("aria-label") || e.textContent).trim().replace(/\s+/g, " ").slice(0, 24) }; }), cfg.typeObjects);
       }
       out[name] = r; await ctx.close();
     };
@@ -165,7 +199,7 @@ if (!QUICK) await step("privacy", async () => {
   const before = [], after = [];
   let phase = before;
   await ctx.route((u) => !u.href.startsWith(URL0), (route) => { phase.push(route.request().url()); return route.fulfill({ status: 204, body: "" }); });
-  await page.goto(URL0, { waitUntil: "load" }); await wait(page, 1500);
+  await page.goto(PAGE, { waitUntil: "load" }); await wait(page, 1500);
   await page.mouse.move(400, 300); await page.mouse.move(700, 500); await warm(page);
   await page.hover("[data-demo]").catch(() => {}); await wait(page, 3500);
   const pre = { requests: [...new Set(before)], cookies: (await ctx.cookies()).map((c) => c.name), storage: await page.evaluate(() => Object.keys(localStorage)) };
@@ -182,8 +216,8 @@ if (!QUICK) await step("scenarios", async () => {
   for (const sc of cfg.scenarios) {
     const [w, h] = sc.size || [1440, 900], ctx = await context(browser, { w, h, touch: w < 900, dpr: 1 }), page = await ctx.newPage(), errors = [];
     await offline(ctx); page.on("pageerror", (e) => errors.push(String(e.message || e).slice(0, 160)));
-    if (sc.consent) await ctx.addInitScript((k) => localStorage.setItem(k, JSON.stringify({ v: 1, at: Date.now() })), cfg.consent.storage);
-    const helpers = { url: URL0, wait: (ms) => wait(page, ms), vis: (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return r.width > 0 && r.height > 0 && c.visibility !== "hidden" && +c.opacity > 0.05 && r.bottom > 0 && r.top < innerHeight; }, sel) };
+    if (sc.consent) await ctx.addInitScript(([k, v]) => localStorage.setItem(k, JSON.stringify({ v, at: Date.now() })), [cfg.consent.storage, CONSENT_VERSION]);
+    const helpers = { url: PAGE, wait: (ms) => wait(page, ms), vis: (sel) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return r.width > 0 && r.height > 0 && c.visibility !== "hidden" && +c.opacity > 0.05 && r.bottom > 0 && r.top < innerHeight; }, sel) };
     let res;
     try { res = await Promise.race([sc.run(page, helpers), new Promise((_, no) => setTimeout(() => no(new Error("timed out after 40 s")), 40000))]); } catch (e) { res = String(e.message || e).split("\n")[0]; }
     record.scenarios.push({ id: sc.id, ok: res === true, note: res === true ? "" : String(res), errors, size: `${w}×${h}` });
@@ -199,7 +233,7 @@ await step("pages", async () => {
     for (const s of [{ w: 390, h: 844, touch: true, dpr: 2 }, { w: 1440, h: 900 }]) {
       const ctx = await context(browser, s), page = await ctx.newPage(), errors = [];
       await offline(ctx); page.on("pageerror", (e) => errors.push(String(e.message || e).slice(0, 160)));
-      const res = await page.goto(URL0 + p.path, { waitUntil: "load" }); await wait(page, 800);
+      const res = await page.goto(URL0 + p.path + Q, { waitUntil: "load" }); await wait(page, 800);
       await withCollector(page);
       const head = s.w === 1440 ? await page.evaluate(() => window.__dsHead()) : null;
       const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth));
@@ -230,7 +264,7 @@ if (!QUICK) await step("weight", async () => {
   const ctx = await context(browser, { w: 1440, h: 900, dpr: 2 }), page = await ctx.newPage(), got = [];
   await offline(ctx);
   page.on("response", async (r) => { if (!r.url().startsWith(URL0)) return; try { const b = await r.body(); got.push({ url: r.url().slice(URL0.length) || "index.html", type: r.request().resourceType(), raw: b.length, sent: /text|javascript|json|xml|svg|css|html/.test(r.headers()["content-type"] || "") ? brotliCompressSync(b).length : b.length }); } catch {} });
-  await page.goto(URL0, { waitUntil: "load" }); await wait(page, 1500); await warm(page); await wait(page, 1500);
+  await page.goto(PAGE, { waitUntil: "load" }); await wait(page, 1500); await warm(page); await wait(page, 1500);
   const by = {}; for (const g of got) { const k = g.type === "stylesheet" ? "css" : g.type === "script" ? "js" : g.type === "font" ? "fonts" : g.type === "image" ? "images" : g.type === "document" ? "html" : "other"; (by[k] ||= { files: 0, sent: 0, raw: 0 }); by[k].files++; by[k].sent += g.sent; by[k].raw += g.raw; }
   record.weight = { by, total: Object.values(by).reduce((a, b) => a + b.sent, 0), files: got.length, top: got.sort((a, b) => b.sent - a.sent).slice(0, 12) };
   await ctx.close();
