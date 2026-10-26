@@ -1,23 +1,24 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-10-25T23:02:32.465Z",
- "commit": "1a04244bb7502133dc1359b14a51d9a43ae94cfc",
+ "generated": "2026-10-26T00:30:55.621Z",
+ "commit": "ebcb6cd48d2a99ad4825ce0653451b2c02392666",
  "ref": "claude/checks",
  "pr": "63",
+ "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-10-25T22:56:03.393Z",
+   "when": "2026-10-26T00:22:09.801Z",
    "quick": false,
-   "seconds": 342,
+   "seconds": 361,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-10-25T23:02:00.634Z",
+   "when": "2026-10-26T00:28:28.878Z",
    "quick": true,
-   "seconds": 32,
+   "seconds": 144,
    "errors": []
   }
  },
@@ -33,11 +34,12 @@
  },
  "summary": {
   "rules": 54,
+  "errors": 0,
   "pass": 34,
   "warn": 8,
   "fail": 6,
   "info": 6,
-  "findings": 57,
+  "findings": 73,
   "new": 0,
   "fixed": 0,
   "accepted": 5,
@@ -54,7 +56,7 @@
    "why": "7 places",
    "fresh": 0,
    "sample": [
-    "src/styles/components/book.css:152: ease-in-out",
+    "src/styles/components/book.css:152: ease-in-out in & i",
     "scripts/cookies.js:30: cubic-bezier(0.65, 0, 0.35, 1)",
     "scripts/deck.js:78: ease = \"power2.in\""
    ],
@@ -70,25 +72,9 @@
    "why": "4 places",
    "fresh": 0,
    "sample": [
-    "src/styles/sections/hero.css:157: rgb(90 60 30 / 0.06)",
-    "src/styles/sections/sections.css:167: rgb(0 0 0 / 0.4)",
-    "src/styles/sections/sections.css:167: rgb(0 0 0 / 0.02)"
-   ],
-   "rank": 304
-  },
-  {
-   "type": "rule",
-   "id": "code.tokens-wired",
-   "severity": "fail",
-   "area": "Code",
-   "title": "Every var() defined, every token used",
-   "kind": "hard",
-   "why": "4 places",
-   "fresh": 0,
-   "sample": [
-    "Code: used, never defined: --i (src/styles/art/art.css)",
-    "Code: used, never defined: --turn (src/styles/art/art.css)",
-    "Code: defined, never used: --ink-40"
+    "src/styles/sections/hero.css:157: rgb(90 60 30 / 0.06) in .hero-chip",
+    "src/styles/sections/sections.css:167: rgb(0 0 0 / 0.4) in .idcard__face",
+    "src/styles/sections/sections.css:167: rgb(0 0 0 / 0.02) in .idcard__face"
    ],
    "rank": 304
   },
@@ -102,8 +88,23 @@
    "why": "2 places",
    "fresh": 0,
    "sample": [
-    "src/styles/sections/sections.css:191: 24px",
-    "src/styles/sections/sections.css:198: 13px"
+    "src/styles/sections/sections.css:191: 24px in .idcard__name",
+    "src/styles/sections/sections.css:198: 13px in .idcard__row"
+   ],
+   "rank": 302
+  },
+  {
+   "type": "rule",
+   "id": "code.tokens-wired",
+   "severity": "fail",
+   "area": "Code",
+   "title": "Every var() defined, every token used",
+   "kind": "hard",
+   "why": "2 places",
+   "fresh": 0,
+   "sample": [
+    "Code: defined, never used: --ink-40",
+    "Code: defined, never used: --purple-light"
    ],
    "rank": 302
   },
@@ -117,7 +118,7 @@
    "why": "1 place",
    "fresh": 0,
    "sample": [
-    "src/styles/components/book.css:74: margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0"
+    "src/styles/components/book.css:74: margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0 in .book__box"
    ],
    "rank": 301
   },
@@ -131,7 +132,7 @@
    "why": "1 place",
    "fresh": 0,
    "sample": [
-    "src/styles/components/book.css:49: @media (width >= 62em)"
+    "src/styles/components/book.css:49: @media (width >= 62em) in @media (width >= 62em)"
    ],
    "rank": 301
   },
@@ -503,6 +504,22 @@
   },
   {
    "type": "rule",
+   "id": "colour.palette",
+   "severity": "warn",
+   "area": "Colour",
+   "title": "Every colour drawn is a token",
+   "kind": "share",
+   "why": "98.3% of colour uses (wanted 99%)",
+   "fresh": 0,
+   "sample": [
+    "section.cookies: rgba(245, 242, 242, 0.8) as background (320x568)",
+    "section.cookies: rgba(247, 247, 247, 0.8) as background (320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080)",
+    "header.nav: rgba(247, 247, 247, 0.7) as background (320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080)"
+   ],
+   "rank": 107
+  },
+  {
+   "type": "rule",
    "id": "layers.z",
    "severity": "warn",
    "area": "Layers",
@@ -524,14 +541,13 @@
    "area": "Fallbacks",
    "title": "The fallback font keeps the layout",
    "kind": "tolerance",
-   "why": "6 places",
+   "why": "2 places",
    "fresh": 0,
    "sample": [
-    "p.idcard__name: «ПетрКузнецов» 2 → 2 lines, 115 → 108px wide with the fallback font (390x844)",
     "h3.feature__title: «Легкий сбор данных от ар» 3 → 2 lines, 139 → 139px wide with the fallback font (390x844)",
-    "h1.hero__title: «Весь лейбл — на одной во» 2 → 2 lines, 542 → 575px wide with the fallback font (1440x900)"
+    "p.pub__author: «Максим Поплавский, CEO» 1 → 2 lines, 305 → 305px wide with the fallback font (390x844)"
    ],
-   "rank": 106
+   "rank": 102
   },
   {
    "type": "rule",
@@ -540,7 +556,7 @@
    "area": "Shape",
    "title": "Corners are radius roles (or pills)",
    "kind": "share",
-   "why": "82.4% of rounded boxes (wanted 90%)",
+   "why": "99.1% of rounded boxes (wanted 90%)",
    "fresh": 0,
    "sample": [
     "button.nav__burger: radius 8px on a 32×32 box (320x568 390x844 844x390 768x1024)"
@@ -553,8 +569,8 @@
    "severity": "warn",
    "area": "Icons",
    "title": "Icons take the colour of their text",
-   "kind": "share",
-   "why": "1 in their own colour (wanted undefined)",
+   "kind": "tolerance",
+   "why": "1 place",
    "fresh": 0,
    "sample": [
     "svg.cookies__check: drawn in its own colour, not the text's (currentColor) (320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080)"
@@ -574,20 +590,6 @@
     "img.pub__source: institute-logo-BDAvn4zf.webp: 411px wide for 154 device px (1366x650 1920x1080)"
    ],
    "rank": 101
-  },
-  {
-   "type": "rule",
-   "id": "health.head",
-   "severity": "warn",
-   "area": "Page health",
-   "title": "Titles, descriptions, outline",
-   "kind": "tolerance",
-   "why": "1 place",
-   "fresh": 0,
-   "sample": [
-    "/: a link to #top, which names nothing on the page"
-   ],
-   "rank": 81
   }
  ],
  "rules": [
@@ -599,6 +601,8 @@
    "how": "Every text holder at every measured size: its size against each role of design/scale.json at that screen (±0.6px). Objects sized as a whole or fitted to their box (hero, CTA and stack titles, ID cards, tiles) are left out.",
    "value": 100,
    "unit": "% of text holders",
+   "on": 442,
+   "total": 442,
    "pass": 97,
    "warn": 90,
    "status": "pass",
@@ -647,24 +651,44 @@
    "kind": "share",
    "title": "Every colour drawn is a token",
    "how": "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of design/tokens.json (±1.5 a channel, ±1.5% alpha).",
-   "value": 99.5,
+   "value": 98.3,
    "unit": "% of colour uses",
+   "on": 1244,
+   "total": 1265,
    "pass": 99,
    "warn": 95,
-   "status": "pass",
+   "status": "warn",
    "items": [
     {
      "key": "245,242,242,0.8",
      "where": "section.cookies",
      "what": "rgba(245, 242, 242, 0.8) as background",
      "value": 1,
+     "n": 1,
      "at": "320x568"
+    },
+    {
+     "key": "247,247,247,0.8",
+     "where": "section.cookies",
+     "what": "rgba(247, 247, 247, 0.8) as background",
+     "value": 1,
+     "n": 8,
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "247,247,247,0.7",
+     "where": "header.nav",
+     "what": "rgba(247, 247, 247, 0.7) as background",
+     "value": 1,
+     "n": 7,
+     "at": "320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080"
     },
     {
      "key": "238,234,233,0.8",
      "where": "section.cookies",
      "what": "rgba(238, 234, 233, 0.8) as background",
      "value": 1,
+     "n": 2,
      "at": "844x390 1366x650"
     },
     {
@@ -672,6 +696,7 @@
      "where": "section.cookies",
      "what": "rgba(245, 243, 243, 0.8) as background",
      "value": 1,
+     "n": 1,
      "at": "1024x768"
     },
     {
@@ -679,6 +704,7 @@
      "where": "section.cookies",
      "what": "rgba(248, 247, 246, 0.8) as background",
      "value": 1,
+     "n": 1,
      "at": "1440x900"
     },
     {
@@ -686,12 +712,13 @@
      "where": "section.cookies",
      "what": "rgba(249, 247, 247, 0.8) as background",
      "value": 1,
+     "n": 1,
      "at": "1920x1080"
     }
    ],
    "webkit": {
-    "status": "pass",
-    "value": 100
+    "status": "warn",
+    "value": 98.3
    },
    "accepted": 0
   },
@@ -733,8 +760,10 @@
    "kind": "share",
    "title": "Corners are radius roles (or pills)",
    "how": "Every rounded box: its corner against radius/s, m, l at that screen (±0.6px), a pill (half its height), or a listed object. Inner corners (outer − inset) show up here as their own values.",
-   "value": 82.4,
+   "value": 99.1,
    "unit": "% of rounded boxes",
+   "on": 371,
+   "total": 450,
    "pass": 90,
    "warn": 75,
    "status": "warn",
@@ -744,6 +773,7 @@
      "where": "button.nav__burger",
      "what": "radius 8px on a 32×32 box",
      "value": 8,
+     "n": 4,
      "at": "320x568 390x844 844x390 768x1024",
      "note": "roles here: s 16, m 24, l 32"
     },
@@ -752,6 +782,7 @@
      "where": "dl.idcard__table",
      "what": "radius 12px on a 207×71 box",
      "value": 12,
+     "n": 24,
      "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
      "note": "roles here: s 16, m 24, l 32",
      "accepted": "id-card-object"
@@ -761,6 +792,7 @@
      "where": "button.cookies__ok",
      "what": "radius 8px on a 48×48 box",
      "value": 8,
+     "n": 8,
      "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
      "note": "roles here: s 16, m 24, l 32",
      "accepted": "cookie-notice"
@@ -770,6 +802,7 @@
      "where": "div.idcard",
      "what": "radius 24px on a 240×345 box",
      "value": 24,
+     "n": 18,
      "at": "390x844 844x390 768x1024 1024x768 1440x900 1920x1080",
      "note": "roles here: s 17, m 25, l 33.5",
      "accepted": "id-card-object"
@@ -779,6 +812,7 @@
      "where": "div.idcard__face",
      "what": "radius 24px on a 240×345 box",
      "value": 24,
+     "n": 18,
      "at": "390x844 844x390 768x1024 1024x768 1440x900 1920x1080",
      "note": "roles here: s 17, m 25, l 33.5",
      "accepted": "id-card-object"
@@ -788,6 +822,7 @@
      "where": "section.cookies",
      "what": "radius 16px on a 276×64 box",
      "value": 16,
+     "n": 7,
      "at": "390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
      "note": "roles here: s 17, m 25, l 33.5",
      "accepted": "cookie-notice"
@@ -795,7 +830,7 @@
    ],
    "webkit": {
     "status": "warn",
-    "value": 86.6
+    "value": 83.8
    },
    "accepted": 5
   },
@@ -862,7 +897,7 @@
    ],
    "webkit": {
     "status": "pass",
-    "value": 4
+    "value": 5
    },
    "accepted": 0
   },
@@ -913,6 +948,12 @@
      "key": "backdrop-filtersection.cookies",
      "where": "section.cookies",
      "what": "backdrop-filter: blur(20px)",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "canvascanvas.fm-split",
+     "where": "canvas.fm-split",
+     "what": "canvas: 155×155",
      "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
     }
    ],
@@ -977,8 +1018,8 @@
     }
    ],
    "webkit": {
-    "status": "pass",
-    "value": 6
+    "status": "warn",
+    "value": 7
    },
    "accepted": 0
   },
@@ -1081,30 +1122,30 @@
      "at": "1024x768"
     },
     {
-     "key": "h3.feature__title|right|644",
+     "key": "h3.feature__title|right|651",
      "where": "h3.feature__title",
-     "what": "right edge +2.69px off the line at 643.5 (4 blocks on it)",
+     "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
      "value": 2.69,
      "at": "1366x650"
     },
     {
-     "key": "p.feature__desc|right|644",
+     "key": "p.feature__desc|right|651",
      "where": "p.feature__desc",
-     "what": "right edge +2.69px off the line at 643.5 (4 blocks on it)",
+     "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
      "value": 2.69,
      "at": "1366x650"
     },
     {
-     "key": "p.hero__lead|right|1195",
+     "key": "p.hero__lead|right|1202",
      "where": "p.hero__lead",
-     "what": "right edge -2px off the line at 1194.5 (3 blocks on it)",
+     "what": "right edge -2px off the line at 1202 (3 blocks on it)",
      "value": 2,
      "at": "1920x1080"
     }
    ],
    "webkit": {
-    "status": "pass",
-    "value": 0
+    "status": "warn",
+    "value": 11
    },
    "accepted": 0
   },
@@ -1256,6 +1297,12 @@
      "where": "canvas.dots",
      "what": "0.66 – 2.37 · css auto 576 / 280 · changes with the screen",
      "value": 11
+    },
+    {
+     "key": "canvas.fm-split",
+     "where": "canvas.fm-split",
+     "what": "1 · css auto 310 / 310 · 1:1",
+     "value": 1
     }
    ],
    "status": "info",
@@ -1267,7 +1314,7 @@
   {
    "id": "icons.colour",
    "area": "Icons",
-   "kind": "share",
+   "kind": "tolerance",
    "title": "Icons take the colour of their text",
    "how": "Inline icons outside the drawings: every fill and stroke equals the icon's own color (currentColor), so an icon follows its button's state.",
    "value": 1,
@@ -1282,8 +1329,8 @@
     }
    ],
    "webkit": {
-    "status": "pass",
-    "value": 0
+    "status": "warn",
+    "value": 1
    },
    "accepted": 0
   },
@@ -1321,7 +1368,7 @@
    ],
    "webkit": {
     "status": "pass",
-    "value": 3
+    "value": 4
    },
    "accepted": 0
   },
@@ -1385,14 +1432,14 @@
      "at": "844x390"
     },
     {
-     "key": "face-maria-240-CQNJS-ff.webp",
+     "key": "face-maria-240.webp",
      "where": "img.idcard__photo",
      "what": "face-maria-240-CQNJS-ff.webp: 240px wide for 271 device px (×3)",
      "value": 0.89,
      "at": "844x390"
     },
     {
-     "key": "face-maria-160-DbL-rgo5.webp",
+     "key": "face-maria-160.webp",
      "where": "img.idcard__photo",
      "what": "face-maria-160-DbL-rgo5.webp: 160px wide for 171 device px (×2)",
      "value": 0.94,
@@ -1774,17 +1821,10 @@
    "kind": "tolerance",
    "title": "The fallback font keeps the layout",
    "how": "The web fonts never arrive (blocked): every heading, text and button against the normal page; a change of line count or more than 6% of width warns (the text would jump when the font comes).",
-   "value": 6,
+   "value": 2,
    "unit": "texts that jump",
    "status": "warn",
    "items": [
-    {
-     "key": "p.idcard__nameПетрКузнецов",
-     "where": "p.idcard__name",
-     "what": "«ПетрКузнецов» 2 → 2 lines, 115 → 108px wide with the fallback font",
-     "value": 6.09,
-     "at": "390x844"
-    },
     {
      "key": "h3.feature__titleЛегкий сбор данных от ар",
      "where": "h3.feature__title",
@@ -1793,32 +1833,11 @@
      "at": "390x844"
     },
     {
-     "key": "h1.hero__titleВесь лейбл — на одной во",
-     "where": "h1.hero__title",
-     "what": "«Весь лейбл — на одной во» 2 → 2 lines, 542 → 575px wide with the fallback font",
-     "value": 6.09,
-     "at": "1440x900"
-    },
-    {
-     "key": "h3.card__titleЛюбые проекты лейбла — о",
-     "where": "h3.card__title",
-     "what": "«Любые проекты лейбла — о» 5 → 4 lines, 587 → 587px wide with the fallback font",
+     "key": "p.pub__authorМаксим Поплавский, CEO",
+     "where": "p.pub__author",
+     "what": "«Максим Поплавский, CEO» 1 → 2 lines, 305 → 305px wide with the fallback font",
      "value": 0,
-     "at": "1440x900"
-    },
-    {
-     "key": "h3.card__titleСтатусы и поля настраива",
-     "where": "h3.card__title",
-     "what": "«Статусы и поля настраива» 5 → 4 lines, 587 → 587px wide with the fallback font",
-     "value": 0,
-     "at": "1440x900"
-    },
-    {
-     "key": "h3.card__titleБудьте в курсе без уточн",
-     "where": "h3.card__title",
-     "what": "«Будьте в курсе без уточн» 5 → 4 lines, 587 → 587px wide with the fallback font",
-     "value": 0,
-     "at": "1440x900"
+     "at": "390x844"
     }
    ],
    "accepted": 0
@@ -1855,20 +1874,13 @@
    "kind": "tolerance",
    "title": "Titles, descriptions, outline",
    "how": "Every page: lang and viewport (fail), one h1 (fail), a title of 10–65 characters, a description of 50–170, headings that do not skip a level, in-page links that name an id, og:image and a manifest on the home page.",
-   "value": 1,
+   "value": 0,
    "unit": "notes",
-   "status": "warn",
-   "items": [
-    {
-     "key": "/#top",
-     "where": "/",
-     "what": "a link to #top, which names nothing on the page",
-     "at": ""
-    }
-   ],
+   "status": "pass",
+   "items": [],
    "webkit": {
-    "status": "warn",
-    "value": 1
+    "status": "pass",
+    "value": 0
    },
    "accepted": 0
   },
@@ -1944,7 +1956,7 @@
    "kind": "trend",
    "title": "A first visit does not get heavier",
    "how": "The bytes of a first visit scrolled top to bottom at 1440×900 (×2), as sent (Brotli for text), against the last deploy of main: more than 10% more warns (scripts alone: 5%).",
-   "value": 1141,
+   "value": 1142,
    "unit": "KB",
    "was": null,
    "status": "pass",
@@ -1962,16 +1974,16 @@
      "value": 83
     },
     {
-     "key": "images",
-     "where": "images",
-     "what": "44 files, 923 KB sent",
-     "value": 923
-    },
-    {
      "key": "js",
      "where": "js",
      "what": "15 files, 112 KB sent",
      "value": 112
+    },
+    {
+     "key": "images",
+     "where": "images",
+     "what": "45 files, 924 KB sent",
+     "value": 924
     },
     {
      "key": "css",
@@ -1991,8 +2003,8 @@
    "status": "pass",
    "value": 0,
    "unit": "places",
-   "items": [],
    "note": "",
+   "items": [],
    "accepted": 0
   },
   {
@@ -2004,8 +2016,8 @@
    "status": "pass",
    "value": 0,
    "unit": "places",
-   "items": [],
    "note": "",
+   "items": [],
    "accepted": 0
   },
   {
@@ -2017,8 +2029,8 @@
    "status": "pass",
    "value": 0,
    "unit": "places",
-   "items": [],
    "note": "",
+   "items": [],
    "accepted": 0
   },
   {
@@ -2030,29 +2042,29 @@
    "status": "fail",
    "value": 4,
    "unit": "places",
+   "note": "",
    "items": [
     {
-     "key": "src/styles/sections/hero.css:157 rgb(90 60 30 / 0.06)",
+     "key": "src/styles/sections/hero.css|rgb(90 60 30 / 0.06)#1",
      "where": "src/styles/sections/hero.css:157",
-     "what": "rgb(90 60 30 / 0.06)"
+     "what": "rgb(90 60 30 / 0.06) in .hero-chip"
     },
     {
-     "key": "src/styles/sections/sections.css:167 rgb(0 0 0 / 0.4)",
+     "key": "src/styles/sections/sections.css|rgb(0 0 0 / 0.4)#1",
      "where": "src/styles/sections/sections.css:167",
-     "what": "rgb(0 0 0 / 0.4)"
+     "what": "rgb(0 0 0 / 0.4) in .idcard__face"
     },
     {
-     "key": "src/styles/sections/sections.css:167 rgb(0 0 0 / 0.02)",
+     "key": "src/styles/sections/sections.css|rgb(0 0 0 / 0.02)#1",
      "where": "src/styles/sections/sections.css:167",
-     "what": "rgb(0 0 0 / 0.02)"
+     "what": "rgb(0 0 0 / 0.02) in .idcard__face"
     },
     {
-     "key": "src/styles/sections/sections.css:167 rgb(0 0 0 / 0.1)",
+     "key": "src/styles/sections/sections.css|rgb(0 0 0 / 0.1)#1",
      "where": "src/styles/sections/sections.css:167",
-     "what": "rgb(0 0 0 / 0.1)"
+     "what": "rgb(0 0 0 / 0.1) in .idcard__face"
     }
    ],
-   "note": "",
    "accepted": 0
   },
   {
@@ -2064,19 +2076,19 @@
    "status": "fail",
    "value": 2,
    "unit": "places",
+   "note": "Objects scaled as a whole (the ID cards' 24/13px, the tiles' --u, the hero chips' --u, the drawings' --fm-px) are pictures of UI, not page text.",
    "items": [
     {
-     "key": "src/styles/sections/sections.css:191 24px",
+     "key": "src/styles/sections/sections.css|24px#1",
      "where": "src/styles/sections/sections.css:191",
-     "what": "24px"
+     "what": "24px in .idcard__name"
     },
     {
-     "key": "src/styles/sections/sections.css:198 13px",
+     "key": "src/styles/sections/sections.css|13px#1",
      "where": "src/styles/sections/sections.css:198",
-     "what": "13px"
+     "what": "13px in .idcard__row"
     }
    ],
-   "note": "Objects scaled as a whole (the ID cards' 24/13px, the tiles' --u, the hero chips' --u, the drawings' --fm-px) are pictures of UI, not page text.",
    "accepted": 0
   },
   {
@@ -2088,14 +2100,14 @@
    "status": "fail",
    "value": 1,
    "unit": "places",
+   "note": "",
    "items": [
     {
-     "key": "src/styles/components/book.css:74 margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0",
+     "key": "src/styles/components/book.css|margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0#1",
      "where": "src/styles/components/book.css:74",
-     "what": "margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0"
+     "what": "margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0 in .book__box"
     }
    ],
-   "note": "",
    "accepted": 0
   },
   {
@@ -2105,31 +2117,21 @@
    "title": "Every var() defined, every token used",
    "how": "179 custom properties used, 106 tokens in tokens.css + tokens.gen.css (read from the code).",
    "status": "fail",
-   "value": 4,
+   "value": 2,
    "unit": "places",
+   "note": "",
    "items": [
     {
-     "key": "used, never defined: --i (src/styles/art/art.css)",
-     "where": "Code",
-     "what": "used, never defined: --i (src/styles/art/art.css)"
-    },
-    {
-     "key": "used, never defined: --turn (src/styles/art/art.css)",
-     "where": "Code",
-     "what": "used, never defined: --turn (src/styles/art/art.css)"
-    },
-    {
-     "key": "defined, never used: --ink-40",
+     "key": "Code|defined, never used: --ink-40#1",
      "where": "Code",
      "what": "defined, never used: --ink-40"
     },
     {
-     "key": "defined, never used: --purple-light",
+     "key": "Code|defined, never used: --purple-light#1",
      "where": "Code",
      "what": "defined, never used: --purple-light"
     }
    ],
-   "note": "",
    "accepted": 0
   },
   {
@@ -2141,8 +2143,8 @@
    "status": "pass",
    "value": 0,
    "unit": "places",
-   "items": [],
    "note": "",
+   "items": [],
    "accepted": 0
   },
   {
@@ -2154,14 +2156,14 @@
    "status": "fail",
    "value": 1,
    "unit": "places",
+   "note": "",
    "items": [
     {
-     "key": "src/styles/components/book.css:49 @media (width >= 62em)",
+     "key": "src/styles/components/book.css|@media (width >= 62em)#1",
      "where": "src/styles/components/book.css:49",
-     "what": "@media (width >= 62em)"
+     "what": "@media (width >= 62em) in @media (width >= 62em)"
     }
    ],
-   "note": "",
    "accepted": 0
   },
   {
@@ -2173,44 +2175,44 @@
    "status": "fail",
    "value": 7,
    "unit": "places",
+   "note": "",
    "items": [
     {
-     "key": "src/styles/components/book.css:152 ease-in-out",
+     "key": "src/styles/components/book.css|ease-in-out#1",
      "where": "src/styles/components/book.css:152",
-     "what": "ease-in-out"
+     "what": "ease-in-out in & i"
     },
     {
-     "key": "scripts/cookies.js:30 cubic-bezier(0.65, 0, 0.35, 1)",
+     "key": "scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
      "where": "scripts/cookies.js:30",
      "what": "cubic-bezier(0.65, 0, 0.35, 1)"
     },
     {
-     "key": "scripts/deck.js:78 ease = \"power2.in\"",
+     "key": "scripts/deck.js|ease = \"power2.in\"#1",
      "where": "scripts/deck.js:78",
      "what": "ease = \"power2.in\""
     },
     {
-     "key": "scripts/deck.js:80 ease = \"power1.out\"",
+     "key": "scripts/deck.js|ease = \"power1.out\"#1",
      "where": "scripts/deck.js:80",
      "what": "ease = \"power1.out\""
     },
     {
-     "key": "scripts/deck.js:166 ease: \"power2.inOut\"",
+     "key": "scripts/deck.js|ease: \"power2.inOut\"#1",
      "where": "scripts/deck.js:166",
      "what": "ease: \"power2.inOut\""
     },
     {
-     "key": "scripts/menu.js:18 CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"",
+     "key": "scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
      "where": "scripts/menu.js:18",
      "what": "CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\""
     },
     {
-     "key": "scripts/menu.js:19 CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"",
+     "key": "scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
      "where": "scripts/menu.js:19",
      "what": "CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\""
     }
    ],
-   "note": "",
    "accepted": 0
   },
   {
@@ -2222,12 +2224,75 @@
    "status": "pass",
    "value": 0,
    "unit": "places",
-   "items": [],
    "note": "",
+   "items": [],
    "accepted": 0
   }
  ],
  "findings": [
+  {
+   "key": "colour.palette::245,242,242,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(245, 242, 242, 0.8) as background",
+   "at": "320x568",
+   "new": false
+  },
+  {
+   "key": "colour.palette::247,247,247,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(247, 247, 247, 0.8) as background",
+   "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
+   "new": false
+  },
+  {
+   "key": "colour.palette::247,247,247,0.7",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "header.nav",
+   "what": "rgba(247, 247, 247, 0.7) as background",
+   "at": "320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080",
+   "new": false
+  },
+  {
+   "key": "colour.palette::238,234,233,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(238, 234, 233, 0.8) as background",
+   "at": "844x390 1366x650",
+   "new": false
+  },
+  {
+   "key": "colour.palette::245,243,243,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(245, 243, 243, 0.8) as background",
+   "at": "1024x768",
+   "new": false
+  },
+  {
+   "key": "colour.palette::248,247,246,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(248, 247, 246, 0.8) as background",
+   "at": "1440x900",
+   "new": false
+  },
+  {
+   "key": "colour.palette::249,247,247,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(249, 247, 247, 0.8) as background",
+   "at": "1920x1080",
+   "new": false
+  },
   {
    "key": "shape.radii::button.nav__burger|8",
    "rule": "shape.radii",
@@ -2235,6 +2300,60 @@
    "where": "button.nav__burger",
    "what": "radius 8px on a 32×32 box",
    "at": "320x568 390x844 844x390 768x1024",
+   "new": false
+  },
+  {
+   "key": "shape.borders::1",
+   "rule": "shape.borders",
+   "status": "pass",
+   "where": "a.btn, dl.idcard__table, div.idcard__row, button.btn, div.footer__legal, a.nav__link",
+   "what": "1px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgba(255, 255, 255, 0.55) 0px 0px 0px 1px inset, rgba(90, 60, 30, 0.06) 0px 1px 1px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.hero-chip",
+   "what": "box-shadow: rgba(255, 255, 255, 0.55) 0px 0px 0px 1px inset, rgba(90, 60, 30, 0.06) 0px 1px 1px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgb(102, 102, 102) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.idcard__face",
+   "what": "box-shadow: rgb(102, 102, 102) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgb(77, 77, 77) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.idcard__face",
+   "what": "box-shadow: rgb(77, 77, 77) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgb(51, 51, 51) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.idcard__face",
+   "what": "box-shadow: rgb(51, 51, 51) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgba(0, 0, 0, 0.1) 0px 4px 16px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "section.cookies",
+   "what": "box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 16px 0px",
+   "at": "",
    "new": false
   },
   {
@@ -2373,29 +2492,29 @@
    "new": false
   },
   {
-   "key": "align.edges::h3.feature__title|right|644",
+   "key": "align.edges::h3.feature__title|right|651",
    "rule": "align.edges",
    "status": "warn",
    "where": "h3.feature__title",
-   "what": "right edge +2.69px off the line at 643.5 (4 blocks on it)",
+   "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
    "at": "1366x650",
    "new": false
   },
   {
-   "key": "align.edges::p.feature__desc|right|644",
+   "key": "align.edges::p.feature__desc|right|651",
    "rule": "align.edges",
    "status": "warn",
    "where": "p.feature__desc",
-   "what": "right edge +2.69px off the line at 643.5 (4 blocks on it)",
+   "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
    "at": "1366x650",
    "new": false
   },
   {
-   "key": "align.edges::p.hero__lead|right|1195",
+   "key": "align.edges::p.hero__lead|right|1202",
    "rule": "align.edges",
    "status": "warn",
    "where": "p.hero__lead",
-   "what": "right edge -2px off the line at 1194.5 (3 blocks on it)",
+   "what": "right edge -2px off the line at 1202 (3 blocks on it)",
    "at": "1920x1080",
    "new": false
   },
@@ -2406,6 +2525,42 @@
    "where": "svg.cookies__check",
    "what": "drawn in its own colour, not the text's (currentColor)",
    "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::40×40",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.feature__icon",
+   "what": "40×40",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::20×20",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.btn__icon",
+   "what": "20×20",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::24×24",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.pub__arrow",
+   "what": "24×24",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::48×48",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.cookies__check",
+   "what": "48×48",
+   "at": "",
    "new": false
   },
   {
@@ -2472,7 +2627,7 @@
    "new": false
   },
   {
-   "key": "images.sharp::face-maria-240-CQNJS-ff.webp",
+   "key": "images.sharp::face-maria-240.webp",
    "rule": "images.sharp",
    "status": "warn",
    "where": "img.idcard__photo",
@@ -2481,7 +2636,7 @@
    "new": false
   },
   {
-   "key": "images.sharp::face-maria-160-DbL-rgo5.webp",
+   "key": "images.sharp::face-maria-160.webp",
    "rule": "images.sharp",
    "status": "warn",
    "where": "img.idcard__photo",
@@ -2508,12 +2663,12 @@
    "new": false
   },
   {
-   "key": "fallback.fonts::p.idcard__nameПетрКузнецов",
-   "rule": "fallback.fonts",
-   "status": "warn",
-   "where": "p.idcard__name",
-   "what": "«ПетрКузнецов» 2 → 2 lines, 115 → 108px wide with the fallback font",
-   "at": "390x844",
+   "key": "states.timing::0",
+   "rule": "states.timing",
+   "status": "pass",
+   "where": "a.skip, a.nav__logo, button.nav__burger",
+   "what": "no transition",
+   "at": "",
    "new": false
   },
   {
@@ -2526,133 +2681,124 @@
    "new": false
   },
   {
-   "key": "fallback.fonts::h1.hero__titleВесь лейбл — на одной во",
+   "key": "fallback.fonts::p.pub__authorМаксим Поплавский, CEO",
    "rule": "fallback.fonts",
    "status": "warn",
-   "where": "h1.hero__title",
-   "what": "«Весь лейбл — на одной во» 2 → 2 lines, 542 → 575px wide with the fallback font",
-   "at": "1440x900",
+   "where": "p.pub__author",
+   "what": "«Максим Поплавский, CEO» 1 → 2 lines, 305 → 305px wide with the fallback font",
+   "at": "390x844",
    "new": false
   },
   {
-   "key": "fallback.fonts::h3.card__titleЛюбые проекты лейбла — о",
-   "rule": "fallback.fonts",
-   "status": "warn",
-   "where": "h3.card__title",
-   "what": "«Любые проекты лейбла — о» 5 → 4 lines, 587 → 587px wide with the fallback font",
-   "at": "1440x900",
-   "new": false
-  },
-  {
-   "key": "fallback.fonts::h3.card__titleСтатусы и поля настраива",
-   "rule": "fallback.fonts",
-   "status": "warn",
-   "where": "h3.card__title",
-   "what": "«Статусы и поля настраива» 5 → 4 lines, 587 → 587px wide with the fallback font",
-   "at": "1440x900",
-   "new": false
-  },
-  {
-   "key": "fallback.fonts::h3.card__titleБудьте в курсе без уточн",
-   "rule": "fallback.fonts",
-   "status": "warn",
-   "where": "h3.card__title",
-   "what": "«Будьте в курсе без уточн» 5 → 4 lines, 587 → 587px wide with the fallback font",
-   "at": "1440x900",
-   "new": false
-  },
-  {
-   "key": "health.head::/#top",
-   "rule": "health.head",
-   "status": "warn",
-   "where": "/",
-   "what": "a link to #top, which names nothing on the page",
+   "key": "weight.total::html",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "html",
+   "what": "1 files, 20 KB sent",
    "at": "",
    "new": false
   },
   {
-   "key": "code.colour-tokens::src/styles/sections/hero.css:157 rgb(90 60 30 / 0.06)",
+   "key": "weight.total::fonts",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "fonts",
+   "what": "4 files, 83 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::js",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "js",
+   "what": "15 files, 112 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::images",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "images",
+   "what": "45 files, 924 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::css",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "css",
+   "what": "2 files, 3 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.colour-tokens::src/styles/sections/hero.css|rgb(90 60 30 / 0.06)#1",
    "rule": "code.colour-tokens",
    "status": "fail",
    "where": "src/styles/sections/hero.css:157",
-   "what": "rgb(90 60 30 / 0.06)",
+   "what": "rgb(90 60 30 / 0.06) in .hero-chip",
    "at": "",
    "new": false
   },
   {
-   "key": "code.colour-tokens::src/styles/sections/sections.css:167 rgb(0 0 0 / 0.4)",
+   "key": "code.colour-tokens::src/styles/sections/sections.css|rgb(0 0 0 / 0.4)#1",
    "rule": "code.colour-tokens",
    "status": "fail",
    "where": "src/styles/sections/sections.css:167",
-   "what": "rgb(0 0 0 / 0.4)",
+   "what": "rgb(0 0 0 / 0.4) in .idcard__face",
    "at": "",
    "new": false
   },
   {
-   "key": "code.colour-tokens::src/styles/sections/sections.css:167 rgb(0 0 0 / 0.02)",
+   "key": "code.colour-tokens::src/styles/sections/sections.css|rgb(0 0 0 / 0.02)#1",
    "rule": "code.colour-tokens",
    "status": "fail",
    "where": "src/styles/sections/sections.css:167",
-   "what": "rgb(0 0 0 / 0.02)",
+   "what": "rgb(0 0 0 / 0.02) in .idcard__face",
    "at": "",
    "new": false
   },
   {
-   "key": "code.colour-tokens::src/styles/sections/sections.css:167 rgb(0 0 0 / 0.1)",
+   "key": "code.colour-tokens::src/styles/sections/sections.css|rgb(0 0 0 / 0.1)#1",
    "rule": "code.colour-tokens",
    "status": "fail",
    "where": "src/styles/sections/sections.css:167",
-   "what": "rgb(0 0 0 / 0.1)",
+   "what": "rgb(0 0 0 / 0.1) in .idcard__face",
    "at": "",
    "new": false
   },
   {
-   "key": "code.type-from-scale::src/styles/sections/sections.css:191 24px",
+   "key": "code.type-from-scale::src/styles/sections/sections.css|24px#1",
    "rule": "code.type-from-scale",
    "status": "fail",
    "where": "src/styles/sections/sections.css:191",
-   "what": "24px",
+   "what": "24px in .idcard__name",
    "at": "",
    "new": false
   },
   {
-   "key": "code.type-from-scale::src/styles/sections/sections.css:198 13px",
+   "key": "code.type-from-scale::src/styles/sections/sections.css|13px#1",
    "rule": "code.type-from-scale",
    "status": "fail",
    "where": "src/styles/sections/sections.css:198",
-   "what": "13px",
+   "what": "13px in .idcard__row",
    "at": "",
    "new": false
   },
   {
-   "key": "code.fluid-from-scale::src/styles/components/book.css:74 margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0",
+   "key": "code.fluid-from-scale::src/styles/components/book.css|margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0#1",
    "rule": "code.fluid-from-scale",
    "status": "fail",
    "where": "src/styles/components/book.css:74",
-   "what": "margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0",
+   "what": "margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0 in .book__box",
    "at": "",
    "new": false
   },
   {
-   "key": "code.tokens-wired::used, never defined: --i (src/styles/art/art.css)",
-   "rule": "code.tokens-wired",
-   "status": "fail",
-   "where": "Code",
-   "what": "used, never defined: --i (src/styles/art/art.css)",
-   "at": "",
-   "new": false
-  },
-  {
-   "key": "code.tokens-wired::used, never defined: --turn (src/styles/art/art.css)",
-   "rule": "code.tokens-wired",
-   "status": "fail",
-   "where": "Code",
-   "what": "used, never defined: --turn (src/styles/art/art.css)",
-   "at": "",
-   "new": false
-  },
-  {
-   "key": "code.tokens-wired::defined, never used: --ink-40",
+   "key": "code.tokens-wired::Code|defined, never used: --ink-40#1",
    "rule": "code.tokens-wired",
    "status": "fail",
    "where": "Code",
@@ -2661,7 +2807,7 @@
    "new": false
   },
   {
-   "key": "code.tokens-wired::defined, never used: --purple-light",
+   "key": "code.tokens-wired::Code|defined, never used: --purple-light#1",
    "rule": "code.tokens-wired",
    "status": "fail",
    "where": "Code",
@@ -2670,25 +2816,25 @@
    "new": false
   },
   {
-   "key": "code.media-steps::src/styles/components/book.css:49 @media (width >= 62em)",
+   "key": "code.media-steps::src/styles/components/book.css|@media (width >= 62em)#1",
    "rule": "code.media-steps",
    "status": "fail",
    "where": "src/styles/components/book.css:49",
-   "what": "@media (width >= 62em)",
+   "what": "@media (width >= 62em) in @media (width >= 62em)",
    "at": "",
    "new": false
   },
   {
-   "key": "code.curves::src/styles/components/book.css:152 ease-in-out",
+   "key": "code.curves::src/styles/components/book.css|ease-in-out#1",
    "rule": "code.curves",
    "status": "fail",
    "where": "src/styles/components/book.css:152",
-   "what": "ease-in-out",
+   "what": "ease-in-out in & i",
    "at": "",
    "new": false
   },
   {
-   "key": "code.curves::scripts/cookies.js:30 cubic-bezier(0.65, 0, 0.35, 1)",
+   "key": "code.curves::scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
    "rule": "code.curves",
    "status": "fail",
    "where": "scripts/cookies.js:30",
@@ -2697,7 +2843,7 @@
    "new": false
   },
   {
-   "key": "code.curves::scripts/deck.js:78 ease = \"power2.in\"",
+   "key": "code.curves::scripts/deck.js|ease = \"power2.in\"#1",
    "rule": "code.curves",
    "status": "fail",
    "where": "scripts/deck.js:78",
@@ -2706,7 +2852,7 @@
    "new": false
   },
   {
-   "key": "code.curves::scripts/deck.js:80 ease = \"power1.out\"",
+   "key": "code.curves::scripts/deck.js|ease = \"power1.out\"#1",
    "rule": "code.curves",
    "status": "fail",
    "where": "scripts/deck.js:80",
@@ -2715,7 +2861,7 @@
    "new": false
   },
   {
-   "key": "code.curves::scripts/deck.js:166 ease: \"power2.inOut\"",
+   "key": "code.curves::scripts/deck.js|ease: \"power2.inOut\"#1",
    "rule": "code.curves",
    "status": "fail",
    "where": "scripts/deck.js:166",
@@ -2724,7 +2870,7 @@
    "new": false
   },
   {
-   "key": "code.curves::scripts/menu.js:18 CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"",
+   "key": "code.curves::scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
    "rule": "code.curves",
    "status": "fail",
    "where": "scripts/menu.js:18",
@@ -2733,7 +2879,7 @@
    "new": false
   },
   {
-   "key": "code.curves::scripts/menu.js:19 CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"",
+   "key": "code.curves::scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
    "rule": "code.curves",
    "status": "fail",
    "where": "scripts/menu.js:19",
