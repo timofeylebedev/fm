@@ -1,24 +1,24 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-10-26T00:43:45.140Z",
- "commit": "563c9cdf41d75a7df54026065107fb4b64849ee7",
+ "generated": "2026-10-26T00:55:30.515Z",
+ "commit": "281ccc8e6bf4881340c413e26a3768ea889d86c9",
  "ref": "claude/checks",
  "pr": "63",
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-10-26T00:33:35.930Z",
+   "when": "2026-10-26T00:46:12.208Z",
    "quick": false,
-   "seconds": 423,
+   "seconds": 385,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-10-26T00:40:55.027Z",
+   "when": "2026-10-26T00:52:54.696Z",
    "quick": true,
-   "seconds": 170,
+   "seconds": 156,
    "errors": []
   }
  },
@@ -706,9 +706,9 @@
    ],
    "webkit": {
     "status": "warn",
-    "value": 98.4,
+    "value": 98.3,
     "on": 1244,
-    "total": 1264
+    "total": 1265
    },
    "accepted": 0
   },
@@ -1966,16 +1966,16 @@
      "value": 83
     },
     {
-     "key": "js",
-     "where": "js",
-     "what": "15 files, 112 KB sent",
-     "value": 112
-    },
-    {
      "key": "images",
      "where": "images",
      "what": "44 files, 923 KB sent",
      "value": 923
+    },
+    {
+     "key": "js",
+     "where": "js",
+     "what": "15 files, 112 KB sent",
+     "value": 112
     },
     {
      "key": "css",
@@ -2700,20 +2700,20 @@
    "new": false
   },
   {
-   "key": "weight.total::js",
-   "rule": "weight.total",
-   "status": "pass",
-   "where": "js",
-   "what": "15 files, 112 KB sent",
-   "at": "",
-   "new": false
-  },
-  {
    "key": "weight.total::images",
    "rule": "weight.total",
    "status": "pass",
    "where": "images",
    "what": "44 files, 923 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::js",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "js",
+   "what": "15 files, 112 KB sent",
    "at": "",
    "new": false
   },
