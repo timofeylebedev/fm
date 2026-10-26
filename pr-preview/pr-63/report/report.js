@@ -567,7 +567,7 @@ function systemPage(tab) {
   const bar = el("div", "tabs"); bar.setAttribute("role", "tablist"); bar.setAttribute("aria-label", "Parts of the system");
   TABS.forEach(([k, label]) => {
     const ts = tabState(k);
-    const b = el("button", "", `${esc(label)}${ts ? `<span class="dot ${ts}" title="a check ${ts === "fail" ? "fails" : "warns"} here"></span>` : tabHasNew[k] ? '<span class="dot" title="something new ' + esc(SINCE) + '"></span>' : ""}`);
+    const b = el("button", "", `${esc(label)}${ts ? `<span class="dot ${ts}" title="a check ${ts === "fail" ? "fails" : "warns"} here"></span><span class="vh">, a check ${ts === "fail" ? "fails" : "warns"}</span>` : tabHasNew[k] ? '<span class="dot" title="something new ' + esc(SINCE) + '"></span><span class="vh">, something new</span>' : ""}`);
     b.type = "button"; b.setAttribute("role", "tab"); b.id = "tab-" + k; b.dataset.k = k;
     b.setAttribute("aria-selected", k === tab); b.tabIndex = k === tab ? 0 : -1; b.setAttribute("aria-controls", "panel");
     bar.appendChild(b);
@@ -985,16 +985,18 @@ function roundPage(n) {
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 const C = D.checks;                                        // null until the checks have run once
 const RULES = C ? C.rules : [];
-const STATUS_PILL = { fail: "bad", warn: "q", pass: "done", info: "x", ask: "q" };
-const STATUS_WORD = { fail: "fails", warn: "warns", pass: "holds", info: "inventory", ask: "question" };
+const STATUS_PILL = { error: "bad", fail: "bad", warn: "q", pass: "done", info: "x", ask: "q" };
+const STATUS_WORD = { error: "could not run", fail: "fails", warn: "warns", pass: "holds", info: "inventory", ask: "question" };
+// a link that comes from data (a question's «Open») is followed only to an https address
+const safeUrl = (u) => (/^https:\/\//.test(String(u || "")) ? u : null);
 const spill = (s, word) => `<span class="pill ${STATUS_PILL[s] || "x"}">${esc(word || STATUS_WORD[s] || s)}</span>`;
 // which tab of the system shows the checks of an area
 const AREA_TAB = { Type: "type", Colour: "colour", Fills: "colour", Space: "space", Shape: "space", Layout: "layout", Alignment: "layout", Ratios: "layout", Layers: "layout",
   Effects: "shadows", Motion: "motion", States: "components", Components: "components", Icons: "icons", Images: "icons", Logic: "behaviour", Fallbacks: "behaviour", Privacy: "behaviour",
   "Page health": "health", Weight: "health", Code: "grammar", Decisions: "decisions" };
 const rulesOf = (tab) => RULES.filter((r) => AREA_TAB[r.area] === tab);
-const tabState = (tab) => { const rs = rulesOf(tab); return rs.some((r) => r.status === "fail") ? "fail" : rs.some((r) => r.status === "warn") ? "warn" : null; };
-const measuredLine = () => C ? `measured on <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> (${esc(C.from || "")}${C.from === "the last deploy of main" && C.commit.slice(0, 7) !== D.meta.head ? ", not this build" : ""}) on ${esc(C.generated.slice(0, 16).replace("T", " "))} UTC · ${Object.entries(C.engines).map(([e, v]) => `${esc(e)} ${esc(v.version)}${v.quick ? " (sizes only)" : ""}`).join(" · ")}` : "";
+const tabState = (tab) => { const rs = rulesOf(tab); return rs.some((r) => r.status === "fail" || r.status === "error") ? "fail" : rs.some((r) => r.status === "warn") ? "warn" : null; };
+const measuredLine = () => C ? `measured on <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> (${esc(C.from || "")}${C.commit.slice(0, 7) !== D.meta.head && C.from !== "this build" ? ", not this build" : ""}) on ${esc(C.generated.slice(0, 16).replace("T", " "))} UTC · ${Object.entries(C.engines).map(([e, v]) => `${esc(e)} ${esc(v.version)}${v.quick ? " (sizes only)" : ""}`).join(" · ")}` : "";
 
 // copying an answer: the line goes to a chat with Claude, who records it (design/checks/answer.mjs)
 const toast = el("div", "toast"); toast.setAttribute("role", "status"); document.body.appendChild(toast);
@@ -1026,9 +1028,10 @@ function checksBlock(panel, tab) {
   const rs = rulesOf(tab); if (!rs.length) return;
   const blk = el("div", "block checks");
   const n = (s) => rs.filter((r) => r.status === s).length;
-  blk.innerHTML = `<h3>Checks</h3><p class="sub">${[["fail", "fail"], ["warn", "warn"], ["pass", "hold"], ["info", "inventory"]].filter(([s]) => n(s)).map(([s, w]) => `${n(s)} ${w}`).join(" · ")} — ${measuredLine()}. Every rule is measured on every deploy; <a href="#needs">what needs you</a> lists the failures across the system.</p>`;
+  blk.innerHTML = `<h3>Checks</h3><p class="sub">${[["error", "could not run"], ["fail", "fail"], ["warn", "warn"], ["pass", "hold"], ["info", "inventory"]].filter(([s]) => n(s)).map(([s, w]) => `${n(s)} ${w}`).join(" · ")} — ${measuredLine()}. Every rule is measured on every deploy; <a href="#needs">what needs you</a> lists the failures across the system.</p>`;
   const list = el("div", "checks__list");
-  rs.slice().sort((a, b) => ({ fail: 0, warn: 1, pass: 2, info: 3 }[a.status] - { fail: 0, warn: 1, pass: 2, info: 3 }[b.status])).forEach((r) => list.appendChild(ruleCard(r)));
+  const O = { error: 0, fail: 1, warn: 2, pass: 3, info: 4 };
+  rs.slice().sort((a, b) => O[a.status] - O[b.status]).forEach((r) => list.appendChild(ruleCard(r)));
   blk.appendChild(list);
   const at = panel.querySelector(":scope > .sub") || panel.querySelector(":scope > h2");
   at ? at.after(blk) : panel.appendChild(blk);
@@ -1041,7 +1044,7 @@ function questionCard(q) {
   const card = el("article", "ask" + (q.state === "reopened" ? " re" : ""));
   card.innerHTML = `<div class="ask__top">${(q.needs || []).map((n) => `<span class="pill ${n === "choice" ? "x" : "q"}">${esc(NEED_LABEL[n] || n)}</span>`).join(" ")}${q.state === "reopened" ? ' <span class="pill bad">changed since your answer</span>' : ""}<span class="note">since ${esc(q.since)}${q.from ? " · " + esc(q.from) : ""}</span></div>
     <p class="ask__q">${esc(q.ask)}</p>${q.state === "reopened" && q.answer ? `<p class="note">You answered «${esc(q.answer.choice)}» on ${esc(q.answer.when)}; since then ${esc((q.changed || []).join(", "))} changed.</p>` : ""}
-    <div class="ask__do">${q.link ? `<a class="btn-ghost" href="${esc(q.link)}" target="_blank" rel="noopener">Open ↗</a>` : ""}${(q.options || []).map((o, i) => `<button type="button" class="btn-ans" data-i="${i}">${esc(o)}</button>`).join("")}</div>
+    <div class="ask__do">${safeUrl(q.link) ? `<a class="btn-ghost" href="${esc(q.link)}" target="_blank" rel="noopener">Open ↗</a>` : ""}${(q.options || []).map((o, i) => `<button type="button" class="btn-ans" data-i="${i}">${esc(o)}</button>`).join("")}</div>
     <label class="ask__note"><span>Note (optional)</span><input type="text" placeholder="what you saw, on which device"></label>`;
   card.addEventListener("click", (e) => { const b = e.target.closest(".btn-ans"); if (!b) return; const note = $(".ask__note input", card).value.trim(); copyLine(`FM answer · ${q.id}: ${q.options[+b.dataset.i]}${note ? " — " + note : ""}`); });
   return card;
@@ -1060,12 +1063,15 @@ function needsPage() {
   const page = el("div", "page");
   const head = el("header", "head");
   const s = C && C.summary;
-  head.innerHTML = `<div class="eyebrow">What needs you</div><h1>${C ? (s.fail ? `${s.fail} ${s.fail === 1 ? "rule fails" : "rules fail"}, ${QUESTIONS.filter((q) => q.state === "open" || q.state === "reopened").length} questions wait for you` : `Every hard rule holds; ${QUESTIONS.filter((q) => q.state === "open" || q.state === "reopened").length} questions wait for you`) : "The checks have not run yet"}</h1>
-    <p class="lede">${C ? `${s.rules} rules of the system, measured in a browser on every deploy: ${s.pass} hold, ${s.warn} warn, ${s.fail} fail, ${s.info} are inventories. ${s.findings} places to look at${C.base ? ` (${s.new} new and ${s.fixed} fixed since the last deploy of main)` : ""}; ${s.accepted} covered by decisions. Each answer button copies a line for a chat with Claude, who records it.` : "They run on every deploy (design/checks/): this page fills once the first deploy after them has run. The questions below are as written."}</p>
+  const q = (v) => esc(v);
+  const openQ = QUESTIONS.filter((x) => x.state === "open" || x.state === "reopened").length;
+  head.innerHTML = `<div class="eyebrow">What needs you</div><h1>${C ? (s.errors ? `${q(s.errors)} rules could not be checked` : s.fail ? `${q(s.fail)} ${s.fail === 1 ? "rule fails" : "rules fail"}, ${openQ} questions wait for you` : `Every hard rule holds; ${openQ} questions wait for you`) : "The checks have not run yet"}</h1>
+    <p class="lede">${C ? `${q(s.rules)} rules of the system, measured in a browser on every deploy: ${q(s.pass)} hold, ${q(s.warn)} warn, ${q(s.fail)} fail${s.errors ? `, ${q(s.errors)} could not run` : ""}, ${q(s.info)} are inventories. ${q(s.findings)} places to look at${C.base ? ` (${q(s.new)} new and ${q(s.fixed)} fixed since the last deploy of main)` : ""}; ${q(s.accepted)} covered by decisions. Each answer button copies a line for a chat with Claude, who records it.` : "They run on every deploy (design/checks/): this page fills once the first deploy after them has run. The questions below are as written."}</p>
     ${C ? `<p class="note">${measuredLine()}</p>` : ""}`;
   page.appendChild(head);
   const sec = (title, sub, nodes) => { if (!nodes.length) return; const s2 = el("section", "sec"); s2.innerHTML = `<h2>${esc(title)}</h2>${sub ? `<p class="sub">${sub}</p>` : ""}`; const g = el("div", "needs"); nodes.forEach((n) => g.appendChild(n)); s2.appendChild(g); page.appendChild(s2); };
   const needs = C ? C.needs : [];
+  if (C && (C.errors || []).length) sec("The measuring failed", "These steps of the checks broke on this run, so the rules that need them say nothing (their last findings are kept as they were).", [el("ul", "plain", C.errors.map((e) => `<li><code>${esc(e)}</code></li>`).join(""))]);
   sec("Failing", "Hard rules that break, and shares under their floor. Fix, keep as designed (a decision), or change the rule.", needs.filter((n) => n.type === "rule" && n.severity === "fail").map(needCard));
   sec("Decisions to look at", "A decision whose measured value left its band, that has expired, or that no longer covers anything.", needs.filter((n) => n.type === "decision").map(needCard));
   sec("Questions for you", "What a check cannot answer: a look on your iPhone or in Safari on your Mac, or a choice. An answer stays valid until the files it is about change; then the question comes back here.", QUESTIONS.filter((q) => q.state === "open" || q.state === "reopened").sort((a, b) => (b.state === "reopened") - (a.state === "reopened") || a.since.localeCompare(b.since)).map(questionCard));
@@ -1091,7 +1097,7 @@ function historyPage() {
   box("Weight of a first visit", "KB sent (Brotli for text), scrolled top to bottom at 1440×900.", [series("total KB", (x) => x.weight && Math.round(x.weight.total / 1024), "KB", PAL[0]), series("scripts KB", (x) => x.weight && Math.round(x.weight.js / 1024), "KB", PAL[1]), series("pictures KB", (x) => x.weight && Math.round(x.weight.images / 1024), "KB", PAL[2])], "KB");
   const t = el("div", "block"); t.innerHTML = "<h3>Every deploy</h3>";
   t.appendChild(B.table({ stack: true, columns: [{ label: "#" , num: true }, { label: "Commit" }, { label: "Day" }, { label: "Fail", num: true }, { label: "Warn", num: true }, { label: "Places", num: true }, { label: "New", num: true }, { label: "Fixed", num: true }],
-    rows: H.map((x, i) => [i + 1, `<a href="https://github.com/timofeylebedev/fm/commit/${esc(x.commit)}"><code>${esc(x.sha)}</code></a>`, esc(x.day), x.summary.fail, x.summary.warn, x.summary.findings, x.summary.new, x.summary.fixed]).reverse() }));
+    rows: H.map((x, i) => [i + 1, `<a href="https://github.com/timofeylebedev/fm/commit/${esc(x.commit)}"><code>${esc(x.sha)}</code></a>`, esc(x.day), esc(x.summary.fail), esc(x.summary.warn), esc(x.summary.findings), esc(x.summary.new), esc(x.summary.fixed)]).reverse() }));
   page.appendChild(t);
   return page;
 }
