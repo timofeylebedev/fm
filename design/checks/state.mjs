@@ -77,7 +77,8 @@ if (webkit) {
     const r = rules.find((x) => x.id === w.id); if (!r || r.status === "error") continue;
     const step = STEP_OF(w.id);
     if (step && (wkFailed.has(step) || !(webkit.timings && step in webkit.timings))) continue;   // not measured in WebKit
-    r.webkit = { status: w.kind === "inventory" ? "info" : w.status, value: w.value };
+    r.webkit = { status: w.kind === "inventory" ? "info" : w.status, value: w.value, on: w.on, total: w.total };
+    Object.defineProperty(r, "wkItems", { value: w.items, enumerable: false });     // for the decisions, not written
     if (SEV[r.webkit.status] > SEV[r.status]) {
       const known = new Set(r.items.map((i) => i.key));
       for (const i of w.items) if (!known.has(i.key)) r.items.push({ ...i, engine: "webkit" });
@@ -103,6 +104,7 @@ const decisionState = decisions.map((d) => {
     if (!r) { missing.push(`no rule «${b.rule}»`); continue; }
     if (r.status === "error") { missing.push(`«${b.rule}» could not run`); continue; }
     const re = new RegExp(b.match || ".");
+    for (const i of r.wkItems || []) if (re.test(`${i.where} ${i.what}`)) i.accepted = d.id;
     for (const i of r.items) {
       if (!re.test(`${i.where} ${i.what}`)) continue;
       i.accepted = d.id; covered++;
@@ -120,9 +122,12 @@ for (const r of rules) {
   const open = r.items.filter((i) => !i.accepted);
   r.accepted = r.items.length - open.length;
   if (r.kind === "share" && r.total) {
-    const ok = r.on + r.items.filter((i) => i.accepted).reduce((a, i) => a + (i.n || 0), 0);
-    r.value = Math.round((ok / r.total) * 1000) / 10;
-    if (!r.webkit || SEV[r.webkit.status] <= SEV[band(r, r.value)]) r.status = band(r, r.value);
+    const acc = r.items.filter((i) => i.accepted).reduce((a, i) => a + (i.n || 0), 0);
+    r.value = Math.round(((r.on + acc) / r.total) * 1000) / 10;
+    let st = band(r, r.value);
+    // WebKit's share is scored again the same way (the accepted uses are the same places)
+    if (r.webkit?.total) { const wacc = (r.wkItems || []).filter((i) => i.accepted).reduce((a, i) => a + (i.n || 0), 0); r.webkit.value = Math.round(((r.webkit.on + wacc) / r.webkit.total) * 1000) / 10; r.webkit.status = band(r, r.webkit.value); if (SEV[r.webkit.status] > SEV[st]) st = r.webkit.status; }
+    r.status = st;
   } else if (r.accepted && (r.status === "fail" || r.status === "warn") && !open.length) r.status = "pass";
 }
 
