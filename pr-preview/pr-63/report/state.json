@@ -1,0 +1,3458 @@
+{
+ "schema": 1,
+ "site": "Flow Medium",
+ "generated": "2026-10-26T00:30:55.621Z",
+ "commit": "ebcb6cd48d2a99ad4825ce0653451b2c02392666",
+ "ref": "claude/checks",
+ "pr": "63",
+ "errors": [],
+ "engines": {
+  "chromium": {
+   "version": "141.0.7390.37",
+   "when": "2026-10-26T00:22:09.801Z",
+   "quick": false,
+   "seconds": 361,
+   "errors": []
+  },
+  "webkit": {
+   "version": "26.0",
+   "when": "2026-10-26T00:28:28.878Z",
+   "quick": true,
+   "seconds": 144,
+   "errors": []
+  }
+ },
+ "base": null,
+ "kinds": {
+  "hard": "any item is a failure",
+  "share": "a share of the uses must follow the rule",
+  "tolerance": "each item inside a band",
+  "convention": "a count that should stay small",
+  "trend": "compared with the last deploy",
+  "scenario": "played in a browser",
+  "inventory": "what there is, no verdict"
+ },
+ "summary": {
+  "rules": 54,
+  "errors": 0,
+  "pass": 34,
+  "warn": 8,
+  "fail": 6,
+  "info": 6,
+  "findings": 73,
+  "new": 0,
+  "fixed": 0,
+  "accepted": 5,
+  "questions": 17
+ },
+ "needs": [
+  {
+   "type": "rule",
+   "id": "code.curves",
+   "severity": "fail",
+   "area": "Motion",
+   "title": "Curves from one table (motion.js)",
+   "kind": "hard",
+   "why": "7 places",
+   "fresh": 0,
+   "sample": [
+    "src/styles/components/book.css:152: ease-in-out in & i",
+    "scripts/cookies.js:30: cubic-bezier(0.65, 0, 0.35, 1)",
+    "scripts/deck.js:78: ease = \"power2.in\""
+   ],
+   "rank": 307
+  },
+  {
+   "type": "rule",
+   "id": "code.colour-tokens",
+   "severity": "fail",
+   "area": "Colour",
+   "title": "Colours from the tokens only",
+   "kind": "hard",
+   "why": "4 places",
+   "fresh": 0,
+   "sample": [
+    "src/styles/sections/hero.css:157: rgb(90 60 30 / 0.06) in .hero-chip",
+    "src/styles/sections/sections.css:167: rgb(0 0 0 / 0.4) in .idcard__face",
+    "src/styles/sections/sections.css:167: rgb(0 0 0 / 0.02) in .idcard__face"
+   ],
+   "rank": 304
+  },
+  {
+   "type": "rule",
+   "id": "code.type-from-scale",
+   "severity": "fail",
+   "area": "Type",
+   "title": "Text sizes from the scale",
+   "kind": "hard",
+   "why": "2 places",
+   "fresh": 0,
+   "sample": [
+    "src/styles/sections/sections.css:191: 24px in .idcard__name",
+    "src/styles/sections/sections.css:198: 13px in .idcard__row"
+   ],
+   "rank": 302
+  },
+  {
+   "type": "rule",
+   "id": "code.tokens-wired",
+   "severity": "fail",
+   "area": "Code",
+   "title": "Every var() defined, every token used",
+   "kind": "hard",
+   "why": "2 places",
+   "fresh": 0,
+   "sample": [
+    "Code: defined, never used: --ink-40",
+    "Code: defined, never used: --purple-light"
+   ],
+   "rank": 302
+  },
+  {
+   "type": "rule",
+   "id": "code.fluid-from-scale",
+   "severity": "fail",
+   "area": "Space",
+   "title": "Spacing, radii and type never own vw/cq/clamp()",
+   "kind": "hard",
+   "why": "1 place",
+   "fresh": 0,
+   "sample": [
+    "src/styles/components/book.css:74: margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0 in .book__box"
+   ],
+   "rank": 301
+  },
+  {
+   "type": "rule",
+   "id": "code.media-steps",
+   "severity": "fail",
+   "area": "Layout",
+   "title": "Screen steps only from media.css",
+   "kind": "hard",
+   "why": "1 place",
+   "fresh": 0,
+   "sample": [
+    "src/styles/components/book.css:49: @media (width >= 62em) in @media (width >= 62em)"
+   ],
+   "rank": 301
+  },
+  {
+   "type": "question",
+   "id": "short-screen-headings",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "On short screens the headings meet: on 1366×650 the hero title is 55px and a section heading 54px; on phones turned sideways a heading is bigger than the hero. Keep a section heading at most the hero ÷ 1.2 on short screens?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/report/#system/type",
+   "options": [
+    "Yes, keep the distance",
+    "Leave as it is"
+   ],
+   "since": "2026-10-17",
+   "from": "PR #5",
+   "why": "open since 2026-10-17 (PR #5)",
+   "rank": 209
+  },
+  {
+   "type": "question",
+   "id": "tools-white-reload",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "On your iPhone, scroll to the tools and reload there, in Safari and in Telegram: does the section stay as it is (not white)?",
+   "needs": [
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "options": [
+    "Stays as it is",
+    "Turns white"
+   ],
+   "since": "2026-10-18",
+   "from": "PR #8",
+   "why": "open since 2026-10-18 (PR #8)",
+   "rank": 208
+  },
+  {
+   "type": "question",
+   "id": "planerka-account",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Which Planerka account should the booking window use? flow-medium-8nzjz3/demo (now; shows Planerka's ribbon on the free plan) or t-l-sfkcrg/30min (hides the branding)?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#demo",
+   "options": [
+    "flow-medium-8nzjz3/demo",
+    "t-l-sfkcrg/30min"
+   ],
+   "since": "2026-10-19",
+   "from": "PR #11",
+   "why": "open since 2026-10-19 (PR #11)",
+   "rank": 207
+  },
+  {
+   "type": "question",
+   "id": "cookie-text",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The cookie notice says «Оставаясь, вы даете согласие» (staying = consent), but only «ОК» counts. Change it to «Нажимая «ОК», вы даёте согласие на обработку данных»?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Change the text",
+    "Keep the text"
+   ],
+   "since": "2026-10-19",
+   "from": "PR #10",
+   "why": "open since 2026-10-19 (PR #10)",
+   "rank": 207
+  },
+  {
+   "type": "question",
+   "id": "cookie-withdraw",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "A way to take consent back (e.g. «Настройки куки» in the footer, which shows the notice again): design one now?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Yes, design it",
+    "Not now"
+   ],
+   "since": "2026-10-19",
+   "from": "PR #10",
+   "why": "open since 2026-10-19 (PR #10)",
+   "rank": 207
+  },
+  {
+   "type": "question",
+   "id": "hero-shake-safari",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Reload the home page a few times (and once as a first visit): does the team picture in the hero still shake or jump in Safari on your Mac and on your iPhone?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "No shake",
+    "Still shakes"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #22, PR #61",
+   "why": "open since 2026-10-20 (PR #22, PR #61)",
+   "rank": 206
+  },
+  {
+   "type": "question",
+   "id": "ring-safari",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The ring of covers in Safari on your Mac and iPhone: smooth and sharp? And is it OK that browsers without a real GPU show it still?",
+   "needs": [
+    "mac-safari",
+    "iphone",
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Smooth, a still ring is fine",
+    "Not smooth or not sharp",
+    "A still ring is not fine"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #20",
+   "why": "open since 2026-10-20 (PR #20)",
+   "rank": 206
+  },
+  {
+   "type": "question",
+   "id": "navbar-sideways-iphone",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Your iPhone turned sideways, in Safari: scroll up and down past the hero. Is the navbar's jump gone, and does it follow smoothly?",
+   "needs": [
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Smooth, no jump",
+    "Still jumps"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #13",
+   "why": "open since 2026-10-20 (PR #13)",
+   "rank": 206
+  },
+  {
+   "type": "question",
+   "id": "short-laptop-hero",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "On short laptop windows (1366×650, 1280×620) the hero now runs past the first screen and the first card's pill is not seen. Is that OK, or should the team picture be smaller there?",
+   "needs": [
+    "choice",
+    "eye"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "OK as it is",
+    "Make the picture smaller on short screens"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #13",
+   "why": "open since 2026-10-20 (PR #13)",
+   "rank": 206
+  },
+  {
+   "type": "question",
+   "id": "wide-card-drawing",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "On a wide stack card the drawing is cut at the card's top while the card opens (it stays centred in the open part). Is that the look you wanted?",
+   "needs": [
+    "eye"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Yes",
+    "No (say how it should be)"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #22",
+   "why": "open since 2026-10-20 (PR #22)",
+   "rank": 206
+  },
+  {
+   "type": "question",
+   "id": "fifth-publication",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The publications include a copy of «Как разобраться в отчетах по роялти» put there to test «Показать больше». Which real publication goes in its place?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#publications",
+   "options": [
+    "Send the publication",
+    "Remove the copy"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #19",
+   "why": "open since 2026-10-20 (PR #19)",
+   "rank": 206
+  },
+  {
+   "type": "question",
+   "id": "report-on-devices",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The review page on your devices: the System tabs one by one (the Type slider), zooming a chart on Responsive (trackpad pinch in Safari), the Typesetter demo — on your Mac in Safari and on your iPhone. Does each work?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/report/",
+   "options": [
+    "All works",
+    "Something is broken (say what)"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #62",
+   "why": "open since 2026-10-25 (PR #62)",
+   "rank": 201
+  },
+  {
+   "type": "question",
+   "id": "fast-scroll-drawings",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Right after the page loads, scroll fast to the bottom: are the drawings of the cards there in time, or do you see empty cards? Also open the link to #clients: does it land on the clients?",
+   "needs": [
+    "iphone",
+    "mac-safari"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#clients",
+   "options": [
+    "In time, lands right",
+    "Empty cards or a wrong landing (say where)"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #61",
+   "why": "open since 2026-10-25 (PR #61)",
+   "rank": 201
+  },
+  {
+   "type": "question",
+   "id": "cta-dust-devices",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The CTA card's dust on your Mac (Safari) and iPhone: does it look as in the lab, and does the phone stay smooth while it moves (about 217 000 specks there)?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "options": [
+    "Looks right and smooth",
+    "Looks wrong",
+    "Stutters on the phone"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #58",
+   "why": "open since 2026-10-25 (PR #58)",
+   "rank": 201
+  },
+  {
+   "type": "question",
+   "id": "cta-lead-contrast",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The CTA's lead stays just under 4.5 : 1 over the dust (4.45 at 1440, 4.21 at 390). Keep it, or dim the middle a bit more so it passes?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "options": [
+    "Keep as it is",
+    "Dim more until it passes 4.5 : 1"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #58",
+   "why": "open since 2026-10-25 (PR #58)",
+   "rank": 201
+  },
+  {
+   "type": "question",
+   "id": "cta-dust-shape",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Which shape for the CTA's dust: as it is on the site now, the burst at the left and right edges (lab of Oct 25), or the one band round the border (lab of Oct 24)?",
+   "needs": [
+    "choice",
+    "eye"
+   ],
+   "link": "https://claude.ai/artifact/PyjsPWv2XDVEYto6M5D7SF",
+   "options": [
+    "As on the site",
+    "Burst at the sides",
+    "One band round the border"
+   ],
+   "since": "2026-10-25",
+   "from": "labs of Oct 24 and Oct 25",
+   "why": "open since 2026-10-25 (labs of Oct 24 and Oct 25)",
+   "rank": 201
+  },
+  {
+   "type": "question",
+   "id": "hsts-preload",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "For the real host (flowmedium.pro): add HSTS preload? It binds every subdomain to HTTPS for good.",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://github.com/timofeylebedev/fm/tree/main/deploy",
+   "options": [
+    "Yes, preload",
+    "No"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #61",
+   "why": "open since 2026-10-25 (PR #61)",
+   "rank": 201
+  },
+  {
+   "type": "rule",
+   "id": "align.edges",
+   "severity": "warn",
+   "area": "Alignment",
+   "title": "Edges line up",
+   "kind": "tolerance",
+   "why": "11 places",
+   "fresh": 0,
+   "sample": [
+    "p.footer__note: left edge -1px off the line at 58 (3 blocks on it) (320x568)",
+    "p.footer__note: right edge +1px off the line at 262 (3 blocks on it) (320x568)",
+    "p.footer__note: left edge -0.88px off the line at 92.88 (3 blocks on it) (390x844)"
+   ],
+   "rank": 111
+  },
+  {
+   "type": "rule",
+   "id": "images.sharp",
+   "severity": "warn",
+   "area": "Images",
+   "title": "Pictures are sharp",
+   "kind": "tolerance",
+   "why": "10 places",
+   "fresh": 0,
+   "sample": [
+    "img.tool__img: fm-litmus-820-DGVGnO6L.avif: 820px wide for 877 device px (×3) (390x844 844x390 1440x900)",
+    "img.tool__img: fm-lens-820-4iU21A1U.avif: 820px wide for 877 device px (×3) (390x844 844x390 1440x900)",
+    "img.pub__source: institute-logo-BDAvn4zf.webp: 411px wide for 462 device px (×3) (390x844 844x390)"
+   ],
+   "rank": 110
+  },
+  {
+   "type": "rule",
+   "id": "colour.palette",
+   "severity": "warn",
+   "area": "Colour",
+   "title": "Every colour drawn is a token",
+   "kind": "share",
+   "why": "98.3% of colour uses (wanted 99%)",
+   "fresh": 0,
+   "sample": [
+    "section.cookies: rgba(245, 242, 242, 0.8) as background (320x568)",
+    "section.cookies: rgba(247, 247, 247, 0.8) as background (320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080)",
+    "header.nav: rgba(247, 247, 247, 0.7) as background (320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080)"
+   ],
+   "rank": 107
+  },
+  {
+   "type": "rule",
+   "id": "layers.z",
+   "severity": "warn",
+   "area": "Layers",
+   "title": "A short ladder of layers",
+   "kind": "convention",
+   "why": "7 places",
+   "fresh": 0,
+   "sample": [
+    "i.nav__pill: z-index -1",
+    "div.hero__inner, section.access, li.access__slot, p.stat__number, p.stat__label, div.cta__content: z-index 1",
+    "li.access__slot, div.pub__watch: z-index 2"
+   ],
+   "rank": 107
+  },
+  {
+   "type": "rule",
+   "id": "fallback.fonts",
+   "severity": "warn",
+   "area": "Fallbacks",
+   "title": "The fallback font keeps the layout",
+   "kind": "tolerance",
+   "why": "2 places",
+   "fresh": 0,
+   "sample": [
+    "h3.feature__title: «Легкий сбор данных от ар» 3 → 2 lines, 139 → 139px wide with the fallback font (390x844)",
+    "p.pub__author: «Максим Поплавский, CEO» 1 → 2 lines, 305 → 305px wide with the fallback font (390x844)"
+   ],
+   "rank": 102
+  },
+  {
+   "type": "rule",
+   "id": "shape.radii",
+   "severity": "warn",
+   "area": "Shape",
+   "title": "Corners are radius roles (or pills)",
+   "kind": "share",
+   "why": "99.1% of rounded boxes (wanted 90%)",
+   "fresh": 0,
+   "sample": [
+    "button.nav__burger: radius 8px on a 32×32 box (320x568 390x844 844x390 768x1024)"
+   ],
+   "rank": 101
+  },
+  {
+   "type": "rule",
+   "id": "icons.colour",
+   "severity": "warn",
+   "area": "Icons",
+   "title": "Icons take the colour of their text",
+   "kind": "tolerance",
+   "why": "1 place",
+   "fresh": 0,
+   "sample": [
+    "svg.cookies__check: drawn in its own colour, not the text's (currentColor) (320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080)"
+   ],
+   "rank": 101
+  },
+  {
+   "type": "rule",
+   "id": "images.weight",
+   "severity": "warn",
+   "area": "Images",
+   "title": "Pictures are not much bigger than drawn",
+   "kind": "tolerance",
+   "why": "1 place",
+   "fresh": 0,
+   "sample": [
+    "img.pub__source: institute-logo-BDAvn4zf.webp: 411px wide for 154 device px (1366x650 1920x1080)"
+   ],
+   "rank": 101
+  }
+ ],
+ "rules": [
+  {
+   "id": "type.roles",
+   "area": "Type",
+   "kind": "share",
+   "title": "Text is set in the roles of the scale",
+   "how": "Every text holder at every measured size: its size against each role of design/scale.json at that screen (±0.6px). Objects sized as a whole or fitted to their box (hero, CTA and stack titles, ID cards, tiles) are left out.",
+   "value": 100,
+   "unit": "% of text holders",
+   "on": 442,
+   "total": 442,
+   "pass": 97,
+   "warn": 90,
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 100
+   },
+   "accepted": 0
+  },
+  {
+   "id": "type.widows",
+   "area": "Type",
+   "kind": "tolerance",
+   "title": "No paragraph ends on one short word",
+   "how": "Every paragraph of 2+ lines at every measured size: its last line, word by word as drawn. A long word alone is fine; one of 4 letters or fewer is a widow.",
+   "value": 0,
+   "unit": "widows",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "type.measure",
+   "area": "Type",
+   "kind": "tolerance",
+   "title": "Lines of running text are not too long",
+   "how": "Paragraphs of 3+ lines: the median characters a line, at most 90 (45–75 is the classic range; headings and short texts left out).",
+   "value": 0,
+   "unit": "too long",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "colour.palette",
+   "area": "Colour",
+   "kind": "share",
+   "title": "Every colour drawn is a token",
+   "how": "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of design/tokens.json (±1.5 a channel, ±1.5% alpha).",
+   "value": 98.3,
+   "unit": "% of colour uses",
+   "on": 1244,
+   "total": 1265,
+   "pass": 99,
+   "warn": 95,
+   "status": "warn",
+   "items": [
+    {
+     "key": "245,242,242,0.8",
+     "where": "section.cookies",
+     "what": "rgba(245, 242, 242, 0.8) as background",
+     "value": 1,
+     "n": 1,
+     "at": "320x568"
+    },
+    {
+     "key": "247,247,247,0.8",
+     "where": "section.cookies",
+     "what": "rgba(247, 247, 247, 0.8) as background",
+     "value": 1,
+     "n": 8,
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "247,247,247,0.7",
+     "where": "header.nav",
+     "what": "rgba(247, 247, 247, 0.7) as background",
+     "value": 1,
+     "n": 7,
+     "at": "320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "238,234,233,0.8",
+     "where": "section.cookies",
+     "what": "rgba(238, 234, 233, 0.8) as background",
+     "value": 1,
+     "n": 2,
+     "at": "844x390 1366x650"
+    },
+    {
+     "key": "245,243,243,0.8",
+     "where": "section.cookies",
+     "what": "rgba(245, 243, 243, 0.8) as background",
+     "value": 1,
+     "n": 1,
+     "at": "1024x768"
+    },
+    {
+     "key": "248,247,246,0.8",
+     "where": "section.cookies",
+     "what": "rgba(248, 247, 246, 0.8) as background",
+     "value": 1,
+     "n": 1,
+     "at": "1440x900"
+    },
+    {
+     "key": "249,247,247,0.8",
+     "where": "section.cookies",
+     "what": "rgba(249, 247, 247, 0.8) as background",
+     "value": 1,
+     "n": 1,
+     "at": "1920x1080"
+    }
+   ],
+   "webkit": {
+    "status": "warn",
+    "value": 98.3
+   },
+   "accepted": 0
+  },
+  {
+   "id": "fills.kinds",
+   "area": "Fills",
+   "kind": "inventory",
+   "title": "Kinds of fill",
+   "how": "Backgrounds the browser drew, by kind: solid, see-through (alpha), gradient, picture.",
+   "items": [
+    {
+     "key": "solid",
+     "where": "a.skip, button.nav__burger i, section.hero, a.btn, section.royalty, article.royalty__card",
+     "what": "solid",
+     "value": 26
+    },
+    {
+     "key": "alpha",
+     "where": "header.nav, li.feature, li.logo-card, a.pub, a.pub__cover, section.cookies",
+     "what": "alpha",
+     "value": 21
+    },
+    {
+     "key": "picture",
+     "where": "div.cta__strip",
+     "what": "picture",
+     "value": 1
+    }
+   ],
+   "status": "info",
+   "webkit": {
+    "status": "info"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "shape.radii",
+   "area": "Shape",
+   "kind": "share",
+   "title": "Corners are radius roles (or pills)",
+   "how": "Every rounded box: its corner against radius/s, m, l at that screen (±0.6px), a pill (half its height), or a listed object. Inner corners (outer − inset) show up here as their own values.",
+   "value": 99.1,
+   "unit": "% of rounded boxes",
+   "on": 371,
+   "total": 450,
+   "pass": 90,
+   "warn": 75,
+   "status": "warn",
+   "items": [
+    {
+     "key": "button.nav__burger|8",
+     "where": "button.nav__burger",
+     "what": "radius 8px on a 32×32 box",
+     "value": 8,
+     "n": 4,
+     "at": "320x568 390x844 844x390 768x1024",
+     "note": "roles here: s 16, m 24, l 32"
+    },
+    {
+     "key": "dl.idcard__table|12",
+     "where": "dl.idcard__table",
+     "what": "radius 12px on a 207×71 box",
+     "value": 12,
+     "n": 24,
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
+     "note": "roles here: s 16, m 24, l 32",
+     "accepted": "id-card-object"
+    },
+    {
+     "key": "button.cookies__ok|8",
+     "where": "button.cookies__ok",
+     "what": "radius 8px on a 48×48 box",
+     "value": 8,
+     "n": 8,
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
+     "note": "roles here: s 16, m 24, l 32",
+     "accepted": "cookie-notice"
+    },
+    {
+     "key": "div.idcard|24",
+     "where": "div.idcard",
+     "what": "radius 24px on a 240×345 box",
+     "value": 24,
+     "n": 18,
+     "at": "390x844 844x390 768x1024 1024x768 1440x900 1920x1080",
+     "note": "roles here: s 17, m 25, l 33.5",
+     "accepted": "id-card-object"
+    },
+    {
+     "key": "div.idcard__face|24",
+     "where": "div.idcard__face",
+     "what": "radius 24px on a 240×345 box",
+     "value": 24,
+     "n": 18,
+     "at": "390x844 844x390 768x1024 1024x768 1440x900 1920x1080",
+     "note": "roles here: s 17, m 25, l 33.5",
+     "accepted": "id-card-object"
+    },
+    {
+     "key": "section.cookies|16",
+     "where": "section.cookies",
+     "what": "radius 16px on a 276×64 box",
+     "value": 16,
+     "n": 7,
+     "at": "390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
+     "note": "roles here: s 17, m 25, l 33.5",
+     "accepted": "cookie-notice"
+    }
+   ],
+   "webkit": {
+    "status": "warn",
+    "value": 83.8
+   },
+   "accepted": 5
+  },
+  {
+   "id": "shape.borders",
+   "area": "Shape",
+   "kind": "convention",
+   "title": "Few border widths",
+   "how": "Distinct border widths drawn at all sizes; more than 2 warns.",
+   "value": 1,
+   "unit": "widths",
+   "warn": 2,
+   "status": "pass",
+   "items": [
+    {
+     "key": "1",
+     "where": "a.btn, dl.idcard__table, div.idcard__row, button.btn, div.footer__legal, a.nav__link",
+     "what": "1px",
+     "value": 20
+    }
+   ],
+   "webkit": {
+    "status": "pass",
+    "value": 1
+   },
+   "accepted": 0
+  },
+  {
+   "id": "effects.shadows",
+   "area": "Effects",
+   "kind": "convention",
+   "title": "Few shadows",
+   "how": "Distinct shadows drawn (box and text); more than 6 warns. There are no shadow tokens yet: each is written in its stylesheet.",
+   "value": 5,
+   "unit": "shadows",
+   "warn": 6,
+   "status": "pass",
+   "items": [
+    {
+     "key": "rgba(255, 255, 255, 0.55) 0px 0px 0px 1px inset, rgba(90, 60, 30, 0.06) 0px 1px 1px 0px",
+     "where": "div.hero-chip",
+     "what": "box-shadow: rgba(255, 255, 255, 0.55) 0px 0px 0px 1px inset, rgba(90, 60, 30, 0.06) 0px 1px 1px 0px"
+    },
+    {
+     "key": "rgb(102, 102, 102) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+     "where": "div.idcard__face",
+     "what": "box-shadow: rgb(102, 102, 102) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px"
+    },
+    {
+     "key": "rgb(77, 77, 77) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+     "where": "div.idcard__face",
+     "what": "box-shadow: rgb(77, 77, 77) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px"
+    },
+    {
+     "key": "rgb(51, 51, 51) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+     "where": "div.idcard__face",
+     "what": "box-shadow: rgb(51, 51, 51) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px"
+    },
+    {
+     "key": "rgba(0, 0, 0, 0.1) 0px 4px 16px 0px",
+     "where": "section.cookies",
+     "what": "box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 16px 0px"
+    }
+   ],
+   "webkit": {
+    "status": "pass",
+    "value": 5
+   },
+   "accepted": 0
+  },
+  {
+   "id": "effects.cost",
+   "area": "Effects",
+   "kind": "inventory",
+   "title": "Effects that cost the graphics card",
+   "how": "Blur and glass (backdrop-filter), filters, blend modes, canvases and video, by element. What each costs on a phone needs a real device (the checks here have no GPU).",
+   "items": [
+    {
+     "key": "backdrop-filterheader.nav",
+     "where": "header.nav",
+     "what": "backdrop-filter: blur(80px)",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "mix-blend-modecanvas.hero-chip-shadow",
+     "where": "canvas.hero-chip-shadow",
+     "what": "mix-blend-mode: multiply",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "canvascanvas.hero-chip-shadow",
+     "where": "canvas.hero-chip-shadow",
+     "what": "canvas: 180×70",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "backdrop-filterdiv.hero-chip",
+     "where": "div.hero-chip",
+     "what": "backdrop-filter: blur(8px)",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "canvascanvas.rc-canvas",
+     "where": "canvas.rc-canvas",
+     "what": "canvas: 288×182",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "canvascanvas.dots",
+     "where": "canvas.dots",
+     "what": "canvas: 288×140",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "backdrop-filtersection.cookies",
+     "where": "section.cookies",
+     "what": "backdrop-filter: blur(20px)",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "canvascanvas.fm-split",
+     "where": "canvas.fm-split",
+     "what": "canvas: 155×155",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    }
+   ],
+   "status": "info",
+   "webkit": {
+    "status": "info"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "layers.z",
+   "area": "Layers",
+   "kind": "convention",
+   "title": "A short ladder of layers",
+   "how": "Distinct z-index values of positioned elements (drawings and chips left out); more than 6 warns. The order: page (−1…2), cookie notice, navbar, skip link.",
+   "value": 7,
+   "unit": "values",
+   "warn": 6,
+   "status": "warn",
+   "items": [
+    {
+     "key": "-1",
+     "where": "i.nav__pill",
+     "what": "z-index -1",
+     "value": -1
+    },
+    {
+     "key": "1",
+     "where": "div.hero__inner, section.access, li.access__slot, p.stat__number, p.stat__label, div.cta__content",
+     "what": "z-index 1",
+     "value": 1
+    },
+    {
+     "key": "2",
+     "where": "li.access__slot, div.pub__watch",
+     "what": "z-index 2",
+     "value": 2
+    },
+    {
+     "key": "3",
+     "where": "li.access__slot",
+     "what": "z-index 3",
+     "value": 3
+    },
+    {
+     "key": "190",
+     "where": "section.cookies",
+     "what": "z-index 190",
+     "value": 190
+    },
+    {
+     "key": "200",
+     "where": "header.nav",
+     "what": "z-index 200",
+     "value": 200
+    },
+    {
+     "key": "300",
+     "where": "a.skip",
+     "what": "z-index 300",
+     "value": 300
+    }
+   ],
+   "webkit": {
+    "status": "warn",
+    "value": 7
+   },
+   "accepted": 0
+  },
+  {
+   "id": "layers.fixed",
+   "area": "Layers",
+   "kind": "inventory",
+   "title": "What stays on the screen",
+   "how": "Fixed and sticky elements, by the sizes they are found at.",
+   "items": [
+    {
+     "key": "a.skip",
+     "where": "a.skip",
+     "what": "fixed, z 300",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "header.nav",
+     "where": "header.nav",
+     "what": "fixed, z 200",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    },
+    {
+     "key": "section.cookies",
+     "where": "section.cookies",
+     "what": "fixed, z 190",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    }
+   ],
+   "status": "info",
+   "webkit": {
+    "status": "info"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "align.edges",
+   "area": "Alignment",
+   "kind": "tolerance",
+   "title": "Edges line up",
+   "how": "The left and right edges of headings, texts, buttons and cards at every measured size, grouped into lines (3+ edges within 0.5px). An edge 0.5–3px from a line is a near miss: it looks aligned and is not.",
+   "value": 11,
+   "unit": "near misses",
+   "status": "warn",
+   "items": [
+    {
+     "key": "p.footer__note|left|58",
+     "where": "p.footer__note",
+     "what": "left edge -1px off the line at 58 (3 blocks on it)",
+     "value": 1,
+     "at": "320x568"
+    },
+    {
+     "key": "p.footer__note|right|262",
+     "where": "p.footer__note",
+     "what": "right edge +1px off the line at 262 (3 blocks on it)",
+     "value": 1,
+     "at": "320x568"
+    },
+    {
+     "key": "p.footer__note|left|93",
+     "where": "p.footer__note",
+     "what": "left edge -0.88px off the line at 92.88 (3 blocks on it)",
+     "value": 0.88,
+     "at": "390x844"
+    },
+    {
+     "key": "p.footer__note|right|297",
+     "where": "p.footer__note",
+     "what": "right edge +0.87px off the line at 297.13 (3 blocks on it)",
+     "value": 0.87,
+     "at": "390x844"
+    },
+    {
+     "key": "p.footer__note|right|374",
+     "where": "p.footer__note",
+     "what": "right edge -2.41px off the line at 374.41 (3 blocks on it)",
+     "value": 2.41,
+     "at": "768x1024"
+    },
+    {
+     "key": "h3.feature__title|right|482",
+     "where": "h3.feature__title",
+     "what": "right edge -0.83px off the line at 481.53 (4 blocks on it)",
+     "value": 0.83,
+     "at": "1024x768"
+    },
+    {
+     "key": "p.feature__desc|right|482",
+     "where": "p.feature__desc",
+     "what": "right edge -0.83px off the line at 481.53 (4 blocks on it)",
+     "value": 0.83,
+     "at": "1024x768"
+    },
+    {
+     "key": "p.footer__note|right|501",
+     "where": "p.footer__note",
+     "what": "right edge -1.48px off the line at 501.48 (3 blocks on it)",
+     "value": 1.48,
+     "at": "1024x768"
+    },
+    {
+     "key": "h3.feature__title|right|651",
+     "where": "h3.feature__title",
+     "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
+     "value": 2.69,
+     "at": "1366x650"
+    },
+    {
+     "key": "p.feature__desc|right|651",
+     "where": "p.feature__desc",
+     "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
+     "value": 2.69,
+     "at": "1366x650"
+    },
+    {
+     "key": "p.hero__lead|right|1202",
+     "where": "p.hero__lead",
+     "what": "right edge -2px off the line at 1202 (3 blocks on it)",
+     "value": 2,
+     "at": "1920x1080"
+    }
+   ],
+   "webkit": {
+    "status": "warn",
+    "value": 11
+   },
+   "accepted": 0
+  },
+  {
+   "id": "align.icons",
+   "area": "Icons",
+   "kind": "tolerance",
+   "title": "Icons sit on their text's line",
+   "how": "An icon next to a label (a button, a link): the centre of the icon against the centre of the label's first line, at most 1px apart.",
+   "value": 0,
+   "unit": "off",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "ratios.inventory",
+   "area": "Ratios",
+   "kind": "inventory",
+   "title": "Aspect ratios of pictures and cards",
+   "how": "Width ÷ height of every picture, canvas and card at each size, matched to a family (1:1, 4:3, 3:2, 16:9, 4:5…) within 1.5%; a CSS aspect-ratio is shown when one is set.",
+   "items": [
+    {
+     "key": "div.hero__table picture",
+     "where": "div.hero__table picture",
+     "what": "3.92",
+     "value": 1
+    },
+    {
+     "key": "img.hero__img",
+     "where": "img.hero__img",
+     "what": "3.92 · css auto 4096 / 1044",
+     "value": 1
+    },
+    {
+     "key": "article.royalty__card",
+     "where": "article.royalty__card",
+     "what": "0.87 – 1.05 · changes with the screen",
+     "value": 7
+    },
+    {
+     "key": "div.idcard",
+     "where": "div.idcard",
+     "what": "0.7 – 0.76 · changes with the screen",
+     "value": 5
+    },
+    {
+     "key": "img.idcard__photo",
+     "where": "img.idcard__photo",
+     "what": "1 · css auto 80 / 80 · 1:1",
+     "value": 1
+    },
+    {
+     "key": "li.feature",
+     "where": "li.feature",
+     "what": "0.75 – 2.46 · changes with the screen",
+     "value": 8
+    },
+    {
+     "key": "li.logo-card",
+     "where": "li.logo-card",
+     "what": "1 · 1:1",
+     "value": 1
+    },
+    {
+     "key": "img.logo-card__img",
+     "where": "img.logo-card__img",
+     "what": "1 · css auto 300 / 300 · 1:1",
+     "value": 1
+    },
+    {
+     "key": "li.stat",
+     "where": "li.stat",
+     "what": "2.05 – 2.07 · changes with the screen",
+     "value": 3
+    },
+    {
+     "key": "div.cta__card",
+     "where": "div.cta__card",
+     "what": "0.66 – 2.37 · changes with the screen",
+     "value": 8
+    },
+    {
+     "key": "article.tool",
+     "where": "article.tool",
+     "what": "0.45 – 2.42 · changes with the screen",
+     "value": 11
+    },
+    {
+     "key": "div.tool__media",
+     "where": "div.tool__media",
+     "what": "0.92 – 1.21 · css 820 / 896 · changes with the screen",
+     "value": 5
+    },
+    {
+     "key": "div.tool__media picture",
+     "where": "div.tool__media picture",
+     "what": "0.92 – 1.18 · changes with the screen",
+     "value": 5
+    },
+    {
+     "key": "img.tool__img",
+     "where": "img.tool__img",
+     "what": "0.92 – 1.18 · css auto 820 / 896 · changes with the screen",
+     "value": 5
+    },
+    {
+     "key": "a.pub",
+     "where": "a.pub",
+     "what": "0.74 – 1.48 · changes with the screen",
+     "value": 16
+    },
+    {
+     "key": "img.pub__avatar",
+     "where": "img.pub__avatar",
+     "what": "1 · css auto 24 / 24 · 1:1",
+     "value": 1
+    },
+    {
+     "key": "img.pub__source",
+     "where": "img.pub__source",
+     "what": "3.17 – 6.41 · css auto 154 / 24 · changes with the screen",
+     "value": 2
+    },
+    {
+     "key": "a.pub__platform img",
+     "where": "a.pub__platform img",
+     "what": "1 · css auto 32 / 32 · 1:1",
+     "value": 1
+    },
+    {
+     "key": "canvas.hero-chip-shadow",
+     "where": "canvas.hero-chip-shadow",
+     "what": "2.31 – 2.89 · css auto 197 / 76 · changes with the screen",
+     "value": 28
+    },
+    {
+     "key": "canvas.rc-canvas",
+     "where": "canvas.rc-canvas",
+     "what": "1.58 – 1.6 · css auto 576 / 364 · changes with the screen",
+     "value": 3
+    },
+    {
+     "key": "canvas.dots",
+     "where": "canvas.dots",
+     "what": "0.66 – 2.37 · css auto 576 / 280 · changes with the screen",
+     "value": 11
+    },
+    {
+     "key": "canvas.fm-split",
+     "where": "canvas.fm-split",
+     "what": "1 · css auto 310 / 310 · 1:1",
+     "value": 1
+    }
+   ],
+   "status": "info",
+   "webkit": {
+    "status": "info"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "icons.colour",
+   "area": "Icons",
+   "kind": "tolerance",
+   "title": "Icons take the colour of their text",
+   "how": "Inline icons outside the drawings: every fill and stroke equals the icon's own color (currentColor), so an icon follows its button's state.",
+   "value": 1,
+   "unit": "in their own colour",
+   "status": "warn",
+   "items": [
+    {
+     "key": "svg.cookies__check",
+     "where": "svg.cookies__check",
+     "what": "drawn in its own colour, not the text's (currentColor)",
+     "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080"
+    }
+   ],
+   "webkit": {
+    "status": "warn",
+    "value": 1
+   },
+   "accepted": 0
+  },
+  {
+   "id": "icons.sizes",
+   "area": "Icons",
+   "kind": "convention",
+   "title": "Few icon sizes",
+   "how": "Distinct sizes the inline icons are drawn at; more than 5 warns.",
+   "value": 4,
+   "unit": "sizes",
+   "warn": 5,
+   "status": "pass",
+   "items": [
+    {
+     "key": "40×40",
+     "where": "svg.feature__icon",
+     "what": "40×40"
+    },
+    {
+     "key": "20×20",
+     "where": "svg.btn__icon",
+     "what": "20×20"
+    },
+    {
+     "key": "24×24",
+     "where": "svg.pub__arrow",
+     "what": "24×24"
+    },
+    {
+     "key": "48×48",
+     "where": "svg.cookies__check",
+     "what": "48×48"
+    }
+   ],
+   "webkit": {
+    "status": "pass",
+    "value": 4
+   },
+   "accepted": 0
+  },
+  {
+   "id": "images.sharp",
+   "area": "Images",
+   "kind": "tolerance",
+   "title": "Pictures are sharp",
+   "how": "Every picture outside the drawings: the file's width against the device pixels it covers (its drawn width × the screen's pixel ratio: 3 on phones, 2 on tablets and the 1440 laptop). Below 0.95 it is upscaled.",
+   "value": 10,
+   "unit": "upscaled",
+   "status": "warn",
+   "items": [
+    {
+     "key": "fm-litmus-820.avif",
+     "where": "img.tool__img",
+     "what": "fm-litmus-820-DGVGnO6L.avif: 820px wide for 877 device px (×3)",
+     "value": 0.93,
+     "at": "390x844 844x390 1440x900"
+    },
+    {
+     "key": "fm-lens-820.avif",
+     "where": "img.tool__img",
+     "what": "fm-lens-820-4iU21A1U.avif: 820px wide for 877 device px (×3)",
+     "value": 0.93,
+     "at": "390x844 844x390 1440x900"
+    },
+    {
+     "key": "institute-logo.webp",
+     "where": "img.pub__source",
+     "what": "institute-logo-BDAvn4zf.webp: 411px wide for 462 device px (×3)",
+     "value": 0.89,
+     "at": "390x844 844x390"
+    },
+    {
+     "key": "institute-mark.webp",
+     "where": "img.pub__source",
+     "what": "institute-mark-BCn1cRwo.webp: 152px wide for 228 device px (×3)",
+     "value": 0.67,
+     "at": "390x844 844x390"
+    },
+    {
+     "key": "vk-video.webp",
+     "where": "a.pub__platform img",
+     "what": "vk-video-CCw81_FH.webp: 64px wide for 96 device px (×3)",
+     "value": 0.67,
+     "at": "390x844 844x390"
+    },
+    {
+     "key": "youtube.webp",
+     "where": "a.pub__platform img",
+     "what": "youtube-CdlZ_zLt.webp: 64px wide for 96 device px (×3)",
+     "value": 0.67,
+     "at": "390x844 844x390"
+    },
+    {
+     "key": "face-petr-240.webp",
+     "where": "img.idcard__photo",
+     "what": "face-petr-240-D1qXm1kg.webp: 240px wide for 260 device px (×3)",
+     "value": 0.92,
+     "at": "844x390"
+    },
+    {
+     "key": "face-maria-240.webp",
+     "where": "img.idcard__photo",
+     "what": "face-maria-240-CQNJS-ff.webp: 240px wide for 271 device px (×3)",
+     "value": 0.89,
+     "at": "844x390"
+    },
+    {
+     "key": "face-maria-160.webp",
+     "where": "img.idcard__photo",
+     "what": "face-maria-160-DbL-rgo5.webp: 160px wide for 171 device px (×2)",
+     "value": 0.94,
+     "at": "768x1024 1024x768 1440x900"
+    },
+    {
+     "key": "face-petr-160.webp",
+     "where": "img.idcard__photo",
+     "what": "face-petr-160-CZtWVE_9.webp: 160px wide for 173 device px (×2)",
+     "value": 0.92,
+     "at": "1024x768 1440x900"
+    }
+   ],
+   "webkit": {
+    "status": "warn",
+    "value": 11
+   },
+   "accepted": 0
+  },
+  {
+   "id": "images.weight",
+   "area": "Images",
+   "kind": "tolerance",
+   "title": "Pictures are not much bigger than drawn",
+   "how": "The same ratio above 2.5: the file is far bigger than the screen can show (bytes for nothing).",
+   "value": 1,
+   "unit": "too big",
+   "status": "warn",
+   "items": [
+    {
+     "key": "institute-logo.webp",
+     "where": "img.pub__source",
+     "what": "institute-logo-BDAvn4zf.webp: 411px wide for 154 device px",
+     "value": 2.67,
+     "at": "1366x650 1920x1080"
+    }
+   ],
+   "webkit": {
+    "status": "warn",
+    "value": 7
+   },
+   "accepted": 0
+  },
+  {
+   "id": "images.format",
+   "area": "Images",
+   "kind": "hard",
+   "title": "Pictures in a modern format",
+   "how": "AVIF, WebP or SVG (drawings left out).",
+   "value": 0,
+   "unit": "old formats",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "images.alt",
+   "area": "Images",
+   "kind": "hard",
+   "title": "Every picture has an alt",
+   "how": "An alt attribute on every <img> (empty for decoration).",
+   "value": 0,
+   "unit": "without alt",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "images.first",
+   "area": "Images",
+   "kind": "hard",
+   "title": "The first screen does not wait",
+   "how": "Pictures on the first screen at any size are not lazy.",
+   "value": 0,
+   "unit": "lazy on the first screen",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "states.timing",
+   "area": "States",
+   "kind": "share",
+   "title": "One hover timing",
+   "how": "Links and buttons that change on hover: the length of their colour/background transition. The grammar says one timing everywhere.",
+   "value": 100,
+   "unit": "% at 450ms",
+   "pass": 95,
+   "warn": 85,
+   "status": "pass",
+   "items": [
+    {
+     "key": "0",
+     "where": "a.skip, a.nav__logo, button.nav__burger",
+     "what": "no transition",
+     "value": 0
+    }
+   ],
+   "webkit": {
+    "status": "pass",
+    "value": 100
+   },
+   "accepted": 0
+  },
+  {
+   "id": "components.copies",
+   "area": "Components",
+   "kind": "tolerance",
+   "title": "Copies of a component look alike",
+   "how": "Each component (a class with __parts) and each of its variants (--modifiers): its copies on the page should share padding, corner, background, text size and display. A difference no modifier explains is a near-duplicate.",
+   "value": 0,
+   "unit": "variants that differ",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "components.inventory",
+   "area": "Components",
+   "kind": "inventory",
+   "title": "Components on the page",
+   "how": "Classes with __parts, the most copies seen at one size, and their variants.",
+   "items": [
+    {
+     "key": "logo-card",
+     "where": ".logo-card",
+     "what": "10 on the page",
+     "value": 10
+    },
+    {
+     "key": "head",
+     "where": ".head",
+     "what": "6 on the page · variants: —, head--center",
+     "value": 6
+    },
+    {
+     "key": "feature",
+     "where": ".feature",
+     "what": "4 on the page",
+     "value": 4
+    },
+    {
+     "key": "idcard",
+     "where": ".idcard",
+     "what": "3 on the page",
+     "value": 3
+    },
+    {
+     "key": "stat",
+     "where": ".stat",
+     "what": "3 on the page · variants: stat--orange, stat--blue, stat--green",
+     "value": 3
+    },
+    {
+     "key": "pub",
+     "where": ".pub",
+     "what": "3 on the page",
+     "value": 3
+    },
+    {
+     "key": "tool",
+     "where": ".tool",
+     "what": "2 on the page",
+     "value": 2
+    },
+    {
+     "key": "nav",
+     "where": ".nav",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "hero",
+     "where": ".hero",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "stack",
+     "where": ".stack",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "royalty",
+     "where": ".royalty",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "access",
+     "where": ".access",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "logos",
+     "where": ".logos",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "cta",
+     "where": ".cta",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "tools",
+     "where": ".tools",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "btn",
+     "where": ".btn",
+     "what": "1 on the page · variants: btn--icon btn--teal",
+     "value": 1
+    },
+    {
+     "key": "pubs",
+     "where": ".pubs",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "footer",
+     "where": ".footer",
+     "what": "1 on the page",
+     "value": 1
+    },
+    {
+     "key": "cookies",
+     "where": ".cookies",
+     "what": "1 on the page",
+     "value": 1
+    }
+   ],
+   "status": "info",
+   "webkit": {
+    "status": "info"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "logic.cookie-notice",
+   "area": "Logic",
+   "kind": "scenario",
+   "title": "Consent: the page has loaded, then «ОК» is pressed",
+   "how": "Given a first visit (nothing stored); when the page has loaded, then «ОК» is pressed; then the notice shows; after «ОК» it leaves, the answer is stored, and a reload does not show it again. At 390×844.",
+   "status": "pass",
+   "items": [],
+   "scenario": {
+    "given": "a first visit (nothing stored)",
+    "when": "the page has loaded, then «ОК» is pressed",
+    "then": "the notice shows; after «ОК» it leaves, the answer is stored, and a reload does not show it again"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "logic.pubs-more",
+   "area": "Logic",
+   "kind": "scenario",
+   "title": "Publications: «Показать больше» is pressed",
+   "how": "Given more than four publications; when «Показать больше» is pressed; then the hidden cards show, and the button goes once none are left. At 1440×900.",
+   "status": "pass",
+   "items": [],
+   "scenario": {
+    "given": "more than four publications",
+    "when": "«Показать больше» is pressed",
+    "then": "the hidden cards show, and the button goes once none are left"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "logic.menu",
+   "area": "Logic",
+   "kind": "scenario",
+   "title": "Navbar: the burger is pressed, then Escape",
+   "how": "Given a phone (the burger); when the burger is pressed, then Escape; then the menu opens (aria-expanded true) and closes again. At 390×844.",
+   "status": "pass",
+   "items": [],
+   "scenario": {
+    "given": "a phone (the burger)",
+    "when": "the burger is pressed, then Escape",
+    "then": "the menu opens (aria-expanded true) and closes again"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "logic.section-link",
+   "area": "Logic",
+   "kind": "scenario",
+   "title": "Navbar: a section link is clicked",
+   "how": "Given a computer (navbar links); when a section link is clicked; then the page scrolls to the section and the address keeps no #id. At 1440×900.",
+   "status": "pass",
+   "items": [],
+   "scenario": {
+    "given": "a computer (navbar links)",
+    "when": "a section link is clicked",
+    "then": "the page scrolls to the section and the address keeps no #id"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "logic.demo-window",
+   "area": "Logic",
+   "kind": "scenario",
+   "title": "Booking: a «Запланировать демо» button is clicked, then the window is closed",
+   "how": "Given consent given (Planerka faked: it cannot be reached from the checks); when a «Запланировать демо» button is clicked, then the window is closed; then the booking window opens over the page without changing the address, and closes. At 1440×900.",
+   "status": "pass",
+   "items": [],
+   "scenario": {
+    "given": "consent given (Planerka faked: it cannot be reached from the checks)",
+    "when": "a «Запланировать демо» button is clicked, then the window is closed",
+    "then": "the booking window opens over the page without changing the address, and closes"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "fallback.nojs",
+   "area": "Fallbacks",
+   "kind": "hard",
+   "title": "The page reads without scripts",
+   "how": "Scripts turned off: at least 90% of the main text shown, every heading and the h1 visible (at 390×844 and 1440×900).",
+   "status": "pass",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "fallback.nowebgl",
+   "area": "Fallbacks",
+   "kind": "hard",
+   "title": "The page works without WebGL",
+   "how": "WebGL turned off (old devices, blocked GPUs): no script errors, the same text shown.",
+   "status": "pass",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "fallback.forced",
+   "area": "Fallbacks",
+   "kind": "hard",
+   "title": "The page works in forced colours",
+   "how": "Windows High Contrast and the like (forced-colors: active): no script errors, the same text shown.",
+   "status": "pass",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "fallback.calm",
+   "area": "Fallbacks",
+   "kind": "hard",
+   "title": "Reduced motion stops the motion",
+   "how": "With reduce motion: after the load and a scroll top to bottom, no CSS or Web Animations still running (GSAP's own motion is not seen by this check).",
+   "status": "pass",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "fallback.fonts",
+   "area": "Fallbacks",
+   "kind": "tolerance",
+   "title": "The fallback font keeps the layout",
+   "how": "The web fonts never arrive (blocked): every heading, text and button against the normal page; a change of line count or more than 6% of width warns (the text would jump when the font comes).",
+   "value": 2,
+   "unit": "texts that jump",
+   "status": "warn",
+   "items": [
+    {
+     "key": "h3.feature__titleЛегкий сбор данных от ар",
+     "where": "h3.feature__title",
+     "what": "«Легкий сбор данных от ар» 3 → 2 lines, 139 → 139px wide with the fallback font",
+     "value": 0,
+     "at": "390x844"
+    },
+    {
+     "key": "p.pub__authorМаксим Поплавский, CEO",
+     "where": "p.pub__author",
+     "what": "«Максим Поплавский, CEO» 1 → 2 lines, 305 → 305px wide with the fallback font",
+     "value": 0,
+     "at": "390x844"
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "privacy.before",
+   "area": "Privacy",
+   "kind": "hard",
+   "title": "Nothing optional before «ОК»",
+   "how": "A first visit: the page, a scroll, a pointer over a demo button and 3.5 s of waiting. Nothing may go to another host, set a cookie or store anything until the cookie notice's «ОК» is pressed (152-ФЗ; CLAUDE.md).",
+   "status": "pass",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "privacy.after",
+   "area": "Privacy",
+   "kind": "inventory",
+   "title": "Who is called after «ОК»",
+   "how": "The same visit after «ОК»: the other hosts the page called.",
+   "items": [
+    {
+     "key": "planerka.app",
+     "where": "planerka.app",
+     "what": "called after consent"
+    }
+   ],
+   "status": "info",
+   "accepted": 0
+  },
+  {
+   "id": "health.head",
+   "area": "Page health",
+   "kind": "tolerance",
+   "title": "Titles, descriptions, outline",
+   "how": "Every page: lang and viewport (fail), one h1 (fail), a title of 10–65 characters, a description of 50–170, headings that do not skip a level, in-page links that name an id, og:image and a manifest on the home page.",
+   "value": 0,
+   "unit": "notes",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass",
+    "value": 0
+   },
+   "accepted": 0
+  },
+  {
+   "id": "health.overflow",
+   "area": "Page health",
+   "kind": "hard",
+   "title": "No page scrolls sideways",
+   "how": "Every page at 390×844 and 1440×900, and the home page at every measured size and every 10px of width.",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "health.errors",
+   "area": "Page health",
+   "kind": "hard",
+   "title": "No script errors",
+   "how": "Errors thrown on every page and size measured.",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "health.status",
+   "area": "Page health",
+   "kind": "hard",
+   "title": "Pages answer as they should",
+   "how": "Every page 200; an address that is not there 404 with the not-found page.",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "health.links",
+   "area": "Page health",
+   "kind": "hard",
+   "title": "Links on the site lead somewhere",
+   "how": "Every link that stays on the site (8), from every page, opened; one with #id must find it.",
+   "status": "pass",
+   "items": [],
+   "webkit": {
+    "status": "pass"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "health.files",
+   "area": "Page health",
+   "kind": "hard",
+   "title": "robots.txt, sitemap, manifest, icons",
+   "how": "The files a browser or a search engine asks for, all there.",
+   "status": "pass",
+   "items": [],
+   "note": "robots.txt keeps every search engine out (until the launch; open item).",
+   "webkit": {
+    "status": "pass"
+   },
+   "accepted": 0
+  },
+  {
+   "id": "weight.total",
+   "area": "Weight",
+   "kind": "trend",
+   "title": "A first visit does not get heavier",
+   "how": "The bytes of a first visit scrolled top to bottom at 1440×900 (×2), as sent (Brotli for text), against the last deploy of main: more than 10% more warns (scripts alone: 5%).",
+   "value": 1142,
+   "unit": "KB",
+   "was": null,
+   "status": "pass",
+   "items": [
+    {
+     "key": "html",
+     "where": "html",
+     "what": "1 files, 20 KB sent",
+     "value": 20
+    },
+    {
+     "key": "fonts",
+     "where": "fonts",
+     "what": "4 files, 83 KB sent",
+     "value": 83
+    },
+    {
+     "key": "js",
+     "where": "js",
+     "what": "15 files, 112 KB sent",
+     "value": 112
+    },
+    {
+     "key": "images",
+     "where": "images",
+     "what": "45 files, 924 KB sent",
+     "value": 924
+    },
+    {
+     "key": "css",
+     "where": "css",
+     "what": "2 files, 3 KB sent",
+     "value": 3
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.ladder",
+   "area": "Type",
+   "kind": "hard",
+   "title": "Every size ends on the ladder",
+   "how": "50 roles of scale.json, both ends, against 0 2 … 24 28 … 64 72 … 128 (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.relations",
+   "area": "Type",
+   "kind": "hard",
+   "title": "Neighbouring text levels at least ×1.125 apart",
+   "how": "6 pairs of type.relations at 320 and 1440 (a ratio of two lines moves only between its two ends) (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.no-swallowed-css",
+   "area": "Code",
+   "kind": "hard",
+   "title": "No CSS hidden inside a comment",
+   "how": "every comment of 20 stylesheets: rules inside, unbalanced marks (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.colour-tokens",
+   "area": "Colour",
+   "kind": "hard",
+   "title": "Colours from the tokens only",
+   "how": "literal #hex / rgb() / hsl() / oklch() in the page's stylesheets (tokens.css definitions and the drawings' art.css left out) (read from the code).",
+   "status": "fail",
+   "value": 4,
+   "unit": "places",
+   "note": "",
+   "items": [
+    {
+     "key": "src/styles/sections/hero.css|rgb(90 60 30 / 0.06)#1",
+     "where": "src/styles/sections/hero.css:157",
+     "what": "rgb(90 60 30 / 0.06) in .hero-chip"
+    },
+    {
+     "key": "src/styles/sections/sections.css|rgb(0 0 0 / 0.4)#1",
+     "where": "src/styles/sections/sections.css:167",
+     "what": "rgb(0 0 0 / 0.4) in .idcard__face"
+    },
+    {
+     "key": "src/styles/sections/sections.css|rgb(0 0 0 / 0.02)#1",
+     "where": "src/styles/sections/sections.css:167",
+     "what": "rgb(0 0 0 / 0.02) in .idcard__face"
+    },
+    {
+     "key": "src/styles/sections/sections.css|rgb(0 0 0 / 0.1)#1",
+     "where": "src/styles/sections/sections.css:167",
+     "what": "rgb(0 0 0 / 0.1) in .idcard__face"
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.type-from-scale",
+   "area": "Type",
+   "kind": "hard",
+   "title": "Text sizes from the scale",
+   "how": "every font-size: a --type-* role, em or %, the fit sizes (--hero-title, --cta-title, --card-title) or an object's own unit (--u, --fm-px) (read from the code).",
+   "status": "fail",
+   "value": 2,
+   "unit": "places",
+   "note": "Objects scaled as a whole (the ID cards' 24/13px, the tiles' --u, the hero chips' --u, the drawings' --fm-px) are pictures of UI, not page text.",
+   "items": [
+    {
+     "key": "src/styles/sections/sections.css|24px#1",
+     "where": "src/styles/sections/sections.css:191",
+     "what": "24px in .idcard__name"
+    },
+    {
+     "key": "src/styles/sections/sections.css|13px#1",
+     "where": "src/styles/sections/sections.css:198",
+     "what": "13px in .idcard__row"
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.fluid-from-scale",
+   "area": "Space",
+   "kind": "hard",
+   "title": "Spacing, radii and type never own vw/cq/clamp()",
+   "how": "margin, padding, gaps, radii, font-size and inset declarations in every stylesheet (read from the code).",
+   "status": "fail",
+   "value": 1,
+   "unit": "places",
+   "note": "",
+   "items": [
+    {
+     "key": "src/styles/components/book.css|margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0#1",
+     "where": "src/styles/components/book.css:74",
+     "what": "margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0 in .book__box"
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.tokens-wired",
+   "area": "Code",
+   "kind": "hard",
+   "title": "Every var() defined, every token used",
+   "how": "179 custom properties used, 106 tokens in tokens.css + tokens.gen.css (read from the code).",
+   "status": "fail",
+   "value": 2,
+   "unit": "places",
+   "note": "",
+   "items": [
+    {
+     "key": "Code|defined, never used: --ink-40#1",
+     "where": "Code",
+     "what": "defined, never used: --ink-40"
+    },
+    {
+     "key": "Code|defined, never used: --purple-light#1",
+     "where": "Code",
+     "what": "defined, never used: --purple-light"
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.layout-steps",
+   "area": "Layout",
+   "kind": "hard",
+   "title": "Layouts change only at S, M, L or a written own step",
+   "how": "13 width container queries against S 22rem, M 43rem, L 58rem and the own steps written in CLAUDE.md (35rem, 32rem, 10em, 400px, 27.5rem, 45.75rem) (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.media-steps",
+   "area": "Layout",
+   "kind": "hard",
+   "title": "Screen steps only from media.css",
+   "how": "7 custom media (--tablet, --phone, --notes-cols, --portrait, --sideways, --mouse, --calm); raw width queries elsewhere (read from the code).",
+   "status": "fail",
+   "value": 1,
+   "unit": "places",
+   "note": "",
+   "items": [
+    {
+     "key": "src/styles/components/book.css|@media (width >= 62em)#1",
+     "where": "src/styles/components/book.css:49",
+     "what": "@media (width >= 62em) in @media (width >= 62em)"
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.curves",
+   "area": "Motion",
+   "kind": "hard",
+   "title": "Curves from one table (motion.js)",
+   "how": "cubic-bezier() and named eases in the page's stylesheets and scripts, outside motion.js and the --ease tokens (read from the code).",
+   "status": "fail",
+   "value": 7,
+   "unit": "places",
+   "note": "",
+   "items": [
+    {
+     "key": "src/styles/components/book.css|ease-in-out#1",
+     "where": "src/styles/components/book.css:152",
+     "what": "ease-in-out in & i"
+    },
+    {
+     "key": "scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
+     "where": "scripts/cookies.js:30",
+     "what": "cubic-bezier(0.65, 0, 0.35, 1)"
+    },
+    {
+     "key": "scripts/deck.js|ease = \"power2.in\"#1",
+     "where": "scripts/deck.js:78",
+     "what": "ease = \"power2.in\""
+    },
+    {
+     "key": "scripts/deck.js|ease = \"power1.out\"#1",
+     "where": "scripts/deck.js:80",
+     "what": "ease = \"power1.out\""
+    },
+    {
+     "key": "scripts/deck.js|ease: \"power2.inOut\"#1",
+     "where": "scripts/deck.js:166",
+     "what": "ease: \"power2.inOut\""
+    },
+    {
+     "key": "scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
+     "where": "scripts/menu.js:18",
+     "what": "CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\""
+    },
+    {
+     "key": "scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
+     "where": "scripts/menu.js:19",
+     "what": "CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\""
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.decisions",
+   "area": "Decisions",
+   "kind": "hard",
+   "title": "Every decision complete",
+   "how": "30 entries: id, kind, what, decided, why; the rule and a fix for each exception; ids unique (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  }
+ ],
+ "findings": [
+  {
+   "key": "colour.palette::245,242,242,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(245, 242, 242, 0.8) as background",
+   "at": "320x568",
+   "new": false
+  },
+  {
+   "key": "colour.palette::247,247,247,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(247, 247, 247, 0.8) as background",
+   "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
+   "new": false
+  },
+  {
+   "key": "colour.palette::247,247,247,0.7",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "header.nav",
+   "what": "rgba(247, 247, 247, 0.7) as background",
+   "at": "320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080",
+   "new": false
+  },
+  {
+   "key": "colour.palette::238,234,233,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(238, 234, 233, 0.8) as background",
+   "at": "844x390 1366x650",
+   "new": false
+  },
+  {
+   "key": "colour.palette::245,243,243,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(245, 243, 243, 0.8) as background",
+   "at": "1024x768",
+   "new": false
+  },
+  {
+   "key": "colour.palette::248,247,246,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(248, 247, 246, 0.8) as background",
+   "at": "1440x900",
+   "new": false
+  },
+  {
+   "key": "colour.palette::249,247,247,0.8",
+   "rule": "colour.palette",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "rgba(249, 247, 247, 0.8) as background",
+   "at": "1920x1080",
+   "new": false
+  },
+  {
+   "key": "shape.radii::button.nav__burger|8",
+   "rule": "shape.radii",
+   "status": "warn",
+   "where": "button.nav__burger",
+   "what": "radius 8px on a 32×32 box",
+   "at": "320x568 390x844 844x390 768x1024",
+   "new": false
+  },
+  {
+   "key": "shape.borders::1",
+   "rule": "shape.borders",
+   "status": "pass",
+   "where": "a.btn, dl.idcard__table, div.idcard__row, button.btn, div.footer__legal, a.nav__link",
+   "what": "1px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgba(255, 255, 255, 0.55) 0px 0px 0px 1px inset, rgba(90, 60, 30, 0.06) 0px 1px 1px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.hero-chip",
+   "what": "box-shadow: rgba(255, 255, 255, 0.55) 0px 0px 0px 1px inset, rgba(90, 60, 30, 0.06) 0px 1px 1px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgb(102, 102, 102) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.idcard__face",
+   "what": "box-shadow: rgb(102, 102, 102) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgb(77, 77, 77) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.idcard__face",
+   "what": "box-shadow: rgb(77, 77, 77) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgb(51, 51, 51) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "div.idcard__face",
+   "what": "box-shadow: rgb(51, 51, 51) 0px 0px 0px 0.5px, rgba(0, 0, 0, 0.4) 0px 24px 24px -16px, rgba(0, 0, 0, 0.02) 0px 0px 16px 0px, rgba(0, 0, 0, 0.1) 0px 24px 56px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "effects.shadows::rgba(0, 0, 0, 0.1) 0px 4px 16px 0px",
+   "rule": "effects.shadows",
+   "status": "pass",
+   "where": "section.cookies",
+   "what": "box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 16px 0px",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "layers.z::-1",
+   "rule": "layers.z",
+   "status": "warn",
+   "where": "i.nav__pill",
+   "what": "z-index -1",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "layers.z::1",
+   "rule": "layers.z",
+   "status": "warn",
+   "where": "div.hero__inner, section.access, li.access__slot, p.stat__number, p.stat__label, div.cta__content",
+   "what": "z-index 1",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "layers.z::2",
+   "rule": "layers.z",
+   "status": "warn",
+   "where": "li.access__slot, div.pub__watch",
+   "what": "z-index 2",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "layers.z::3",
+   "rule": "layers.z",
+   "status": "warn",
+   "where": "li.access__slot",
+   "what": "z-index 3",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "layers.z::190",
+   "rule": "layers.z",
+   "status": "warn",
+   "where": "section.cookies",
+   "what": "z-index 190",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "layers.z::200",
+   "rule": "layers.z",
+   "status": "warn",
+   "where": "header.nav",
+   "what": "z-index 200",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "layers.z::300",
+   "rule": "layers.z",
+   "status": "warn",
+   "where": "a.skip",
+   "what": "z-index 300",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.footer__note|left|58",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.footer__note",
+   "what": "left edge -1px off the line at 58 (3 blocks on it)",
+   "at": "320x568",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.footer__note|right|262",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.footer__note",
+   "what": "right edge +1px off the line at 262 (3 blocks on it)",
+   "at": "320x568",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.footer__note|left|93",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.footer__note",
+   "what": "left edge -0.88px off the line at 92.88 (3 blocks on it)",
+   "at": "390x844",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.footer__note|right|297",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.footer__note",
+   "what": "right edge +0.87px off the line at 297.13 (3 blocks on it)",
+   "at": "390x844",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.footer__note|right|374",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.footer__note",
+   "what": "right edge -2.41px off the line at 374.41 (3 blocks on it)",
+   "at": "768x1024",
+   "new": false
+  },
+  {
+   "key": "align.edges::h3.feature__title|right|482",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "h3.feature__title",
+   "what": "right edge -0.83px off the line at 481.53 (4 blocks on it)",
+   "at": "1024x768",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.feature__desc|right|482",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.feature__desc",
+   "what": "right edge -0.83px off the line at 481.53 (4 blocks on it)",
+   "at": "1024x768",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.footer__note|right|501",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.footer__note",
+   "what": "right edge -1.48px off the line at 501.48 (3 blocks on it)",
+   "at": "1024x768",
+   "new": false
+  },
+  {
+   "key": "align.edges::h3.feature__title|right|651",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "h3.feature__title",
+   "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
+   "at": "1366x650",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.feature__desc|right|651",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.feature__desc",
+   "what": "right edge +2.69px off the line at 651 (4 blocks on it)",
+   "at": "1366x650",
+   "new": false
+  },
+  {
+   "key": "align.edges::p.hero__lead|right|1202",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.hero__lead",
+   "what": "right edge -2px off the line at 1202 (3 blocks on it)",
+   "at": "1920x1080",
+   "new": false
+  },
+  {
+   "key": "icons.colour::svg.cookies__check",
+   "rule": "icons.colour",
+   "status": "warn",
+   "where": "svg.cookies__check",
+   "what": "drawn in its own colour, not the text's (currentColor)",
+   "at": "320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::40×40",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.feature__icon",
+   "what": "40×40",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::20×20",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.btn__icon",
+   "what": "20×20",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::24×24",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.pub__arrow",
+   "what": "24×24",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "icons.sizes::48×48",
+   "rule": "icons.sizes",
+   "status": "pass",
+   "where": "svg.cookies__check",
+   "what": "48×48",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "images.sharp::fm-litmus-820.avif",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.tool__img",
+   "what": "fm-litmus-820-DGVGnO6L.avif: 820px wide for 877 device px (×3)",
+   "at": "390x844 844x390 1440x900",
+   "new": false
+  },
+  {
+   "key": "images.sharp::fm-lens-820.avif",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.tool__img",
+   "what": "fm-lens-820-4iU21A1U.avif: 820px wide for 877 device px (×3)",
+   "at": "390x844 844x390 1440x900",
+   "new": false
+  },
+  {
+   "key": "images.sharp::institute-logo.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.pub__source",
+   "what": "institute-logo-BDAvn4zf.webp: 411px wide for 462 device px (×3)",
+   "at": "390x844 844x390",
+   "new": false
+  },
+  {
+   "key": "images.sharp::institute-mark.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.pub__source",
+   "what": "institute-mark-BCn1cRwo.webp: 152px wide for 228 device px (×3)",
+   "at": "390x844 844x390",
+   "new": false
+  },
+  {
+   "key": "images.sharp::vk-video.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "a.pub__platform img",
+   "what": "vk-video-CCw81_FH.webp: 64px wide for 96 device px (×3)",
+   "at": "390x844 844x390",
+   "new": false
+  },
+  {
+   "key": "images.sharp::youtube.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "a.pub__platform img",
+   "what": "youtube-CdlZ_zLt.webp: 64px wide for 96 device px (×3)",
+   "at": "390x844 844x390",
+   "new": false
+  },
+  {
+   "key": "images.sharp::face-petr-240.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.idcard__photo",
+   "what": "face-petr-240-D1qXm1kg.webp: 240px wide for 260 device px (×3)",
+   "at": "844x390",
+   "new": false
+  },
+  {
+   "key": "images.sharp::face-maria-240.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.idcard__photo",
+   "what": "face-maria-240-CQNJS-ff.webp: 240px wide for 271 device px (×3)",
+   "at": "844x390",
+   "new": false
+  },
+  {
+   "key": "images.sharp::face-maria-160.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.idcard__photo",
+   "what": "face-maria-160-DbL-rgo5.webp: 160px wide for 171 device px (×2)",
+   "at": "768x1024 1024x768 1440x900",
+   "new": false
+  },
+  {
+   "key": "images.sharp::face-petr-160.webp",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.idcard__photo",
+   "what": "face-petr-160-CZtWVE_9.webp: 160px wide for 173 device px (×2)",
+   "at": "1024x768 1440x900",
+   "new": false
+  },
+  {
+   "key": "images.weight::institute-logo.webp",
+   "rule": "images.weight",
+   "status": "warn",
+   "where": "img.pub__source",
+   "what": "institute-logo-BDAvn4zf.webp: 411px wide for 154 device px",
+   "at": "1366x650 1920x1080",
+   "new": false
+  },
+  {
+   "key": "states.timing::0",
+   "rule": "states.timing",
+   "status": "pass",
+   "where": "a.skip, a.nav__logo, button.nav__burger",
+   "what": "no transition",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "fallback.fonts::h3.feature__titleЛегкий сбор данных от ар",
+   "rule": "fallback.fonts",
+   "status": "warn",
+   "where": "h3.feature__title",
+   "what": "«Легкий сбор данных от ар» 3 → 2 lines, 139 → 139px wide with the fallback font",
+   "at": "390x844",
+   "new": false
+  },
+  {
+   "key": "fallback.fonts::p.pub__authorМаксим Поплавский, CEO",
+   "rule": "fallback.fonts",
+   "status": "warn",
+   "where": "p.pub__author",
+   "what": "«Максим Поплавский, CEO» 1 → 2 lines, 305 → 305px wide with the fallback font",
+   "at": "390x844",
+   "new": false
+  },
+  {
+   "key": "weight.total::html",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "html",
+   "what": "1 files, 20 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::fonts",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "fonts",
+   "what": "4 files, 83 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::js",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "js",
+   "what": "15 files, 112 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::images",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "images",
+   "what": "45 files, 924 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::css",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "css",
+   "what": "2 files, 3 KB sent",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.colour-tokens::src/styles/sections/hero.css|rgb(90 60 30 / 0.06)#1",
+   "rule": "code.colour-tokens",
+   "status": "fail",
+   "where": "src/styles/sections/hero.css:157",
+   "what": "rgb(90 60 30 / 0.06) in .hero-chip",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.colour-tokens::src/styles/sections/sections.css|rgb(0 0 0 / 0.4)#1",
+   "rule": "code.colour-tokens",
+   "status": "fail",
+   "where": "src/styles/sections/sections.css:167",
+   "what": "rgb(0 0 0 / 0.4) in .idcard__face",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.colour-tokens::src/styles/sections/sections.css|rgb(0 0 0 / 0.02)#1",
+   "rule": "code.colour-tokens",
+   "status": "fail",
+   "where": "src/styles/sections/sections.css:167",
+   "what": "rgb(0 0 0 / 0.02) in .idcard__face",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.colour-tokens::src/styles/sections/sections.css|rgb(0 0 0 / 0.1)#1",
+   "rule": "code.colour-tokens",
+   "status": "fail",
+   "where": "src/styles/sections/sections.css:167",
+   "what": "rgb(0 0 0 / 0.1) in .idcard__face",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.type-from-scale::src/styles/sections/sections.css|24px#1",
+   "rule": "code.type-from-scale",
+   "status": "fail",
+   "where": "src/styles/sections/sections.css:191",
+   "what": "24px in .idcard__name",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.type-from-scale::src/styles/sections/sections.css|13px#1",
+   "rule": "code.type-from-scale",
+   "status": "fail",
+   "where": "src/styles/sections/sections.css:198",
+   "what": "13px in .idcard__row",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.fluid-from-scale::src/styles/components/book.css|margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0#1",
+   "rule": "code.fluid-from-scale",
+   "status": "fail",
+   "where": "src/styles/components/book.css:74",
+   "what": "margin: max(0px, (100vh - var(--tall) - 48px - 3 * var(--inset)) / 2) auto 0 in .book__box",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.tokens-wired::Code|defined, never used: --ink-40#1",
+   "rule": "code.tokens-wired",
+   "status": "fail",
+   "where": "Code",
+   "what": "defined, never used: --ink-40",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.tokens-wired::Code|defined, never used: --purple-light#1",
+   "rule": "code.tokens-wired",
+   "status": "fail",
+   "where": "Code",
+   "what": "defined, never used: --purple-light",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.media-steps::src/styles/components/book.css|@media (width >= 62em)#1",
+   "rule": "code.media-steps",
+   "status": "fail",
+   "where": "src/styles/components/book.css:49",
+   "what": "@media (width >= 62em) in @media (width >= 62em)",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.curves::src/styles/components/book.css|ease-in-out#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "src/styles/components/book.css:152",
+   "what": "ease-in-out in & i",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.curves::scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "scripts/cookies.js:30",
+   "what": "cubic-bezier(0.65, 0, 0.35, 1)",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.curves::scripts/deck.js|ease = \"power2.in\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "scripts/deck.js:78",
+   "what": "ease = \"power2.in\"",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.curves::scripts/deck.js|ease = \"power1.out\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "scripts/deck.js:80",
+   "what": "ease = \"power1.out\"",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.curves::scripts/deck.js|ease: \"power2.inOut\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "scripts/deck.js:166",
+   "what": "ease: \"power2.inOut\"",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.curves::scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "scripts/menu.js:18",
+   "what": "CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "code.curves::scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "scripts/menu.js:19",
+   "what": "CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"",
+   "at": "",
+   "new": false
+  }
+ ],
+ "fixed": [],
+ "decisions": [
+  {
+   "id": "cta-light-middle",
+   "kind": "exception",
+   "state": "unbound",
+   "what": "CTA card: the white title and the white text sit on the purple card (#884dff) with white dust moving over it (25%, scripts/stipple.js; until Oct 25, 2026 15%; until Oct 19, 2026 on the light purple #b596ff between purple dots). Since Oct 25 the middle is dimmed back towards #884dff (89% in the middle, an oval 80% × 80% of the card) and the dust thins out round each text line and the button (invClear 75)",
+   "decided": "Tim, 2026-10-18 — kept for now"
+  },
+  {
+   "id": "stack-and-stat-colours",
+   "kind": "exception",
+   "state": "unbound",
+   "what": "White text on the colours of the card stack and the stats: the orange «Документы» and green «Финансы» cards, their labels (also over the progress fill), the orange, green and blue stats",
+   "decided": "Tim, 2026-10-17 (orange) and 2026-10-18 (green, the progress fill)"
+  },
+  {
+   "id": "teal-orange-buttons",
+   "kind": "exception",
+   "state": "unbound",
+   "what": "White text on the teal (Telegram-бот) and orange (FM Lens demo) buttons",
+   "decided": "Tim, 2026-10-17"
+  },
+  {
+   "id": "footer-notes",
+   "kind": "exception",
+   "state": "unbound",
+   "what": "The grey notes of the footer (ink 50% on the footer grey)",
+   "decided": "Tim, 2026-10-17; ink 50% on 2026-10-18"
+  },
+  {
+   "id": "tool-card-air",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Tool cards are padded by their own width across the whole column (--tool-pad: 28px on a 288px card, about 35 on a 430px one, 48 on a 700px one, 64 on the widest, 1024px): about their radius (radius/l, 32 → 56) on phones, above it from about a 450px card; every other card is padded by its radius. Under the text, above the picture, at least --pad-l (40 → 64). With the picture under the text, the whole picture is shown (never cut), centred, at most 360px wide, with twice the padding at its sides on cards from 27.5rem (a 480 window) and once the padding below that",
+   "decided": "Tim, 2026-10-18 (the air); the padding by the card's width on 2026-10-18 (28–32 on a 320 phone, 40 on a 420 one; it stopped growing at a 600px card); 2026-10-24 (Tim: the padding shrinks with the screen at every size, so it runs to the widest card and a 420 phone gets about 32; the picture under the text is never cut, 2× padding at its sides down to 480px, 360px at most); 2026-10-24 later (Tim: side by side from an 800 window, not 768; the least height --tool-min-h only from a 1024 one, so below it the card is as tall as its text and the picture does not start below the text's top)"
+  },
+  {
+   "id": "hero-three-lines",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Where two lines of the hero title do not fit (about under 430px), it takes three: «Весь лейбл. / На одной / волне». Chosen by fit (a container query in the title's em), not by a screen width",
+   "decided": "Tim, 2026-10-18"
+  },
+  {
+   "id": "logo-whole-columns",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The logo strip shows whole columns (2, 3, 4, chosen by its own width). Adding a column makes the tiles smaller at once (−33% from 2 to 3, −25% from 3 to 4); the steps are the shared steps S and M, where the features above change too (tiles ≥ 112 and ≥ 164px)",
+   "decided": "Tim, 2026-10-18 (whole columns; 3 columns down to a 390 screen, in step with the features)"
+  },
+  {
+   "id": "id-card-object",
+   "kind": "decision",
+   "state": "holding",
+   "covered": 3,
+   "notes": [],
+   "what": "The ID cards are an object of a fixed size (240 × 345px), scaled as a whole by the row or the deck, corners included: 24px of the card's 240 (the table half that in), so the card keeps its shape at every screen size. Their deck starts below a 35rem column, their own step: the row needs that room",
+   "decided": "2026-10-18; radius/m on 2026-10-18 (Tim); 16px, scaled with the card, on 2026-10-20 (Tim: smaller corners, always in proportion to the card); 24px on 2026-10-22 (Tim: 24 at most)",
+   "until": null
+  },
+  {
+   "id": "body-16",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Running text is 16px at every screen width (type/body); short text in small cards (the features, the bylines) is type/body-s, 14 → 16; the text of the tool cards type/body-m, 16 → 18",
+   "decided": "Tim, 2026-10-18; body-s and body-m on 2026-10-18"
+  },
+  {
+   "id": "type-on-the-ladder",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Every text size ends on the ladder (steps of 2 up to 24, 4 up to 64, 8 up to 128) at 320 and 1440: hero 36 → 60 (60 at most: Tim, 2026-10-22), h2 28 → 52 (also the stack card titles), card-heading 24 → 32, lead 16 → 20, card-tag 14 → 18, body-m 16 → 18, body 16, body-s 14 → 16, ui 14. No modular ratio any more: the levels keep their order and distance by type.relations (at least ×1.125 apart at both ends), checked by build/tokens.mjs",
+   "decided": "Tim, 2026-10-18"
+  },
+  {
+   "id": "layout-steps",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Blocks change their layout together, at three shared column widths: S 22rem (a 390 screen: features 1 → 2, logos 2 → 3), M 43rem (a 768 window, also with a classic scrollbar: logos 3 → 4; royalty, publications 1 → 2), L 58rem (a 1024 window, also with a scrollbar: features 2 → 4; the tool cards' least height). Own steps: the ID cards' deck (35rem); the tool cards side by side from 45.75rem (an 800 window, also with a scrollbar; Tim, 2026-10-24)",
+   "decided": "Tim, 2026-10-18"
+  },
+  {
+   "id": "footer-notes-1080",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The footer's grey notes go from two columns to one row at a 1080 window (--notes-cols, 67.5em), not at 1024 with the navbar; the last note reads «Дизайн и разработка — Тим Лебедев»",
+   "decided": "Tim, 2026-10-24"
+  },
+  {
+   "id": "royalty-by-shape",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The royalty cards fill their column and arrange themselves by their own shape: narrow — the drawing on top, the title from 70% of the card's width; wide (from a 32rem card) — the title left, the drawing right. Titles as wide as the card, at most 14em (three lines, never two long ones; 12em and evened-out lines until 2026-10-22, Tim: full width)",
+   "decided": "Tim, 2026-10-18"
+  },
+  {
+   "id": "stack-tall-screens",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "A stack card is laid out vertically (text on top, the drawing below) when it is less than 1.3 times as wide as tall, and on every screen about 1440px tall or taller (a card 83rem tall), whatever its width; the drawing grows up to 1080px with its room",
+   "decided": "Tim, 2026-10-18"
+  },
+  {
+   "id": "endless-motion",
+   "kind": "exception",
+   "state": "unbound",
+   "what": "Things that move by themselves without end and have no pause switch: the CTA's strip of words, the hero chips, the ring's idle spin, the dust of the stats and the CTA, the loops in the drawings. They all stop for visitors who turned on \"reduce motion\"",
+   "decided": "Tim, 2026-10-18 — no pause switch, the strip keeps its loop"
+  },
+  {
+   "id": "menu-pills",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The burger menu's pills open with the settle curve, from 20% to 117% and back to 100%, 0.8s in all, and close by playing the same backwards",
+   "decided": "Tim, 2026-10-18 — kept as designed"
+  },
+  {
+   "id": "cookie-notice",
+   "kind": "decision",
+   "state": "holding",
+   "covered": 2,
+   "notes": [],
+   "what": "The cookie notice is the same card at every screen width (276px, fixed radii 16/8, 12px text: type/note), not fluid like the rest of the page; its text uses ink 70%, its button black 5% (7% under the mouse: --tint-strong); its links underlined 1px, 3px under the baseline, in ink 20% (Tim, Oct 19; Figma has 10%), ink 30% under the mouse, as in Figma; its line height is the site's text one (1.3) instead of Figma's 1.25; after «ОК» the text stays, «ОК» turns into a drawn checkmark, the card sets off 0.15 s before the drawing ends and goes down below the screen edge while fading (0.45 s, the 'leave' curve of motion.js, as the stack titles leave)",
+   "decided": "Tim, 2026-10-19 — the Figma section 'cookies'; the exit (text stays, card goes down with an existing curve) on his request",
+   "until": null
+  },
+  {
+   "id": "consent-by-ok",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Only «ОК» counts as consent: nothing optional (analytics, a chat) starts before it (scripts/consent.js, onConsent). The answer is kept 12 months on the device, with the version of the text (VERSION); a visitor who has not answered is asked again on the next visit",
+   "decided": "Claude, 2026-10-19 — proposed to Tim with the cookie notice"
+  },
+  {
+   "id": "safari-box",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "In Safari 26+ on a Mac the page scrolls in its own box (.page, position fixed, inset 0) instead of the window; everywhere else the window scrolls as before. box.js gives <html> the class boxed (on every page: the main one, the two legal documents and the 404 since Oct 24); scroller.js is what every script asks about scrolling; GSAP's ScrollTrigger watches the box (gsap.js), and the logos are held there by position: sticky instead of GSAP's pin. ?fmbox=1 / ?fmbox=0 force it on or off",
+   "decided": "Tim, 2026-10-19 — wanted a solid Safari bar, as on YouTube and Google Docs"
+  },
+  {
+   "id": "doc-pages",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The privacy policy and the cookie consent are pages of the site: the policy at its old address (/privacy_policy_ru), the consent at /cookie_consent (Tim, 2026-10-24: «a proper address»; the old /soglasie_cookie leads there with a 301 in deploy/ and public/soglasie_cookie.html on GitHub Pages). Their text is the Tilda text as it was (Tim, 2026-10-19: «keep it as is for now except formatting»); only the layout is new: headings, paragraphs, hanging list markers, one card per purpose of processing, links. Text line height 1.5 (--doc-line), not --lh-text 1.3. Tim, 2026-10-24: title and text in one white section, Golos for everything, the title 24px on phones to 40px on computers (type/doc-title), the navbar white at 70% (as the main one over white), list markers «1.» not «(1)», link underlines 5px under the text, no line above the footer",
+   "decided": "Tim, 2026-10-19 (text as is); Claude, 2026-10-19 (layout, line height)"
+  },
+  {
+   "id": "typeset",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Where lines may break is decided by build/typeset (it replaced build/typograph.js): one answer per space, by the language of each text (lang), Russian and English rules plus rules for any language; no-break spaces and word joiners only. Letters you can see are never changed by the build: straight quotes, a hyphen for a dash, look-alike letters are reported (npm run typeset -- --lint) and changed only with --fix. No length limit on what is held together (Tim, 2026-10-24: «let's not set limits for that»)",
+   "decided": "Claude, 2026-10-19; Tim, 2026-10-24 (no length limits, merged)"
+  },
+  {
+   "id": "hero-bounds",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The hero has least and greatest sizes for its parts (picture, air above and below the text). On tall screens it stops growing and the first card shows more under it (390×844: 574px instead of 826); on screens shorter than about 690px it is taller than the screen rather than squeezing the picture (1366×650: 673px, the team 291px tall instead of 249, no pill of the first card on the first screen)",
+   "decided": "Claude, 2026-10-19, from Tim's round-4 comments (hero 1–3) — to confirm"
+  },
+  {
+   "id": "pinned-pill",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "A card that has become a pill does not wait: it goes on up with the page at once and leaves the screen under the navbar, while the next card comes up to the top. The pinned pill of 2026-10-19 is gone, and its code with it (the sticky holder round each card, the last card's copy, SET.hold)",
+   "decided": "Tim, 2026-10-20 — remove the sticky behaviour of a closed card pill (it was pinned for 1/5 of a screen since 2026-10-19, round-4 comment cards 5); the same day — remove the pause from the code completely"
+  },
+  {
+   "id": "pubs-more",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The publications show at most 4 cards; with 5 or more, a «Показать больше» pill under them shows the next 4 each time and goes away when none are left. It is --section-gap below the cards (the gap their heading had; Tim, 2026-10-20), while the heading itself has --section-air-l above the cards. It is a line button (.btn--line): no colour of its own, a 1px border, ink 70% on an ink 16% border, ink on ink 25% under the mouse (Tim, 2026-10-20), and it comes in as a block, as the hero's button does. Without scripts every card is shown and the button is not",
+   "decided": "Tim, 2026-10-20 — button below the cards from 5 cards; later the same day: no background, 1px border, 70%/16% → 100%/25%, coming in like the hero's button"
+  },
+  {
+   "id": "no-focus-ring",
+   "kind": "exception",
+   "state": "unbound",
+   "what": "No focus ring anywhere on the page (links, buttons, the publications the focus moves to after «Показать больше», the booking window's close button). Only the system's high-contrast modes (forced colours) keep a ring, in the system's colour. The skip link still appears when it is reached with Tab",
+   "decided": "Tim, 2026-10-20 — remove all design for focus states"
+  },
+  {
+   "id": "section-air-l",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The tools and the publications have more air than the other sections: --section-air-l (56 → 112px) above and below their content and from their headings to their cards, the same as under the CTA card (which had section-y × 1.4, the same numbers). The gap from the publications to «Показать больше» stays --section-gap",
+   "decided": "Tim, 2026-10-20 — top and bottom paddings 112 at most (as under the CTA card), the heading gap 112 too, the button's gap unchanged"
+  },
+  {
+   "id": "safari-bottom-bar",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Safari's bottom bar on iPhone takes no colour from the page: an empty block fixed over the middle of the bottom edge (.bar-guard, base.css; iOS only, 64 × 8px, takes taps), which Safari skips as see-through and then finds nothing fixed or sticky there, so the bar stays plain glass. Before, the bar turned the colour of the stack's cards and kept it after the stack (WebKit hit-tests the bottom edge through clipping and through blocks with nothing sticky in them, so the last card hidden by the stack's overflow still counted). A backdrop filter on the block (Oct 22) made the bar white instead",
+   "decided": "Tim, 2026-10-22 — «i don't want it to have any color», then «i want it to have no background» (white was not it either)"
+  },
+  {
+   "id": "telegram-cap-flicker",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "Known limit, left as it is: in Telegram's browser on iPhone, a hard fling past the end of the page makes the strip behind Telegram's buttons (the white cap, nav.js initCap) flicker for 3–5 frames (about 50–80 ms). Everywhere else the cap holds at the navbar (±1px, measured frame by frame in Tim's recordings with ?fmcap=debug, Oct 23)",
+   "decided": "Tim, 2026-10-23 — «let's do this» (record it and leave it): the top bar is white in general, a split-second flicker on a hard scroll past the end"
+  },
+  {
+   "id": "idcard-stack-rise",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "On phones (the ID cards as a stack, a column below 35rem) the cards do not drop: they rise 80px into place one after another, the bottom card first, 0.12s apart, 0.7s each (out), turning from −4° to their angle in the stack; the whole stack fades in as one picture (0.55s, the reveal curve). In the stack the angle goes with the place, not the card: the top card straight, then 4°, then 8° (the slot carries it, so a swap turns the cards to their new places and the stack always looks the same). The row keeps the drop and each card's own angle",
+   "decided": "Tim, 2026-10-23 — in the access-cards lab: «on mobile i want cards to move from below, one after another, no drop animation», «the top card end state to be straight and the other cards on equal angles», «on swap they should also change the angle so that the stack stays the same (0, 4, 8)», «when it's a stack there's a moment when cards overlap in their transparency. i don't want that»"
+  },
+  {
+   "id": "idcard-tip-and-light",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "The ID cards of the row start their drop tipped 10° with the top edge toward the visitor and lie flat again at an even speed by the landing (M.DROP.tip); they fade in slowly at both ends (M.curve.reveal, cubic-bezier(0.5, 0, 0.5, 1); 0.2s as before). A light from the top, 75° above the page, shades a face as the card tips or leans: brighter turned towards it, darker turned away, ×4 at most 45%, nothing lying flat (M.LIGHT). The shadow stays the site's own box-shadow, with a 0.5px hairline of the face's colour as its first layer, so no light line shows between the card's edge and its shadow",
+   "decided": "Tim, 2026-10-23 — the settings of the access-cards lab (light from the top at 75°, shade 4, no gloss; tilt −20°, even, 1× the fall; −10° since Oct 24, Tim: «change the tilt at the start from -20 to -10»; fade 0.36 of the fall on 0.5, 0, 0.5, 1); «the drop shadow should be consistent with the current website»; «there's a thin white line at the bottom»"
+  }
+ ],
+ "questions": [
+  {
+   "id": "report-on-devices",
+   "ask": "The review page on your devices: the System tabs one by one (the Type slider), zooming a chart on Responsive (trackpad pinch in Safari), the Typesetter demo — on your Mac in Safari and on your iPhone. Does each work?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/report/",
+   "since": "2026-10-25",
+   "from": "PR #62",
+   "options": [
+    "All works",
+    "Something is broken (say what)"
+   ],
+   "about": [
+    "design/report/site/report.js",
+    "design/report/site/report.css"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "hero-shake-safari",
+   "ask": "Reload the home page a few times (and once as a first visit): does the team picture in the hero still shake or jump in Safari on your Mac and on your iPhone?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "since": "2026-10-20",
+   "from": "PR #22, PR #61",
+   "options": [
+    "No shake",
+    "Still shakes"
+   ],
+   "about": [
+    "src/styles/sections/hero.css",
+    "src/scripts/hero.js",
+    "src/scripts/boot.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "fast-scroll-drawings",
+   "ask": "Right after the page loads, scroll fast to the bottom: are the drawings of the cards there in time, or do you see empty cards? Also open the link to #clients: does it land on the clients?",
+   "needs": [
+    "iphone",
+    "mac-safari"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#clients",
+   "since": "2026-10-25",
+   "from": "PR #61",
+   "options": [
+    "In time, lands right",
+    "Empty cards or a wrong landing (say where)"
+   ],
+   "about": [
+    "src/scripts/art/mount.js",
+    "src/scripts/main.js",
+    "src/scripts/anchor.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "cta-dust-devices",
+   "ask": "The CTA card's dust on your Mac (Safari) and iPhone: does it look as in the lab, and does the phone stay smooth while it moves (about 217 000 specks there)?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "since": "2026-10-25",
+   "from": "PR #58",
+   "options": [
+    "Looks right and smooth",
+    "Looks wrong",
+    "Stutters on the phone"
+   ],
+   "about": [
+    "src/scripts/stipple.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "cta-lead-contrast",
+   "ask": "The CTA's lead stays just under 4.5 : 1 over the dust (4.45 at 1440, 4.21 at 390). Keep it, or dim the middle a bit more so it passes?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "since": "2026-10-25",
+   "from": "PR #58",
+   "options": [
+    "Keep as it is",
+    "Dim more until it passes 4.5 : 1"
+   ],
+   "about": [
+    "src/scripts/stipple.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "cta-dust-shape",
+   "ask": "Which shape for the CTA's dust: as it is on the site now, the burst at the left and right edges (lab of Oct 25), or the one band round the border (lab of Oct 24)?",
+   "needs": [
+    "choice",
+    "eye"
+   ],
+   "link": "https://claude.ai/artifact/PyjsPWv2XDVEYto6M5D7SF",
+   "since": "2026-10-25",
+   "from": "labs of Oct 24 and Oct 25",
+   "options": [
+    "As on the site",
+    "Burst at the sides",
+    "One band round the border"
+   ],
+   "about": [
+    "src/scripts/stipple.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "ring-safari",
+   "ask": "The ring of covers in Safari on your Mac and iPhone: smooth and sharp? And is it OK that browsers without a real GPU show it still?",
+   "needs": [
+    "mac-safari",
+    "iphone",
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "since": "2026-10-20",
+   "from": "PR #20",
+   "options": [
+    "Smooth, a still ring is fine",
+    "Not smooth or not sharp",
+    "A still ring is not fine"
+   ],
+   "about": [
+    "src/scripts/ring.js",
+    "src/scripts/ring-gl.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "navbar-sideways-iphone",
+   "ask": "Your iPhone turned sideways, in Safari: scroll up and down past the hero. Is the navbar's jump gone, and does it follow smoothly?",
+   "needs": [
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "since": "2026-10-20",
+   "from": "PR #13",
+   "options": [
+    "Smooth, no jump",
+    "Still jumps"
+   ],
+   "about": [
+    "src/scripts/nav.js",
+    "src/styles/sections/nav.css"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "short-laptop-hero",
+   "ask": "On short laptop windows (1366×650, 1280×620) the hero now runs past the first screen and the first card's pill is not seen. Is that OK, or should the team picture be smaller there?",
+   "needs": [
+    "choice",
+    "eye"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "since": "2026-10-20",
+   "from": "PR #13",
+   "options": [
+    "OK as it is",
+    "Make the picture smaller on short screens"
+   ],
+   "about": [
+    "src/styles/sections/hero.css",
+    "design/scale.json"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "wide-card-drawing",
+   "ask": "On a wide stack card the drawing is cut at the card's top while the card opens (it stays centred in the open part). Is that the look you wanted?",
+   "needs": [
+    "eye"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "since": "2026-10-20",
+   "from": "PR #22",
+   "options": [
+    "Yes",
+    "No (say how it should be)"
+   ],
+   "about": [
+    "src/scripts/cards.js",
+    "src/styles/sections/stack.css"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "tools-white-reload",
+   "ask": "On your iPhone, scroll to the tools and reload there, in Safari and in Telegram: does the section stay as it is (not white)?",
+   "needs": [
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "since": "2026-10-18",
+   "from": "PR #8",
+   "options": [
+    "Stays as it is",
+    "Turns white"
+   ],
+   "about": [
+    "src/scripts/boot.js",
+    "src/styles/base/base.css"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "planerka-account",
+   "ask": "Which Planerka account should the booking window use? flow-medium-8nzjz3/demo (now; shows Planerka's ribbon on the free plan) or t-l-sfkcrg/30min (hides the branding)?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#demo",
+   "since": "2026-10-19",
+   "from": "PR #11",
+   "options": [
+    "flow-medium-8nzjz3/demo",
+    "t-l-sfkcrg/30min"
+   ],
+   "about": [
+    "src/scripts/book.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "cookie-text",
+   "ask": "The cookie notice says «Оставаясь, вы даете согласие» (staying = consent), but only «ОК» counts. Change it to «Нажимая «ОК», вы даёте согласие на обработку данных»?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "since": "2026-10-19",
+   "from": "PR #10",
+   "options": [
+    "Change the text",
+    "Keep the text"
+   ],
+   "about": [
+    "src/index.html"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "cookie-withdraw",
+   "ask": "A way to take consent back (e.g. «Настройки куки» in the footer, which shows the notice again): design one now?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "since": "2026-10-19",
+   "from": "PR #10",
+   "options": [
+    "Yes, design it",
+    "Not now"
+   ],
+   "about": [
+    "src/scripts/consent.js"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "fifth-publication",
+   "ask": "The publications include a copy of «Как разобраться в отчетах по роялти» put there to test «Показать больше». Which real publication goes in its place?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#publications",
+   "since": "2026-10-20",
+   "from": "PR #19",
+   "options": [
+    "Send the publication",
+    "Remove the copy"
+   ],
+   "about": [
+    "src/index.html"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "short-screen-headings",
+   "ask": "On short screens the headings meet: on 1366×650 the hero title is 55px and a section heading 54px; on phones turned sideways a heading is bigger than the hero. Keep a section heading at most the hero ÷ 1.2 on short screens?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/report/#system/type",
+   "since": "2026-10-17",
+   "from": "PR #5",
+   "options": [
+    "Yes, keep the distance",
+    "Leave as it is"
+   ],
+   "about": [
+    "design/scale.json",
+    "src/styles/components/head.css"
+   ],
+   "status": "open",
+   "state": "open"
+  },
+  {
+   "id": "hsts-preload",
+   "ask": "For the real host (flowmedium.pro): add HSTS preload? It binds every subdomain to HTTPS for good.",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://github.com/timofeylebedev/fm/tree/main/deploy",
+   "since": "2026-10-25",
+   "from": "PR #61",
+   "options": [
+    "Yes, preload",
+    "No"
+   ],
+   "about": [
+    "deploy/_headers"
+   ],
+   "status": "open",
+   "state": "open"
+  }
+ ],
+ "from": "this build"
+}
