@@ -996,7 +996,7 @@ const AREA_TAB = { Type: "type", Colour: "colour", Fills: "colour", Space: "spac
   "Page health": "health", Weight: "health", Code: "grammar", Decisions: "decisions" };
 const rulesOf = (tab) => RULES.filter((r) => AREA_TAB[r.area] === tab);
 const tabState = (tab) => { const rs = rulesOf(tab); return rs.some((r) => r.status === "fail" || r.status === "error") ? "fail" : rs.some((r) => r.status === "warn") ? "warn" : null; };
-const measuredLine = () => C ? `measured on <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> (${esc(C.from || "")}${C.commit.slice(0, 7) !== D.meta.head && C.from !== "this build" ? ", not this build" : ""}) on ${esc(C.generated.slice(0, 16).replace("T", " "))} UTC · ${Object.entries(C.engines).map(([e, v]) => `${esc(e)} ${esc(v.version)}${v.quick ? " (sizes only)" : ""}`).join(" · ")}` : "";
+const measuredLine = () => C ? `measured on <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> (${esc(C.from || "")}${C.commit.slice(0, 7) !== D.meta.head && C.from !== "this build" ? ", not this build" : ""}) on ${esc(C.generated.slice(0, 16).replace("T", " "))} UTC · ${Object.entries(C.engines).map(([e, v]) => `${esc(e)} ${esc(v.version)}${v.quick ? " (sizes and pages)" : ""}`).join(" · ")}` : "";
 
 // copying an answer: the line goes to a chat with Claude, who records it (design/checks/answer.mjs)
 const toast = el("div", "toast"); toast.setAttribute("role", "status"); document.body.appendChild(toast);
