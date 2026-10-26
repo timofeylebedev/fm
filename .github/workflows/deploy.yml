@@ -3,6 +3,8 @@
 # - Every pull request is published as a preview in pr-preview/pr-<number>/
 #   (https://timofeylebedev.github.io/fm/pr-preview/pr-<number>/). The link is posted as a comment on the
 #   pull request, updated on every push, and the preview is removed when the pull request is merged or closed.
+# - Then the job `checks` measures the design system (design/checks/) and publishes the review page (/report/) again
+#   with the result; the record is kept on the report-data branch.
 # Once: Settings → Pages → Build and deployment → Source: "Deploy from a branch", branch gh-pages, folder / (root).
 name: Build and deploy
 
@@ -79,3 +81,87 @@ jobs:
           preview-branch: gh-pages
           umbrella-dir: pr-preview
           action: auto
+
+  # The design system's checks (design/checks/README.md): the built site measured in Chromium and WebKit, every rule's
+  # result, the decisions and questions, «what needs you». They run after the site is out, so they never hold it up;
+  # the record is kept on the report-data branch (main: history; a pull request: its last run, compared with main), and
+  # the review page (/report/) is published again with them. A failure here never touches the site.
+  # Not on ubuntu-latest: Playwright cannot install its browsers on Ubuntu 26.04 (see audit.yml).
+  checks:
+    needs: site
+    if: github.event.action != 'closed' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      FM_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      FM_PR: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run build
+
+      - name: Measure (Chromium, then WebKit)
+        run: |
+          node design/checks/measure.mjs
+          node design/checks/measure.mjs --engine webkit --quick || echo "::warning title=Checks::WebKit could not be measured"
+
+      - name: The state (compared with the last deploy of main)
+        run: |
+          mkdir -p design/checks/out/prev
+          if git fetch --depth=1 origin +refs/heads/report-data:refs/remotes/origin/report-data; then
+            git show origin/report-data:latest/state.json > design/checks/out/prev/state.json || rm -f design/checks/out/prev/state.json
+            git show origin/report-data:latest/record-chromium.json > design/checks/out/prev/record.json || rm -f design/checks/out/prev/record.json
+          fi
+          node design/checks/state.mjs --webkit design/checks/out/record-webkit.json --prev design/checks/out/prev/state.json --prev-record design/checks/out/prev/record.json
+
+      - name: Keep the record (report-data branch)
+        run: node design/checks/keep.mjs ${{ github.event_name == 'pull_request' && format('--pr {0}', github.event.pull_request.number) || '' }}
+
+      - name: The review page with the checks
+        run: |
+          node design/report/build-site.mjs
+          rm -rf dist/report && cp -R design/report/site dist/report
+          find dist \( -name '*.br' -o -name '*.gz' \) -delete
+          touch dist/.nojekyll
+
+      - name: Publish the review page (main)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist/report
+          target-folder: report
+          branch: gh-pages
+          force: false
+
+      - name: Publish the review page (the preview)
+        if: github.event_name == 'pull_request'
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: dist
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: deploy
+          comment: false
+
+      - name: Summary
+        if: always()
+        run: |
+          { echo "### Design-system checks"; echo; echo '```'; node -e 'const s=require("./design/checks/out/state.json");const m=s.summary;console.log(`${m.rules} rules: ${m.pass} pass, ${m.warn} warn, ${m.fail} fail; ${m.findings} findings (${m.new} new, ${m.fixed} fixed); ${m.questions} questions open`);for(const n of s.needs.slice(0,15))console.log(`${n.severity.padEnd(4)} ${n.title.slice(0,100)} — ${n.why}`)' 2>/dev/null || echo "(no state: an earlier step failed)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  # a closed pull request: its last run is taken off the report-data branch
+  forget:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main            # the keeper as main has it (a closed pull request's own branch may be gone)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node design/checks/keep.mjs --forget ${{ github.event.pull_request.number }}

@@ -1,0 +1,197 @@
+{
+  "$about": [
+    "Questions for Tim: what a check cannot answer (a look on a real device, a choice). The report's first page («What needs you») lists the open ones with answer buttons; a button copies the answer to paste into a chat with Claude, who records it with `node design/checks/answer.mjs <id> \"<answer>\" [\"note\"]`.",
+    "about: the files the question is about. An answer is stored with those files' fingerprints (git blob hashes): when one of them changes, the question opens again («changed since your answer»), so an OK given to an older build never covers a newer one.",
+    "needs: iphone | mac-safari | eye (look at it anywhere) | choice. link: where to look (the live site unless a PR preview is named).",
+    "status: open | answered. A question can also be closed by a decision (answer.decision) or dropped (status: dropped, with why)."
+  ],
+  "questions": [
+    {
+      "id": "report-on-devices",
+      "ask": "The review page on your devices: the System tabs one by one (the Type slider), zooming a chart on Responsive (trackpad pinch in Safari), the Typesetter demo — on your Mac in Safari and on your iPhone. Does each work?",
+      "needs": ["mac-safari", "iphone"],
+      "link": "https://timofeylebedev.github.io/fm/report/",
+      "since": "2026-10-25",
+      "from": "PR #62",
+      "options": ["All works", "Something is broken (say what)"],
+      "about": ["design/report/site/report.js", "design/report/site/report.css"],
+      "status": "open"
+    },
+    {
+      "id": "hero-shake-safari",
+      "ask": "Reload the home page a few times (and once as a first visit): does the team picture in the hero still shake or jump in Safari on your Mac and on your iPhone?",
+      "needs": ["mac-safari", "iphone"],
+      "link": "https://timofeylebedev.github.io/fm/",
+      "since": "2026-10-20",
+      "from": "PR #22, PR #61",
+      "options": ["No shake", "Still shakes"],
+      "about": ["src/styles/sections/hero.css", "src/scripts/hero.js", "src/scripts/boot.js"],
+      "status": "open"
+    },
+    {
+      "id": "fast-scroll-drawings",
+      "ask": "Right after the page loads, scroll fast to the bottom: are the drawings of the cards there in time, or do you see empty cards? Also open the link to #clients: does it land on the clients?",
+      "needs": ["iphone", "mac-safari"],
+      "link": "https://timofeylebedev.github.io/fm/#clients",
+      "since": "2026-10-25",
+      "from": "PR #61",
+      "options": ["In time, lands right", "Empty cards or a wrong landing (say where)"],
+      "about": ["src/scripts/art/mount.js", "src/scripts/main.js", "src/scripts/anchor.js"],
+      "status": "open"
+    },
+    {
+      "id": "cta-dust-devices",
+      "ask": "The CTA card's dust on your Mac (Safari) and iPhone: does it look as in the lab, and does the phone stay smooth while it moves (about 217 000 specks there)?",
+      "needs": ["mac-safari", "iphone"],
+      "link": "https://timofeylebedev.github.io/fm/#tools",
+      "since": "2026-10-25",
+      "from": "PR #58",
+      "options": ["Looks right and smooth", "Looks wrong", "Stutters on the phone"],
+      "about": ["src/scripts/stipple.js"],
+      "status": "open"
+    },
+    {
+      "id": "cta-lead-contrast",
+      "ask": "The CTA's lead stays just under 4.5 : 1 over the dust (4.45 at 1440, 4.21 at 390). Keep it, or dim the middle a bit more so it passes?",
+      "needs": ["choice"],
+      "link": "https://timofeylebedev.github.io/fm/#tools",
+      "since": "2026-10-25",
+      "from": "PR #58",
+      "options": ["Keep as it is", "Dim more until it passes 4.5 : 1"],
+      "about": ["src/scripts/stipple.js"],
+      "status": "open"
+    },
+    {
+      "id": "cta-dust-shape",
+      "ask": "Which shape for the CTA's dust: as it is on the site now, the burst at the left and right edges (lab of Oct 25), or the one band round the border (lab of Oct 24)?",
+      "needs": ["choice", "eye"],
+      "link": "https://claude.ai/artifact/PyjsPWv2XDVEYto6M5D7SF",
+      "since": "2026-10-25",
+      "from": "labs of Oct 24 and Oct 25",
+      "options": ["As on the site", "Burst at the sides", "One band round the border"],
+      "about": ["src/scripts/stipple.js"],
+      "status": "open"
+    },
+    {
+      "id": "ring-safari",
+      "ask": "The ring of covers in Safari on your Mac and iPhone: smooth and sharp? And is it OK that browsers without a real GPU show it still?",
+      "needs": ["mac-safari", "iphone", "choice"],
+      "link": "https://timofeylebedev.github.io/fm/",
+      "since": "2026-10-20",
+      "from": "PR #20",
+      "options": ["Smooth, a still ring is fine", "Not smooth or not sharp", "A still ring is not fine"],
+      "about": ["src/scripts/ring.js", "src/scripts/ring-gl.js"],
+      "status": "open"
+    },
+    {
+      "id": "navbar-sideways-iphone",
+      "ask": "Your iPhone turned sideways, in Safari: scroll up and down past the hero. Is the navbar's jump gone, and does it follow smoothly?",
+      "needs": ["iphone"],
+      "link": "https://timofeylebedev.github.io/fm/",
+      "since": "2026-10-20",
+      "from": "PR #13",
+      "options": ["Smooth, no jump", "Still jumps"],
+      "about": ["src/scripts/nav.js", "src/styles/sections/nav.css"],
+      "status": "open"
+    },
+    {
+      "id": "short-laptop-hero",
+      "ask": "On short laptop windows (1366×650, 1280×620) the hero now runs past the first screen and the first card's pill is not seen. Is that OK, or should the team picture be smaller there?",
+      "needs": ["choice", "eye"],
+      "link": "https://timofeylebedev.github.io/fm/",
+      "since": "2026-10-20",
+      "from": "PR #13",
+      "options": ["OK as it is", "Make the picture smaller on short screens"],
+      "about": ["src/styles/sections/hero.css", "design/scale.json"],
+      "status": "open"
+    },
+    {
+      "id": "wide-card-drawing",
+      "ask": "On a wide stack card the drawing is cut at the card's top while the card opens (it stays centred in the open part). Is that the look you wanted?",
+      "needs": ["eye"],
+      "link": "https://timofeylebedev.github.io/fm/",
+      "since": "2026-10-20",
+      "from": "PR #22",
+      "options": ["Yes", "No (say how it should be)"],
+      "about": ["src/scripts/cards.js", "src/styles/sections/stack.css"],
+      "status": "open"
+    },
+    {
+      "id": "tools-white-reload",
+      "ask": "On your iPhone, scroll to the tools and reload there, in Safari and in Telegram: does the section stay as it is (not white)?",
+      "needs": ["iphone"],
+      "link": "https://timofeylebedev.github.io/fm/#tools",
+      "since": "2026-10-18",
+      "from": "PR #8",
+      "options": ["Stays as it is", "Turns white"],
+      "about": ["src/scripts/boot.js", "src/styles/base/base.css"],
+      "status": "open"
+    },
+    {
+      "id": "planerka-account",
+      "ask": "Which Planerka account should the booking window use? flow-medium-8nzjz3/demo (now; shows Planerka's ribbon on the free plan) or t-l-sfkcrg/30min (hides the branding)?",
+      "needs": ["choice"],
+      "link": "https://timofeylebedev.github.io/fm/#demo",
+      "since": "2026-10-19",
+      "from": "PR #11",
+      "options": ["flow-medium-8nzjz3/demo", "t-l-sfkcrg/30min"],
+      "about": ["src/scripts/book.js"],
+      "status": "open"
+    },
+    {
+      "id": "cookie-text",
+      "ask": "The cookie notice says «Оставаясь, вы даете согласие» (staying = consent), but only «ОК» counts. Change it to «Нажимая «ОК», вы даёте согласие на обработку данных»?",
+      "needs": ["choice"],
+      "link": "https://timofeylebedev.github.io/fm/",
+      "since": "2026-10-19",
+      "from": "PR #10",
+      "options": ["Change the text", "Keep the text"],
+      "about": ["src/index.html"],
+      "status": "open"
+    },
+    {
+      "id": "cookie-withdraw",
+      "ask": "A way to take consent back (e.g. «Настройки куки» in the footer, which shows the notice again): design one now?",
+      "needs": ["choice"],
+      "link": "https://timofeylebedev.github.io/fm/",
+      "since": "2026-10-19",
+      "from": "PR #10",
+      "options": ["Yes, design it", "Not now"],
+      "about": ["src/scripts/consent.js"],
+      "status": "open"
+    },
+    {
+      "id": "fifth-publication",
+      "ask": "The publications include a copy of «Как разобраться в отчетах по роялти» put there to test «Показать больше». Which real publication goes in its place?",
+      "needs": ["choice"],
+      "link": "https://timofeylebedev.github.io/fm/#publications",
+      "since": "2026-10-20",
+      "from": "PR #19",
+      "options": ["Send the publication", "Remove the copy"],
+      "about": ["src/index.html"],
+      "status": "open"
+    },
+    {
+      "id": "short-screen-headings",
+      "ask": "On short screens the headings meet: on 1366×650 the hero title is 55px and a section heading 54px; on phones turned sideways a heading is bigger than the hero. Keep a section heading at most the hero ÷ 1.2 on short screens?",
+      "needs": ["choice"],
+      "link": "https://timofeylebedev.github.io/fm/report/#system/type",
+      "since": "2026-10-17",
+      "from": "PR #5",
+      "options": ["Yes, keep the distance", "Leave as it is"],
+      "about": ["design/scale.json", "src/styles/components/head.css"],
+      "status": "open"
+    },
+    {
+      "id": "hsts-preload",
+      "ask": "For the real host (flowmedium.pro): add HSTS preload? It binds every subdomain to HTTPS for good.",
+      "needs": ["choice"],
+      "link": "https://github.com/timofeylebedev/fm/tree/main/deploy",
+      "since": "2026-10-25",
+      "from": "PR #61",
+      "options": ["Yes, preload", "No"],
+      "about": ["deploy/_headers"],
+      "status": "open"
+    }
+  ]
+}

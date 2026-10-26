@@ -17,6 +17,12 @@ rules Claude follows. The site's history, open PRs and open questions live in th
 - **The review page of the design system** (every colour, size, step, shadow, curve and decision, and each review round):
   `design/report/site/index.html` (opens from the clone), published at https://timofeylebedev.github.io/fm/report/.
   Its data is read from the repo by `node design/report/build-site.mjs` (`design/report/README.md`).
+- **The checks of the design system** (`design/checks/`, README there): every rule of the system measured in a browser
+  on every deploy (job `checks` of deploy.yml, after the site is out): findings, decisions that cover them, questions
+  for Tim, and «what needs you», in one `state.json` (live: `…/fm/report/state.json`; history on the `report-data`
+  branch, never edited by hand). Read it at the start of design work instead of trusting an old round's numbers.
+  `npm run checks` runs it locally after a build. Tim answers a question with a button on the report that copies
+  «FM answer · <id>: <answer>»; record it with `node design/checks/answer.mjs <id> "<answer>" ["note"]` in the PR it leads to.
 - Owner and reviewer: Tim (timofeylebedev). The site's language is Russian; talk to Tim in the language he writes in.
 - The design lives in Figma: https://www.figma.com/design/JTfxQeW8liN3knCO3GWtns/website-2.0 (Figma Pro plan:
   no Variables REST API, so variables go through the Figma MCP tool `use_figma`).
@@ -33,7 +39,11 @@ rules Claude follows. The site's history, open PRs and open questions live in th
   and its findings are fixed in a commit "Fixes from the independent review".
 - Measure, don't guess. Numbers in PRs come from a browser (Playwright), not from reading the CSS.
 - When something is decided on purpose (an exception, a trade-off Tim chose), add it to `design/decisions.json`
-  (who, when, why). `npm run audit` prints the exceptions with measured values.
+  (who, when, why). `npm run audit` prints the exceptions with measured values. When the decision covers what a check
+  finds, bind it: `"checks": [{ "rule": "<id>", "match": "<regex>", "band": [least, greatest] }]` (design/checks/README.md):
+  the check then accepts it and brings it back when its value moves.
+- A question for Tim that a check cannot answer (a look on his iPhone, a choice) goes into `design/questions.json`
+  (with the files it is about), not only into the project doc: the report shows it with answer buttons.
 
 ## Commands
 
@@ -45,6 +55,8 @@ npm run preview       # dist/ at localhost:4173
 npm run check         # html-validate on the four built pages
 npm run audit         # sideways scroll, cut text, text < 12px, tap targets < 24px, axe; 9 sizes
                       # FM_ENGINE=firefox|webkit for other engines (npx playwright install <engine> once)
+npm run checks        # the design system's checks (design/checks/): measure + state.json, ~5–7 min
+npm run rules         # the rules read from the code only (fast)
 npm run tokens        # design/scale.json + tokens.json -> src/styles/base/tokens.gen.css
 npm run tokens:sync   # three-way merge with a fresh Figma export (design/README.md)
 npm run images        # assets-src/img -> src/assets/img (AVIF/WebP; commit the outputs)

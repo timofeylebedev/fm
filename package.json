@@ -14,6 +14,9 @@
     "tokens": "node build/tokens.mjs",
     "tokens:sync": "node build/tokens.mjs sync design/figma/export.json",
     "audit": "node build/audit.mjs",
+    "checks": "node design/checks/measure.mjs && node design/checks/state.mjs",
+    "checks:state": "node design/checks/state.mjs",
+    "rules": "node design/report/tools/rules.mjs",
     "typeset": "node build/typeset/cli.mjs",
     "test:typeset": "node --test build/typeset/test.mjs"
   },

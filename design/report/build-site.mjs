@@ -8,6 +8,10 @@
 //   site/typeset.js   build/typeset/core.js + lint.js bundled for the browser (window.Typeset): the page's demo runs
 //                     the real typesetter
 //   site/fonts/       the site's fonts (the type specimens are drawn in them)
+//   site/state.json   the design system's checks (design/checks/): this commit's if they were just run
+//                     (design/checks/out/), else the last deploy of main's (the report-data branch); and history.json,
+//                     one line per deploy of main. The measured parts of the page (the responsive picture and map) come
+//                     from the same record when there is one, else from the latest round in data.json.
 //
 //   node design/report/build-site.mjs [--since <commit>]      (default: meta.since in data.json, round 5's build)
 //
@@ -22,6 +26,7 @@ const ROOT = path.resolve(HERE, "../..");
 const SITE = path.join(HERE, "site");
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
 const git = (...a) => execFileSync("git", a, { cwd: ROOT, encoding: "utf8", maxBuffer: 64 << 20 });
+const tryGit = (...a) => { try { return execFileSync("git", a, { cwd: ROOT, encoding: "utf8", maxBuffer: 64 << 20, stdio: ["ignore", "pipe", "ignore"] }); } catch { return null; } };
 const atBase = (p) => { if (typeof NO_BASE !== "undefined" && NO_BASE) return null; try { return git("show", `${SINCE}:${p}`); } catch { return null; } };
 // a shallow clone (GitHub's checkout) has no baseline commit: fetch that one commit, or nothing can be marked new
 const haveBase = () => { try { git("cat-file", "-e", `${SINCE}^{commit}`); return true; } catch { return false; } };
@@ -271,6 +276,33 @@ const cssVars = { face: "var(--idcard-face-1)" };
 for (const f of ["src/styles/base/tokens.gen.css", "src/styles/base/tokens.css"])
   for (const m of read(f).matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\))\s*;/g)) cssVars[m[1]] ??= m[2];
 
+// ── the checks: this commit's (just run), or the last deploy of main's (report-data) ─────────────────────────────
+const OUT = path.join(ROOT, "design/checks/out");
+const local = (f) => (fs.existsSync(path.join(OUT, f)) ? fs.readFileSync(path.join(OUT, f), "utf8") : null);
+let checksState = local("state.json"), checksRecord = local("record-chromium.json"), checksFrom = null;
+// a local run is «this build» only when it measured this very commit; an older one says whose it is
+if (checksState) { const c = JSON.parse(checksState).commit || "", h = (process.env.FM_HEAD_SHA || tryGit("rev-parse", "HEAD") || "").trim(); checksFrom = c && h && c.slice(0, 7) === h.slice(0, 7) ? "this build" : `a local run of ${c.slice(0, 7) || "an unknown commit"}`; }
+if (!tryGit("rev-parse", "--verify", "-q", "refs/remotes/origin/report-data")) tryGit("fetch", "--depth=1", "origin", "+refs/heads/report-data:refs/remotes/origin/report-data");
+if (!checksState) { checksState = tryGit("show", "origin/report-data:latest/state.json"); checksRecord = tryGit("show", "origin/report-data:latest/record-chromium.json"); if (checksState) checksFrom = "the last deploy of main"; }
+const historyIdx = tryGit("show", "origin/report-data:history/index.json");
+const checks = checksState ? JSON.parse(checksState) : null;
+const record = checksRecord ? JSON.parse(checksRecord) : null;
+if (checks) checks.from = checksFrom;
+// the responsive picture and map from the record's sweep (every 10px of width, every 25px of height)
+if (record?.sweep) {
+  picture.sweep = { after: { width: record.sweep.width, height: record.sweep.height } };
+  picture.measured = { commit: record.commit, when: record.when, engine: `${record.engine} ${record.version}` };
+  const { default: siteCfg } = await import(path.join(ROOT, "design/checks/site.config.mjs"));
+  const rows = record.sweep.width.slice().sort((a, b) => a.w - b.w);
+  const remade = Object.entries(siteCfg.mapRows || {}).map(([key, label]) => {
+    const now = [];
+    for (const r of rows) { const v = r[key]; if (v == null) continue; const last = now.at(-1); if (last && last.label === String(v)) last.to = r.w + 10; else { if (last) last.to = r.w; now.push({ from: r.w, to: r.w + 10, label: String(v) }); } }
+    if (now.length) now.at(-1).to = Math.max(now.at(-1).to, 1920);
+    return { label, now };
+  }).filter((r) => r.now.length);
+  if (remade.length) { map.rows = remade; map.measured = picture.measured; }
+}
+
 // ── write ───────────────────────────────────────────────────────────────────────────────────────────────────────────
 const head = (process.env.FM_HEAD_SHA || git("rev-parse", "HEAD").trim()).slice(0, 7);
 const built = git("log", "-1", "--format=%cs").trim();
@@ -288,6 +320,11 @@ const REPORT = {
     grammar: cleanAll(clone(sec.grammar)), decisions,
   },
   typeset: { rules: rulesBy, decision: typesetDecision },
+  checks,
+  history: historyIdx ? JSON.parse(historyIdx) : [],
+  // the questions as written (the checks' state adds whether each is open; without checks they are shown as written)
+  questions: JSON.parse(read("design/questions.json")).questions,
+  live: "https://timofeylebedev.github.io/fm/",
 };
 fs.mkdirSync(SITE, { recursive: true });
 const json = JSON.stringify(REPORT).replace(/<\/(script)/gi, "<\\/$1");
@@ -306,6 +343,10 @@ fs.writeFileSync(path.join(SITE, "typeset.js"), "/* generated by design/report/b
 fs.mkdirSync(path.join(SITE, "fonts"), { recursive: true });
 for (const f of fs.readdirSync(path.join(ROOT, "src/assets/fonts"))) if (f.endsWith(".woff2")) fs.copyFileSync(path.join(ROOT, "src/assets/fonts", f), path.join(SITE, "fonts", f));
 
+// for the AI agents and anything else that reads it: the same state as a file (…/report/state.json)
+if (checks) fs.writeFileSync(path.join(SITE, "state.json"), JSON.stringify(checks, null, 1)); else fs.rmSync(path.join(SITE, "state.json"), { force: true });
+if (historyIdx) fs.writeFileSync(path.join(SITE, "history.json"), historyIdx); else fs.rmSync(path.join(SITE, "history.json"), { force: true });
+
 const kb = (f) => Math.round(fs.statSync(path.join(SITE, f)).size / 1024) + " KB";
-console.log(`site/data.js ${kb("data.js")} · typeset.js ${kb("typeset.js")} · since ${SINCE.slice(0, 7)}`);
+console.log(`site/data.js ${kb("data.js")} · typeset.js ${kb("typeset.js")} · since ${SINCE.slice(0, 7)} · checks ${checks ? `of ${checks.commit.slice(0, 7)} (${checksFrom}): ${checks.summary.fail} fail, ${checks.summary.warn} warn` : "none yet"}`);
 console.log(`  new since ${SINCE.slice(0, 7)}: colours ${colour.flatMap((g) => g.tokens).filter((t) => t.isNew || t.was).length}, type ${typeRoles.filter((r) => r.isNew || r.was).length}, space ${spaceRoles.filter((r) => r.isNew || r.was).length}, steps ${containers.filter((c) => c.isNew).length + pageSteps.filter((p) => p.isNew).length}, shadows ${shadows.filter((s) => s.isNew).length}, decisions ${decisions.filter((d) => d.isNew).length} new / ${decisions.filter((d) => d.changed).length} changed, curves ${blockOf(motion, "curves").items.filter((c) => c.isNew || c.changed).length}`);

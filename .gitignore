@@ -5,3 +5,8 @@ dist/
 # Figma sync: the last pull from Figma and the generated push script (see design/README.md)
 design/figma/export.json
 design/figma/push.gen.js
+
+# the design system checks: records and state of a local run (CI keeps them on the report-data branch)
+design/checks/out/
+design/report/site/state.json
+design/report/site/history.json

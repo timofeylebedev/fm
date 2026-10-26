@@ -1,7 +1,11 @@
 /* The review page of the Flow Medium system: everything shown comes from window.REPORT (data.js, written by
    design/report/build-site.mjs from the repo). Pages, by the address's hash:
-     #system/<tab>   the system as it is now, in tabs (colour, type, space, layout, shadows, motion, responsive,
-                     blocks, grammar, decisions); things new since the baseline round are marked "new"
+     #needs          what needs Tim: failing rules, decisions whose value moved, questions (with answer buttons that
+                     copy a line for a chat with Claude), warnings, what fixed itself; from the checks (design/checks)
+     #history        every deploy of main, measured: failures, shares, weight
+     #system/<tab>   the system as it is now, in tabs (colour, type, space, layout, effects, motion, icons &
+                     pictures, components, behaviour, page health, responsive, blocks, grammar, decisions), each with
+                     the checks of its areas; things new since the baseline round are marked "new"
      #typesetter     what build/typeset does, with a demo running the real code (window.Typeset, typeset.js)
      #round-<n>      one review round: its findings, its changes, its pictures
    No module scripts and no fetch, so the page also opens straight from the folder (file://). */
@@ -541,7 +545,8 @@ const rgbOf = (h) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
 
 const TABS = [
   ["colour", "Colour", colourTab], ["type", "Type", typeTab], ["space", "Space", spaceTab], ["layout", "Layout", layoutTab],
-  ["shadows", "Shadows", shadowsTab], ["motion", "Motion", motionTab], ["responsive", "Responsive", responsiveTab],
+  ["shadows", "Effects", shadowsTab], ["motion", "Motion", motionTab], ["icons", "Icons & pictures", iconsTab], ["components", "Components", componentsTab],
+  ["behaviour", "Behaviour", behaviourTab], ["health", "Page health", healthTab], ["responsive", "Responsive", responsiveTab],
   ["blocks", "Blocks", blocksTab], ["grammar", "Grammar", grammarTab], ["decisions", "Decisions", decisionsTab],
 ];
 const tabHasNew = {
@@ -561,7 +566,8 @@ function systemPage(tab) {
   page.appendChild(head);
   const bar = el("div", "tabs"); bar.setAttribute("role", "tablist"); bar.setAttribute("aria-label", "Parts of the system");
   TABS.forEach(([k, label]) => {
-    const b = el("button", "", `${esc(label)}${tabHasNew[k] ? '<span class="dot" title="something new ' + esc(SINCE) + '"></span>' : ""}`);
+    const ts = tabState(k);
+    const b = el("button", "", `${esc(label)}${ts ? `<span class="dot ${ts}" title="a check ${ts === "fail" ? "fails" : "warns"} here"></span><span class="vh">, a check ${ts === "fail" ? "fails" : "warns"}</span>` : tabHasNew[k] ? '<span class="dot" title="something new ' + esc(SINCE) + '"></span><span class="vh">, something new</span>' : ""}`);
     b.type = "button"; b.setAttribute("role", "tab"); b.id = "tab-" + k; b.dataset.k = k;
     b.setAttribute("aria-selected", k === tab); b.tabIndex = k === tab ? 0 : -1; b.setAttribute("aria-controls", "panel");
     bar.appendChild(b);
@@ -576,6 +582,8 @@ function systemPage(tab) {
   page.appendChild(bar);
   const panel = el("div", "panel"); panel.id = "panel"; panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", "tab-" + tab);
   (TABS.find(([k]) => k === tab) || TABS[0])[2](panel);
+  checksBlock(panel, tab);
+  if (["icons", "components", "behaviour", "health"].includes(tab) && !C) panel.appendChild(el("p", "note", "The checks of this tab have not run yet: they run on every deploy (design/checks/)."));
   page.appendChild(panel);
   return page;
 }
@@ -711,7 +719,7 @@ function layoutTab(panel) {
   m.appendChild(B.table({ stack: true, columns: [{ label: "Name" }, { label: "Condition" }, { label: "What", muted: true }],
     rows: S.pageSteps.map((p) => [`<code>${esc(p.name)}</code> ${newPill(p)}`, `<code>${esc(p.cond)}</code>`, esc(p.note)]) }));
   panel.appendChild(m);
-  if (S.map) { const mp = clone(S.map); panel.appendChild(render(Object.assign(mp, { title: "Responsive map", sub: "Where each block changes its layout, measured every 10px of width on main (round 6, Oct 24; overlay scrollbars). Blue lines: the shared steps of the column, at the screen width they fall on." }))); }
+  if (S.map) { const mp = clone(S.map); panel.appendChild(render(Object.assign(mp, { title: "Responsive map", sub: `Where each block changes its layout, measured every 10px of width (${mp.measured ? `${mp.measured.commit.slice(0, 7)}, ${mp.measured.when.slice(0, 10)}, again on every deploy` : "round 6, Oct 24"}; overlay scrollbars). Blue lines: the shared steps of the column, at the screen width they fall on.` }))); }
   if (S.heightLine) { const g = el("div", "grid2"); g.appendChild(render(S.heightLine)); panel.appendChild(g); }
 }
 
@@ -736,7 +744,8 @@ function motionTab(panel) {
   if (S.motionCards) panel.appendChild(render(S.motionCards));
 }
 function responsiveTab(panel) {
-  panelHead(panel, "Responsive", "Every size of the page, measured in a browser at every 10px of width (1100 tall) and every 25px of height (1440 wide), on main as round 6 measured it (bd0566f, Oct 24; no size has changed on main since). Pick a group; zoom with the slider or Ctrl/⌘ + scroll (a pinch on a trackpad or a touch screen), drag to move; each line is named at its right end with its least and greatest value. Hover a name to pick its line out.");
+  const m = S.picture.measured;
+  panelHead(panel, "Responsive", `Every size of the page, measured in a browser at every 10px of width (1100 tall) and every 25px of height (1440 wide), ${m ? `on ${m.commit.slice(0, 7)} (${m.engine}, ${m.when.slice(0, 10)}; measured again on every deploy)` : "on main as round 6 measured it (bd0566f, Oct 24)"}. Pick a group; zoom with the slider or Ctrl/⌘ + scroll (a pinch on a trackpad or a touch screen), drag to move; each line is named at its right end with its least and greatest value. Hover a name to pick its line out.`);
   panel.appendChild(render(S.picture));
 }
 function blocksTab(panel) {
@@ -972,14 +981,144 @@ function roundPage(n) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   The checks (design/checks/): «What needs you», the checks on each tab of the system, the history
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+const C = D.checks;                                        // null until the checks have run once
+const RULES = C ? C.rules : [];
+const STATUS_PILL = { error: "bad", fail: "bad", warn: "q", pass: "done", info: "x", ask: "q" };
+const STATUS_WORD = { error: "could not run", fail: "fails", warn: "warns", pass: "holds", info: "inventory", ask: "question" };
+// a link that comes from data (a question's «Open») is followed only to an https address
+const safeUrl = (u) => (/^https:\/\//.test(String(u || "")) ? u : null);
+const spill = (s, word) => `<span class="pill ${STATUS_PILL[s] || "x"}">${esc(word || STATUS_WORD[s] || s)}</span>`;
+// which tab of the system shows the checks of an area
+const AREA_TAB = { Type: "type", Colour: "colour", Fills: "colour", Space: "space", Shape: "space", Layout: "layout", Alignment: "layout", Ratios: "layout", Layers: "layout",
+  Effects: "shadows", Motion: "motion", States: "components", Components: "components", Icons: "icons", Images: "icons", Logic: "behaviour", Fallbacks: "behaviour", Privacy: "behaviour",
+  "Page health": "health", Weight: "health", Code: "grammar", Decisions: "decisions" };
+const rulesOf = (tab) => RULES.filter((r) => AREA_TAB[r.area] === tab);
+const tabState = (tab) => { const rs = rulesOf(tab); return rs.some((r) => r.status === "fail" || r.status === "error") ? "fail" : rs.some((r) => r.status === "warn") ? "warn" : null; };
+const measuredLine = () => C ? `measured on <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> (${esc(C.from || "")}${C.commit.slice(0, 7) !== D.meta.head && C.from !== "this build" ? ", not this build" : ""}) on ${esc(C.generated.slice(0, 16).replace("T", " "))} UTC · ${Object.entries(C.engines).map(([e, v]) => `${esc(e)} ${esc(v.version)}${v.quick ? " (sizes and pages)" : ""}`).join(" · ")}` : "";
+
+// copying an answer: the line goes to a chat with Claude, who records it (design/checks/answer.mjs)
+const toast = el("div", "toast"); toast.setAttribute("role", "status"); document.body.appendChild(toast);
+let toastT = 0;
+const say = (t) => { toast.textContent = t; toast.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove("on"), 2600); };
+async function copyLine(text) {
+  try { await navigator.clipboard.writeText(text); say("Copied: paste it into a chat with Claude"); return; } catch (e) {}
+  const t = el("textarea"); t.value = text; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;opacity:0;left:0;top:0"; document.body.appendChild(t); t.select();
+  let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} t.remove();
+  if (ok) say("Copied: paste it into a chat with Claude"); else prompt("Copy this line into a chat with Claude:", text);
+}
+
+// one rule: verdict, kind, value, how it is measured, and its items (accepted ones marked with their decision)
+function ruleCard(r, { open = false, max = 8 } = {}) {
+  const card = el("article", "check s-" + r.status);
+  const val = r.value != null ? `<span class="check__v">${esc(r.value)}${r.unit ? (String(r.unit).startsWith("%") ? "" : " ") + esc(r.unit) : ""}${r.was && r.was.value != null && r.was.value !== r.value ? ` <span class="was">was ${esc(r.was.value)}</span>` : ""}</span>` : "";
+  const wk = r.webkit ? ` <span class="note" title="Playwright's WebKit, the engine of Safari">WebKit: ${esc(STATUS_WORD[r.webkit.status] || r.webkit.status)}${r.webkit.value != null && r.webkit.value !== r.value ? " · " + esc(r.webkit.value) : ""}</span>` : "";
+  const band = r.kind === "share" ? ` <span class="note">wanted ≥ ${esc(r.pass)}%, fails under ${esc(r.warn)}%</span>` : r.kind === "convention" && r.warn != null ? ` <span class="note">at most ${esc(r.warn)}</span>` : "";
+  const items = r.items || [];
+  const rows = items.map((i) => `<tr${i.accepted ? ' class="acc"' : ""}><td>${esc(i.where)}</td><td>${esc(i.what)}${i.note ? ` <span class="note">${esc(i.note)}</span>` : ""}${i.engine ? ' <span class="pill x">WebKit</span>' : ""}</td><td class="note">${esc(i.at || "")}</td><td>${i.accepted ? `<a href="#system/decisions" class="pill x" title="covered by a decision">${esc(i.accepted)}</a>` : ""}</td></tr>`);
+  const table = items.length ? `<div class="tbl"><table class="stack-sm"><thead><tr><th>Where</th><th>What</th><th>At</th><th></th></tr></thead><tbody>${rows.slice(0, max).join("")}</tbody></table></div>${items.length > max ? `<details><summary>${items.length - max} more</summary><div class="tbl"><table class="stack-sm"><tbody>${rows.slice(max).join("")}</tbody></table></div></details>` : ""}` : "";
+  card.innerHTML = `<div class="check__top">${spill(r.status)} <b>${esc(r.title)}</b> <span class="check__kind" title="${esc((C.kinds || {})[r.kind] || "")}">${esc(r.kind)}</span>${val}${band}${wk}</div>
+    <p class="check__how">${esc(r.how)}${r.note ? ` <b>${esc(r.note)}</b>` : ""}</p>${r.scenario ? `<div class="scn"><span><i>Given</i> ${esc(r.scenario.given)}</span><span><i>When</i> ${esc(r.scenario.when)}</span><span><i>Then</i> ${esc(r.scenario.then)}</span></div>` : ""}
+    ${table ? (open || r.status === "fail" || r.status === "warn" || r.kind === "inventory" ? table : `<details><summary>${items.length} measured</summary>${table}</details>`) : ""}`;
+  return card;
+}
+// the checks of a tab, put under its title
+function checksBlock(panel, tab) {
+  const rs = rulesOf(tab); if (!rs.length) return;
+  const blk = el("div", "block checks");
+  const n = (s) => rs.filter((r) => r.status === s).length;
+  blk.innerHTML = `<h3>Checks</h3><p class="sub">${[["error", "could not run"], ["fail", "fail"], ["warn", "warn"], ["pass", "hold"], ["info", "inventory"]].filter(([s]) => n(s)).map(([s, w]) => `${n(s)} ${w}`).join(" · ")} — ${measuredLine()}. Every rule is measured on every deploy; <a href="#needs">what needs you</a> lists the failures across the system.</p>`;
+  const list = el("div", "checks__list");
+  const O = { error: 0, fail: 1, warn: 2, pass: 3, info: 4 };
+  rs.slice().sort((a, b) => O[a.status] - O[b.status]).forEach((r) => list.appendChild(ruleCard(r)));
+  blk.appendChild(list);
+  const at = panel.querySelector(":scope > .sub") || panel.querySelector(":scope > h2");
+  at ? at.after(blk) : panel.appendChild(blk);
+}
+
+// the questions (open ones from the checks' state; as written when the checks have not run yet)
+const QUESTIONS = (C ? C.questions : D.questions.map((q) => ({ ...q, state: q.status === "answered" ? "answered" : q.status === "dropped" ? "dropped" : "open" })));
+const NEED_LABEL = { iphone: "iPhone", "mac-safari": "Mac · Safari", eye: "a look", choice: "a choice" };
+function questionCard(q) {
+  const card = el("article", "ask" + (q.state === "reopened" ? " re" : ""));
+  card.innerHTML = `<div class="ask__top">${(q.needs || []).map((n) => `<span class="pill ${n === "choice" ? "x" : "q"}">${esc(NEED_LABEL[n] || n)}</span>`).join(" ")}${q.state === "reopened" ? ' <span class="pill bad">changed since your answer</span>' : ""}<span class="note">since ${esc(q.since)}${q.from ? " · " + esc(q.from) : ""}</span></div>
+    <p class="ask__q">${esc(q.ask)}</p>${q.state === "reopened" && q.answer ? `<p class="note">You answered «${esc(q.answer.choice)}» on ${esc(q.answer.when)}; since then ${esc((q.changed || []).join(", "))} changed.</p>` : ""}
+    <div class="ask__do">${safeUrl(q.link) ? `<a class="btn-ghost" href="${esc(q.link)}" target="_blank" rel="noopener">Open ↗</a>` : ""}${(q.options || []).map((o, i) => `<button type="button" class="btn-ans" data-i="${i}">${esc(o)}</button>`).join("")}</div>
+    <label class="ask__note"><span>Note (optional)</span><input type="text" placeholder="what you saw, on which device"></label>`;
+  card.addEventListener("click", (e) => { const b = e.target.closest(".btn-ans"); if (!b) return; const note = $(".ask__note input", card).value.trim(); copyLine(`FM answer · ${q.id}: ${q.options[+b.dataset.i]}${note ? " — " + note : ""}`); });
+  return card;
+}
+function needCard(n) {
+  const r = RULES.find((x) => x.id === n.id), card = el("article", "need s-" + n.severity);
+  const tab = r ? AREA_TAB[r.area] : n.type === "decision" ? "decisions" : null;
+  const acts = n.type === "rule" ? [["Fix it", "fix it"], ["Keep it as designed", "keep it as designed (a decision)"], ["Not a problem: change the rule", "the rule is wrong, change it"]] : [["Still right", "still right"], ["Reconsider", "reconsider it"]];
+  card.innerHTML = `<div class="need__top">${spill(n.severity)} <b>${esc(n.title)}</b> <span class="note">${esc(n.area)}${n.fresh ? ` · <span class="pill new">${n.fresh} new</span>` : ""}</span></div>
+    <p class="need__why">${esc(n.why)}</p>${(n.sample || []).length ? `<ul class="need__s">${n.sample.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    <div class="ask__do">${tab ? `<a class="btn-ghost" href="#system/${tab}">See all</a>` : ""}${acts.map(([l, t]) => `<button type="button" class="btn-ans" data-t="${esc(t)}">${esc(l)}</button>`).join("")}</div>`;
+  card.addEventListener("click", (e) => { const b = e.target.closest(".btn-ans"); if (b) copyLine(`FM ${n.type} · ${n.id}: ${b.dataset.t}`); });
+  return card;
+}
+function needsPage() {
+  const page = el("div", "page");
+  const head = el("header", "head");
+  const s = C && C.summary;
+  const q = (v) => esc(v);
+  const openQ = QUESTIONS.filter((x) => x.state === "open" || x.state === "reopened").length;
+  head.innerHTML = `<div class="eyebrow">What needs you</div><h1>${C ? (s.errors ? `${q(s.errors)} rules could not be checked` : s.fail ? `${q(s.fail)} ${s.fail === 1 ? "rule fails" : "rules fail"}, ${openQ} questions wait for you` : `Every hard rule holds; ${openQ} questions wait for you`) : "The checks have not run yet"}</h1>
+    <p class="lede">${C ? `${q(s.rules)} rules of the system, measured in a browser on every deploy: ${q(s.pass)} hold, ${q(s.warn)} warn, ${q(s.fail)} fail${s.errors ? `, ${q(s.errors)} could not run` : ""}, ${q(s.info)} are inventories. ${q(s.findings)} places to look at${C.base ? ` (${q(s.new)} new and ${q(s.fixed)} fixed since the last deploy of main)` : ""}; ${q(s.accepted)} covered by decisions. Each answer button copies a line for a chat with Claude, who records it.` : "They run on every deploy (design/checks/): this page fills once the first deploy after them has run. The questions below are as written."}</p>
+    ${C ? `<p class="note">${measuredLine()}</p>` : ""}`;
+  page.appendChild(head);
+  const sec = (title, sub, nodes) => { if (!nodes.length) return; const s2 = el("section", "sec"); s2.innerHTML = `<h2>${esc(title)}</h2>${sub ? `<p class="sub">${sub}</p>` : ""}`; const g = el("div", "needs"); nodes.forEach((n) => g.appendChild(n)); s2.appendChild(g); page.appendChild(s2); };
+  const needs = C ? C.needs : [];
+  if (C && (C.errors || []).length) sec("The measuring failed", "These steps of the checks broke on this run, so the rules that need them say nothing (their last findings are kept as they were).", [el("ul", "plain", C.errors.map((e) => `<li><code>${esc(e)}</code></li>`).join(""))]);
+  sec("Failing", "Hard rules that break, and shares under their floor. Fix, keep as designed (a decision), or change the rule.", needs.filter((n) => n.type === "rule" && n.severity === "fail").map(needCard));
+  sec("Decisions to look at", "A decision whose measured value left its band, that has expired, or that no longer covers anything.", needs.filter((n) => n.type === "decision").map(needCard));
+  sec("Questions for you", "What a check cannot answer: a look on your iPhone or in Safari on your Mac, or a choice. An answer stays valid until the files it is about change; then the question comes back here.", QUESTIONS.filter((q) => q.state === "open" || q.state === "reopened").sort((a, b) => (b.state === "reopened") - (a.state === "reopened") || a.since.localeCompare(b.since)).map(questionCard));
+  sec("Warnings", "Soft rules: tolerances, conventions and shares above their floor but under their aim.", needs.filter((n) => n.type === "rule" && n.severity === "warn").map(needCard));
+  if (C && C.fixed.length) sec("Fixed since the last deploy of main", "Places that failed or warned then and are gone now (they closed themselves).", [el("ul", "plain", C.fixed.slice(0, 40).map((f) => `<li><code>${esc(f.rule)}</code> ${esc(f.where)}: ${esc(f.what)}</li>`).join(""))]);
+  const answered = QUESTIONS.filter((q) => q.state === "answered");
+  if (answered.length) sec("Answered", "", [el("ul", "plain", answered.map((q) => `<li>${esc(q.ask)} — <b>${esc(q.answer.choice)}</b>${q.answer.note ? ` (${esc(q.answer.note)})` : ""} <span class="note">${esc(q.answer.when)}</span></li>`).join(""))]);
+  if (C) { const k = el("section", "sec"); k.innerHTML = `<h2>How strict each rule is</h2><p class="sub">Every rule has a kind; a decision can cover what a rule finds (it is then shown with its value on every run, and comes back here when that value moves).</p><div class="kinds">${Object.entries(C.kinds).map(([kk, v]) => `<div><b>${esc(kk)}</b><span>${esc(v)}</span></div>`).join("")}</div>`; page.appendChild(k); }
+  return page;
+}
+// the history of main's deploys: how the main numbers moved
+function historyPage() {
+  const page = el("div", "page"), H = D.history || [];
+  const head = el("header", "head");
+  head.innerHTML = `<div class="eyebrow">History</div><h1>The system, deploy by deploy</h1><p class="lede">${H.length ? `${H.length} deploys of main measured since ${esc(H[0].day)}: what failed and warned, the shares of the system's rules, the weight of a first visit. Kept on the <a href="https://github.com/timofeylebedev/fm/tree/report-data">report-data</a> branch (a record per deploy, the state and the full measurements).` : "Nothing yet: the history starts with the first deploy of main after the checks were added."}</p>`;
+  page.appendChild(head);
+  if (!H.length) return page;
+  const series = (label, f, unit, color) => ({ key: label, label, color, pts: H.map((x, i) => [i + 1, f(x)]).filter((p) => p[1] != null) });
+  const box = (title, sub, ss, unit) => { const b = el("div", "block"); b.innerHTML = `<h3>${esc(title)}</h3><p class="sub">${esc(sub)}</p>`; b.appendChild(zchart({ id: "hist-" + title, series: ss, log: false, xNote: "Deploy of main (1 = the first measured)", xTip: "deploy {x}", ticks: H.map((_, i) => i + 1).filter((i, _, a) => a.length < 12 || i % Math.ceil(a.length / 10) === 1), unit, height: 260 })); page.appendChild(b); };
+  box("Failures and warnings", "Rules that fail or warn, and places to look at.", [series("rules failing", (x) => x.summary.fail, "", PAL[6]), series("rules warning", (x) => x.summary.warn, "", PAL[1]), series("places", (x) => x.summary.findings, "", PAL[0])], "");
+  const share = (id) => (x) => x.rules[id] ? x.rules[id][1] : null;
+  box("Shares", "How much of the page follows the scale.", [series("text on a role %", share("type.roles"), "%", PAL[0]), series("colours from tokens %", share("colour.palette"), "%", PAL[2]), series("corners on a role %", share("shape.radii"), "%", PAL[3])], "%");
+  box("Weight of a first visit", "KB sent (Brotli for text), scrolled top to bottom at 1440×900.", [series("total KB", (x) => x.weight && Math.round(x.weight.total / 1024), "KB", PAL[0]), series("scripts KB", (x) => x.weight && Math.round(x.weight.js / 1024), "KB", PAL[1]), series("pictures KB", (x) => x.weight && Math.round(x.weight.images / 1024), "KB", PAL[2])], "KB");
+  const t = el("div", "block"); t.innerHTML = "<h3>Every deploy</h3>";
+  t.appendChild(B.table({ stack: true, columns: [{ label: "#" , num: true }, { label: "Commit" }, { label: "Day" }, { label: "Fail", num: true }, { label: "Warn", num: true }, { label: "Places", num: true }, { label: "New", num: true }, { label: "Fixed", num: true }],
+    rows: H.map((x, i) => [i + 1, `<a href="https://github.com/timofeylebedev/fm/commit/${esc(x.commit)}"><code>${esc(x.sha)}</code></a>`, esc(x.day), esc(x.summary.fail), esc(x.summary.warn), esc(x.summary.findings), esc(x.summary.new), esc(x.summary.fixed)]).reverse() }));
+  page.appendChild(t);
+  return page;
+}
+// new tabs of the system: areas measured on the page that had no tab before
+function iconsTab(panel) { panelHead(panel, "Icons and pictures", "The inline icons (size, the stroke as drawn, colour from the text, line-up with their label) and every picture: the file against the device pixels it covers, format, loading, alt. Measured at the 8 screen sizes of the checks; the drawings are left out (they are pictures of the product)."); }
+function componentsTab(panel) { panelHead(panel, "Components and states", "The page's components (classes with __parts, the BEM way), their variants and whether copies look alike; the hover timing of links and buttons."); }
+function behaviourTab(panel) { panelHead(panel, "Behaviour", "The logic of the page as a table of scenarios (given, when, then), each played in a browser on every deploy; how the page holds up without scripts, WebGL or its fonts, in forced colours and with reduced motion; and what it calls before and after the cookie consent."); }
+function healthTab(panel) { panelHead(panel, "Page health", "Every page of the site: titles, descriptions, the outline, links, files a browser or a search engine asks for, sideways scroll, script errors, and the weight of a first visit against the last deploy. Also the code's own rules (no CSS swallowed by a comment, every token used) are under Grammar."); }
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
    The sidebar and the routes
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 const nav = $("#side-nav"), main = $("#main");
-nav.innerHTML = `<a href="#system/colour" data-page="system">The system<small>as it is now, in tabs</small></a>
+const openN = QUESTIONS.filter((q) => q.state === "open" || q.state === "reopened").length + (C ? C.needs.filter((n) => n.type !== "question" && n.severity === "fail").length : 0);
+nav.innerHTML = `<a href="#needs" data-page="needs"><span>What needs you${openN ? ` <span class="side__n" title="failing rules and open questions">${openN}</span>` : ""}</span><small>failures, questions, decisions to look at</small></a>
+  <a href="#system/colour" data-page="system">The system<small>as it is now, in tabs, with its checks</small></a>
   <a href="#typesetter" data-page="typesetter">The typesetter<small>how lines may break</small></a>
+  <a href="#history" data-page="history">History<small>every deploy of main, measured</small></a>
   <div class="side__group" id="rounds-h">Rounds</div>
   ${D.rounds.map((r) => `<a href="#round-${r.n}" data-page="round-${r.n}">Round ${r.n} · ${esc(r.date)}<small>${esc(r.title.replace(/^Round \d+:\s*/, ""))}</small></a>`).join("")}`;
-$("#side-foot").innerHTML = `Built ${esc(D.meta.built)} from ${esc(D.meta.ref || "main")} at <a href="https://github.com/timofeylebedev/fm/commit/${esc(D.meta.head)}">${esc(D.meta.head)}</a>.<br>Source: <a href="https://github.com/timofeylebedev/fm/tree/main/design/report">design/report</a>`;
+$("#side-foot").innerHTML = `Built ${esc(D.meta.built)} from ${esc(D.meta.ref || "main")} at <a href="https://github.com/timofeylebedev/fm/commit/${esc(D.meta.head)}">${esc(D.meta.head)}</a>.${C ? `<br>Checks of <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> · <a href="state.json">state.json</a>` : ""}<br>Source: <a href="https://github.com/timofeylebedev/fm/tree/main/design/report">design/report</a>, <a href="https://github.com/timofeylebedev/fm/tree/main/design/checks">design/checks</a>`;
 const side = $("#side"), scrim = $("#scrim"), menuBtn = $("#menu-open");
 const narrow = matchMedia("(width < 900px)");
 const openMenu = (on) => {
@@ -1008,7 +1147,7 @@ const onLeave = (fn) => LEAVE.push(fn);
 function route(opt = {}) {
   const prevItems = LB.items; LB.items = [];               // the pictures of the page about to be built
   if (!lb.hidden) lbClose(true);
-  const h = decodeURIComponent(location.hash.slice(1)) || "system/" + store.get("tab", "colour");
+  const h = decodeURIComponent(location.hash.slice(1)) || "needs";
   let pageKey, title, anchor = null, shown;
   const m = h.match(/^round-(\d+)(?:\/(.+))?$/);
   if (h === "system" || h.startsWith("system/")) {
@@ -1024,6 +1163,8 @@ function route(opt = {}) {
     if (bar) document.documentElement.style.setProperty("--tabs-h", bar.offsetHeight + "px");   // the screen bar sits right under the tabs                // the chosen tab in view in its strip
     if (sel && bar) bar.scrollLeft = Math.max(0, sel.offsetLeft - (bar.clientWidth - sel.offsetWidth) / 2);
     if (opt.focusTab) $("#tab-" + opt.focusTab)?.focus();
+  } else if (h === "needs" || h === "history") {
+    pageKey = h; title = h === "needs" ? "What needs you" : "History"; shown = h; swap(h === "needs" ? needsPage() : historyPage(), title); scrollTo(0, 0);
   } else if (h === "typesetter") {
     pageKey = "typesetter"; title = "The typesetter"; shown = h; swap(typesetPage(), title); scrollTo(0, 0);
   } else {
