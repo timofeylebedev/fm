@@ -1,24 +1,24 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-10-26T00:30:55.621Z",
- "commit": "ebcb6cd48d2a99ad4825ce0653451b2c02392666",
+ "generated": "2026-10-26T00:43:45.140Z",
+ "commit": "563c9cdf41d75a7df54026065107fb4b64849ee7",
  "ref": "claude/checks",
  "pr": "63",
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-10-26T00:22:09.801Z",
+   "when": "2026-10-26T00:33:35.930Z",
    "quick": false,
-   "seconds": 361,
+   "seconds": 423,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-10-26T00:28:28.878Z",
+   "when": "2026-10-26T00:40:55.027Z",
    "quick": true,
-   "seconds": 144,
+   "seconds": 170,
    "errors": []
   }
  },
@@ -35,8 +35,8 @@
  "summary": {
   "rules": 54,
   "errors": 0,
-  "pass": 34,
-  "warn": 8,
+  "pass": 35,
+  "warn": 7,
   "fail": 6,
   "info": 6,
   "findings": 73,
@@ -551,20 +551,6 @@
   },
   {
    "type": "rule",
-   "id": "shape.radii",
-   "severity": "warn",
-   "area": "Shape",
-   "title": "Corners are radius roles (or pills)",
-   "kind": "share",
-   "why": "99.1% of rounded boxes (wanted 90%)",
-   "fresh": 0,
-   "sample": [
-    "button.nav__burger: radius 8px on a 32×32 box (320x568 390x844 844x390 768x1024)"
-   ],
-   "rank": 101
-  },
-  {
-   "type": "rule",
    "id": "icons.colour",
    "severity": "warn",
    "area": "Icons",
@@ -609,7 +595,9 @@
    "items": [],
    "webkit": {
     "status": "pass",
-    "value": 100
+    "value": 100,
+    "on": 442,
+    "total": 442
    },
    "accepted": 0
   },
@@ -718,7 +706,9 @@
    ],
    "webkit": {
     "status": "warn",
-    "value": 98.3
+    "value": 98.4,
+    "on": 1244,
+    "total": 1264
    },
    "accepted": 0
   },
@@ -766,7 +756,7 @@
    "total": 450,
    "pass": 90,
    "warn": 75,
-   "status": "warn",
+   "status": "pass",
    "items": [
     {
      "key": "button.nav__burger|8",
@@ -829,8 +819,10 @@
     }
    ],
    "webkit": {
-    "status": "warn",
-    "value": 83.8
+    "status": "pass",
+    "value": 99.1,
+    "on": 377,
+    "total": 450
    },
    "accepted": 5
   },
@@ -1956,7 +1948,7 @@
    "kind": "trend",
    "title": "A first visit does not get heavier",
    "how": "The bytes of a first visit scrolled top to bottom at 1440×900 (×2), as sent (Brotli for text), against the last deploy of main: more than 10% more warns (scripts alone: 5%).",
-   "value": 1142,
+   "value": 1141,
    "unit": "KB",
    "was": null,
    "status": "pass",
@@ -1982,8 +1974,8 @@
     {
      "key": "images",
      "where": "images",
-     "what": "45 files, 924 KB sent",
-     "value": 924
+     "what": "44 files, 923 KB sent",
+     "value": 923
     },
     {
      "key": "css",
@@ -2296,7 +2288,7 @@
   {
    "key": "shape.radii::button.nav__burger|8",
    "rule": "shape.radii",
-   "status": "warn",
+   "status": "pass",
    "where": "button.nav__burger",
    "what": "radius 8px on a 32×32 box",
    "at": "320x568 390x844 844x390 768x1024",
@@ -2721,7 +2713,7 @@
    "rule": "weight.total",
    "status": "pass",
    "where": "images",
-   "what": "45 files, 924 KB sent",
+   "what": "44 files, 923 KB sent",
    "at": "",
    "new": false
   },
