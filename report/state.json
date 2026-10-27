@@ -1,30 +1,30 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-10-27T21:19:07.464Z",
- "commit": "cca861377a3e42ea61befb27969780b356380e17",
+ "generated": "2026-10-27T22:36:52.996Z",
+ "commit": "c583f788a2047a98685d9c8ea26d0c7590e93f99",
  "ref": "main",
  "pr": null,
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-10-27T21:10:11.253Z",
+   "when": "2026-10-27T22:26:38.978Z",
    "quick": false,
-   "seconds": 372,
+   "seconds": 432,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-10-27T21:16:42.294Z",
+   "when": "2026-10-27T22:34:08.421Z",
    "quick": true,
-   "seconds": 145,
+   "seconds": 165,
    "errors": []
   }
  },
  "base": {
-  "commit": "f8a67aff4431d4bb3afa3bae0132ddd3be19f137",
-  "generated": "2026-10-26T09:24:28.954Z"
+  "commit": "cca861377a3e42ea61befb27969780b356380e17",
+  "generated": "2026-10-27T21:19:07.464Z"
  },
  "kinds": {
   "hard": "any item is a failure",
@@ -42,9 +42,9 @@
   "warn": 7,
   "fail": 6,
   "info": 6,
-  "findings": 73,
-  "new": 2,
-  "fixed": 2,
+  "findings": 76,
+  "new": 3,
+  "fixed": 0,
   "accepted": 5,
   "questions": 17
  },
@@ -475,35 +475,19 @@
   },
   {
    "type": "rule",
-   "id": "colour.palette",
-   "severity": "warn",
-   "area": "Colour",
-   "title": "Every colour drawn is a token",
-   "kind": "share",
-   "why": "98.1% of colour uses (wanted 99%)",
-   "fresh": 2,
-   "sample": [
-    "section.cookies: rgba(245, 242, 242, 0.8) as background (320x568)",
-    "section.cookies: rgba(247, 247, 247, 0.8) as background (320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080)",
-    "header.nav: rgba(247, 247, 247, 0.7) as background (320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080)"
-   ],
-   "rank": 159
-  },
-  {
-   "type": "rule",
    "id": "images.sharp",
    "severity": "warn",
    "area": "Images",
    "title": "Pictures are sharp",
    "kind": "tolerance",
-   "why": "10 places",
-   "fresh": 0,
+   "why": "12 places",
+   "fresh": 2,
    "sample": [
-    "img.tool__img: fm-litmus-820-DGVGnO6L.avif: 820px wide for 877 device px (×3) (390x844 844x390 1440x900)",
-    "img.tool__img: fm-lens-820-4iU21A1U.avif: 820px wide for 877 device px (×3) (390x844 844x390 1440x900)",
-    "img.pub__source: institute-logo-BDAvn4zf.webp: 411px wide for 462 device px (×3) (390x844 844x390)"
+    "img.pub__source: institute-logo-BDAvn4zf.webp: 411px wide for 462 device px (×3) (390x844 844x390)",
+    "img.pub__source: institute-mark-BCn1cRwo.webp: 152px wide for 228 device px (×3) (390x844 844x390)",
+    "a.pub__platform img: vk-video-CCw81_FH.webp: 64px wide for 96 device px (×3) (390x844 844x390)"
    ],
-   "rank": 110
+   "rank": 162
   },
   {
    "type": "rule",
@@ -512,12 +496,28 @@
    "area": "Alignment",
    "title": "Edges line up",
    "kind": "tolerance",
-   "why": "9 places",
-   "fresh": 0,
+   "why": "10 places",
+   "fresh": 1,
    "sample": [
     "p.footer__note: left edge -1px off the line at 58 (3 blocks on it) (320x568)",
-    "p.footer__note: right edge +1px off the line at 262 (3 blocks on it) (320x568)",
-    "p.footer__note: left edge -0.88px off the line at 92.88 (3 blocks on it) (390x844)"
+    "p.tool__brand: right edge +1.27px off the line at 262 (3 blocks on it) (320x568)",
+    "p.footer__note: right edge +1px off the line at 262 (3 blocks on it) (320x568)"
+   ],
+   "rank": 160
+  },
+  {
+   "type": "rule",
+   "id": "colour.palette",
+   "severity": "warn",
+   "area": "Colour",
+   "title": "Every colour drawn is a token",
+   "kind": "share",
+   "why": "98.1% of colour uses (wanted 99%)",
+   "fresh": 0,
+   "sample": [
+    "section.cookies: rgba(245, 242, 242, 0.8) as background (320x568)",
+    "section.cookies: rgba(247, 247, 247, 0.8) as background (320x568 390x844 844x390 768x1024 1024x768 1366x650 1440x900 1920x1080)",
+    "header.nav: rgba(247, 247, 247, 0.7) as background (320x568 390x844 768x1024 1024x768 1366x650 1440x900 1920x1080)"
    ],
    "rank": 109
   },
@@ -744,7 +744,7 @@
    "accepted": 0,
    "was": {
     "status": "warn",
-    "value": 98.3
+    "value": 98.1
    }
   },
   {
@@ -865,7 +865,7 @@
    "accepted": 5,
    "was": {
     "status": "pass",
-    "value": 99.1
+    "value": 99
    }
   },
   {
@@ -1113,7 +1113,7 @@
    "kind": "tolerance",
    "title": "Edges line up",
    "how": "The left and right edges of headings, texts, buttons and cards at every measured size, grouped into lines (3+ edges within 0.5px). An edge 0.5–3px from a line is a near miss: it looks aligned and is not.",
-   "value": 9,
+   "value": 10,
    "unit": "near misses",
    "status": "warn",
    "items": [
@@ -1122,6 +1122,13 @@
      "where": "p.footer__note",
      "what": "left edge -1px off the line at 58 (3 blocks on it)",
      "value": 1,
+     "at": "320x568"
+    },
+    {
+     "key": "p.tool__brand|right|262",
+     "where": "p.tool__brand",
+     "what": "right edge +1.27px off the line at 262 (3 blocks on it)",
+     "value": 1.27,
      "at": "320x568"
     },
     {
@@ -1183,12 +1190,12 @@
    ],
    "webkit": {
     "status": "warn",
-    "value": 9
+    "value": 10
    },
    "accepted": 0,
    "was": {
     "status": "warn",
-    "value": 11
+    "value": 9
    }
   },
   {
@@ -1435,24 +1442,10 @@
    "kind": "tolerance",
    "title": "Pictures are sharp",
    "how": "Every picture outside the drawings: the file's width against the device pixels it covers (its drawn width × the screen's pixel ratio: 3 on phones, 2 on tablets and the 1440 laptop). Below 0.95 it is upscaled.",
-   "value": 10,
+   "value": 12,
    "unit": "upscaled",
    "status": "warn",
    "items": [
-    {
-     "key": "fm-litmus-820.avif",
-     "where": "img.tool__img",
-     "what": "fm-litmus-820-DGVGnO6L.avif: 820px wide for 877 device px (×3)",
-     "value": 0.93,
-     "at": "390x844 844x390 1440x900"
-    },
-    {
-     "key": "fm-lens-820.avif",
-     "where": "img.tool__img",
-     "what": "fm-lens-820-4iU21A1U.avif: 820px wide for 877 device px (×3)",
-     "value": 0.93,
-     "at": "390x844 844x390 1440x900"
-    },
     {
      "key": "institute-logo.webp",
      "where": "img.pub__source",
@@ -1508,11 +1501,39 @@
      "what": "face-petr-160-CZtWVE_9.webp: 160px wide for 173 device px (×2)",
      "value": 0.92,
      "at": "1024x768 1440x900"
+    },
+    {
+     "key": "fm-litmus-420.avif",
+     "where": "img.tool__img",
+     "what": "fm-litmus-420-Cwp3t3ch.avif: 420px wide for 464 device px (×1)",
+     "value": 0.91,
+     "at": "1366x650 1920x1080"
+    },
+    {
+     "key": "fm-lens-420.avif",
+     "where": "img.tool__img",
+     "what": "fm-lens-420-innm9aB7.avif: 420px wide for 464 device px (×1)",
+     "value": 0.91,
+     "at": "1366x650 1920x1080"
+    },
+    {
+     "key": "fm-litmus-820.avif",
+     "where": "img.tool__img",
+     "what": "fm-litmus-820-RUSyKtwB.avif: 820px wide for 928 device px (×2)",
+     "value": 0.88,
+     "at": "1440x900"
+    },
+    {
+     "key": "fm-lens-820.avif",
+     "where": "img.tool__img",
+     "what": "fm-lens-820-B9LLDYFm.avif: 820px wide for 928 device px (×2)",
+     "value": 0.88,
+     "at": "1440x900"
     }
    ],
    "webkit": {
     "status": "warn",
-    "value": 11
+    "value": 13
    },
    "accepted": 0,
    "was": {
@@ -2100,19 +2121,19 @@
    "kind": "trend",
    "title": "A first visit does not get heavier",
    "how": "The bytes of a first visit scrolled top to bottom at 1440×900 (×2), as sent (Brotli for text), against the last deploy of main: more than 10% more warns (scripts alone: 5%).",
-   "value": 1138,
+   "value": 1182,
    "unit": "KB",
    "was": {
     "status": "pass",
-    "value": 1141
+    "value": 1138
    },
    "status": "pass",
    "items": [
     {
      "key": "html",
      "where": "html",
-     "what": "1 files, 20 KB sent (was 20 KB)",
-     "value": 20
+     "what": "1 files, 21 KB sent (was 20 KB)",
+     "value": 21
     },
     {
      "key": "fonts",
@@ -2123,8 +2144,8 @@
     {
      "key": "images",
      "where": "images",
-     "what": "43 files, 920 KB sent (was 923 KB)",
-     "value": 920
+     "what": "43 files, 963 KB sent (was 920 KB)",
+     "value": 963
     },
     {
      "key": "js",
@@ -2455,7 +2476,7 @@
    "where": "section.cookies",
    "what": "rgba(248, 248, 248, 0.8) as background",
    "at": "320x568",
-   "new": true
+   "new": false
   },
   {
    "key": "colour.palette::238,234,233,0.8",
@@ -2500,7 +2521,7 @@
    "where": "section.cookies",
    "what": "rgba(253, 253, 253, 0.8) as background",
    "at": "1920x1080",
-   "new": true
+   "new": false
   },
   {
    "key": "shape.radii::button.nav__burger|8",
@@ -2638,6 +2659,15 @@
    "new": false
   },
   {
+   "key": "align.edges::p.tool__brand|right|262",
+   "rule": "align.edges",
+   "status": "warn",
+   "where": "p.tool__brand",
+   "what": "right edge +1.27px off the line at 262 (3 blocks on it)",
+   "at": "320x568",
+   "new": true
+  },
+  {
    "key": "align.edges::p.footer__note|right|262",
    "rule": "align.edges",
    "status": "warn",
@@ -2755,24 +2785,6 @@
    "new": false
   },
   {
-   "key": "images.sharp::fm-litmus-820.avif",
-   "rule": "images.sharp",
-   "status": "warn",
-   "where": "img.tool__img",
-   "what": "fm-litmus-820-DGVGnO6L.avif: 820px wide for 877 device px (×3)",
-   "at": "390x844 844x390 1440x900",
-   "new": false
-  },
-  {
-   "key": "images.sharp::fm-lens-820.avif",
-   "rule": "images.sharp",
-   "status": "warn",
-   "where": "img.tool__img",
-   "what": "fm-lens-820-4iU21A1U.avif: 820px wide for 877 device px (×3)",
-   "at": "390x844 844x390 1440x900",
-   "new": false
-  },
-  {
    "key": "images.sharp::institute-logo.webp",
    "rule": "images.sharp",
    "status": "warn",
@@ -2845,6 +2857,42 @@
    "new": false
   },
   {
+   "key": "images.sharp::fm-litmus-420.avif",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.tool__img",
+   "what": "fm-litmus-420-Cwp3t3ch.avif: 420px wide for 464 device px (×1)",
+   "at": "1366x650 1920x1080",
+   "new": true
+  },
+  {
+   "key": "images.sharp::fm-lens-420.avif",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.tool__img",
+   "what": "fm-lens-420-innm9aB7.avif: 420px wide for 464 device px (×1)",
+   "at": "1366x650 1920x1080",
+   "new": true
+  },
+  {
+   "key": "images.sharp::fm-litmus-820.avif",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.tool__img",
+   "what": "fm-litmus-820-RUSyKtwB.avif: 820px wide for 928 device px (×2)",
+   "at": "1440x900",
+   "new": false
+  },
+  {
+   "key": "images.sharp::fm-lens-820.avif",
+   "rule": "images.sharp",
+   "status": "warn",
+   "where": "img.tool__img",
+   "what": "fm-lens-820-B9LLDYFm.avif: 820px wide for 928 device px (×2)",
+   "at": "1440x900",
+   "new": false
+  },
+  {
    "key": "images.weight::institute-logo.webp",
    "rule": "images.weight",
    "status": "warn",
@@ -2885,7 +2933,7 @@
    "rule": "weight.total",
    "status": "pass",
    "where": "html",
-   "what": "1 files, 20 KB sent (was 20 KB)",
+   "what": "1 files, 21 KB sent (was 20 KB)",
    "at": "",
    "new": false
   },
@@ -2903,7 +2951,7 @@
    "rule": "weight.total",
    "status": "pass",
    "where": "images",
-   "what": "43 files, 920 KB sent (was 923 KB)",
+   "what": "43 files, 963 KB sent (was 920 KB)",
    "at": "",
    "new": false
   },
@@ -3079,20 +3127,7 @@
    "new": false
   }
  ],
- "fixed": [
-  {
-   "key": "align.edges::p.footer__note|right|374",
-   "rule": "align.edges",
-   "where": "p.footer__note",
-   "what": "right edge -2.41px off the line at 374.41 (3 blocks on it)"
-  },
-  {
-   "key": "align.edges::p.footer__note|right|501",
-   "rule": "align.edges",
-   "where": "p.footer__note",
-   "what": "right edge -1.48px off the line at 501.48 (3 blocks on it)"
-  }
- ],
+ "fixed": [],
  "decisions": [
   {
    "id": "cta-light-middle",
@@ -3658,5 +3693,5 @@
    "state": "open"
   }
  ],
- "from": "the last deploy of main"
+ "from": "this build"
 }
