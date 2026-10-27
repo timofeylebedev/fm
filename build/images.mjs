@@ -58,9 +58,21 @@ const RASTER = [
   // Settings: HERO_1X and HERO_2X above.
   { src: "hero-table.webp", widths: [900, 1200, 1400, 1800, 2120, 2650, 3200], formats: ["avif", "webp"], options: heroQ(HERO_1X) },
   { src: "hero-table.webp", name: "hero-table-2x", widths: [1800, 2120, 2650, 3200, 4096], formats: ["avif", "webp"], options: heroQ(HERO_2X) },
-  // the two tool cards: shown at most 462 CSS px wide
-  { src: "fm-litmus.png", widths: [480, 820], formats: ["avif", "webp"] },
-  { src: "fm-lens.png", widths: [480, 820], formats: ["avif", "webp"] },
+  // the two tool cards (Tim's pictures of Oct 28, 2026, 1230 × 1344). Drawn at most 360 CSS px wide on phones and
+  // tablets (about 88vw − 50px) and 383–410 when the cards stand side by side (the sizes in index.html); in device px
+  // that is 381–410 at 1×, 464–720 at 2× phones and tablets, 815–820 on 2× laptops, 800–1007 on 3× phones. Each width at
+  // the lowest setting whose SSIMULACRA2 against the original at that width (on the card's white) is 90 or more
+  // (Oct 28, 2026). Both need full colour (4:4:4): halved colour never gets to 90 (the bot's teal and red marks, the
+  // orange of Lens). The Lens scans are fine grain, so 10-bit (a little smaller there); Litmus is flat UI, 8-bit.
+  // The WebP (browsers without AVIF): lossy at the lowest quality that gets to 90; Lens at 420 never does, so near-lossless.
+  // Scores of the AVIF / sizes: Litmus 90.1 16 KB · 90.0 24 KB · 90.1 31 KB · 90.3 39 KB;
+  //                             Lens   90.2 29 KB · 90.5 58 KB · 90.2 84 KB · 90.2 116 KB
+  { src: "fm-litmus.png", widths: [420, 640, 820, 1024], formats: ["avif", "webp"], options: (w) => ({
+    avif: { quality: { 420: 76, 640: 72, 820: 70, 1024: 70 }[w], bitdepth: 8, chromaSubsampling: "4:4:4" },
+    webp: { quality: { 420: 94, 640: 93, 820: 92, 1024: 91 }[w], smartSubsample: true } }) },
+  { src: "fm-lens.png", widths: [420, 640, 820, 1024], formats: ["avif", "webp"], options: (w) => ({
+    avif: { quality: { 420: 78, 640: 78, 820: 76, 1024: 76 }[w], bitdepth: 10, chromaSubsampling: "4:4:4" },
+    webp: w === 420 ? { nearLossless: true, quality: 40 } : { quality: { 640: 97, 820: 97, 1024: 100 }[w], smartSubsample: true } }) },
   // photos on the ID cards (80 CSS px) and the author of the publications (24 CSS px): 2× and 3×
   ...["petr", "nazar", "maria"].map((n) => ({ src: n + ".png", name: "face-" + n, widths: [160, 240], formats: ["webp"] })),
   { src: "maxim-poplavsky.png", name: "author", widths: [48, 72], formats: ["webp"] },
