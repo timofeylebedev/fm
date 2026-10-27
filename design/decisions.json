@@ -192,7 +192,7 @@
     {
       "id": "doc-pages",
       "kind": "decision",
-      "what": "The privacy policy and the cookie consent are pages of the site: the policy at its old address (/privacy_policy_ru), the consent at /cookie_consent (Tim, 2026-10-24: «a proper address»; the old /soglasie_cookie leads there with a 301 in deploy/ and public/soglasie_cookie.html on GitHub Pages). Their text is the Tilda text as it was (Tim, 2026-10-19: «keep it as is for now except formatting»); only the layout is new: headings, paragraphs, hanging list markers, one card per purpose of processing, links. Text line height 1.5 (--doc-line), not --lh-text 1.3. Tim, 2026-10-24: title and text in one white section, Golos for everything, the title 24px on phones to 40px on computers (type/doc-title), the navbar white at 70% (as the main one over white), list markers «1.» not «(1)», link underlines 5px under the text, no line above the footer",
+      "what": "The privacy policy and the cookie consent are pages of the site: both at the old site's addresses, /privacy_policy_ru and /soglasie_cookie (Tim, 2026-10-27: «use the old links»; from Oct 24 to 27 the consent was at /cookie_consent). Their text is the Tilda text as it was (Tim, 2026-10-19: «keep it as is for now except formatting»); only the layout is new: headings, paragraphs, hanging list markers, one card per purpose of processing, links. Text line height 1.5 (--doc-line), not --lh-text 1.3. Tim, 2026-10-24: title and text in one white section, Golos for everything, the title 24px on phones to 40px on computers (type/doc-title), the navbar white at 70% (as the main one over white), list markers «1.» not «(1)», link underlines 5px under the text, no line above the footer",
       "decided": "Tim, 2026-10-19 (text as is); Claude, 2026-10-19 (layout, line height)",
       "why": "a long legal text is read line after line; 1.3 suits the page's short texts. The wording waits for a separate review (errors listed in the chat of Oct 19)",
       "fix": "when the text is revised, edit it in the two pages directly"
@@ -224,9 +224,9 @@
     {
       "id": "pubs-more",
       "kind": "decision",
-      "what": "The publications show at most 4 cards; with 5 or more, a «Показать больше» pill under them shows the next 4 each time and goes away when none are left. It is --section-gap below the cards (the gap their heading had; Tim, 2026-10-20), while the heading itself has --section-air-l above the cards. It is a line button (.btn--line): no colour of its own, a 1px border, ink 70% on an ink 16% border, ink on ink 25% under the mouse (Tim, 2026-10-20), and it comes in as a block, as the hero's button does. Without scripts every card is shown and the button is not",
+      "what": "The publications show at most 2 cards (Tim, 2026-10-27; was 4); with more, a «Показать больше» pill under them shows the next 4 each time and goes away when none are left. It is --section-gap below the cards (the gap their heading had; Tim, 2026-10-20), while the heading itself has --section-air-l above the cards. It is a line button (.btn--line): no colour of its own, a 1px border, ink 70% on an ink 16% border, ink on ink 25% under the mouse (Tim, 2026-10-20), and it comes in as a block, as the hero's button does. Without scripts every card is shown and the button is not",
       "decided": "Tim, 2026-10-20 — button below the cards from 5 cards; later the same day: no background, 1px border, 70%/16% → 100%/25%, coming in like the hero's button",
-      "why": "the list can grow without the page getting longer; 4 is two full rows of the two-column grid",
+      "why": "the list can grow without the page getting longer; 2 is one full row of the two-column grid",
       "fix if reconsidered": "PUBS in scripts/pubs.js (first, more); the colours in sections.css (.pubs__more)"
     },
     {

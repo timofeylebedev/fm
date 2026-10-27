@@ -9,8 +9,7 @@ export default {
   pages: [
     { path: "", title: "Home", main: true },
     { path: "privacy_policy_ru", title: "Privacy policy" },
-    { path: "soglasie_cookie", title: "Consent" },
-    { path: "cookie_consent", title: "Cookie consent" },
+    { path: "soglasie_cookie", title: "Cookie consent" },
     { path: "no-such-page", title: "Not found (404)", status: 404 },
   ],
 
@@ -100,13 +99,13 @@ export default {
         await page.reload(); await h.wait(4500);
         return (await h.vis(".cookies")) ? "shown again after a reload" : true;
       } },
-    { id: "pubs-more", area: "Publications", given: "more than four publications", when: "«Показать больше» is pressed", then: "the hidden cards show, and the button goes once none are left", size: [1440, 900],
+    { id: "pubs-more", area: "Publications", given: "more than two publications", when: "«Показать больше» is pressed", then: "the hidden cards show, and the button goes once none are left", size: [1440, 900],
       run: async (page, h) => {
         await page.goto(h.url); await h.wait(1500);
         const state = () => page.evaluate(() => { const k = [...(document.querySelector("[data-pubs]")?.children || [])]; return { cards: k.length, hidden: k.filter((c) => c.hidden).length, button: !document.querySelector("[data-pubs-more]")?.hidden }; });
-        const before = await state();
-        if (before.cards <= 4) return before.button ? `the button shows with ${before.cards} cards` : true;
-        if (before.hidden !== before.cards - 4 || !before.button) return `with ${before.cards} cards: ${before.hidden} hidden, button ${before.button ? "shown" : "hidden"}`;
+        const before = await state(), first = 2;   // PUBS in scripts/pubs.js
+        if (before.cards <= first) return before.button ? `the button shows with ${before.cards} cards` : true;
+        if (before.hidden !== before.cards - first || !before.button) return `with ${before.cards} cards: ${before.hidden} hidden, button ${before.button ? "shown" : "hidden"}`;
         await page.locator("[data-pubs-more]").scrollIntoViewIfNeeded(); await h.wait(900); await page.click("[data-pubs-more]"); await h.wait(1200);
         const after = await state();
         return after.hidden === Math.max(0, before.hidden - 4) && after.button === after.hidden > 0 ? true : `after the press: ${after.hidden} still hidden, button ${after.button ? "still there" : "gone"}`;

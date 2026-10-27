@@ -29,10 +29,9 @@ export default defineConfig({
     modulePreload: { polyfill: false },
     rollupOptions: { input: {
       index: resolve(src, "index.html"), 404: resolve(src, "404.html"),
-      // the legal documents: the policy at its old address (/privacy_policy_ru), the consent at /cookie_consent (the old
-      // /soglasie_cookie is public/soglasie_cookie.html, which leads there). Every host in deploy/ and GitHub Pages serve a
-      // page.html for its address without .html
-      privacy_policy_ru: resolve(src, "privacy_policy_ru.html"), cookie_consent: resolve(src, "cookie_consent.html")
+      // the legal documents at the old site's addresses (/privacy_policy_ru, /soglasie_cookie). Every host in deploy/ and
+      // GitHub Pages serve a page.html for its address without .html
+      privacy_policy_ru: resolve(src, "privacy_policy_ru.html"), soglasie_cookie: resolve(src, "soglasie_cookie.html")
     } }
   }
 });

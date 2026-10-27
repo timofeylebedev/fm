@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "images": "node build/images.mjs",
     "fonts": "python3 build/fonts.py",
-    "check": "html-validate dist/index.html dist/404.html dist/privacy_policy_ru.html dist/cookie_consent.html dist/soglasie_cookie.html",
+    "check": "html-validate dist/index.html dist/404.html dist/privacy_policy_ru.html dist/soglasie_cookie.html",
     "tokens": "node build/tokens.mjs",
     "tokens:sync": "node build/tokens.mjs sync design/figma/export.json",
     "audit": "node build/audit.mjs",

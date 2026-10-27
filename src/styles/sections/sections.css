@@ -410,7 +410,7 @@
 .tool__img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 
 /* ── Publications: grey cards, links to articles and a video ──
-   Two columns from step M; one column, as wide as the column, below that. At most four are shown: with more, the
+   Two columns from step M; one column, as wide as the column, below that. At most two are shown: with more, the
    pill «Показать больше» under them shows the next ones (scripts/pubs.js; decision pubs-more), as far below the cards
    as the heading used to be above them (--section-gap; Tim, Oct 20: it stays so while the heading gets more air). */
 .pubs { container: pubs / inline-size; }

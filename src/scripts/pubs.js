@@ -1,4 +1,4 @@
-/* The publications: at most PUBS.first cards are shown. With more of them (5 or more), the button «Показать больше»
+/* The publications: at most PUBS.first cards are shown. With more of them, the button «Показать больше»
    under the cards shows the next PUBS.more each time; the cards come in as blocks do (motion.js arrive), and the button
    goes away when none are left. The focus goes to the first card that came, so the keyboard carries on from there.
    Without scripts every card is shown and the button stays hidden (hidden in the HTML).
@@ -6,7 +6,7 @@
 import { arrive } from "./motion.js";
 import { refreshSoon } from "./gsap.js";
 
-const PUBS = { first: 4, more: 4 };
+const PUBS = { first: 2, more: 4 };
 
 export function initPubs() {
   const grid = document.querySelector("[data-pubs]");
