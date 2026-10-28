@@ -8,7 +8,9 @@ rules Claude follows. The site's history, open PRs and open questions live in th
 
 - The landing page of Flow Medium, a custom static Vite site (rebuilt from Taptop, same design and motion).
 - `main` is the live site: every push to `main` builds and publishes to https://timofeylebedev.github.io/fm/
-  (`.github/workflows/deploy.yml`). The real host (flowmedium.pro) is not decided; settings for it are in `deploy/`.
+  (`.github/workflows/deploy.yml`). The real host (flowmedium.pro) is not decided; settings for it are in `deploy/`, and `npm run export`
+  (also the «Export» workflow on every push to main) makes the upload: open robots.txt, a 404 that works at any depth,
+  the settings. A change to what the real host needs goes into `build/export.mjs` and `deploy/`, never into main's Pages build.
 - **Every pull request gets a preview:** the same workflow publishes it to
   `https://timofeylebedev.github.io/fm/pr-preview/pr-<number>/`, posts the link as a comment on the PR, updates it
   on every push and removes it when the PR is closed (`rossjrw/pr-preview-action`). Pages serves the `gh-pages`
@@ -52,6 +54,7 @@ npm install           # once, Node 22+
 npm run dev           # localhost:5173 (runs `npm run tokens` first)
 npm run build         # dist/ (not committed)
 npm run preview       # dist/ at localhost:4173
+npm run export        # the site for the real host: export/site, export/server, a zip (README "Hosting")
 npm run check         # html-validate on the four built pages
 npm run audit         # sideways scroll, cut text, text < 12px, tap targets < 24px, axe; 9 sizes
                       # FM_ENGINE=firefox|webkit for other engines (npx playwright install <engine> once)
