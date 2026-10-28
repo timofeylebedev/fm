@@ -1,34 +1,82 @@
-# Apache (shared hosting, for example Beget or Timeweb): copy this file into the folder with the contents of dist/.
+# Apache (most shared hosting: Beget, Timeweb, REG.RU, SprintHost …) for flowmedium.pro — the same as nginx.conf.
+# `npm run export` puts this file into the site's folder: upload everything in site/ (this file too) into the web root
+# (often public_html/ or www/). Needs mod_rewrite and mod_headers (on by default on such hosts); mod_deflate if present.
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html
 ErrorDocument 404 /404.html
-Options -Indexes
+AddDefaultCharset utf-8
+AddType application/manifest+json .webmanifest
+AddType font/woff2 .woff2
+AddType image/avif .avif
+AddType image/webp .webp
+# .br and .gz are encodings here, not a language (Apache reads .br as Breton) or a type of their own
+RemoveLanguage .br
+RemoveType .gz
+RemoveEncoding .gz
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteCond %{HTTPS} off [OR]
+
+  # https://flowmedium.pro only. Many hosts end https at a front server and pass the request on as http: then
+  # X-Forwarded-Proto says https, and asking for https again would go round in circles
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://flowmedium.pro%{REQUEST_URI} [R=301,L]
   RewriteCond %{HTTP_HOST} ^www\. [NC]
-  RewriteRule ^ https://flowmedium.pro%{REQUEST_URI} [L,R=301]
-</IfModule>
+  RewriteRule ^ https://flowmedium.pro%{REQUEST_URI} [R=301,L]
 
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript image/svg+xml application/json application/manifest+json application/xml
-</IfModule>
+  # /privacy_policy_ru → privacy_policy_ru.html (the old site's addresses, no .html)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+)$ $1.html [L]
 
-<IfModule mod_mime.c>
-  AddType image/avif .avif
-  AddType image/webp .webp
-  AddType font/woff2 .woff2
-  AddType application/manifest+json .webmanifest
+  # the build leaves a compressed copy next to every text file: send it as it is (brotli, else gzip)
+  RewriteCond %{HTTP:Accept-Encoding} br
+  RewriteCond %{REQUEST_FILENAME}.br -f
+  RewriteRule ^(.+)\.(html|css|js|svg|json|xml|webmanifest|txt)$ $1.$2.br [L]
+  RewriteCond %{HTTP:Accept-Encoding} gzip
+  RewriteCond %{REQUEST_FILENAME}.gz -f
+  RewriteRule ^(.+)\.(html|css|js|svg|json|xml|webmanifest|txt)$ $1.$2.gz [L]
+  RewriteRule \.html\.(br|gz)$ - [T=text/html,E=no-gzip:1]
+  RewriteRule \.css\.(br|gz)$ - [T=text/css,E=no-gzip:1]
+  RewriteRule \.js\.(br|gz)$ - [T=text/javascript,E=no-gzip:1]
+  RewriteRule \.svg\.(br|gz)$ - [T=image/svg+xml,E=no-gzip:1]
+  RewriteRule \.(json|webmanifest)\.(br|gz)$ - [T=application/json,E=no-gzip:1]
+  RewriteRule \.xml\.(br|gz)$ - [T=application/xml,E=no-gzip:1]
+  RewriteRule \.txt\.(br|gz)$ - [T=text/plain,E=no-gzip:1]
 </IfModule>
 
 <IfModule mod_headers.c>
+  <FilesMatch "\.br$">
+    Header set Content-Encoding br
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+  <FilesMatch "\.gz$">
+    Header set Content-Encoding gzip
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+
+  # security headers (the page itself carries its Content Security Policy; frame-ancestors can only come from here)
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
   Header always set Content-Security-Policy "frame-ancestors 'self'"
   Header always set Cross-Origin-Opener-Policy "same-origin"
+
+  # pages and files with a fixed name: checked with the server every time; files whose name carries a hash of their
+  # content (assets/): cached for a year, never asked for again
   Header set Cache-Control "no-cache"
   <If "%{REQUEST_URI} =~ m#^/assets/#">
     Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set Access-Control-Allow-Origin "*"
   </If>
+</IfModule>
+
+# what has no compressed copy (small files, or a host without mod_rewrite) is compressed on the fly; the copies above
+# carry no-gzip, so they are never compressed twice
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript image/svg+xml application/json application/manifest+json application/xml text/plain
 </IfModule>

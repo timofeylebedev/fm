@@ -1,5 +1,6 @@
 node_modules/
 dist/
+export/
 .DS_Store
 
 # Figma sync: the last pull from Figma and the generated push script (see design/README.md)

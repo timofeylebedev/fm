@@ -15,6 +15,7 @@ npm install          # once (Node 22 or newer)
 npm run dev          # the site at http://localhost:5173, reloads on every change
 npm run build        # the finished site in dist/
 npm run preview      # dist/ at http://localhost:4173, as it will be on the server
+npm run export       # the site for flowmedium.pro in export/ and one zip (see Hosting)
 npm run check        # validates the HTML of dist/
 npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figma variables (design/README.md)
 ```
@@ -67,9 +68,17 @@ Test switches for phones, at the end of the address: `?fmcards=debug` (what the 
 
 ## Hosting
 
-`npm run build`, then put the contents of `dist/` on the server, and take the matching file from `deploy/`.
-Files in `dist/assets/` have a hash in their name and can be cached for a year; everything else must be checked
-every time (the settings in `deploy/` do both). The build also leaves a compressed copy (`.br`, `.gz`) next to every
-text file for servers that can send it as it is.
+`npm run export` makes the site as it goes to its real host, https://flowmedium.pro: `export/site/` (upload all of it,
+the hidden `.htaccess` too, into the web root), `export/server/` (nginx and Caddy settings) and the same in one zip,
+`export/flowmedium-site-<date>-<commit>.zip`, with a `README.txt` on what goes where and what to check after uploading.
+GitHub Actions makes the same export on every push to `main` (workflow «Export», artifact `flowmedium-site`).
 
-Before launch: change `public/robots.txt` (it asks search engines to stay away while this is a test site).
+It is the build of `npm run build` plus what only the real host gets: `robots.txt` lets search engines in and names
+the sitemap (the test site keeps them out), the 404 page names its files from the domain's root (so `/a/b/c` gets a
+styled page), and the server settings of `deploy/` come along. The script stops if a page lacks its canonical address
+on flowmedium.pro, names the test site, or asks not to be indexed.
+
+Which settings: Apache and shared hosting `.htaccess`, Netlify and Cloudflare Pages `_headers` (both already in
+`site/`), nginx `nginx.conf`, Caddy `Caddyfile`. Files in `assets/` have a hash in their name and are cached for a
+year; everything else is checked every time. The build leaves a compressed copy (`.br`, `.gz`) next to every text
+file, and every setting sends it as it is.
