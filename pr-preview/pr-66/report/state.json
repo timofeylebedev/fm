@@ -1,30 +1,30 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-10-27T22:36:52.996Z",
- "commit": "c583f788a2047a98685d9c8ea26d0c7590e93f99",
- "ref": "main",
- "pr": null,
+ "generated": "2026-10-28T09:50:28.702Z",
+ "commit": "12f83289cb2c9146079b0ae694203541483791d6",
+ "ref": "claude/launch-export",
+ "pr": "66",
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-10-27T22:26:38.978Z",
+   "when": "2026-10-28T09:40:30.497Z",
    "quick": false,
-   "seconds": 432,
+   "seconds": 419,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-10-27T22:34:08.421Z",
+   "when": "2026-10-28T09:47:46.896Z",
    "quick": true,
-   "seconds": 165,
+   "seconds": 162,
    "errors": []
   }
  },
  "base": {
-  "commit": "cca861377a3e42ea61befb27969780b356380e17",
-  "generated": "2026-10-27T21:19:07.464Z"
+  "commit": "c583f788a2047a98685d9c8ea26d0c7590e93f99",
+  "generated": "2026-10-27T22:36:52.996Z"
  },
  "kinds": {
   "hard": "any item is a failure",
@@ -43,7 +43,7 @@
   "fail": 6,
   "info": 6,
   "findings": 76,
-  "new": 3,
+  "new": 0,
   "fixed": 0,
   "accepted": 5,
   "questions": 17
@@ -481,13 +481,13 @@
    "title": "Pictures are sharp",
    "kind": "tolerance",
    "why": "12 places",
-   "fresh": 2,
+   "fresh": 0,
    "sample": [
     "img.pub__source: institute-logo-BDAvn4zf.webp: 411px wide for 462 device px (×3) (390x844 844x390)",
     "img.pub__source: institute-mark-BCn1cRwo.webp: 152px wide for 228 device px (×3) (390x844 844x390)",
     "a.pub__platform img: vk-video-CCw81_FH.webp: 64px wide for 96 device px (×3) (390x844 844x390)"
    ],
-   "rank": 162
+   "rank": 112
   },
   {
    "type": "rule",
@@ -497,13 +497,13 @@
    "title": "Edges line up",
    "kind": "tolerance",
    "why": "10 places",
-   "fresh": 1,
+   "fresh": 0,
    "sample": [
     "p.footer__note: left edge -1px off the line at 58 (3 blocks on it) (320x568)",
     "p.tool__brand: right edge +1.27px off the line at 262 (3 blocks on it) (320x568)",
     "p.footer__note: right edge +1px off the line at 262 (3 blocks on it) (320x568)"
    ],
-   "rank": 160
+   "rank": 110
   },
   {
    "type": "rule",
@@ -1195,7 +1195,7 @@
    "accepted": 0,
    "was": {
     "status": "warn",
-    "value": 9
+    "value": 10
    }
   },
   {
@@ -1538,7 +1538,7 @@
    "accepted": 0,
    "was": {
     "status": "warn",
-    "value": 10
+    "value": 12
    }
   },
   {
@@ -2125,14 +2125,14 @@
    "unit": "KB",
    "was": {
     "status": "pass",
-    "value": 1138
+    "value": 1182
    },
    "status": "pass",
    "items": [
     {
      "key": "html",
      "where": "html",
-     "what": "1 files, 21 KB sent (was 20 KB)",
+     "what": "1 files, 21 KB sent (was 21 KB)",
      "value": 21
     },
     {
@@ -2142,16 +2142,16 @@
      "value": 83
     },
     {
-     "key": "images",
-     "where": "images",
-     "what": "43 files, 963 KB sent (was 920 KB)",
-     "value": 963
-    },
-    {
      "key": "js",
      "where": "js",
      "what": "15 files, 112 KB sent (was 112 KB)",
      "value": 112
+    },
+    {
+     "key": "images",
+     "where": "images",
+     "what": "43 files, 963 KB sent (was 963 KB)",
+     "value": 963
     },
     {
      "key": "css",
@@ -2665,7 +2665,7 @@
    "where": "p.tool__brand",
    "what": "right edge +1.27px off the line at 262 (3 blocks on it)",
    "at": "320x568",
-   "new": true
+   "new": false
   },
   {
    "key": "align.edges::p.footer__note|right|262",
@@ -2863,7 +2863,7 @@
    "where": "img.tool__img",
    "what": "fm-litmus-420-Cwp3t3ch.avif: 420px wide for 464 device px (×1)",
    "at": "1366x650 1920x1080",
-   "new": true
+   "new": false
   },
   {
    "key": "images.sharp::fm-lens-420.avif",
@@ -2872,7 +2872,7 @@
    "where": "img.tool__img",
    "what": "fm-lens-420-innm9aB7.avif: 420px wide for 464 device px (×1)",
    "at": "1366x650 1920x1080",
-   "new": true
+   "new": false
   },
   {
    "key": "images.sharp::fm-litmus-820.avif",
@@ -2933,7 +2933,7 @@
    "rule": "weight.total",
    "status": "pass",
    "where": "html",
-   "what": "1 files, 21 KB sent (was 20 KB)",
+   "what": "1 files, 21 KB sent (was 21 KB)",
    "at": "",
    "new": false
   },
@@ -2947,20 +2947,20 @@
    "new": false
   },
   {
-   "key": "weight.total::images",
-   "rule": "weight.total",
-   "status": "pass",
-   "where": "images",
-   "what": "43 files, 963 KB sent (was 920 KB)",
-   "at": "",
-   "new": false
-  },
-  {
    "key": "weight.total::js",
    "rule": "weight.total",
    "status": "pass",
    "where": "js",
    "what": "15 files, 112 KB sent (was 112 KB)",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::images",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "images",
+   "what": "43 files, 963 KB sent (was 963 KB)",
    "at": "",
    "new": false
   },
@@ -3693,5 +3693,5 @@
    "state": "open"
   }
  ],
- "from": "the last deploy of main"
+ "from": "this build"
 }
