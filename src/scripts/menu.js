@@ -1,4 +1,4 @@
-/* The menu of phones and tablets (below 1024px, where the styles show the burger): the burger turns into a cross, and
+/* The menu of phones, tablets and narrow laptops (below 1200px, where the styles show the burger: --nav-burger): the burger turns into a cross, and
    the pills of the menu pop in from its corner one after another, lower ones starting smaller. Closing is a little
    faster than opening. It closes after a tap on a link, a tap outside it, or Escape; and at once if the screen grows
    so wide that the burger is gone (the width lives in the styles only: media.css). */
