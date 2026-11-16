@@ -1,6 +1,6 @@
 /* The navbar: fixed at the top, frosted. Its colour follows the section behind it (scripts/nav.js), and the
-   outline of the current link slides from link to link (scripts/nav-pill.js). Below 1024px (--tablet) the links give
-   way to a burger and a menu of pills (scripts/menu.js). Paddings: the nav/* tokens.
+   outline of the current link slides from link to link (scripts/nav-pill.js). Below 1200px (--nav-burger) the links give
+   way to a burger and a menu of pills (scripts/menu.js): below that there is too little room around them. Paddings: the nav/* tokens.
    On phones turned sideways (--sideways: a short, wide screen) it moves away with the page while it is scrolled down,
    once the hero has gone, and comes back with it while it is scrolled up (scripts/nav.js, "hide"): there the screen is
    too short to give it a strip.
@@ -40,7 +40,7 @@ html.nav-away .nav { pointer-events: none; }
   transition: color var(--hover-out) var(--ease-out);
 
   /* the current link is marked by its outline only (the pill below): its text keeps the colour of the others */
-  @media (--tablet) { display: none; }
+  @media (--nav-burger) { display: none; }
 }
 /* the outline of the current link (moved by scripts/nav-pill.js; until then the current link draws its own) */
 .nav__pill {
@@ -52,7 +52,10 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
 /* hover darkens the other links only: the current one stays as it is, text and outline (Tim, Oct 20) */
 @media (--mouse) { .nav__link:not([aria-current]):hover { color: var(--ink); transition-duration: var(--hover-in); } }
 
-.nav__cta { @media (--phone) { display: none; } }
+/* «Войти» and «Запланировать демо», side by side, one size (.btn--nav). «Войти» is there at every width; on phones the
+   demo moves to the menu */
+.nav__ctas { display: flex; gap: 8px; }
+.nav__ctas [data-demo] { @media (--phone) { display: none; } }
 
 .nav__burger {
   display: none; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
@@ -62,7 +65,7 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
   &::after { content: ""; position: absolute; inset: -6px; }
 
   & i { display: block; width: 20px; height: 1px; border-radius: var(--round); background: var(--ink); }
-  @media (--tablet) { display: flex; }
+  @media (--nav-burger) { display: flex; }
 }
 
 /* the menu: pills under the burger */
@@ -73,7 +76,7 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
 
   &.is-open { display: flex; }
   @media (--phone) { padding: calc(var(--nav-h) + 12px) var(--nav-pad-right) 0 0; }
-  @media not (--tablet) { display: none !important; }
+  @media not (--nav-burger) { display: none !important; }
 }
 .menu__item {
   display: flex; align-items: center; justify-content: center;
