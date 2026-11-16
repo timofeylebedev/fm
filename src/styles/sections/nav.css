@@ -54,7 +54,7 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
 
 /* «Войти» and «Запланировать демо», side by side, one size (.btn--nav). «Войти» is there at every width; on phones the
    demo moves to the menu */
-.nav__ctas { display: flex; gap: 8px; }
+.nav__ctas { display: flex; gap: 12px; }
 .nav__ctas [data-demo] { @media (--phone) { display: none; } }
 
 .nav__burger {
