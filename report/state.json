@@ -1,30 +1,30 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-10-27T22:36:52.996Z",
- "commit": "c583f788a2047a98685d9c8ea26d0c7590e93f99",
+ "generated": "2026-11-16T19:57:20.415Z",
+ "commit": "1d322d893d8db152ca787df2a50d9a63d9e94e03",
  "ref": "main",
  "pr": null,
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-10-27T22:26:38.978Z",
+   "when": "2026-11-16T19:48:25.921Z",
    "quick": false,
-   "seconds": 432,
+   "seconds": 367,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-10-27T22:34:08.421Z",
+   "when": "2026-11-16T19:54:50.275Z",
    "quick": true,
-   "seconds": 165,
+   "seconds": 150,
    "errors": []
   }
  },
  "base": {
-  "commit": "cca861377a3e42ea61befb27969780b356380e17",
-  "generated": "2026-10-27T21:19:07.464Z"
+  "commit": "c583f788a2047a98685d9c8ea26d0c7590e93f99",
+  "generated": "2026-10-27T22:36:52.996Z"
  },
  "kinds": {
   "hard": "any item is a failure",
@@ -43,7 +43,7 @@
   "fail": 6,
   "info": 6,
   "findings": 76,
-  "new": 3,
+  "new": 0,
   "fixed": 0,
   "accepted": 5,
   "questions": 17
@@ -141,25 +141,6 @@
   },
   {
    "type": "question",
-   "id": "short-screen-headings",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "On short screens the headings meet: on 1366×650 the hero title is 55px and a section heading 54px; on phones turned sideways a heading is bigger than the hero. Keep a section heading at most the hero ÷ 1.2 on short screens?",
-   "needs": [
-    "choice"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/report/#system/type",
-   "options": [
-    "Yes, keep the distance",
-    "Leave as it is"
-   ],
-   "since": "2026-10-17",
-   "from": "PR #5",
-   "why": "open since 2026-10-17 (PR #5)",
-   "rank": 211
-  },
-  {
-   "type": "question",
    "id": "tools-white-reload",
    "severity": "ask",
    "area": "Questions",
@@ -175,7 +156,26 @@
    "since": "2026-10-18",
    "from": "PR #8",
    "why": "open since 2026-10-18 (PR #8)",
-   "rank": 210
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "short-screen-headings",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "On short screens the headings meet: on 1366×650 the hero title is 55px and a section heading 54px; on phones turned sideways a heading is bigger than the hero. Keep a section heading at most the hero ÷ 1.2 on short screens?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/report/#system/type",
+   "options": [
+    "Yes, keep the distance",
+    "Leave as it is"
+   ],
+   "since": "2026-10-17",
+   "from": "PR #5",
+   "why": "open since 2026-10-17 (PR #5)",
+   "rank": 230
   },
   {
    "type": "question",
@@ -194,7 +194,7 @@
    "since": "2026-10-19",
    "from": "PR #11",
    "why": "open since 2026-10-19 (PR #11)",
-   "rank": 209
+   "rank": 229
   },
   {
    "type": "question",
@@ -213,7 +213,7 @@
    "since": "2026-10-19",
    "from": "PR #10",
    "why": "open since 2026-10-19 (PR #10)",
-   "rank": 209
+   "rank": 229
   },
   {
    "type": "question",
@@ -232,7 +232,7 @@
    "since": "2026-10-19",
    "from": "PR #10",
    "why": "open since 2026-10-19 (PR #10)",
-   "rank": 209
+   "rank": 229
   },
   {
    "type": "question",
@@ -252,7 +252,7 @@
    "since": "2026-10-20",
    "from": "PR #22, PR #61",
    "why": "open since 2026-10-20 (PR #22, PR #61)",
-   "rank": 208
+   "rank": 228
   },
   {
    "type": "question",
@@ -274,7 +274,7 @@
    "since": "2026-10-20",
    "from": "PR #20",
    "why": "open since 2026-10-20 (PR #20)",
-   "rank": 208
+   "rank": 228
   },
   {
    "type": "question",
@@ -293,7 +293,7 @@
    "since": "2026-10-20",
    "from": "PR #13",
    "why": "open since 2026-10-20 (PR #13)",
-   "rank": 208
+   "rank": 228
   },
   {
    "type": "question",
@@ -313,7 +313,7 @@
    "since": "2026-10-20",
    "from": "PR #13",
    "why": "open since 2026-10-20 (PR #13)",
-   "rank": 208
+   "rank": 228
   },
   {
    "type": "question",
@@ -332,7 +332,7 @@
    "since": "2026-10-20",
    "from": "PR #22",
    "why": "open since 2026-10-20 (PR #22)",
-   "rank": 208
+   "rank": 228
   },
   {
    "type": "question",
@@ -351,7 +351,7 @@
    "since": "2026-10-20",
    "from": "PR #19",
    "why": "open since 2026-10-20 (PR #19)",
-   "rank": 208
+   "rank": 228
   },
   {
    "type": "question",
@@ -371,7 +371,7 @@
    "since": "2026-10-25",
    "from": "PR #62",
    "why": "open since 2026-10-25 (PR #62)",
-   "rank": 203
+   "rank": 223
   },
   {
    "type": "question",
@@ -391,7 +391,7 @@
    "since": "2026-10-25",
    "from": "PR #61",
    "why": "open since 2026-10-25 (PR #61)",
-   "rank": 203
+   "rank": 223
   },
   {
    "type": "question",
@@ -412,7 +412,7 @@
    "since": "2026-10-25",
    "from": "PR #58",
    "why": "open since 2026-10-25 (PR #58)",
-   "rank": 203
+   "rank": 223
   },
   {
    "type": "question",
@@ -431,7 +431,7 @@
    "since": "2026-10-25",
    "from": "PR #58",
    "why": "open since 2026-10-25 (PR #58)",
-   "rank": 203
+   "rank": 223
   },
   {
    "type": "question",
@@ -452,7 +452,7 @@
    "since": "2026-10-25",
    "from": "labs of Oct 24 and Oct 25",
    "why": "open since 2026-10-25 (labs of Oct 24 and Oct 25)",
-   "rank": 203
+   "rank": 223
   },
   {
    "type": "question",
@@ -471,7 +471,7 @@
    "since": "2026-10-25",
    "from": "PR #61",
    "why": "open since 2026-10-25 (PR #61)",
-   "rank": 203
+   "rank": 223
   },
   {
    "type": "rule",
@@ -481,13 +481,13 @@
    "title": "Pictures are sharp",
    "kind": "tolerance",
    "why": "12 places",
-   "fresh": 2,
+   "fresh": 0,
    "sample": [
     "img.pub__source: institute-logo-BDAvn4zf.webp: 411px wide for 462 device px (×3) (390x844 844x390)",
     "img.pub__source: institute-mark-BCn1cRwo.webp: 152px wide for 228 device px (×3) (390x844 844x390)",
     "a.pub__platform img: vk-video-CCw81_FH.webp: 64px wide for 96 device px (×3) (390x844 844x390)"
    ],
-   "rank": 162
+   "rank": 112
   },
   {
    "type": "rule",
@@ -497,13 +497,13 @@
    "title": "Edges line up",
    "kind": "tolerance",
    "why": "10 places",
-   "fresh": 1,
+   "fresh": 0,
    "sample": [
     "p.footer__note: left edge -1px off the line at 58 (3 blocks on it) (320x568)",
     "p.tool__brand: right edge +1.27px off the line at 262 (3 blocks on it) (320x568)",
     "p.footer__note: right edge +1px off the line at 262 (3 blocks on it) (320x568)"
    ],
-   "rank": 160
+   "rank": 110
   },
   {
    "type": "rule",
@@ -590,8 +590,8 @@
    "how": "Every text holder at every measured size: its size against each role of design/scale.json at that screen (±0.6px). Objects sized as a whole or fitted to their box (hero, CTA and stack titles, ID cards, tiles) are left out.",
    "value": 100,
    "unit": "% of text holders",
-   "on": 394,
-   "total": 394,
+   "on": 397,
+   "total": 397,
    "pass": 97,
    "warn": 90,
    "status": "pass",
@@ -599,8 +599,8 @@
    "webkit": {
     "status": "pass",
     "value": 100,
-    "on": 394,
-    "total": 394
+    "on": 397,
+    "total": 397
    },
    "accepted": 0,
    "was": {
@@ -656,8 +656,8 @@
    "how": "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of design/tokens.json (±1.5 a channel, ±1.5% alpha).",
    "value": 98.1,
    "unit": "% of colour uses",
-   "on": 1164,
-   "total": 1187,
+   "on": 1176,
+   "total": 1199,
    "pass": 99,
    "warn": 95,
    "status": "warn",
@@ -738,8 +738,8 @@
    "webkit": {
     "status": "warn",
     "value": 98.2,
-    "on": 1164,
-    "total": 1185
+    "on": 1176,
+    "total": 1198
    },
    "accepted": 0,
    "was": {
@@ -788,10 +788,10 @@
    "kind": "share",
    "title": "Corners are radius roles (or pills)",
    "how": "Every rounded box: its corner against radius/s, m, l at that screen (±0.6px), a pill (half its height), or a listed object. Inner corners (outer − inset) show up here as their own values.",
-   "value": 99,
+   "value": 98.8,
    "unit": "% of rounded boxes",
-   "on": 339,
-   "total": 418,
+   "on": 343,
+   "total": 423,
    "pass": 90,
    "warn": 75,
    "status": "pass",
@@ -801,8 +801,8 @@
      "where": "button.nav__burger",
      "what": "radius 8px on a 32×32 box",
      "value": 8,
-     "n": 4,
-     "at": "320x568 390x844 844x390 768x1024",
+     "n": 5,
+     "at": "320x568 390x844 844x390 768x1024 1024x768",
      "note": "roles here: s 16, m 24, l 32"
     },
     {
@@ -858,9 +858,9 @@
    ],
    "webkit": {
     "status": "pass",
-    "value": 99,
-    "on": 345,
-    "total": 418
+    "value": 98.8,
+    "on": 349,
+    "total": 423
    },
    "accepted": 5,
    "was": {
@@ -883,7 +883,7 @@
      "key": "1",
      "where": "a.btn, dl.idcard__table, div.idcard__row, button.btn, div.footer__legal, a.nav__link",
      "what": "1px",
-     "value": 20
+     "value": 21
     }
    ],
    "webkit": {
@@ -1195,7 +1195,7 @@
    "accepted": 0,
    "was": {
     "status": "warn",
-    "value": 9
+    "value": 10
    }
   },
   {
@@ -1538,7 +1538,7 @@
    "accepted": 0,
    "was": {
     "status": "warn",
-    "value": 10
+    "value": 12
    }
   },
   {
@@ -2125,14 +2125,14 @@
    "unit": "KB",
    "was": {
     "status": "pass",
-    "value": 1138
+    "value": 1182
    },
    "status": "pass",
    "items": [
     {
      "key": "html",
      "where": "html",
-     "what": "1 files, 21 KB sent (was 20 KB)",
+     "what": "1 files, 21 KB sent (was 21 KB)",
      "value": 21
     },
     {
@@ -2144,7 +2144,7 @@
     {
      "key": "images",
      "where": "images",
-     "what": "43 files, 963 KB sent (was 920 KB)",
+     "what": "43 files, 963 KB sent (was 963 KB)",
      "value": 963
     },
     {
@@ -2352,7 +2352,7 @@
    "area": "Layout",
    "kind": "hard",
    "title": "Screen steps only from media.css",
-   "how": "7 custom media (--tablet, --phone, --notes-cols, --portrait, --sideways, --mouse, --calm); raw width queries elsewhere (read from the code).",
+   "how": "8 custom media (--tablet, --phone, --nav-burger, --notes-cols, --portrait, --sideways, --mouse, --calm); raw width queries elsewhere (read from the code).",
    "status": "fail",
    "value": 1,
    "unit": "places",
@@ -2529,7 +2529,7 @@
    "status": "pass",
    "where": "button.nav__burger",
    "what": "radius 8px on a 32×32 box",
-   "at": "320x568 390x844 844x390 768x1024",
+   "at": "320x568 390x844 844x390 768x1024 1024x768",
    "new": false
   },
   {
@@ -2665,7 +2665,7 @@
    "where": "p.tool__brand",
    "what": "right edge +1.27px off the line at 262 (3 blocks on it)",
    "at": "320x568",
-   "new": true
+   "new": false
   },
   {
    "key": "align.edges::p.footer__note|right|262",
@@ -2863,7 +2863,7 @@
    "where": "img.tool__img",
    "what": "fm-litmus-420-Cwp3t3ch.avif: 420px wide for 464 device px (×1)",
    "at": "1366x650 1920x1080",
-   "new": true
+   "new": false
   },
   {
    "key": "images.sharp::fm-lens-420.avif",
@@ -2872,7 +2872,7 @@
    "where": "img.tool__img",
    "what": "fm-lens-420-innm9aB7.avif: 420px wide for 464 device px (×1)",
    "at": "1366x650 1920x1080",
-   "new": true
+   "new": false
   },
   {
    "key": "images.sharp::fm-litmus-820.avif",
@@ -2933,7 +2933,7 @@
    "rule": "weight.total",
    "status": "pass",
    "where": "html",
-   "what": "1 files, 21 KB sent (was 20 KB)",
+   "what": "1 files, 21 KB sent (was 21 KB)",
    "at": "",
    "new": false
   },
@@ -2951,7 +2951,7 @@
    "rule": "weight.total",
    "status": "pass",
    "where": "images",
-   "what": "43 files, 963 KB sent (was 920 KB)",
+   "what": "43 files, 963 KB sent (was 963 KB)",
    "at": "",
    "new": false
   },
@@ -3693,5 +3693,5 @@
    "state": "open"
   }
  ],
- "from": "the last deploy of main"
+ "from": "this build"
 }
