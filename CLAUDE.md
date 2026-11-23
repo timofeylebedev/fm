@@ -14,15 +14,25 @@ rules Claude follows. The site's history, open PRs and open questions live in th
   on every push and removes it when the PR is closed (`rossjrw/pr-preview-action`). Pages serves the `gh-pages`
   branch: the site at its root, the previews in `pr-preview/` (main's publish keeps them). Give Tim the preview link
   in the PR description; it needs no other branch.
-- **The review page of the design system** (every colour, size, step, shadow, curve and decision, and each review round):
-  `design/report/site/index.html` (opens from the clone), published at https://timofeylebedev.github.io/fm/report/.
-  Its data is read from the repo by `node design/report/build-site.mjs` (`design/report/README.md`).
-- **The checks of the design system** (`design/checks/`, README there): every rule of the system measured in a browser
-  on every deploy (job `checks` of deploy.yml, after the site is out): findings, decisions that cover them, questions
-  for Tim, and «what needs you», in one `state.json` (live: `…/fm/report/state.json`; history on the `report-data`
-  branch, never edited by hand). Read it at the start of design work instead of trusting an old round's numbers.
-  `npm run checks` runs it locally after a build. Tim answers a question with a button on the report that copies
-  «FM answer · <id>: <answer>»; record it with `node design/checks/answer.mjs <id> "<answer>" ["note"]` in the PR it leads to.
+- **site-kit** (https://github.com/timofeylebedev/site-kit): Tim's shared kit for his sites. The checks, the review
+  page, the typesetter, the picture pipeline, the audit, the code rules (the lessons learned) and the CI workflows are
+  the kit's; what is particular to Flow Medium is in its adapter, `site-kit.config.mjs` (pages, sizes, palette, probes,
+  scenarios, code rules, report, pictures, audit). The kit is pinned to one commit (later a tag) in two places:
+  `package.json` (`"site-kit": "github:timofeylebedev/site-kit#…"`) and the `uses: …@…` lines of `.github/workflows/`.
+  Raise both together, on purpose, in a PR of its own. A change to the kit's code goes in a site-kit PR, never into
+  `node_modules/`; FM's settings change in `site-kit.config.mjs`. The kit's own lessons: `node_modules/site-kit/AGENTS.md`.
+- **The review page of the design system** (every colour, size, step, shadow, curve and decision, each block, and each
+  review round): site-kit's page, built by `npm run report` into `design/report/site/` (a build output, not committed:
+  open its `index.html` from the clone), published at https://timofeylebedev.github.io/fm/report/ (CI builds it on every
+  deploy). FM keeps the rounds' data and pictures in `design/report/` (`data.json`, `shots/`; README there).
+- **The checks of the design system** (site-kit checks; FM's settings in `site-kit.config.mjs`, commands in
+  `design/checks/README.md`): every rule of the system measured in a browser on every deploy (job `checks` of
+  deploy.yml, after the site is out; on a PR only when a design file changed, or with the label `checks`): findings,
+  decisions that cover them, questions for Tim, and «what needs you», in one `state.json` (live: `…/fm/report/state.json`;
+  history on the `report-data` branch, never edited by hand). Read it at the start of design work instead of trusting an
+  old round's numbers. `npm run checks` runs it locally after a build (records in `design/checks/out/`). Tim answers a
+  question with a button on the report that copies «FM answer · <id>: <answer>»; record it with
+  `npx site-kit checks answer <id> "<answer>" ["note"]` in the PR it leads to.
 - Owner and reviewer: Tim (timofeylebedev). The site's language is Russian; talk to Tim in the language he writes in.
 - The design lives in Figma: https://www.figma.com/design/JTfxQeW8liN3knCO3GWtns/website-2.0 (Figma Pro plan:
   no Variables REST API, so variables go through the Figma MCP tool `use_figma`).
@@ -32,15 +42,15 @@ rules Claude follows. The site's history, open PRs and open questions live in th
 - **Never commit to `main` directly.** Work on a branch, open a pull request, Tim reviews and merges.
   One topic per PR; say in the description what changed, what was measured and what Tim should look at.
 - Commit as `timofeylebedev <49580438+timofeylebedev@users.noreply.github.com>`.
-- Before a PR: `npm run build && npm run check && npm run audit`. The audit also runs on every PR in CI
-  (`.github/workflows/audit.yml`: Chromium fails on problems, Firefox and WebKit only warn).
+- Before a PR: `npm run build && npm run check && npm run audit` (and `npm run rules`). The audit also runs on every
+  PR in CI (`.github/workflows/audit.yml`, the kit's workflow: Chromium fails on problems, Firefox and WebKit only warn).
 - Rebase open branches on `main` before they merge; several PRs often touch the same modules (nav.js, main.js).
 - For larger rounds Tim asks for an independent review: a separate agent that has not seen the work re-checks it,
   and its findings are fixed in a commit "Fixes from the independent review".
 - Measure, don't guess. Numbers in PRs come from a browser (Playwright), not from reading the CSS.
 - When something is decided on purpose (an exception, a trade-off Tim chose), add it to `design/decisions.json`
   (who, when, why). `npm run audit` prints the exceptions with measured values. When the decision covers what a check
-  finds, bind it: `"checks": [{ "rule": "<id>", "match": "<regex>", "band": [least, greatest] }]` (design/checks/README.md):
+  finds, bind it: `"checks": [{ "rule": "<id>", "match": "<regex>", "band": [least, greatest] }]` (site-kit's checks/README.md):
   the check then accepts it and brings it back when its value moves.
 - A question for Tim that a check cannot answer (a look on his iPhone, a choice) goes into `design/questions.json`
   (with the files it is about), not only into the project doc: the report shows it with answer buttons.
@@ -53,15 +63,17 @@ npm run dev           # localhost:5173 (runs `npm run tokens` first)
 npm run build         # dist/ (not committed)
 npm run preview       # dist/ at localhost:4173
 npm run check         # html-validate on the four built pages
-npm run audit         # sideways scroll, cut text, text < 12px, tap targets < 24px, axe; 9 sizes
-                      # FM_ENGINE=firefox|webkit for other engines (npx playwright install <engine> once)
-npm run checks        # the design system's checks (design/checks/): measure + state.json, ~5–7 min
-npm run rules         # the rules read from the code only (fast)
+npm run audit         # site-kit audit: sideways scroll, cut text, text < 12px, tap targets < 24px, axe; 9 sizes
+                      # -- --engine firefox|webkit for other engines (npx playwright install <engine> once)
+npm run checks        # site-kit checks: measure + state.json into design/checks/out/, ~6–8 min
+npm run checks:state  # the state again from the last record
+npm run rules         # site-kit rules: the rules read from the code only (seconds)
+npm run report        # site-kit report: the review page into design/report/site/ (open its index.html)
 npm run tokens        # design/scale.json + tokens.json -> src/styles/base/tokens.gen.css
 npm run tokens:sync   # three-way merge with a fresh Figma export (design/README.md)
-npm run images        # assets-src/img -> src/assets/img (AVIF/WebP; commit the outputs)
+npm run images        # site-kit images: assets-src/img -> src/assets/img (AVIF/WebP; commit the outputs; list in site-kit.config.mjs)
 npm run fonts         # assets-src/fonts -> subsets (pip install fonttools brotli)
-node design/report/build-site.mjs   # the review page of the system (design/report/site/, README there)
+npm run typeset -- --lint src/*.html   # site-kit typeset: what a proofreader would fix
 ```
 
 ## Rules in the code
@@ -106,11 +118,12 @@ node design/report/build-site.mjs   # the review page of the system (design/repo
   subject, never a state; one hover timing. No focus ring (Tim, Oct 20: decision `no-focus-ring`).
 - **Media in lazy CSS:** a lazily loaded stylesheet must `@import "../base/media.css"` itself, or Lightning CSS fails
   on the custom media (`--mouse`, `--sideways` …).
-- **Texts:** write them normally in the HTML; `build/typeset/` decides where lines may break (no-break spaces, word
-  joiners, `<wbr>` in links) by each text's `lang` (Russian and English rules; README there). It never changes a
-  visible letter: `npm run typeset -- --lint src/*.html` lists what a proofreader would fix. No length limit on held
+- **Texts:** write them normally in the HTML; site-kit's typesetter (`site-kit/typeset/vite` in vite.config.js,
+  `site-kit typeset`; settings: `typeset` in site-kit.config.mjs) decides where lines may break (no-break spaces, word
+  joiners, `<wbr>` in links) by each text's `lang` (Russian and English rules; `node_modules/site-kit/typeset/README.md`).
+  It never changes a visible letter: `npm run typeset -- --lint src/*.html` lists what a proofreader would fix. No length limit on held
   pieces (Tim). Keep links and other inline tags out of headings split by GSAP: SplitText loses a hold at a tag's edge.
-  `npm run test:typeset` after changing a rule.
+  A rule changes in site-kit (with its test there, `npm test`), never here.
 - **Third-party scripts:** add the domain to `POLICY` in `build/plugins.js` (the build writes a strict CSP with script
   hashes). Anything optional (analytics, Planerka preload) starts only from `onConsent()` in `scripts/consent.js`:
   only the «ОК» of the cookie notice is consent. Raise `VERSION` in consent.js when the purposes change.
@@ -140,7 +153,7 @@ node design/report/build-site.mjs   # the review page of the system (design/repo
   `--hide-scrollbars`: a page measured at 390 is 375 wide and layout steps show up 15–20px late. To measure as on a Mac
   or a phone, take it out of the served CSS (`prep()` in `design/report/tools/lib.py`); the audit keeps it.
 - Headless Chromium without a GPU: launch with `--use-gl=swiftshader --enable-unsafe-swiftshader` (as
-  `build/audit.mjs` does), at most 2 browser contexts at a time, and judge motion by its curves, not by frame timing.
+  `site-kit audit` does), at most 2 browser contexts at a time, and judge motion by its curves, not by frame timing.
 - Telegram's browser: `?fmcap=debug` (the white strip above the navbar turns red, a box shows what the browser says;
   without it the strip exists only in apps' browsers, never in Safari, where it drifted under the navbar). A
   3–5 frame flicker on a hard fling past the end is Telegram's own (decision `telegram-cap-flicker`): don't chase it.

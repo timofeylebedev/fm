@@ -20,17 +20,17 @@ takes it out of the served CSS (all scripts here use it); `FM_GUTTER=1` keeps it
 - `sections.py url prefix W H [mobile] [dpr]` — one screenshot per section (reduced motion), for looking.
 - `pair.py out.jpg W H mobile dpr "<js: scrollY>" [crop] [wait]` — a before/after picture; `FM_CALM=1` reduced motion,
   `FM_PATH=privacy_policy_ru.html` another page, `FM_OLD` / `FM_NEW` other servers.
-- `rules.mjs` (Node, from the repository root) — the system's implicit rules as a lint over scale.json, tokens,
-  decisions.json, CLAUDE.md and the stylesheets: ladder, relations, no CSS in comments, colours from tokens, type from
-  the scale, no own fluid values, every var defined / token used, layout steps, screen steps, one table of curves,
-  decisions complete. A prototype for `npm run rules` (not in CI until Tim says so). `--json out.json` for the report.
+- `rules.mjs` (gone) — round 6's lint of the system's implicit rules (ladder, relations, no CSS in comments, colours
+  from tokens, type from the scale, no own fluid values, every var defined / token used, layout steps, screen steps,
+  one table of curves, decisions complete). It grew into the checks' code rules and is now `npm run rules`
+  (`site-kit rules`); `../measure/r6-rules.json` keeps round 6's output.
 - `round6.py` + `round6_changes.py` + `round6_findings.py` — write `../data.json` from the measurements in
   `../measure/`, round 5's published page (`../measure/published-oct23.json`) and round 4's data.json from git:
   `python3 -I round6.py ../measure/r6-sweep-before.json ../measure/r6-sweep-now.json ../measure/r6-areas-before.json ../measure/r6-areas-now.json ../measure/r6-rules.json ../measure/r6-audit.txt ../measure/r6-review.json`
   (before = main at edeb745, the build round 5 measured, served on :8001; now = bd0566f on :8002).
 - Round 5 (Oct 23, another chat) published its page without committing its source; its data and pictures were taken
   out of the published page this round (`../measure/published-oct23.json`, `../shots/r5a-*`). Its rules.mjs is lost;
-  this folder's `rules.mjs` is a new one.
+  round 6 wrote a new one (now `site-kit rules`).
 - The DOM extraction of the `analyzing-design-systems` skill (`extract_dom.cjs` + `analyze.py`) was run from a scratch
   copy with three edits (Chromium path and swiftshader flags, `bypassCSP`, a time limit on `document.fonts.ready` and a
   top-to-bottom scroll). Its "76 text styles" and "off-grid spacing" findings are artefacts of fluid sizing.

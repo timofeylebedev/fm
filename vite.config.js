@@ -1,7 +1,8 @@
 // The build of the site: `npm run dev` to work on it, `npm run build` for the finished site in dist/.
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
-import { icons, inlineScripts, typeset, minifyPages, inlineCss, csp, precompress } from "./build/plugins.js";
+import { typeset } from "site-kit/typeset/vite";   // where lines may break (site-kit/typeset/README.md; settings: site-kit.config.mjs)
+import { icons, inlineScripts, minifyPages, inlineCss, csp, precompress } from "./build/plugins.js";
 
 const src = resolve(import.meta.dirname, "src");
 const dist = resolve(import.meta.dirname, "dist");

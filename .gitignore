@@ -8,5 +8,5 @@ design/figma/push.gen.js
 
 # the design system checks: records and state of a local run (CI keeps them on the report-data branch)
 design/checks/out/
-design/report/site/state.json
-design/report/site/history.json
+# the review page of the system, built by `npm run report` (site-kit report); CI builds it on every deploy
+design/report/site/

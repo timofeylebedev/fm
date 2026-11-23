@@ -1,6 +1,6 @@
 {
   "$about": [
-    "Questions for Tim: what a check cannot answer (a look on a real device, a choice). The report's first page («What needs you») lists the open ones with answer buttons; a button copies the answer to paste into a chat with Claude, who records it with `node design/checks/answer.mjs <id> \"<answer>\" [\"note\"]`.",
+    "Questions for Tim: what a check cannot answer (a look on a real device, a choice). The report's first page («What needs you») lists the open ones with answer buttons; a button copies the answer to paste into a chat with Claude, who records it with `npx site-kit checks answer <id> \"<answer>\" [\"note\"]`.",
     "about: the files the question is about. An answer is stored with those files' fingerprints (git blob hashes): when one of them changes, the question opens again («changed since your answer»), so an OK given to an older build never covers a newer one.",
     "needs: iphone | mac-safari | eye (look at it anywhere) | choice. link: where to look (the live site unless a PR preview is named).",
     "status: open | answered. A question can also be closed by a decision (answer.decision) or dropped (status: dropped, with why)."
@@ -14,7 +14,7 @@
       "since": "2026-10-25",
       "from": "PR #62",
       "options": ["All works", "Something is broken (say what)"],
-      "about": ["design/report/site/report.js", "design/report/site/report.css"],
+      "about": ["node_modules/site-kit/report/page/report.js", "node_modules/site-kit/report/page/report.css"],
       "status": "open"
     },
     {

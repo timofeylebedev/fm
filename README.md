@@ -17,7 +17,15 @@ npm run build        # the finished site in dist/
 npm run preview      # dist/ at http://localhost:4173, as it will be on the server
 npm run check        # validates the HTML of dist/
 npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figma variables (design/README.md)
+npm run audit        # the built page in a real browser at nine sizes (site-kit audit)
+npm run checks       # the design system's checks, ~6–8 min (site-kit checks; design/checks/README.md)
+npm run rules        # the rules read from the code only, in seconds (site-kit rules)
+npm run report       # the review page of the system into design/report/site/ (site-kit report); open its index.html
 ```
+
+The checks, the review page, the typesetter, the picture pipeline and the audit come from
+[site-kit](https://github.com/timofeylebedev/site-kit), Tim's shared kit for his sites (a pinned version in
+`package.json`); what is particular to Flow Medium is in `site-kit.config.mjs`.
 
 ## Where things are
 
@@ -29,23 +37,24 @@ npm run tokens:sync  # merges design/tokens.json with a fresh export of the Figm
 | `src/scripts/` | the scripts, one file per part of the page; `main.js` starts them, `boot.js` runs first, inside `<head>` |
 | `src/scripts/art/` | the drawings of the card stack and the royalty cards (downloaded only when they are about to be seen) |
 | `src/assets/icons/` | the SVG icons put into the page: `<svg data-icon="logo">` in the HTML becomes the content of `logo.svg` |
-| `src/assets/img/`, `src/assets/fonts/` | the pictures and fonts the site uses, made from the originals by `build/images.mjs` and `build/fonts.py` |
+| `src/assets/img/`, `src/assets/fonts/` | the pictures and fonts the site uses, made from the originals by `npm run images` (site-kit) and `build/fonts.py` |
 | `assets-src/` | the originals of every picture and font (not published) |
 | `public/` | files copied as they are: `robots.txt`, the icons, `og.png` (the picture for links in messengers) |
-| `build/` | the build steps: `images.mjs` and `fonts.py` (the pictures and fonts), and the Vite plugins for icons, the inline first script, Russian non-breaking spaces, minification, the Content Security Policy |
+| `build/` | the build steps: `fonts.py` (the fonts), `tokens.mjs` (the CSS of the tokens), and the Vite plugins for icons, the inline first script, minification, the Content Security Policy (where lines may break is site-kit's plugin, in `vite.config.js`) |
+| `site-kit.config.mjs` | Flow Medium's settings for site-kit: its pages, sizes, palette, checks, code rules, report, pictures, audit |
 | `deploy/` | server settings: `nginx.conf`, `Caddyfile`, `.htaccess` (Apache), `_headers` (Netlify, Cloudflare Pages) |
 
 ## Changing things
 
 - **A text:** in `src/index.html`. Where lines may break («в&nbsp;доме», «10&nbsp;000», «Лейбл&nbsp;—», «Dr.&nbsp;Smith») is
-  decided by the build (`build/typeset/`, Russian and English by `lang`), so the text can be written normally;
+  decided by the build (site-kit's typesetter, Russian and English by `lang`), so the text can be written normally;
   `npm run typeset -- --lint src/*.html` lists quotes, dashes and look-alike letters to fix by hand.
 - **A colour, or a size shared with Figma** (footer, buttons so far): `design/tokens.json`, the same values as the Figma
   variables; `npm run tokens:sync` moves changes both ways. See `design/README.md`.
 - **A font, a curve:** `src/styles/base/tokens.css`. The screen widths are in `src/styles/base/media.css` (with the data behind them).
-- **Checking the page:** `npm run build && npm run audit` — sideways scroll, cut-off text, text under 12px, small tap targets and axe-core at nine screen sizes (two of them with the browser's text at 24px), in Chromium (`npx playwright install chromium` once; `FM_ENGINE=firefox` or `webkit` for the other engines). It also runs on every pull request (`.github/workflows/audit.yml`).
+- **Checking the page:** `npm run build && npm run audit` — sideways scroll, cut-off text, text under 12px, small tap targets and axe-core at nine screen sizes (two of them with the browser's text at 24px), in Chromium (`npx playwright install chromium` once; `npm run audit -- --engine firefox` or `webkit` for the other engines). It also runs on every pull request (`.github/workflows/audit.yml`).
 - **A picture:** put the new original into `assets-src/img/` under the same name, run `npm run images`, commit the new files.
-  The list in `build/images.mjs` says what is made from each original (sizes and formats: AVIF and WebP).
+  The list in `site-kit.config.mjs` (key `images`) says what is made from each original (sizes and formats: AVIF and WebP).
 - **The icons and the link picture:** four originals in `assets-src/img/` — `icon.png` (512 × 512: iPhone and Android
   icons), `og.png` (1200 × 630: the picture for links in messengers), `favicon-32.png` (32 × 32: `favicon.ico`, cut to a
   circle) and `fm-logo.svg` (`favicon.svg`). Replace one, run `npm run images`, commit. The PNGs come out lossless (the
