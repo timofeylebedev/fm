@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   audit:
-    uses: timofeylebedev/site-kit/.github/workflows/audit.yml@v0.1.0
+    uses: timofeylebedev/site-kit/.github/workflows/audit.yml@v0.1.1
     with:
       build: npm run build
       engines: '["chromium", "firefox", "webkit"]'
