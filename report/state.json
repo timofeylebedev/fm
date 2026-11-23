@@ -3976,7 +3976,7 @@
    "state": "open"
   }
  ],
- "from": "this build",
- "whose": "measured on this commit (7110893)",
- "own": true
+ "from": "the last deploy of main",
+ "whose": "measured on main at 7110893, an earlier commit than this one (004d46f)",
+ "own": false
 }
