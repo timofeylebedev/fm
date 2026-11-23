@@ -1,10 +1,7 @@
-/* The review page of the Flow Medium system. One dark look on purpose (the site's own light colours read as content
-   on it): surfaces in tones of black, one accent (sky blue) for data and marks in text. The page's own text is Golos,
-   the site's text face; specimens use the site's fonts as the site does. */
-@font-face { font-family: "Golos"; src: url("fonts/golos-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Golos"; src: url("fonts/golos-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "Golos"; src: url("fonts/golos-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "Pragmatica Ext"; src: url("fonts/pragmatica-ext-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+/* The review page of a site's design system (site-kit report). One dark look on purpose (the site's own light colours
+   read as content on it): surfaces in tones of black, one accent (sky blue) for data and marks in text. The page's own
+   text is the site's text face, and the specimens use the site's fonts as the site does: site.css, written by the
+   build from the adapter, has their @font-face rules and sets --font, --display, --site-text and --site-accent. */
 
 :root {
   color-scheme: dark;
@@ -23,8 +20,10 @@
   --warn: #fbbf24;
   --bad: #f87171;
   --new: #c4b5fd;
-  --font: "Golos", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --display: "Pragmatica Ext", "Golos", Arial, sans-serif;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --display: Arial, sans-serif;
+  --site-text: ui-sans-serif, system-ui, sans-serif;
+  --site-accent: #888888;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --r: 10px;
   --side-w: 248px;
@@ -297,10 +296,9 @@ input[type="range"] { accent-color: var(--accent); }
 .shadows { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
 .shadow { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
 .shadow .stage { height: 190px; display: grid; place-items: center; background: #fff; }
-.shadow .stage.sand { background: #eeeae9; }
 .shadow .stage .obj { width: 128px; height: 84px; border-radius: 16px; background: #fff; display: grid; place-items: center; color: rgb(0 0 0 / 0.6); font: 500 13px var(--font); }
 .shadow .stage .obj.pill { width: 150px; height: 44px; border-radius: 999px; }
-.shadow .stage .obj.card { width: 96px; height: 138px; border-radius: 10px; background: var(--idcard-face-1, #666); }
+.shadow .stage .obj.card { width: 96px; height: 138px; border-radius: 10px; background: #666; }
 .shadow .meta { padding: 12px 14px 14px; display: grid; gap: 6px; }
 .shadow .meta code { font-size: 11.5px; }
 .shadow .meta ul { margin: 0; padding-left: 16px; color: var(--muted); font-size: 12.5px; }
@@ -323,14 +321,14 @@ input[type="range"] { accent-color: var(--accent); }
 .ts-side h3 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
 .ts-side h3 span { font-weight: 500; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .ts-paper { background: #fff; color: #000; border-radius: 8px; padding: 16px; overflow-x: auto; }
-.ts-col { font-family: "Golos", sans-serif; line-height: 1.3; outline: 1px dashed #c9c9c9; outline-offset: 0; }
+.ts-col { font-family: var(--site-text); line-height: 1.3; outline: 1px dashed #c9c9c9; outline-offset: 0; }
 .ts-col p { margin: 0 0 0.8em; }
 .ts-col p:last-child { margin-bottom: 0; }
-.ts-col.head { font-family: "Pragmatica Ext", sans-serif; font-weight: 700; line-height: 1.05; }
+.ts-col.head { font-family: var(--display); font-weight: 700; line-height: 1.05; }
 .ts-col .bad { background: #ffd9d9; box-shadow: 0 0 0 2px #ffd9d9; border-radius: 2px; color: #b00000; }
 .ts-col .hold { position: relative; }
-.ts-marks .ts-col .hold::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.12em; height: 0.3em; border: 1.5px solid #884dff; border-top: 0; border-radius: 0 0 0.35em 0.35em; pointer-events: none; }
-.ts-marks .ts-col .join::after { content: "⁀"; position: absolute; color: #884dff; font-size: 0.8em; translate: -0.35em 0.55em; pointer-events: none; }
+.ts-marks .ts-col .hold::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.12em; height: 0.3em; border: 1.5px solid var(--site-accent); border-top: 0; border-radius: 0 0 0.35em 0.35em; pointer-events: none; }
+.ts-marks .ts-col .join::after { content: "⁀"; position: absolute; color: var(--site-accent); font-size: 0.8em; translate: -0.35em 0.55em; pointer-events: none; }
 .ts-marks .ts-col .wbr::after { content: "¦"; position: absolute; color: #f56e00; font-size: 0.8em; translate: -0.15em 0; pointer-events: none; }
 .ts-col .join, .ts-col .wbr { position: relative; }
 .ts-col .hold.hi::after { border-color: #f56e00; }
@@ -349,10 +347,10 @@ input[type="range"] { accent-color: var(--accent); }
 .steps > div::before { content: counter(s); width: 26px; height: 26px; border-radius: 50%; background: var(--surface-3); display: grid; place-items: center; font-weight: 600; font-size: 13px; }
 .steps p { margin: 0; color: var(--muted); font-size: 14px; }
 .steps b { color: var(--fg); }
-.ex { font-family: "Golos", sans-serif; background: #fff; color: #000; padding: 1px 6px; border-radius: 4px; white-space: nowrap; display: inline-block; margin: 1px 0; }
-.ex .m { color: #884dff; font-weight: 600; }
+.ex { font-family: var(--site-text); background: #fff; color: #000; padding: 1px 6px; border-radius: 4px; white-space: nowrap; display: inline-block; margin: 1px 0; }
+.ex .m { color: var(--site-accent); font-weight: 600; }
 
-/* ── the checks (design/checks): rule cards, «What needs you», questions, history ── */
+/* ── the checks (site-kit checks): rule cards, «What needs you», questions, history ── */
 .tabs .dot.fail { background: var(--bad); }
 .tabs .dot.warn { background: var(--warn); }
 .side__n { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); font-size: 11.5px; font-weight: 600; text-align: center; line-height: 18px; vertical-align: 1px; }
@@ -394,3 +392,11 @@ input[type="range"] { accent-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 .check.s-error, .need.s-error { border-left-color: var(--bad); }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ── layer 2: whose measurements; layer 3: the blocks live and in pictures ── */
+.whose { border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); background: color-mix(in srgb, var(--warn) 9%, transparent); color: var(--fg); border-radius: var(--r); padding: 10px 14px; margin: 12px 0 0; font-size: 14px; max-width: 80ch; }
+.whose b { color: var(--warn); }
+.toc a[aria-current] { color: var(--fg); background: var(--surface-3); border-color: var(--line-2); }
+.toc .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-left: 6px; vertical-align: middle; background: var(--warn); }
+.bframe { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r); background: #fff; width: 100%; box-sizing: content-box; }
+.bframe iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: 0 0; background: #fff; }

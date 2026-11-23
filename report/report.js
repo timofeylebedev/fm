@@ -1,32 +1,40 @@
-/* The review page of the Flow Medium system: everything shown comes from window.REPORT (data.js, written by
-   design/report/build-site.mjs from the repo). Pages, by the address's hash:
-     #needs          what needs Tim: failing rules, decisions whose value moved, questions (with answer buttons that
-                     copy a line for a chat with Claude), warnings, what fixed itself; from the checks (design/checks)
+/* The review page of a site's design system (site-kit report): everything shown comes from window.REPORT (data.js,
+   written by site-kit's report/build.mjs from the site's repo); whatever is particular to the site is in REPORT.site
+   (from its adapter, site-kit.config.mjs). Pages, by the address's hash:
+     #needs          what needs the owner: failing rules, decisions whose value moved, questions (with answer buttons
+                     that copy a line for a chat with Claude), warnings, what fixed itself; from the checks
      #history        every deploy of main, measured: failures, shares, weight
      #system/<tab>   the system as it is now, in tabs (colour, type, space, layout, effects, motion, icons &
                      pictures, components, behaviour, page health, responsive, blocks, grammar, decisions), each with
-                     the checks of its areas; things new since the baseline round are marked "new"
-     #typesetter     what build/typeset does, with a demo running the real code (window.Typeset, typeset.js)
-     #round-<n>      one review round: its findings, its changes, its pictures
+                     the checks of its areas; things new since the baseline are marked "new"
+     #blocks/<id>    each block of the page: the site itself in a frame at a width you pick, and its latest pictures
+     #typesetter     what the typesetter does, with a demo running the real code (window.Typeset, typeset.js)
+     #round-<n>      one review round: its findings, its changes, its pictures (only when the site keeps rounds)
    No module scripts and no fetch, so the page also opens straight from the folder (file://). */
 (() => {
 "use strict";
-const D = window.REPORT, S = D.system, TS = window.Typeset;
+const D = window.REPORT, S = D.system, TS = window.Typeset, SITE = D.site || {}, NOTES = SITE.notes || {};
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// a commit of the site's repo as a link (plain text when the adapter names no repo)
+const commit = (sha, text) => SITE.repo && sha ? `<a href="https://github.com/${esc(SITE.repo)}/commit/${esc(sha)}">${text == null ? esc(String(sha).slice(0, 7)) : text}</a>` : (text == null ? esc(String(sha || "").slice(0, 7)) : text);
+const repoLink = (path, text) => SITE.repo ? `<a href="https://github.com/${esc(SITE.repo)}/${path}">${text}</a>` : text;
 const r1 = (v) => Math.round(v * 10) / 10;
 const r2 = (v) => Math.round(v * 100) / 100;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const PAL = ["#38bdf8", "#f59e0b", "#34d399", "#f472b6", "#a78bfa", "#facc15", "#fb7185", "#22d3ee", "#a3e635", "#fb923c", "#c084fc", "#2dd4bf", "#e879f9", "#93c5fd", "#fcd34d", "#86efac"];
+const KEY = "site-kit-report:" + (SITE.tag || SITE.name || "") + ":";
 const store = {
-  get(k, d) { try { const v = JSON.parse(localStorage.getItem("fm-report:" + k)); return v == null ? d : v; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem("fm-report:" + k, JSON.stringify(v)); } catch (e) {} },
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(KEY + k)); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(KEY + k, JSON.stringify(v)); } catch (e) {} },
 };
 const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-const SINCE = `since ${D.meta.sinceLabel}`;
+// the site's live branch and the branch its records and pictures are kept on (the adapter's mainBranch, checks.dataBranch)
+const MAIN = D.meta.main || "main", DATA = (D.shots && D.shots.dataBranch) || "report-data";
+const SINCE = D.meta.sinceLabel ? `since ${D.meta.sinceLabel}` : "since the baseline";
 const newPill = (it, title) => it && (it.isNew || it.was || it.changed)
   ? `<span class="pill new" title="${esc(title || (it.isNew ? "new " + SINCE : "changed " + SINCE))}">${it.isNew ? "new" : "changed"}</span>` : "";
 
@@ -476,31 +484,38 @@ function zchart(o) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-   The scale: a size at a screen (design/scale.json, the same sums as build/tokens.mjs)
+   The scale: a size at a screen (the site's scale.json, the same sums as its tokens build)
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
-const RG = S.scale.range;
-const vpOf = (w, h) => Math.min(w, RG.from + (h - RG.height.from) * (RG.to - RG.from) / (RG.height.to - RG.height.from));
+// a scale may leave out any of these (a site whose sizes do not follow the screen's height has no range.height)
+const RG = S.scale.range || { from: 320, to: 1440 }, RH = RG.height || null;
+const LH = S.scale.lineHeight || {}, REL = S.scale.relations || null;
+const vpOf = (w, h) => (RH ? Math.min(w, RG.from + (h - RH.from) * (RG.to - RG.from) / (RH.to - RH.from)) : w);
 const lerp = (px, x) => px[0] + (px[1] - px[0]) * clamp((x - RG.from) / (RG.to - RG.from), 0, 1);
-const gutterRole = S.space.find((r) => r.name === "section/pad-x");
+// a role sized by its card («per») follows the column: at most column.max, inside the gutter role (the adapter's
+// report.column); without one, the screen's width
+const COL = S.column || {}, gutterRole = COL.gutter ? S.space.find((r) => r.name === COL.gutter) : null;
 const roleAt = (r, w, h) => {
   if (r.per) {                                                            // by the card's own width: the column
-    const card = Math.min(1024, w - 2 * lerp(gutterRole.px, vpOf(w, h)));
+    const card = Math.min(COL.max || Infinity, w - 2 * (gutterRole ? lerp(gutterRole.px, vpOf(w, h)) : 0));
     return r.px[0] + (r.px[1] - r.px[0]) * clamp((card - r.per.from) / (r.per.to - r.per.from), 0, 1);
   }
   return lerp(r.px, r.by === "width" ? w : vpOf(w, h));
 };
-const LADDER = (() => { const out = [0]; let v = 0; S.scale.ladder.steps.forEach(([st, to]) => { while (v < to) { v += st; out.push(v); } }); return out; })();
+// the ladder in words: "Steps of 2 up to 24, of 4 up to 64, of 8 up to 128. "
+const LADDER_WORDS = (() => { const st = (S.scale.ladder || {}).steps || []; return st.length ? "Steps " + st.map(([x, to]) => `of ${x} up to ${to}`).join(", ") + ". " : ""; })();
+const LADDER = (() => { const out = [0]; let v = 0; ((S.scale.ladder || {}).steps || []).forEach(([st, to]) => { while (v < to) { v += st; out.push(v); } }); return out; })();
 const screen = { w: store.get("w", 1440), h: store.get("h", 920) };
 const screenBar = (onChange) => {
   const bar = el("div", "screen");
   bar.innerHTML = `<label class="slider"><span>Screen width</span><input type="range" min="${RG.from}" max="${RG.to}" step="1" value="${screen.w}" data-k="w"><output></output></label>
-    <label class="slider"><span>Screen height</span><input type="range" min="${RG.height.from}" max="${RG.height.to}" step="1" value="${screen.h}" data-k="h"><output></output></label>
+    ${RH ? `<label class="slider"><span>Screen height</span><input type="range" min="${RH.from}" max="${RH.to}" step="1" value="${screen.h}" data-k="h"><output></output></label>` : ""}
     <div class="sum"></div>`;
-  const slope = (RG.to - RG.from) / (RG.height.to - RG.height.from), icpt = RG.from - slope * RG.height.from;
+  const slope = RH ? (RG.to - RG.from) / (RH.to - RH.from) : 0, icpt = RH ? RG.from - slope * RH.from : 0;
   const upd = () => {
     $$("input", bar).forEach((i) => { i.nextElementSibling.textContent = i.value + "px"; });
     const vp = vpOf(screen.w, screen.h);
-    $(".sum", bar).innerHTML = `This screen counts as <b>${r1(vp)}</b> (${vp < screen.w ? "its height holds it back: " : ""}size = min(width, ${slope} × height ${icpt < 0 ? "−" : "+"} ${Math.abs(icpt)})). The range runs from ${RG.from} to ${RG.to}; ${RG.height.from} tall counts as ${RG.from}, ${RG.height.to} tall as ${RG.to}.`;
+    $(".sum", bar).innerHTML = RH ? `This screen counts as <b>${r1(vp)}</b> (${vp < screen.w ? "its height holds it back: " : ""}size = min(width, ${slope} × height ${icpt < 0 ? "−" : "+"} ${Math.abs(icpt)})). The range runs from ${RG.from} to ${RG.to}; ${RH.from} tall counts as ${RG.from}, ${RH.to} tall as ${RG.to}.`
+      : `This screen counts as <b>${r1(vp)}</b> (its width: the scale does not follow the screen's height). The range runs from ${RG.from} to ${RG.to}.`;
   };
   bar.addEventListener("input", (e) => { const i = e.target; if (!i.dataset.k) return; screen[i.dataset.k] = +i.value; store.set(i.dataset.k, +i.value); upd(); onChange(); });
   upd();
@@ -519,7 +534,7 @@ function ladderRows(roles, { min = 0, max, at }) {
       s += `<line x1="${X(v)}" x2="${X(v)}" y1="${top - 6}" y2="${H - 22}" stroke="${used ? css("--line-2") : css("--line")}" stroke-width="${big || used ? 1 : 0.5}"/>`;
       if ((used || v % 16 === 0) && X(v) - lastX > 16) { s += `<text x="${X(v)}" y="${H - 8}" fill="${used ? css("--muted") : css("--faint")}" font-size="10.5" text-anchor="middle">${v}</text>`; lastX = X(v); }
     });
-    S.scale.ladder.steps.reduce((a0, [st, to]) => { const a = Math.max(a0, min); if (a < max && to > min) s += `<text x="${(X(a) + X(Math.min(to, max))) / 2}" y="14" fill="${css("--faint")}" font-size="10.5" text-anchor="middle">steps of ${st}</text><line x1="${X(a) + 3}" x2="${X(Math.min(to, max)) - 3}" y1="20" y2="20" stroke="${css("--line-2")}"/>`; return to; }, 0);
+    ((S.scale.ladder || {}).steps || []).reduce((a0, [st, to]) => { const a = Math.max(a0, min); if (a < max && to > min) s += `<text x="${(X(a) + X(Math.min(to, max))) / 2}" y="14" fill="${css("--faint")}" font-size="10.5" text-anchor="middle">steps of ${st}</text><line x1="${X(a) + 3}" x2="${X(Math.min(to, max)) - 3}" y1="20" y2="20" stroke="${css("--line-2")}"/>`; return to; }, 0);
     roles.forEach((r, i) => {
       const y = top + i * rowH + 12, [a, b] = r.px, v = at(r), c = PAL[i % PAL.length];
       s += `<text x="0" y="${y + 4}" fill="${css("--muted")}" font-size="12">${esc(r.name)}</text>`;
@@ -560,9 +575,9 @@ const tabHasNew = {
 function systemPage(tab) {
   const page = el("div", "page");
   const head = el("header", "head");
-  head.innerHTML = `<div class="eyebrow">The system · ${esc(D.meta.ref || "main")} at <a href="https://github.com/timofeylebedev/fm/commit/${esc(D.meta.head)}">${esc(D.meta.head)}</a></div>
+  head.innerHTML = `<div class="eyebrow">The system · ${esc(D.meta.ref || MAIN)} at ${commit(D.meta.head)}</div>
     <h1>The system as it is now</h1>
-    <p class="lede">Every colour, size, step, shadow, curve and decision of the site, read from the repo's own files when this page was built (${esc(D.meta.built)}). Things that are new or changed ${esc(SINCE)} carry a <span class="pill new">new</span> mark; the rounds that changed them are in the sidebar.</p>`;
+    <p class="lede">Every colour, size, step, shadow, curve and decision of the site, read from the repo's own files when this page was built (${esc(D.meta.built)}). ${D.meta.noBase ? "Nothing is marked new: there is no baseline to compare with." : `Things that are new or changed ${esc(SINCE)} carry a <span class="pill new">new</span> mark${D.rounds.length ? "; the rounds that changed them are in the sidebar" : ""}.`}</p>${whoseNote()}`;
   page.appendChild(head);
   const bar = el("div", "tabs"); bar.setAttribute("role", "tablist"); bar.setAttribute("aria-label", "Parts of the system");
   TABS.forEach(([k, label]) => {
@@ -583,14 +598,14 @@ function systemPage(tab) {
   const panel = el("div", "panel"); panel.id = "panel"; panel.setAttribute("role", "tabpanel"); panel.setAttribute("aria-labelledby", "tab-" + tab);
   (TABS.find(([k]) => k === tab) || TABS[0])[2](panel);
   checksBlock(panel, tab);
-  if (["icons", "components", "behaviour", "health"].includes(tab) && !C) panel.appendChild(el("p", "note", "The checks of this tab have not run yet: they run on every deploy (design/checks/)."));
+  if (["icons", "components", "behaviour", "health"].includes(tab) && !C) panel.appendChild(el("p", "note", "The checks of this tab have not run yet: they run on every deploy (site-kit checks)."));
   page.appendChild(panel);
   return page;
 }
-const panelHead = (panel, title, sub) => { panel.appendChild(el("h2", "", title)); if (sub) panel.appendChild(el("p", "sub", sub)); };
+const panelHead = (panel, title, sub) => { panel.appendChild(el("h2", "", title)); if (sub) panel.appendChild(el("p", "sub", sub)); };   // sub is HTML
 
 function colourTab(panel) {
-  panelHead(panel, "Colour", "The colour tokens of design/tokens.json as tiles: the colour over white, as on the page (the band along the bottom shows it over checks, so its alpha shows), its token, the CSS variable and what it is for. «on white» is the contrast of that colour as text on the white page; on the brand colours, of white text on them.");
+  panelHead(panel, "Colour", "The colour tokens of " + (SITE.paths && SITE.paths.colours || "the site") + " as tiles: the colour over white, as on the page (the band along the bottom shows it over checks, so its alpha shows), its token, the CSS variable and what it is for. «on white» is the contrast of that colour as text on the white page; on the brand colours, of white text on them.");
   S.colour.forEach((g) => {
     const blk = el("div", "block");
     blk.innerHTML = `<h3>${esc(g.label)}</h3><p class="sub">${esc(g.about)}</p>`;
@@ -601,8 +616,8 @@ function colourTab(panel) {
       if (hx) {
         const rgb = rgbOf(hx.rgb), shown = over(rgb, hx.a, [255, 255, 255]);
         const light = lum(shown) > 0.45; onColour = light ? "#000" : "#fff";
-        if (g.key === "brand" || g.key === "idcard") on = `white on it ${r1(ratio([255, 255, 255], shown))} : 1`;
-        else if (g.key === "ink") on = `on white ${r1(ratio(shown, [255, 255, 255]))} : 1`;
+        if (g.contrast === "white-on") on = `white on it ${r1(ratio([255, 255, 255], shown))} : 1`;
+        else if (g.contrast === "on-white") on = `on white ${r1(ratio(shown, [255, 255, 255]))} : 1`;
       }
       const alpha = hx && hx.a < 1 ? ` · ${Math.round(hx.a * 100)}%` : "";
       const tile = el("div", "swatch");
@@ -613,49 +628,53 @@ function colourTab(panel) {
     blk.appendChild(grid);
     panel.appendChild(blk);
   });
-  if (S.colourWhere) { const w = clone(S.colourWhere); w.title = "Where they are used"; w.sub = "The colour roles of the page, from the analysis of round 6."; panel.appendChild(render(w)); }
+  if (!S.colour.length) panel.appendChild(el("p", "note", "The adapter names no colour tokens (colours in site-kit.config.mjs)."));
+  if (S.colourWhere) { const w = clone(S.colourWhere); w.title = "Where they are used"; w.sub = "The colour roles of the page, from the latest round's analysis."; panel.appendChild(render(w)); }
 }
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
 function typeTab(panel) {
-  panelHead(panel, "Type", "Every text role of design/scale.json: its two ends on the ladder (at 320 and 1440), the size it has on the screen set below, and a text from the site drawn at that size in the site's own font. The roles keep their distance at both ends (×" + S.scale.relations.min + " at least), so at every size between.");
+  panelHead(panel, "Type", "Every text role of " + (SITE.paths && SITE.paths.scale || "the scale") + ": its two ends on the ladder (at " + RG.from + " and " + RG.to + "), the size it has on the screen set below, and a text from the site drawn at that size in the site's own font. " + (REL ? "The roles keep their distance at both ends (×" + REL.min + " at least), so at every size between." : "The scale names no relations between the roles (type.relations)."));
   const roles = S.type;
   let lad, cards = [], relBox, chart = null, chartH = 0;
   const at = (r) => roleAt(r, screen.w, screen.h);
   const update = () => {
     lad._draw();
     cards.forEach(({ r, node }) => {
-      const v = at(r), lh = typeof r.lh === "number" ? r.lh : S.scale.lineHeight[r.lh] || 1.3;
+      const v = at(r), lh = typeof r.lh === "number" ? r.lh : LH[r.lh] || 1.3;
       $(".role__now", node).textContent = r2(v) + "px";
       const smp = $(".role__sample", node); smp.style.fontSize = v + "px";
-      $(".role__meta", node).textContent = `${r.font === "display" ? "Pragmatica Ext" : "Golos"} ${r.weight} · line ${lh} = ${r1(v * lh)}px`;
+      $(".role__meta", node).textContent = `${faceName(r)} ${r.weight || 400} · line ${lh} = ${r1(v * lh)}px`;
     });
     drawRel();
     if (!chart) return;
     if (screen.h !== chartH) { const n = makeChart(); chart._dispose?.(); chart.replaceWith(n); chart = n; } else chart._set({ marker: screen.w });
   };
   panel.appendChild(screenBar(() => update()));
-  const lb = el("div", "block"); lb.innerHTML = `<h3>On the ladder</h3><p class="sub">Steps of 2 up to 24, of 4 up to 64, of 8 up to 128. Each role runs from its size at 320 to its size at 1440 (both on the ladder); the filled dot is the size on this screen.</p>`;
-  lad = ladderRows(roles, { min: 10, max: 64, at });
+  const lb = el("div", "block"); lb.innerHTML = `<h3>On the ladder</h3><p class="sub">${LADDER_WORDS}Each role runs from its size at ${RG.from} to its size at ${RG.to} (both on the ladder); the filled dot is the size on this screen.</p>`;
+  lad = ladderRows(roles, { min: 10, max: ladderTop(roles, 64), at });
   lb.appendChild(lad); panel.appendChild(lb);
   const spec = el("div", "block"); spec.innerHTML = `<h3>The roles</h3>`;
   const list = el("div", "spec");
   roles.forEach((r) => {
     const node = el("div", "role");
-    const color = r.color ? (r.color === "ink-60" ? "rgb(0 0 0 / 0.6)" : "rgb(0 0 0 / 0.7)") : "#000";
-    const lh = typeof r.lh === "number" ? r.lh : S.scale.lineHeight[r.lh] || 1.3;
+    const color = r.color ? (S.cssVars || {})[r.color] || r.color : "#000";
+    const lh = typeof r.lh === "number" ? r.lh : LH[r.lh] || 1.3;
     node.innerHTML = `<div class="role__top"><code>${esc(r.name)}</code>${newPill(r, r.was ? `changed ${SINCE}: was ${r.was.px.join(" → ")}` : "")}<span class="role__ends">${r.px[0]} → ${r.px[1]}${r.label ? " · a label" : ""}</span><span class="role__now"></span><span class="role__meta"></span></div>
-      <div class="role__sample" lang="ru" style="font-family:${r.font === "display" ? "'Pragmatica Ext', sans-serif" : "'Golos', sans-serif"};font-weight:${r.weight || 400};line-height:${lh};color:${color};${r.upper ? "text-transform:uppercase;" : ""}${r.track ? "letter-spacing:" + r.track + ";" : ""}">${esc(TS ? TS.typeset(r.text || "Весь лейбл — на одной волне", { lang: "ru", heading: r.font === "display" }) : r.text)}</div>
+      <div class="role__sample" lang="${esc(SITE.lang || "en")}" style="font-family:${r.font === "display" ? "var(--display)" : "var(--site-text)"};font-weight:${r.weight || 400};line-height:${lh};color:${color};${r.upper ? "text-transform:uppercase;" : ""}${r.track ? "letter-spacing:" + r.track + ";" : ""}">${esc(TS && TS.typeset ? TS.typeset(r.text || SAMPLE_LINE, { lang: SITE.lang || "en", heading: r.font === "display" }) : r.text || SAMPLE_LINE)}</div>
       <p class="role__use">${esc(r.use || "")}${r.where ? ` · <span class="note">${esc(r.where)}</span>` : ""}</p>`;
     list.appendChild(node); cards.push({ r, node });
   });
   spec.appendChild(list); panel.appendChild(spec);
   // relations at this screen
-  relBox = el("div", "block"); relBox.innerHTML = `<h3>Distance between levels</h3><p class="sub">The pairs of type.relations at this screen: the bar is the ratio of the two sizes, the dashed line the least allowed (×${S.scale.relations.min}). ${esc(S.scale.relations.$about || "")}</p><div class="rel box"></div>`;
-  panel.appendChild(relBox);
+  if (REL) {
+    relBox = el("div", "block"); relBox.innerHTML = `<h3>Distance between levels</h3><p class="sub">The pairs of type.relations at this screen: the bar is the ratio of the two sizes, the dashed line the least allowed (×${REL.min}). ${esc(REL.$about || "")}</p><div class="rel box"></div>`;
+    panel.appendChild(relBox);
+  }
   const drawRel = () => {
-    const top = 1.8, min = S.scale.relations.min;
-    $(".rel", relBox).innerHTML = S.scale.relations.pairs.map(([a, b]) => {
+    if (!REL) return;
+    const top = 1.8, min = REL.min;
+    $(".rel", relBox).innerHTML = (REL.pairs || []).filter(([a, b]) => roles.some((r) => r.name === a) && roles.some((r) => r.name === b)).map(([a, b]) => {
       const ra = roles.find((r) => r.name === a), rb = roles.find((r) => r.name === b), k = at(ra) / at(rb);
       return `<div class="rel__row"><span>${esc(a.replace("type/", ""))} / ${esc(b.replace("type/", ""))}</span><div class="rel__bar"><i style="width:${clamp((k - 1) / (top - 1), 0, 1) * 100}%"></i><s style="left:${((min - 1) / (top - 1)) * 100}%"></s></div><span class="k ${k < min - 1e-9 ? "no" : ""}">×${k.toFixed(3)}</span></div>`;
     }).join("");
@@ -668,14 +687,22 @@ function typeTab(panel) {
   chart = makeChart();
   cb.appendChild(chart); panel.appendChild(cb);
   const extra = el("div", "grid2");
-  extra.innerHTML = `<div class="box"><h3>Line heights</h3><p>${Object.entries(S.scale.lineHeight).map(([k, v]) => `<b>${esc(k)}</b> ${v}`).join(" · ")}: tighter as text gets bigger. Labels are tracked ${esc(S.scale.tracking.label)}.</p></div><div class="box"><h3>Figma aliases</h3><p>${Object.entries(S.scale.aliases).filter(([k]) => k !== "$about").map(([k, v]) => `<code>${esc(k)}</code> = <code>${esc(v)}</code>`).join(" · ")}</p></div>`;
-  panel.appendChild(extra);
+  // line heights and tracking, and the aliases a design tool knows the roles by: only what the scale names
+  const lhs = Object.entries(LH).filter(([k]) => k !== "$about"), track = S.scale.tracking || {}, aliases = Object.entries(S.scale.aliases || {}).filter(([k]) => k !== "$about");
+  extra.innerHTML = (lhs.length || track.label ? `<div class="box"><h3>Line heights</h3><p>${lhs.length ? `${lhs.map(([k, v]) => `<b>${esc(k)}</b> ${v}`).join(" · ")}: tighter as text gets bigger.` : ""}${track.label ? ` Labels are tracked ${esc(track.label)}.` : ""}</p></div>` : "") +
+    (aliases.length ? `<div class="box"><h3>Figma aliases</h3><p>${aliases.map(([k, v]) => `<code>${esc(k)}</code> = <code>${esc(v)}</code>`).join(" · ")}</p></div>` : "");
+  if (extra.innerHTML) panel.appendChild(extra);
   update();
 }
 const range = (a, b, st) => { const out = []; for (let v = a; v <= b + 1e-9; v += st) out.push(v); return out; };
+// the font a role is drawn in, by name; a text for a role that has none of its own
+const faceName = (r) => (r.font === "display" ? SITE.fonts && SITE.fonts.display : SITE.fonts && SITE.fonts.text) || (r.font === "display" ? "display face" : "text face");
+const SAMPLE_LINE = ((SITE.typesetSamples || []).find((x) => x.lang === SITE.lang) || (SITE.typesetSamples || [])[0] || { text: "The quick brown fox jumps over the lazy dog" }).text.split("\n")[0];
+// the top of a ladder chart: at least `least`, else the first step of the ladder at or above the biggest end
+const ladderTop = (roles, least) => { const top = Math.max(least, ...roles.flatMap((r) => r.px)); return LADDER.find((v) => v >= top) || top; };
 
 function spaceTab(panel) {
-  panelHead(panel, "Space", "Every spacing and radius role of design/scale.json, its two ends and its size on the screen set below. Roles marked «a measure» size a block (they need not be on the ladder); «by the card» follow their own card's width; «by width» the screen's width alone.");
+  panelHead(panel, "Space", "Every spacing and radius role of " + (SITE.paths && SITE.paths.scale || "the scale") + ", its two ends and its size on the screen set below. Roles marked «a measure» size a block (they need not be on the ladder); «by the card» follow their own card's width; «by width» the screen's width alone.");
   const roles = S.space, radii = roles.filter((r) => r.name.startsWith("radius/")), rest = roles.filter((r) => !r.name.startsWith("radius/"));
   const at = (r) => roleAt(r, screen.w, screen.h);
   let lad, rows = [], rads = [];
@@ -687,10 +714,10 @@ function spaceTab(panel) {
   };
   panel.appendChild(screenBar(upd));
   const lb = el("div", "block"); lb.innerHTML = `<h3>On the ladder</h3><p class="sub">Each role from its size at 320 to its size at 1440; the filled dot is the size on this screen. Measures (a block's size, marked below) are not on the ladder and are left out here.</p>`;
-  lad = ladderRows(roles.filter((r) => !r.size), { max: 128, at }); lb.appendChild(lad); panel.appendChild(lb);
-  const rb = el("div", "block"); rb.innerHTML = `<h3>Radii</h3><p class="sub">Tiles take s, half-column cards m, full-column cards l; padding = radius, inner radius = outer − inset.</p>`;
+  lad = ladderRows(roles.filter((r) => !r.size), { max: ladderTop(roles.filter((r) => !r.size), 128), at }); lb.appendChild(lad); panel.appendChild(lb);
+  const rb = el("div", "block"); rb.innerHTML = `<h3>Radii</h3>${NOTES.radii ? `<p class="sub">${esc(NOTES.radii)}</p>` : ""}`;
   const rg = el("div", "radii");
-  radii.forEach((r) => { const node = el("div", "radius"); node.innerHTML = `<div class="shape ${r.name === "radius/s" ? "tint" : ""}"></div><div><code>${esc(r.name)}</code> ${newPill(r)}</div><div class="role__ends">${r.px[0]} → ${r.px[1]} · now <b class="num"></b></div><p class="note" style="margin:0">${esc(r.use || "")}</p>`; rg.appendChild(node); rads.push({ r, node }); });
+  radii.forEach((r) => { const node = el("div", "radius"); node.innerHTML = `<div class="shape ${r === radii[0] ? "tint" : ""}"></div><div><code>${esc(r.name)}</code> ${newPill(r)}</div><div class="role__ends">${r.px[0]} → ${r.px[1]} · now <b class="num"></b></div><p class="note" style="margin:0">${esc(r.use || "")}</p>`; rg.appendChild(node); rads.push({ r, node }); });
   rb.appendChild(rg); panel.appendChild(rb);
   const sb = el("div", "block"); sb.innerHTML = `<h3>Spacing and measures</h3><p class="sub">The bar is the size on this screen (to scale; the full width is 140px).</p>`;
   const list = el("div", "space-list");
@@ -707,49 +734,54 @@ function spaceTab(panel) {
 }
 
 function layoutTab(panel) {
-  panelHead(panel, "Layout", "One centred column (at most 1024), blocks that change at three shared steps of the column (S, M, L) and a few written own steps, and the page's own steps in media.css. The steps are read from the stylesheets.");
+  panelHead(panel, "Layout", NOTES.layout || "The column's container steps (shared and own) and the page's own steps (custom media). The steps are read from the stylesheets.");
   const t = el("div", "block");
-  t.innerHTML = `<h3>Container steps</h3><p class="sub">Every <code>@container</code> query in the stylesheets. Shared steps are the column's S 22rem, M 43rem, L 58rem; any other is an own step (CLAUDE.md lists them).</p>`;
+  t.innerHTML = `<h3>Container steps</h3><p class="sub">Every <code>@container</code> query in the stylesheets. ${esc(NOTES.steps || "A step the adapter names (report.steps) is a shared step; any other is an own step.")}</p>`;
   t.appendChild(B.table({ stack: true, columns: [{ label: "Container" }, { label: "When" }, { label: "Step" }, { label: "What changes", muted: true }, { label: "Where", muted: true }],
     rows: S.containers.map((c) => [`<code>${esc(c.container)}</code>`, `<code>${esc(c.cond)}</code>${c.px ? ` <span class="note">${r1(c.px)}px</span>` : c.em ? ` <span class="note">em of its own text</span>` : ""} ${newPill(c, c.was ? `new ${SINCE}: was ${c.was}` : "")}${c.was ? ` <span class="was">was ${esc(c.was)}</span>` : ""}`,
       c.step === "own" ? '<span class="pill q">own</span>' : `<span class="pill x">${c.step}</span>`, c.first ? `<code>${esc(c.first)}</code>` : "—", `${esc(c.file)}:${c.line}`]) }));
   panel.appendChild(t);
   const m = el("div", "block");
-  m.innerHTML = `<h3>Page steps</h3><p class="sub">The custom media of src/styles/base/media.css, in em (so bigger browser text gets the layout of a narrower screen).</p>`;
+  m.innerHTML = `<h3>Page steps</h3><p class="sub">The custom media of ${esc(SITE.paths && SITE.paths.media || "the site's media stylesheet")}, in em (so bigger browser text gets the layout of a narrower screen).</p>`;
   m.appendChild(B.table({ stack: true, columns: [{ label: "Name" }, { label: "Condition" }, { label: "What", muted: true }],
     rows: S.pageSteps.map((p) => [`<code>${esc(p.name)}</code> ${newPill(p)}`, `<code>${esc(p.cond)}</code>`, esc(p.note)]) }));
   panel.appendChild(m);
-  if (S.map) { const mp = clone(S.map); panel.appendChild(render(Object.assign(mp, { title: "Responsive map", sub: `Where each block changes its layout, measured every 10px of width (${mp.measured ? `${mp.measured.commit.slice(0, 7)}, ${mp.measured.when.slice(0, 10)}, again on every deploy` : "round 6, Oct 24"}; overlay scrollbars). Blue lines: the shared steps of the column, at the screen width they fall on.` }))); }
+  if (S.map) { const mp = clone(S.map); panel.appendChild(render(Object.assign(mp, { title: "Responsive map", sub: `Where each block changes its layout, measured every 10px of width (${mp.measured ? `${mp.measured.commit.slice(0, 7)}, ${mp.measured.when.slice(0, 10)}, again on every deploy` : "as the latest round measured it"}; overlay scrollbars).${(mp.steps || []).length ? " Blue lines: the shared steps of the column, at the screen width they fall on." : ""}` }))); }
   if (S.heightLine) { const g = el("div", "grid2"); g.appendChild(render(S.heightLine)); panel.appendChild(g); }
 }
 
 function shadowsTab(panel) {
-  panelHead(panel, "Shadows", "Every shadow in the stylesheets, drawn with its own value on the ground it sits on, with the places that use it. There are no shadow tokens yet (round 6, G4: --shadow-float, --shadow-object, --shadow-chip proposed). Not listed: the ID card\'s shadow in the air, which scripts/motion.js derives from the object shadow while the card falls (M.DROP).");
+  panelHead(panel, "Shadows", "Every shadow in the stylesheets, drawn with its own value on the ground it sits on, with the places that use it." + (NOTES.shadows ? " " + NOTES.shadows : ""));
   const vars = Object.entries(S.cssVars || {}).map(([k, v]) => `--${k}:${v}`).join(";");
   const grid = el("div", "shadows"); grid.setAttribute("style", vars);
   S.shadows.forEach((s) => {
     const card = el("div", "shadow");
-    const isId = /face/.test(s.value), isChip = /chip/.test(s.uses.map((u) => u.sel).join());
-    const obj = s.painter ? `<div class="obj" style="background:#004de5;color:#fff;box-shadow:0 0 0 22px #fff, 0 0 0 23px #d4d4d4">a card</div>` : `<div class="obj ${isId ? "card" : isChip ? "pill" : /menu|cookies|book/.test(s.uses.map((u) => u.sel).join()) ? "pill" : ""}" style="${s.prop}:${esc(s.value)};${isChip ? "background:rgb(255 255 255 / 0.7)" : ""}">${isId ? "" : isChip ? "Last seen" : "Меню"}</div>`;
-    card.innerHTML = `<div class="stage ${s.ground === "sand" ? "sand" : ""}">${obj}</div>
-      <div class="meta"><b>${esc(s.name)} ${newPill(s)}</b><code>${esc(s.prop)}: ${esc(s.value)}</code>${s.painter ? `<p class="note" style="margin:0">Not a shadow: a spread in the page's colour that paints the strips round a stack card (here drawn as a white ring).</p>` : ""}<ul>${s.uses.map((u) => `<li><code>${esc(u.sel)}</code> ${u.media ? `<span class="note">${esc(u.media)}</span> ` : ""}<span class="note">${esc(u.file)}:${u.line}</span> ${u.isNew ? '<span class="pill new">new</span>' : ""}</li>`).join("")}</ul></div>`;
+    // the object it is drawn on: the adapter's report.shadow(s) gives its shape (card, pill or a box), text and ground
+    const obj = s.painter ? `<div class="obj" style="background:${esc(s.bg || "var(--accent)")};color:#fff;box-shadow:0 0 0 22px #fff, 0 0 0 23px #d4d4d4">${esc(s.text || "a card")}</div>` : `<div class="obj ${esc(s.shape || "")}" style="${s.prop}:${esc(s.value)};${s.bg ? "background:" + esc(s.bg) : ""}">${esc(s.text || "")}</div>`;
+    const ground = (SITE.grounds || {})[s.ground] || "#fff";
+    card.innerHTML = `<div class="stage" style="background:${esc(ground)}">${obj}</div>
+      <div class="meta"><b>${esc(s.name)} ${newPill(s)}</b><code>${esc(s.prop)}: ${esc(s.value)}</code>${s.painter ? `<p class="note" style="margin:0">Not a shadow: a spread in the page's colour that paints round an object (here drawn as a white ring).</p>` : ""}<ul>${s.uses.map((u) => `<li><code>${esc(u.sel)}</code> ${u.media ? `<span class="note">${esc(u.media)}</span> ` : ""}<span class="note">${esc(u.file)}:${u.line}</span> ${u.isNew ? '<span class="pill new">new</span>' : ""}</li>`).join("")}</ul></div>`;
     grid.appendChild(card);
   });
   panel.appendChild(grid);
+  if (!S.shadows.length) panel.appendChild(el("p", "note", "No shadows in the stylesheets."));
 }
 
 function motionTab(panel) {
-  panelHead(panel, "Motion", "The curves (time across, progress up; press or hover one to see it move) and every duration on one scale, from the code (round 6's reading of scripts/motion.js and the stylesheets). Curves are compared with round 5\'s reading; the durations marked changed are the ones round 6 found changed.");
+  panelHead(panel, "Motion", "The curves (time across, progress up; press or hover one to see it move) and every duration on one scale, " + (S.motion.fromCode ? "read from the stylesheets and scripts when this page was built." : "from the latest round's reading of the code. Curves are compared with the round before; the durations marked changed are the ones the latest round found changed."));
+  if (!S.motion.blocks.length) panel.appendChild(el("p", "note", "No curves or durations found in the code."));
   S.motion.blocks.forEach((b) => panel.appendChild(render(b)));
   if (S.motionCards) panel.appendChild(render(S.motionCards));
 }
 function responsiveTab(panel) {
-  const m = S.picture.measured;
-  panelHead(panel, "Responsive", `Every size of the page, measured in a browser at every 10px of width (1100 tall) and every 25px of height (1440 wide), ${m ? `on ${m.commit.slice(0, 7)} (${m.engine}, ${m.when.slice(0, 10)}; measured again on every deploy)` : "on main as round 6 measured it (bd0566f, Oct 24)"}. Pick a group; zoom with the slider or Ctrl/⌘ + scroll (a pinch on a trackpad or a touch screen), drag to move; each line is named at its right end with its least and greatest value. Hover a name to pick its line out.`);
-  panel.appendChild(render(S.picture));
+  const m = S.picture && S.picture.measured;
+  panelHead(panel, "Responsive", `Every size of the page, measured in a browser at every 10px of width (1100 tall) and every 25px of height (1440 wide), ${m ? `on ${m.commit.slice(0, 7)} (${m.engine}, ${m.when.slice(0, 10)}; measured again on every deploy)` : "as the latest round measured it"}. Pick a group; zoom with the slider or Ctrl/⌘ + scroll (a pinch on a trackpad or a touch screen), drag to move; each line is named at its right end with its least and greatest value. Hover a name to pick its line out.`);
+  if (S.picture) panel.appendChild(render(S.picture));
+  else panel.appendChild(el("p", "note", "Nothing measured yet: the checks measure every size at every width on each deploy of main (site-kit checks)."));
 }
 function blocksTab(panel) {
-  panelHead(panel, "Blocks", "The sections of the page that have rules of their own, as measured in round 6 (Oct 24).");
+  panelHead(panel, "Blocks", `The sections of the page that have rules of their own, as the latest round measured them. <a href="#blocks">Each block live</a>, at a width you pick, with its latest pictures.`);
+  if (!S.blocks.length) { panel.appendChild(el("p", "note", "No round has measured the blocks one by one. The Blocks page shows each of them live, with its latest pictures.")); return; }
   const toc = el("nav", "toc"); toc.setAttribute("aria-label", "Blocks");
   S.blocks.forEach((s) => { const a = el("a", "", esc(s.nav || s.title)); a.href = "#sys-" + s.id; toc.appendChild(a); });
   toc.addEventListener("click", (e) => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); document.getElementById(a.getAttribute("href").slice(1))?.scrollIntoView({ behavior: calm() ? "auto" : "smooth" }); });
@@ -758,11 +790,12 @@ function blocksTab(panel) {
 }
 function grammarTab(panel) {
   panelHead(panel, "Grammar", "How the parts are put together: the rules the page follows everywhere, written down or not.");
-  S.grammar.blocks.forEach((b) => panel.appendChild(render(b)));
+  if (S.grammar) S.grammar.blocks.forEach((b) => panel.appendChild(render(b)));
+  else panel.appendChild(el("p", "note", "No round has written the grammar down yet; the code's own rules are checked below."));
 }
 function decisionsTab(panel) {
   const all = S.decisions;
-  panelHead(panel, "Decisions", `design/decisions.json: ${all.length} entries — exceptions (a rule left on purpose, printed by the audit with this run's values) and decisions (how something is meant to be). ${all.filter((d) => d.isNew).length} new and ${all.filter((d) => d.changed).length} changed ${SINCE}.`);
+  panelHead(panel, "Decisions", `${esc(SITE.paths && SITE.paths.decisions || "decisions.json")}: ${all.length} entries — exceptions (a rule left on purpose, printed by the audit with this run's values) and decisions (how something is meant to be). ${D.meta.noBase ? "" : `${all.filter((d) => d.isNew).length} new and ${all.filter((d) => d.changed).length} changed ${SINCE}.`}`);
   const st = { kind: "all", q: "" };
   const ctl = el("div", "controls");
   ctl.innerHTML = `<div class="seg" role="group" aria-label="Kind">${[["all", "All"], ["exception", "Exceptions"], ["decision", "Decisions"], ["new", "New or changed"]].map(([k, l]) => `<button type="button" data-k="${k}">${l}</button>`).join("")}</div><input type="search" placeholder="Search" aria-label="Search the decisions">`;
@@ -783,21 +816,22 @@ function decisionsTab(panel) {
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
    The typesetter page
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
-const SAMPLE = {
-  ru: "Весь лейбл — на одной волне\n\nПланируйте релизы наперёд, чтобы они не накладывались и выходили в срок, а не в последний момент.\n\nСозвонитесь с нами на 30 минут: покажем, как ваш лейбл может работать слаженнее и расти. С 1 января 2026 г. отчёты по ст. 6 приходят в т. ч. по e-mail hello@flowmedium.pro, а договоры за 2022–2025 годы — в личный кабинет.",
-  en: "Dr. Smith wrote to us on October 19 about the 5 GB of reports.\n\nI think a label should see what it is owed in one place, not in a dozen of spreadsheets and e-mails from 2022–2025.",
-};
+// the demo's texts: the adapter's (report.typesetSamples), one per language
+const SAMPLE = Object.fromEntries((SITE.typesetSamples || []).map((x) => [x.lang, x.text]));
+if (!Object.keys(SAMPLE).length) SAMPLE.en = "Dr. Smith wrote to us on October 19 about the 5 GB of reports.\n\nI think a label should see what it is owed in one place, not in a dozen of spreadsheets and e-mails from 2022–2025.";
+const LANGS = Object.keys(SAMPLE), LANG_NAME = { ru: "Русский", en: "English" };
 function typesetPage() {
   const page = el("div", "page");
   const dec = D.typeset.decision;
-  page.innerHTML = `<header class="head"><div class="eyebrow">build/typeset · since PR #17 (Oct 24)</div><h1>The typesetter</h1>
+  page.innerHTML = `<header class="head"><div class="eyebrow">site-kit typeset</div><h1>The typesetter</h1>
     <p class="lede">A browser breaks a line at any space and after any hyphen or dash. The typesetter decides which of those places a reader should never see a line end at — «в | доме», «10 | км», «Dr. | Smith», a dash starting a line, «e- | mail» — and holds them together. It runs on every page when the site is built, by each text's language (Russian and English rules, plus rules for any language), and <b>never changes a letter you can see</b>: it writes only no-break spaces, invisible word joiners and line-break hints in long links.</p></header>`;
   // ── the demo ──
   const demo = el("section", "sec"); demo.id = "try";
-  const st = Object.assign({ lang: "ru", heading: false, width: 300, size: 18, marks: true }, store.get("ts", {}));
-  demo.innerHTML = `<h2>Try it</h2><p class="sub">The same text twice at the same width: on the left as the browser breaks it, on the right with the typesetter's holds (the real code, build/typeset/core.js). A line that ends where the typesetter would hold — after «в», before a dash, between a number and its word, inside «e-mail» — is marked red. Drag the width to watch the lines move; edit the text, or switch the language.</p>
-    <div class="ts-controls"><div class="seg" role="group" aria-label="Language"><button type="button" data-lang="ru">Русский</button><button type="button" data-lang="en">English</button></div>
-      <label class="switch"><input type="checkbox" class="hd"${st.heading ? " checked" : ""}><span></span>Heading (Pragmatica)</label>
+  const st = Object.assign({ lang: SAMPLE[SITE.lang] ? SITE.lang : LANGS[0], heading: false, width: 300, size: 18, marks: true }, store.get("ts", {}));
+  if (!SAMPLE[st.lang]) st.lang = LANGS[0];
+  demo.innerHTML = `<h2>Try it</h2><p class="sub">The same text twice at the same width: on the left as the browser breaks it, on the right with the typesetter's holds (the real code, site-kit's typeset/core.js). A line that ends where the typesetter would hold — after «в», before a dash, between a number and its word, inside «e-mail» — is marked red. Drag the width to watch the lines move; edit the text, or switch the language.</p>
+    <div class="ts-controls"><div class="seg" role="group" aria-label="Language">${LANGS.map((l) => `<button type="button" data-lang="${esc(l)}">${esc(LANG_NAME[l] || l)}</button>`).join("")}</div>
+      <label class="switch"><input type="checkbox" class="hd"${st.heading ? " checked" : ""}><span></span>Heading (${esc(SITE.fonts && SITE.fonts.display || "display face")})</label>
       <label class="switch"><input type="checkbox" class="mk"${st.marks ? " checked" : ""}><span></span>Show the holds</label>
       <label class="slider"><span>Width</span><input type="range" class="wd" min="140" max="640" step="1" value="${st.width}"><output></output></label>
       <label class="slider"><span>Size</span><input type="range" class="sz" min="12" max="48" step="1" value="${st.size}"><output></output></label></div>
@@ -929,15 +963,15 @@ function typesetPage() {
     <div><p><b>Tokens.</b> The text is cut into words, numbers, spaces, punctuation, dashes, hyphens, signs — and whole pieces for links, e-mails and phone numbers (as in the demo above).</p></div>
     <div><p><b>One answer per space.</b> For every space the rules are asked in order, looking at the words on both sides; the first that has a view answers: <i>hold</i> (with a strength), <i>break</i>, or no view (the next rule is asked). No passes, so a chain like «а⍽не⍽в⍽последний» is held word by word.</p></div>
     <div><p><b>Joins.</b> Where two parts touch with no space but a browser may still break — after a hyphen or a dash — a hold is a word joiner (U+2060): invisible, and the real hyphen stays, so copying and searching still find «e-mail».</p></div>
-    <div><p><b>No length limit.</b> A hold is never let go because the piece it makes is long (Tim, Oct 24). The longest pieces on the site are 19 letters on the home page and 18 in a heading of the privacy policy; no page scrolls sideways at 320–390.</p></div>
-    <div><p><b>In place.</b> Only the characters the rules decide on change, at their place in the source; entities and everything else stay as written. Visible fixes (quotes, dashes, look-alike letters) are only reported: <code>npm run typeset -- --lint src/*.html</code>.</p></div></div>
-    <div class="grid2"><div class="box"><h3>Strengths</h3><p><b>author</b> 9 — a no-break space you typed (kept, except next to a link) · <b>must</b> 3 · <b>should</b> 2 · <b>nice</b> 1. Recorded for each hold and printed by <code>npm run typeset</code>.</p></div>
-    <div class="box"><h3>Marks</h3><p><span class="ex">в<span class="m">⍽</span>доме</span> a no-break space · <span class="ex">e-<span class="m">⁀</span>mail</span> a word joiner · <span class="ex">hello@<span class="m">¦</span>flowmedium<span class="m">¦</span>.pro</span> a place a long link may break (<code>&lt;wbr&gt;</code>).</p></div>
-    <div class="box"><h3>With the animations</h3><p>GSAP's SplitText keeps every no-break space. Inside headings split letter by letter (<code>data-reveal="chars"</code>) no word joiners are written (they would become empty letters); a hold at the edge of an inline tag is lost when a heading is split, so links stay out of split headings.</p></div></div>`;
+    <div><p><b>No length limit.</b> A hold is never let go because the piece it makes is long: a piece that does not fit is a page to fix, found by the audit (sideways scroll).</p></div>
+    <div><p><b>In place.</b> Only the characters the rules decide on change, at their place in the source; entities and everything else stay as written. Visible fixes (quotes, dashes, look-alike letters) are only reported: <code>site-kit typeset --lint src/*.html</code>.</p></div></div>
+    <div class="grid2"><div class="box"><h3>Strengths</h3><p><b>author</b> 9 — a no-break space you typed (kept, except next to a link) · <b>must</b> 3 · <b>should</b> 2 · <b>nice</b> 1. Recorded for each hold and printed by <code>site-kit typeset</code>.</p></div>
+    <div class="box"><h3>Marks</h3><p><span class="ex">в<span class="m">⍽</span>доме</span> a no-break space · <span class="ex">e-<span class="m">⁀</span>mail</span> a word joiner · <span class="ex">hello@<span class="m">¦</span>example<span class="m">¦</span>.com</span> a place a long link may break (<code>&lt;wbr&gt;</code>).</p></div>
+    ${NOTES.typeset ? `<div class="box"><h3>On this site</h3><p>${esc(NOTES.typeset)}</p></div>` : ""}</div>`;
   page.appendChild(how);
   // ── the rules ──
   const rules = el("section", "sec"); rules.id = "rules";
-  rules.innerHTML = `<h2>The rules</h2><p class="sub">As build/typeset/README.md writes them (with their sources there). The order of the table is the order the rules are asked in.</p>`;
+  rules.innerHTML = `<h2>The rules</h2><p class="sub">As site-kit's typeset/README.md writes them (with their sources there). The order of the table is the order the rules are asked in.</p>`;
   const mark = (s) => esc(s).replace(/`([^`]+)`/g, (m, c) => `<span class="ex">${c.replace(/⍽|⁀|¦/g, (x) => `<span class="m">${x}</span>`)}</span>`);
   [["*", "Any language"], ["ru", "Russian"], ["en", "English"]].forEach(([k, label]) => {
     const list = D.typeset.rules[k] || [];
@@ -950,11 +984,10 @@ function typesetPage() {
   page.appendChild(rules);
   if (dec) {
     const m = el("section", "sec"); m.id = "measured";
-    m.innerHTML = `<h2>Measured</h2><p class="sub">Decision <code>typeset</code> in design/decisions.json.</p><div class="dec"><p>${esc(dec.what)}</p>${dec.measured ? `<p><b>Measured:</b> ${esc(dec.measured)}</p>` : ""}${dec.why ? `<p><b>Why:</b> ${esc(dec.why)}</p>` : ""}<div class="who">${esc(dec.decided || "")}</div></div>
-      <div class="box" style="margin-top:14px"><h3>Commands</h3><pre class="out">npm run typeset -- src/index.html        every text of the page with its holds and [its longest piece]
-npm run typeset -- --lint src/*.html     what a proofreader would change (never changed by the build)
-npm run typeset -- --text "Dr. Smith on page 12" --lang en [--heading]
-npm run test:typeset                     every rule as examples</pre></div>`;
+    m.innerHTML = `<h2>Measured</h2><p class="sub">Decision <code>${esc(dec.id)}</code> in ${esc(SITE.paths && SITE.paths.decisions || "decisions.json")}.</p><div class="dec"><p>${esc(dec.what)}</p>${dec.measured ? `<p><b>Measured:</b> ${esc(dec.measured)}</p>` : ""}${dec.why ? `<p><b>Why:</b> ${esc(dec.why)}</p>` : ""}<div class="who">${esc(dec.decided || "")}</div></div>
+      <div class="box" style="margin-top:14px"><h3>Commands</h3><pre class="out">site-kit typeset src/index.html          every text of the page with its holds and [its longest piece]
+site-kit typeset --lint src/*.html       what a proofreader would change (never changed by the build)
+site-kit typeset --text "Dr. Smith on page 12" --lang en [--heading]</pre></div>`;
     page.appendChild(m);
   }
   return page;
@@ -981,9 +1014,14 @@ function roundPage(n) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-   The checks (design/checks/): «What needs you», the checks on each tab of the system, the history
+   The checks (site-kit checks): «What needs you», the checks on each tab of the system, the history
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 const C = D.checks;                                        // null until the checks have run once
+// layer 2: when the measurements are not this commit's own, the page says whose they are, in plain words
+function whoseNote() {
+  if (!C || C.own || C.from === "this build") return "";
+  return `<p class="whose"><b>Not measured on this commit.</b> The checks' numbers on this page were ${esc(C.whose || "measured on " + String(C.commit).slice(0, 7) + " (" + (C.from || "") + ")")}. What is read from the code (tokens, roles, steps, decisions) is this commit's own.</p>`;
+}
 const RULES = C ? C.rules : [];
 const STATUS_PILL = { error: "bad", fail: "bad", warn: "q", pass: "done", info: "x", ask: "q" };
 const STATUS_WORD = { error: "could not run", fail: "fails", warn: "warns", pass: "holds", info: "inventory", ask: "question" };
@@ -996,9 +1034,9 @@ const AREA_TAB = { Type: "type", Colour: "colour", Fills: "colour", Space: "spac
   "Page health": "health", Weight: "health", Code: "grammar", Decisions: "decisions" };
 const rulesOf = (tab) => RULES.filter((r) => AREA_TAB[r.area] === tab);
 const tabState = (tab) => { const rs = rulesOf(tab); return rs.some((r) => r.status === "fail" || r.status === "error") ? "fail" : rs.some((r) => r.status === "warn") ? "warn" : null; };
-const measuredLine = () => C ? `measured on <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> (${esc(C.from || "")}${C.commit.slice(0, 7) !== D.meta.head && C.from !== "this build" ? ", not this build" : ""}) on ${esc(C.generated.slice(0, 16).replace("T", " "))} UTC · ${Object.entries(C.engines).map(([e, v]) => `${esc(e)} ${esc(v.version)}${v.quick ? " (sizes and pages)" : ""}`).join(" · ")}` : "";
+const measuredLine = () => C ? `measured on ${commit(C.commit)} (${esc(C.from || "")}${C.commit.slice(0, 7) !== D.meta.head && C.from !== "this build" ? ", not this build" : ""}) on ${esc(C.generated.slice(0, 16).replace("T", " "))} UTC · ${Object.entries(C.engines).map(([e, v]) => `${esc(e)} ${esc(v.version)}${v.quick ? " (sizes and pages)" : ""}`).join(" · ")}` : "";
 
-// copying an answer: the line goes to a chat with Claude, who records it (design/checks/answer.mjs)
+// copying an answer: the line goes to a chat with Claude, who records it (site-kit checks answer)
 const toast = el("div", "toast"); toast.setAttribute("role", "status"); document.body.appendChild(toast);
 let toastT = 0;
 const say = (t) => { toast.textContent = t; toast.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove("on"), 2600); };
@@ -1046,7 +1084,7 @@ function questionCard(q) {
     <p class="ask__q">${esc(q.ask)}</p>${q.state === "reopened" && q.answer ? `<p class="note">You answered «${esc(q.answer.choice)}» on ${esc(q.answer.when)}; since then ${esc((q.changed || []).join(", "))} changed.</p>` : ""}
     <div class="ask__do">${safeUrl(q.link) ? `<a class="btn-ghost" href="${esc(q.link)}" target="_blank" rel="noopener">Open ↗</a>` : ""}${(q.options || []).map((o, i) => `<button type="button" class="btn-ans" data-i="${i}">${esc(o)}</button>`).join("")}</div>
     <label class="ask__note"><span>Note (optional)</span><input type="text" placeholder="what you saw, on which device"></label>`;
-  card.addEventListener("click", (e) => { const b = e.target.closest(".btn-ans"); if (!b) return; const note = $(".ask__note input", card).value.trim(); copyLine(`FM answer · ${q.id}: ${q.options[+b.dataset.i]}${note ? " — " + note : ""}`); });
+  card.addEventListener("click", (e) => { const b = e.target.closest(".btn-ans"); if (!b) return; const note = $(".ask__note input", card).value.trim(); copyLine(`${SITE.tag || SITE.name} answer · ${q.id}: ${q.options[+b.dataset.i]}${note ? " — " + note : ""}`); });
   return card;
 }
 function needCard(n) {
@@ -1056,7 +1094,7 @@ function needCard(n) {
   card.innerHTML = `<div class="need__top">${spill(n.severity)} <b>${esc(n.title)}</b> <span class="note">${esc(n.area)}${n.fresh ? ` · <span class="pill new">${n.fresh} new</span>` : ""}</span></div>
     <p class="need__why">${esc(n.why)}</p>${(n.sample || []).length ? `<ul class="need__s">${n.sample.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     <div class="ask__do">${tab ? `<a class="btn-ghost" href="#system/${tab}">See all</a>` : ""}${acts.map(([l, t]) => `<button type="button" class="btn-ans" data-t="${esc(t)}">${esc(l)}</button>`).join("")}</div>`;
-  card.addEventListener("click", (e) => { const b = e.target.closest(".btn-ans"); if (b) copyLine(`FM ${n.type} · ${n.id}: ${b.dataset.t}`); });
+  card.addEventListener("click", (e) => { const b = e.target.closest(".btn-ans"); if (b) copyLine(`${SITE.tag || SITE.name} ${n.type} · ${n.id}: ${b.dataset.t}`); });
   return card;
 }
 function needsPage() {
@@ -1066,8 +1104,8 @@ function needsPage() {
   const q = (v) => esc(v);
   const openQ = QUESTIONS.filter((x) => x.state === "open" || x.state === "reopened").length;
   head.innerHTML = `<div class="eyebrow">What needs you</div><h1>${C ? (s.errors ? `${q(s.errors)} rules could not be checked` : s.fail ? `${q(s.fail)} ${s.fail === 1 ? "rule fails" : "rules fail"}, ${openQ} questions wait for you` : `Every hard rule holds; ${openQ} questions wait for you`) : "The checks have not run yet"}</h1>
-    <p class="lede">${C ? `${q(s.rules)} rules of the system, measured in a browser on every deploy: ${q(s.pass)} hold, ${q(s.warn)} warn, ${q(s.fail)} fail${s.errors ? `, ${q(s.errors)} could not run` : ""}, ${q(s.info)} are inventories. ${q(s.findings)} places to look at${C.base ? ` (${q(s.new)} new and ${q(s.fixed)} fixed since the last deploy of main)` : ""}; ${q(s.accepted)} covered by decisions. Each answer button copies a line for a chat with Claude, who records it.` : "They run on every deploy (design/checks/): this page fills once the first deploy after them has run. The questions below are as written."}</p>
-    ${C ? `<p class="note">${measuredLine()}</p>` : ""}`;
+    <p class="lede">${C ? `${q(s.rules)} rules of the system, measured in a browser on every deploy: ${q(s.pass)} hold, ${q(s.warn)} warn, ${q(s.fail)} fail${s.errors ? `, ${q(s.errors)} could not run` : ""}, ${q(s.info)} are inventories. ${q(s.findings)} places to look at${C.base ? ` (${q(s.new)} new and ${q(s.fixed)} fixed since the last deploy of main)` : ""}; ${q(s.accepted)} covered by decisions. Each answer button copies a line for a chat with Claude, who records it.` : "They run on every deploy (site-kit checks): this page fills once the first deploy after them has run. The questions below are as written."}</p>
+    ${C ? `<p class="note">${measuredLine()}</p>${whoseNote()}` : ""}`;
   page.appendChild(head);
   const sec = (title, sub, nodes) => { if (!nodes.length) return; const s2 = el("section", "sec"); s2.innerHTML = `<h2>${esc(title)}</h2>${sub ? `<p class="sub">${sub}</p>` : ""}`; const g = el("div", "needs"); nodes.forEach((n) => g.appendChild(n)); s2.appendChild(g); page.appendChild(s2); };
   const needs = C ? C.needs : [];
@@ -1086,7 +1124,7 @@ function needsPage() {
 function historyPage() {
   const page = el("div", "page"), H = D.history || [];
   const head = el("header", "head");
-  head.innerHTML = `<div class="eyebrow">History</div><h1>The system, deploy by deploy</h1><p class="lede">${H.length ? `${H.length} deploys of main measured since ${esc(H[0].day)}: what failed and warned, the shares of the system's rules, the weight of a first visit. Kept on the <a href="https://github.com/timofeylebedev/fm/tree/report-data">report-data</a> branch (a record per deploy, the state and the full measurements).` : "Nothing yet: the history starts with the first deploy of main after the checks were added."}</p>`;
+  head.innerHTML = `<div class="eyebrow">History</div><h1>The system, deploy by deploy</h1><p class="lede">${H.length ? `${H.length} deploys of ${esc(MAIN)} measured since ${esc(H[0].day)}: what failed and warned, the shares of the system's rules, the weight of a first visit. Kept on the ${repoLink("tree/" + DATA, esc(DATA))} branch (a record per deploy, the state and the full measurements).` : `Nothing yet: the history starts with the first deploy of ${esc(MAIN)} after the checks were added.`}</p>`;
   page.appendChild(head);
   if (!H.length) return page;
   const series = (label, f, unit, color) => ({ key: label, label, color, pts: H.map((x, i) => [i + 1, f(x)]).filter((p) => p[1] != null) });
@@ -1097,14 +1135,103 @@ function historyPage() {
   box("Weight of a first visit", "KB sent (Brotli for text), scrolled top to bottom at 1440×900.", [series("total KB", (x) => x.weight && Math.round(x.weight.total / 1024), "KB", PAL[0]), series("scripts KB", (x) => x.weight && Math.round(x.weight.js / 1024), "KB", PAL[1]), series("pictures KB", (x) => x.weight && Math.round(x.weight.images / 1024), "KB", PAL[2])], "KB");
   const t = el("div", "block"); t.innerHTML = "<h3>Every deploy</h3>";
   t.appendChild(B.table({ stack: true, columns: [{ label: "#" , num: true }, { label: "Commit" }, { label: "Day" }, { label: "Fail", num: true }, { label: "Warn", num: true }, { label: "Places", num: true }, { label: "New", num: true }, { label: "Fixed", num: true }],
-    rows: H.map((x, i) => [i + 1, `<a href="https://github.com/timofeylebedev/fm/commit/${esc(x.commit)}"><code>${esc(x.sha)}</code></a>`, esc(x.day), esc(x.summary.fail), esc(x.summary.warn), esc(x.summary.findings), esc(x.summary.new), esc(x.summary.fixed)]).reverse() }));
+    rows: H.map((x, i) => [i + 1, commit(x.commit, `<code>${esc(x.sha)}</code>`), esc(x.day), esc(x.summary.fail), esc(x.summary.warn), esc(x.summary.findings), esc(x.summary.new), esc(x.summary.fixed)]).reverse() }));
   page.appendChild(t);
   return page;
 }
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   The blocks (layer 3): each block of the page live, the site itself in a frame at a width you pick, and the block's
+   latest pictures (site-kit shots), each with its day and marked when a file it is made of has changed since.
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+// served under the site (…/<report path>/ of a deploy or a preview: meta.reportPath, "report" unless the build was told
+// otherwise), the frame shows this very build, at the site's root that many folders up; else the live site
+const REPORT_PATH = (D.meta.reportPath || "report").replace(/^\/+|\/+$/g, "");
+const UNDER_SITE = /^https?:$/.test(location.protocol) && location.pathname.replace(/index\.html$/, "").endsWith("/" + REPORT_PATH + "/");
+const SITE_ROOT = "../".repeat(REPORT_PATH.split("/").filter(Boolean).length || 1);
+const FRAME_SIZES = [[320, 568], [390, 844], [768, 1024], [1024, 768], [1440, 900]];
+const day = (iso) => (iso ? String(iso).slice(0, 10) : "an unknown day");
+function blocksPage(id) {
+  const page = el("div", "page"), list = SITE.blocks || [], SH = (D.shots && D.shots.blocks) || {};
+  const shotsOf = (x) => (SH[x.id] && SH[x.id].sizes || []).filter((s) => !s.missing);
+  const taken = list.filter((x) => shotsOf(x).length).length;
+  const head = el("header", "head");
+  head.innerHTML = `<div class="eyebrow">Blocks</div><h1>Each block, live and in pictures</h1>
+    <p class="lede">The site itself in a frame at the width you pick, at the block${UNDER_SITE ? " (this build, or main)" : SITE.live ? " (the live site: main)" : ""}; under it the block's latest pictures, each with the day it was taken. A picture is marked <span class="pill q">may be out of date</span> when a file the block is made of has changed since. ${taken ? `${taken} of ${list.length} blocks have pictures${D.shots.from === "report-data" ? ` (from the ${esc(DATA)} branch)` : D.shots.from === "both" ? ` (this run's, the others from the ${esc(DATA)} branch)` : ""}.` : "No pictures yet: <code>site-kit shots</code> takes them (on main after the checks, or with <code>--all</code>)."}</p>`;
+  page.appendChild(head);
+  if (!list.length) { page.appendChild(el("p", "note", "The adapter lists no blocks (report.blocks in site-kit.config.mjs).")); return page; }
+  const b = list.find((x) => x.id === id) || list[0];
+  store.set("block", b.id);
+  const toc = el("nav", "toc blocks-toc"); toc.setAttribute("aria-label", "Blocks");
+  list.forEach((x) => {
+    const stale = shotsOf(x).length && (SH[x.id].changed || []).length;
+    const a = el("a", "", `${esc(x.title)}${stale ? '<span class="dot warn" title="its pictures may be out of date"></span>' : ""}`);
+    a.href = "#blocks/" + x.id; if (x === b) a.setAttribute("aria-current", "true");
+    toc.appendChild(a);
+  });
+  toc.addEventListener("click", (e) => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); go(a.getAttribute("href"), { keepScroll: true }); });
+  head.appendChild(toc);
+
+  // ── live ──
+  const live = el("section", "sec"); live.id = "live";
+  const st = Object.assign({ w: 1440, src: UNDER_SITE ? "build" : "live" }, store.get("frame", {}));
+  if (!FRAME_SIZES.some(([w]) => w === st.w)) st.w = 1440;
+  if (!UNDER_SITE || !SITE.live) st.src = UNDER_SITE ? "build" : "live";
+  const base = () => (st.src === "build" && UNDER_SITE ? SITE_ROOT : SITE.live);
+  live.innerHTML = `<h2>${esc(b.title)}</h2>
+    <div class="controls"><div class="seg" role="group" aria-label="Screen width">${FRAME_SIZES.map(([w, h]) => `<button type="button" data-w="${w}" title="${w}×${h}">${w}</button>`).join("")}</div>
+      ${UNDER_SITE && SITE.live ? `<div class="seg" role="group" aria-label="Which site"><button type="button" data-src="build">This build</button><button type="button" data-src="live">Main (live)</button></div>` : ""}
+      <a class="btn-ghost" target="_blank" rel="noopener">Open ↗</a></div>
+    <p class="sub frame-cap"></p><div class="bframe"><iframe title="${esc(b.title)}, live"></iframe></div>`;
+  page.appendChild(live);
+  const box = $(".bframe", live), fr = $("iframe", live), cap = $(".frame-cap", live), open = $("a.btn-ghost", live);
+  if (!base()) { box.remove(); open.remove(); cap.textContent = "The adapter names no live site (live in site-kit.config.mjs), and this page is not served under the site: nothing to show here."; }
+  else {
+    const size = () => FRAME_SIZES.find(([w]) => w === st.w);
+    // scaled to fit the column, and never taller than most of the screen (the pictures stay in reach)
+    const scaleOf = () => { const [w, h] = size(), room = box.parentElement.clientWidth || w; return Math.min(1, room / w, Math.max(0.2, (innerHeight * 0.72) / h)); };
+    const fit = () => { const [w, h] = size(), k = scaleOf(); fr.style.width = w + "px"; fr.style.height = h + "px"; fr.style.transform = `scale(${k})`; box.style.maxWidth = Math.round(w * k) + "px"; box.style.height = Math.round(h * k) + "px"; const pc = $(".pc", cap); if (pc) pc.textContent = Math.round(k * 100) + "%"; };
+    // the block's own address when it has an id; else, on the same origin, the frame is scrolled to its selector
+    const load = () => {
+      const u = base() + (b.page || "") + (b.anchor ? "#" + b.anchor : "");
+      const [w, h] = size();
+      $$("[data-w]", live).forEach((x) => x.setAttribute("aria-pressed", +x.dataset.w === st.w));
+      $$("[data-src]", live).forEach((x) => x.setAttribute("aria-pressed", x.dataset.src === st.src));
+      cap.innerHTML = `${w}×${h}, ${st.src === "build" ? "this build" : "the live site (main)"}, drawn at <span class="pc"></span>.${b.anchor ? "" : st.src === "build" ? "" : " This block has no address of its own: scroll the frame to it."}`;
+      open.href = u; fit(); fr.src = u;
+    };
+    fr.addEventListener("load", () => { if (b.anchor || !b.selector) return; try { const t = fr.contentDocument && fr.contentDocument.querySelector(b.selector); if (t) t.scrollIntoView(); } catch (e) { /* another origin */ } });
+    live.addEventListener("click", (e) => {
+      const x = e.target.closest("[data-w], [data-src]"); if (!x) return;
+      if (x.dataset.w) st.w = +x.dataset.w; else st.src = x.dataset.src;
+      store.set("frame", st); load();
+    });
+    const ro = new ResizeObserver(() => fit()); ro.observe(live); onLeave(() => ro.disconnect());
+    load();
+  }
+
+  // ── pictures ──
+  const pics = el("section", "sec"); pics.id = "pictures";
+  const sh = SH[b.id] || { sizes: [] }, items = shotsOf(b), stale = sh.changed || [];
+  pics.innerHTML = `<h2>Pictures</h2>${items.length ? `<p class="sub">Taken ${esc(day(sh.taken))} on ${commit(sh.commit)}. ${stale.length ? `<span class="pill q">may be out of date</span> Since then ${stale.map((f) => `<code>${esc(f)}</code>`).join(", ")} changed.` : "Every file the block is made of is as it was then."}</p>` : `<p class="note">No pictures of this block yet: <code>site-kit shots</code> takes them when its files change (on main), or all of them with <code>--all</code>.</p>`}`;
+  // a picture kept from an older run (the last one could not take that size) has its own day and may be out of date
+  if (items.length) pics.appendChild(B.shots({ items: items.map((s) => ({ src: "blocks/" + s.file, title: `${b.title} · ${s.w}×${s.h}`, text: `${esc(day(s.old ? s.taken : sh.taken))}${stale.length || s.old ? " · may be out of date" : ""}` })) }));
+  if ((b.files || []).length) pics.appendChild(el("p", "note", `Made of ${b.files.map((f) => `<code>${esc(f)}</code>`).join(", ")}${b.selector ? ` · on the page: <code>${esc(b.selector)}</code>` : ""}.`));
+  page.appendChild(pics);
+
+  // ── every block at a glance ──
+  const all = el("section", "sec"); all.id = "all";
+  all.innerHTML = "<h2>All blocks</h2>";
+  all.appendChild(B.table({ stack: true, columns: [{ label: "Block" }, { label: "Pictures" }, { label: "State" }, { label: "Files", muted: true }],
+    rows: list.map((x) => { const n = shotsOf(x), c = (SH[x.id] && SH[x.id].changed) || [];
+      return [`<a href="#blocks/${esc(x.id)}">${esc(x.title)}</a>`, n.length ? `${n.length} · ${esc(day(SH[x.id].taken))}` : "—", n.length ? (c.length ? '<span class="pill q">may be out of date</span>' : '<span class="pill done">current</span>') : '<span class="pill x">none yet</span>', (x.files || []).map((f) => `<code>${esc(f)}</code>`).join(" ")]; }) }));
+  page.appendChild(all);
+  return page;
+}
+
 // new tabs of the system: areas measured on the page that had no tab before
 function iconsTab(panel) { panelHead(panel, "Icons and pictures", "The inline icons (size, the stroke as drawn, colour from the text, line-up with their label) and every picture: the file against the device pixels it covers, format, loading, alt. Measured at the 8 screen sizes of the checks; the drawings are left out (they are pictures of the product)."); }
 function componentsTab(panel) { panelHead(panel, "Components and states", "The page's components (classes with __parts, the BEM way), their variants and whether copies look alike; the hover timing of links and buttons."); }
-function behaviourTab(panel) { panelHead(panel, "Behaviour", "The logic of the page as a table of scenarios (given, when, then), each played in a browser on every deploy; how the page holds up without scripts, WebGL or its fonts, in forced colours and with reduced motion; and what it calls before and after the cookie consent."); }
+function behaviourTab(panel) { panelHead(panel, "Behaviour", "The logic of the page as a table of scenarios (given, when, then), each played in a browser on every deploy; how the page holds up without scripts, WebGL or its fonts, in forced colours and with reduced motion; and what it calls before and after consent (for a site that asks for it)."); }
 function healthTab(panel) { panelHead(panel, "Page health", "Every page of the site: titles, descriptions, the outline, links, files a browser or a search engine asks for, sideways scroll, script errors, and the weight of a first visit against the last deploy. Also the code's own rules (no CSS swallowed by a comment, every token used) are under Grammar."); }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -1114,11 +1241,12 @@ const nav = $("#side-nav"), main = $("#main");
 const openN = QUESTIONS.filter((q) => q.state === "open" || q.state === "reopened").length + (C ? C.needs.filter((n) => n.type !== "question" && n.severity === "fail").length : 0);
 nav.innerHTML = `<a href="#needs" data-page="needs"><span>What needs you${openN ? ` <span class="side__n" title="failing rules and open questions">${openN}</span>` : ""}</span><small>failures, questions, decisions to look at</small></a>
   <a href="#system/colour" data-page="system">The system<small>as it is now, in tabs, with its checks</small></a>
+  <a href="#blocks" data-page="blocks">Blocks<small>each block live, and its latest pictures</small></a>
   <a href="#typesetter" data-page="typesetter">The typesetter<small>how lines may break</small></a>
   <a href="#history" data-page="history">History<small>every deploy of main, measured</small></a>
-  <div class="side__group" id="rounds-h">Rounds</div>
+  ${D.rounds.length ? '<div class="side__group" id="rounds-h">Rounds</div>' : ""}
   ${D.rounds.map((r) => `<a href="#round-${r.n}" data-page="round-${r.n}">Round ${r.n} · ${esc(r.date)}<small>${esc(r.title.replace(/^Round \d+:\s*/, ""))}</small></a>`).join("")}`;
-$("#side-foot").innerHTML = `Built ${esc(D.meta.built)} from ${esc(D.meta.ref || "main")} at <a href="https://github.com/timofeylebedev/fm/commit/${esc(D.meta.head)}">${esc(D.meta.head)}</a>.${C ? `<br>Checks of <a href="https://github.com/timofeylebedev/fm/commit/${esc(C.commit)}">${esc(C.commit.slice(0, 7))}</a> · <a href="state.json">state.json</a>` : ""}<br>Source: <a href="https://github.com/timofeylebedev/fm/tree/main/design/report">design/report</a>, <a href="https://github.com/timofeylebedev/fm/tree/main/design/checks">design/checks</a>`;
+$("#side-foot").innerHTML = `Built ${esc(D.meta.built)} from ${esc(D.meta.ref || MAIN)} at ${commit(D.meta.head)}.${C ? `<br>Checks of ${commit(C.commit)}${C.own || C.from === "this build" ? "" : ` (${esc(C.from)})`} · <a href="state.json">state.json</a>` : ""}<br>Made by <a href="https://github.com/timofeylebedev/site-kit">site-kit</a> report`;
 const side = $("#side"), scrim = $("#scrim"), menuBtn = $("#menu-open");
 const narrow = matchMedia("(width < 900px)");
 const openMenu = (on) => {
@@ -1144,7 +1272,9 @@ function go(hash, opt = {}) { if (location.hash !== hash) history.pushState(null
 // what a page set up outside itself (listeners on the window, observers) is undone when the next page is built
 const LEAVE = [];
 const onLeave = (fn) => LEAVE.push(fn);
+let leaveMark = 0;
 function route(opt = {}) {
+  leaveMark = LEAVE.length;                                // what the page about to be built sets up comes after this
   const prevItems = LB.items; LB.items = [];               // the pictures of the page about to be built
   if (!lb.hidden) lbClose(true);
   const h = decodeURIComponent(location.hash.slice(1)) || "needs";
@@ -1165,8 +1295,16 @@ function route(opt = {}) {
     if (opt.focusTab) $("#tab-" + opt.focusTab)?.focus();
   } else if (h === "needs" || h === "history") {
     pageKey = h; title = h === "needs" ? "What needs you" : "History"; shown = h; swap(h === "needs" ? needsPage() : historyPage(), title); scrollTo(0, 0);
+  } else if (h === "blocks" || h.startsWith("blocks/")) {
+    const want = h.split("/")[1], ids = (SITE.blocks || []).map((b) => b.id), saved = store.get("block", null), id = ids.includes(want) ? want : ids.includes(saved) ? saved : ids[0];
+    pageKey = "blocks"; title = "Blocks"; shown = id ? "blocks/" + id : "blocks";
+    const keep = opt.keepScroll && current === "blocks" ? scrollY : null;
+    swap(blocksPage(id), title);
+    scrollTo(0, keep || 0);
   } else if (h === "typesetter") {
     pageKey = "typesetter"; title = "The typesetter"; shown = h; swap(typesetPage(), title); scrollTo(0, 0);
+  } else if (!D.rounds.length) {
+    pageKey = "needs"; title = "What needs you"; shown = "needs"; swap(needsPage(), title); scrollTo(0, 0);
   } else {
     const r = (m && D.rounds.find((x) => String(x.n) === m[1])) || D.rounds[0];
     anchor = m && String(r.n) === m[1] ? m[2] : null;
@@ -1182,10 +1320,11 @@ function route(opt = {}) {
 }
 function swap(node, title) {
   hideTip();
-  LEAVE.splice(0).forEach((fn) => { try { fn(); } catch (e) {} });
+  // only the old page's: the new one was built (and set up its observers) before it is swapped in
+  LEAVE.splice(0, leaveMark).forEach((fn) => { try { fn(); } catch (e) {} });
   main.innerHTML = "";
   main.appendChild(node);
-  document.title = (title ? title + " · " : "") + "Flow Medium";
+  document.title = (title ? title + " · " : "") + (SITE.name || "The system");
 }
 // back and forward fire both popstate and hashchange for a hash: one is enough
 addEventListener("hashchange", () => route({ smooth: true }));
