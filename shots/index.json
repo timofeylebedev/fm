@@ -1,0 +1,476 @@
+{
+ "generated": "2026-11-23T17:02:21.933Z",
+ "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+ "mode": "changed",
+ "sizes": [
+  "390x844",
+  "1440x900"
+ ],
+ "blocks": {
+  "nav": {
+   "title": "Navbar",
+   "page": "",
+   "selector": ".nav",
+   "files": {
+    "src/styles/sections/nav.css": "366a9d9eb64997fc8ea85d30649c25a367274113",
+    "src/scripts/nav.js": "c44bdb93e70d72f390fcea4a467258c85178a9f6",
+    "src/scripts/nav-pill.js": "dce3def2c8fce115eb5870a537bced1cf69b0e7b",
+    "src/scripts/menu.js": "2f179ae91931faad0c2876299f9ea76c68daf12b"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "nav/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 52
+     },
+     "bytes": 6870
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "nav/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 56
+     },
+     "bytes": 4850
+    }
+   ]
+  },
+  "hero": {
+   "title": "Hero",
+   "page": "",
+   "selector": ".hero",
+   "files": {
+    "src/styles/sections/hero.css": "6245f649b8b3b0985dbb7618588e59b1081e0b20",
+    "src/scripts/hero.js": "3e0465a5bf6e69da0b4cc240d3e1138f598fd3fa"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "hero/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 574
+     },
+     "bytes": 77710
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "hero/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 853
+     },
+     "bytes": 53368
+    }
+   ]
+  },
+  "stack": {
+   "title": "Card stack",
+   "page": "",
+   "selector": ".stack",
+   "frames": [
+    0.1,
+    0.5,
+    0.85
+   ],
+   "files": {
+    "src/styles/sections/stack.css": "c90f006360afb3f64269a5f9fb76240e58ff4ee9",
+    "src/scripts/cards.js": "097d3e8f5d3156d9e27db5db7defdec5c0135a37",
+    "src/styles/art/art.css": "6305bd0cb8309a678a0c6ce4d1de99e57e79c463",
+    "src/scripts/art/s1.js": "c7a0cd012f6f6703811468c15e9dc69cc9c02288",
+    "src/scripts/art/s2.js": "09ba361967324753217b2d2795c055d8ff701dfa",
+    "src/scripts/art/s3.js": "30b785f13bd55f7e2f14b2cb5fd6069b1a0b7db1",
+    "src/scripts/art/shared.js": "6ef3fad39c0075d75343c158af317ee53dc8048c"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "stack/390x844.jpg",
+     "frame": 1,
+     "at": 0.1,
+     "css": {
+      "w": 390,
+      "h": 7806
+     },
+     "bytes": 85205
+    },
+    {
+     "w": 390,
+     "h": 844,
+     "file": "stack/390x844-2.jpg",
+     "frame": 2,
+     "at": 0.5,
+     "css": {
+      "w": 390,
+      "h": 7806
+     },
+     "bytes": 84434
+    },
+    {
+     "w": 390,
+     "h": 844,
+     "file": "stack/390x844-3.jpg",
+     "frame": 3,
+     "at": 0.85,
+     "css": {
+      "w": 390,
+      "h": 7806
+     },
+     "bytes": 82487
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "stack/1440x900.jpg",
+     "frame": 1,
+     "at": 0.1,
+     "css": {
+      "w": 1440,
+      "h": 8289
+     },
+     "bytes": 47884
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "stack/1440x900-2.jpg",
+     "frame": 2,
+     "at": 0.5,
+     "css": {
+      "w": 1440,
+      "h": 8289
+     },
+     "bytes": 47704
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "stack/1440x900-3.jpg",
+     "frame": 3,
+     "at": 0.85,
+     "css": {
+      "w": 1440,
+      "h": 8289
+     },
+     "bytes": 47263
+    }
+   ]
+  },
+  "royalty": {
+   "title": "Royalty",
+   "page": "",
+   "selector": ".royalty",
+   "files": {
+    "src/styles/sections/sections.css": "cf4a5f830d5c3c62943423fca12bc3db8fcd4ed8",
+    "src/styles/art/art.css": "6305bd0cb8309a678a0c6ce4d1de99e57e79c463",
+    "src/scripts/art/royalty.js": "9e6ed2eb91bfc85c65b71373127f1944f0c56fdb",
+    "src/scripts/art/royalty-settings.js": "ddffaa0cea19094ccdc78f98112bb97f270113bd"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "royalty/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 929
+     },
+     "bytes": 81230
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "royalty/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 864
+     },
+     "bytes": 52694
+    }
+   ]
+  },
+  "access": {
+   "title": "ID cards",
+   "page": "",
+   "selector": ".access",
+   "files": {
+    "src/styles/sections/sections.css": "cf4a5f830d5c3c62943423fca12bc3db8fcd4ed8",
+    "src/scripts/deck.js": "d53ce1e2448a325c7f926fe148a34fdb4fa5bca0"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "access/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 602
+     },
+     "bytes": 49047
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "access/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 714
+     },
+     "bytes": 32808
+    }
+   ]
+  },
+  "releases": {
+   "title": "Releases",
+   "page": "",
+   "selector": ".releases",
+   "files": {
+    "src/styles/sections/sections.css": "cf4a5f830d5c3c62943423fca12bc3db8fcd4ed8",
+    "src/styles/components/ring.css": "48b793465951a56f58167dfca41cc55b13759289",
+    "src/scripts/ring.js": "0d4d0f09fe6f5e36b6d2fafe7692698cfbc09e06",
+    "src/scripts/ring-gl.js": "4658ce0e22061472c05f597386c724ca3d3b82f7"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "releases/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 836
+     },
+     "bytes": 120674
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "releases/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 1099
+     },
+     "bytes": 63980
+    }
+   ]
+  },
+  "clients": {
+   "title": "Clients",
+   "page": "",
+   "selector": ".clients",
+   "files": {
+    "src/styles/sections/sections.css": "cf4a5f830d5c3c62943423fca12bc3db8fcd4ed8",
+    "src/scripts/logos.js": "bac3f470a112eeb07dee5c34280c8199f3b10920",
+    "src/scripts/stipple.js": "e69532a4845157b8390e5da9e85bfde3e70e835f"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "clients/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 383
+     },
+     "bytes": 56542
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "clients/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 778
+     },
+     "bytes": 55132
+    }
+   ]
+  },
+  "cta": {
+   "title": "CTA",
+   "page": "",
+   "selector": ".cta",
+   "files": {
+    "src/styles/sections/sections.css": "cf4a5f830d5c3c62943423fca12bc3db8fcd4ed8",
+    "src/scripts/stipple.js": "e69532a4845157b8390e5da9e85bfde3e70e835f",
+    "src/scripts/link-cards.js": "8ce1e2056caa060a05cd0e120d2007337ba76dd4"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "cta/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 623
+     },
+     "bytes": 129129
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "cta/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 837
+     },
+     "bytes": 63792
+    }
+   ]
+  },
+  "tools": {
+   "title": "Tools",
+   "page": "",
+   "selector": ".tools",
+   "files": {
+    "src/styles/sections/sections.css": "cf4a5f830d5c3c62943423fca12bc3db8fcd4ed8",
+    "src/scripts/link-cards.js": "8ce1e2056caa060a05cd0e120d2007337ba76dd4"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "tools/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 1546
+     },
+     "bytes": 224215
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "tools/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 1410
+     },
+     "bytes": 85114
+    }
+   ]
+  },
+  "pubs": {
+   "title": "Publications",
+   "page": "",
+   "selector": ".pubs",
+   "files": {
+    "src/styles/sections/sections.css": "cf4a5f830d5c3c62943423fca12bc3db8fcd4ed8",
+    "src/scripts/pubs.js": "4af87aadf3de29f8c6575915fee89be4fb01f8dc"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "pubs/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 1005
+     },
+     "bytes": 120171
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "pubs/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 961
+     },
+     "bytes": 46770
+    }
+   ]
+  },
+  "footer": {
+   "title": "Footer",
+   "page": "",
+   "selector": "footer",
+   "files": {
+    "src/styles/sections/footer.css": "9b35eebf6ee9e34c6ca77e8ea57b549c43dae6ed"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "footer/390x844.jpg",
+     "css": {
+      "w": 390,
+      "h": 328
+     },
+     "bytes": 35237
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "footer/1440x900.jpg",
+     "css": {
+      "w": 1440,
+      "h": 158
+     },
+     "bytes": 10351
+    }
+   ]
+  },
+  "cookies": {
+   "title": "Cookie notice",
+   "page": "",
+   "selector": ".cookies",
+   "files": {
+    "src/styles/components/cookies.css": "0c378d60e708b6654b1429da17b325880dcddf98",
+    "src/scripts/cookies.js": "eb2ecf7efb713aa8296d4c16def83ef06d24bb96"
+   },
+   "taken": "2026-11-23T17:03:08.370Z",
+   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "sizes": [
+    {
+     "w": 390,
+     "h": 844,
+     "file": "cookies/390x844.jpg",
+     "css": {
+      "w": 276,
+      "h": 64
+     },
+     "bytes": 12571
+    },
+    {
+     "w": 1440,
+     "h": 900,
+     "file": "cookies/1440x900.jpg",
+     "css": {
+      "w": 276,
+      "h": 64
+     },
+     "bytes": 2960
+    }
+   ]
+  }
+ }
+}
