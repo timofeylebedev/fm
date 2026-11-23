@@ -46,7 +46,7 @@ jobs:
     permissions:
       contents: write       # push to the gh-pages branch
       pull-requests: write  # the preview link comment
-    uses: timofeylebedev/site-kit/.github/workflows/site.yml@f336c16968340183fc3f052d8f2df27bb2b3f163
+    uses: timofeylebedev/site-kit/.github/workflows/site.yml@afbef2d1b0fa5c383c61c478ce4740c35ee224ba
     with:
       build: npm run build
       check: npm run check
@@ -58,7 +58,7 @@ jobs:
     permissions:
       contents: write       # the report-data branch, the review page on gh-pages
       pull-requests: write  # the preview
-    uses: timofeylebedev/site-kit/.github/workflows/checks.yml@f336c16968340183fc3f052d8f2df27bb2b3f163
+    uses: timofeylebedev/site-kit/.github/workflows/checks.yml@afbef2d1b0fa5c383c61c478ce4740c35ee224ba
     with:
       build: npm run build
       engines: chromium webkit:quick
