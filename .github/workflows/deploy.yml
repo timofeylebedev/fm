@@ -1,167 +1,65 @@
-# Builds the site and publishes it on GitHub Pages, from the gh-pages branch.
+# Builds the site and publishes it on GitHub Pages, from the gh-pages branch, with site-kit's workflows
+# (https://github.com/timofeylebedev/site-kit, .github/workflows/site.yml and checks.yml; this file is its template).
 # - A push to main publishes the site itself at the root: https://timofeylebedev.github.io/fm/
 # - Every pull request is published as a preview in pr-preview/pr-<number>/
 #   (https://timofeylebedev.github.io/fm/pr-preview/pr-<number>/). The link is posted as a comment on the
 #   pull request, updated on every push, and the preview is removed when the pull request is merged or closed.
-# - Then the job `checks` measures the design system (design/checks/) and publishes the review page (/report/) again
-#   with the result; the record is kept on the report-data branch.
+# - The review page of the system (`site-kit report`) is built from the code with the site and published at /report/
+#   (a preview has its own at …/pr-<number>/report/).
+# - Then the job `checks` measures the design system (site-kit checks, FM's settings in site-kit.config.mjs) and
+#   publishes the review page again with the result; the record is kept on the report-data branch (main: history; a
+#   pull request: its last run, compared with main; removed when the pull request is closed). On a pull request the
+#   measuring runs only when a file of `checks.designPaths` changed, or with the label `checks`.
+#   the label `shots`     → pictures of the pull request's changed blocks, in its preview's review page
+#   Actions → Build and deploy → Run workflow → shots: all   → every block's pictures again (on main: kept)
+#
 # Once: Settings → Pages → Build and deployment → Source: "Deploy from a branch", branch gh-pages, folder / (root).
+#       Settings → Actions → General → Workflow permissions: "Read and write permissions".
+#       Issues → Labels: `checks` and `shots`.
+# The kit's version is pinned here and in package.json ("site-kit"): raise both together, on purpose.
 name: Build and deploy
 
 on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, reopened, synchronize, closed]
+    types: [opened, reopened, synchronize, closed, labeled]
   workflow_dispatch:
-
-permissions:
-  contents: write       # push to the gh-pages branch
-  pull-requests: write  # the preview link comment
+    inputs:
+      shots:
+        description: pictures of the blocks
+        type: choice
+        options: [changed, all, none]
+        default: changed
 
 # One run at a time per pull request (by its number) or per branch, so a pull request never cancels a deploy of
 # main. Not github.ref alone: when a pull request is merged, its "closed" run (the preview's removal) has the ref
-# refs/heads/main, and it cancelled main's deploy that way (PR #59, Oct 25).
+# refs/heads/main, and it cancelled main's deploy that way (PR #59, Oct 25). A label other than `checks`/`shots` gets
+# a lane of its own (its run does nothing), so adding it never cancels a preview that is being published.
 concurrency:
-  group: pages-${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || github.ref }}
+  group: pages-${{ github.event.action == 'labeled' && !contains(fromJSON('["checks", "shots"]'), github.event.label.name) && format('label-{0}', github.run_id) || github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || github.ref }}
   cancel-in-progress: true
 
 jobs:
   site:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    if: github.event.action != 'labeled' || contains(fromJSON('["checks", "shots"]'), github.event.label.name)
+    permissions:
+      contents: write       # push to the gh-pages branch
+      pull-requests: write  # the preview link comment
+    uses: timofeylebedev/site-kit/.github/workflows/site.yml@afbef2d1b0fa5c383c61c478ce4740c35ee224ba
+    with:
+      build: npm run build
+      check: npm run check
 
-      - uses: actions/setup-node@v4
-        if: github.event.action != 'closed'
-        with:
-          node-version: 22
-          cache: npm
-      - if: github.event.action != 'closed'
-        run: npm ci
-      - if: github.event.action != 'closed'
-        run: npm run build
-      - if: github.event.action != 'closed'
-        run: npm run check
-
-      # the review page of the system (design/report/site), at /report/: its data read again from this commit
-      - name: Build the review page
-        if: github.event.action != 'closed'
-        env:
-          FM_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        # never stops the site's deploy: if the page's data cannot be built, the committed copy is published
-        run: |
-          node design/report/build-site.mjs || echo "::warning::the review page's data could not be rebuilt; the committed copy is published"
-          cp -R design/report/site dist/report
-
-      # GitHub Pages compresses by itself, so the .br/.gz copies are left out;
-      # .nojekyll tells Pages to serve the files as they are.
-      - name: Prepare for GitHub Pages
-        if: github.event.action != 'closed'
-        run: |
-          find dist \( -name '*.br' -o -name '*.gz' \) -delete
-          touch dist/.nojekyll
-
-      # main → the root of the site; the open previews in pr-preview/ are kept
-      - name: Publish the site
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist
-          branch: gh-pages
-          clean-exclude: pr-preview/
-          force: false
-
-      # pull request → its preview (and its removal when the pull request is closed)
-      - name: Publish the preview
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        uses: rossjrw/pr-preview-action@v1
-        with:
-          source-dir: dist
-          preview-branch: gh-pages
-          umbrella-dir: pr-preview
-          action: auto
-
-  # The design system's checks (design/checks/README.md): the built site measured in Chromium and WebKit, every rule's
-  # result, the decisions and questions, «what needs you». They run after the site is out, so they never hold it up;
-  # the record is kept on the report-data branch (main: history; a pull request: its last run, compared with main), and
-  # the review page (/report/) is published again with them. A failure here never touches the site.
-  # Not on ubuntu-latest: Playwright cannot install its browsers on Ubuntu 26.04 (see audit.yml).
+  # They run after the site is out, so they never hold it up; a failure here never touches the site.
+  # Measured in Chromium, then WebKit (the full sizes and the pages only).
   checks:
     needs: site
-    if: github.event.action != 'closed' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
-    env:
-      FM_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      FM_PR: ${{ github.event.pull_request.number }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium webkit
-      - run: npm run build
-
-      - name: Measure (Chromium, then WebKit)
-        run: |
-          node design/checks/measure.mjs
-          node design/checks/measure.mjs --engine webkit --quick || echo "::warning title=Checks::WebKit could not be measured"
-
-      - name: The state (compared with the last deploy of main)
-        run: |
-          mkdir -p design/checks/out/prev
-          if git fetch --depth=1 origin +refs/heads/report-data:refs/remotes/origin/report-data; then
-            git show origin/report-data:latest/state.json > design/checks/out/prev/state.json || rm -f design/checks/out/prev/state.json
-            git show origin/report-data:latest/record-chromium.json > design/checks/out/prev/record.json || rm -f design/checks/out/prev/record.json
-          fi
-          node design/checks/state.mjs --webkit design/checks/out/record-webkit.json --prev design/checks/out/prev/state.json --prev-record design/checks/out/prev/record.json
-
-      - name: Keep the record (report-data branch)
-        run: node design/checks/keep.mjs ${{ github.event_name == 'pull_request' && format('--pr {0}', github.event.pull_request.number) || '' }}
-
-      - name: The review page with the checks
-        run: |
-          node design/report/build-site.mjs
-          rm -rf dist/report && cp -R design/report/site dist/report
-          find dist \( -name '*.br' -o -name '*.gz' \) -delete
-          touch dist/.nojekyll
-
-      - name: Publish the review page (main)
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist/report
-          target-folder: report
-          branch: gh-pages
-          force: false
-
-      - name: Publish the review page (the preview)
-        if: github.event_name == 'pull_request'
-        uses: rossjrw/pr-preview-action@v1
-        with:
-          source-dir: dist
-          preview-branch: gh-pages
-          umbrella-dir: pr-preview
-          action: deploy
-          comment: false
-
-      - name: Summary
-        if: always()
-        run: |
-          { echo "### Design-system checks"; echo; echo '```'; node -e 'const s=require("./design/checks/out/state.json");const m=s.summary;console.log(`${m.rules} rules: ${m.pass} pass, ${m.warn} warn, ${m.fail} fail; ${m.findings} findings (${m.new} new, ${m.fixed} fixed); ${m.questions} questions open`);for(const n of s.needs.slice(0,15))console.log(`${n.severity.padEnd(4)} ${n.title.slice(0,100)} — ${n.why}`)' 2>/dev/null || echo "(no state: an earlier step failed)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-
-  # a closed pull request: its last run is taken off the report-data branch
-  forget:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main            # the keeper as main has it (a closed pull request's own branch may be gone)
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: node design/checks/keep.mjs --forget ${{ github.event.pull_request.number }}
+    permissions:
+      contents: write       # the report-data branch, the review page on gh-pages
+      pull-requests: write  # the preview
+    uses: timofeylebedev/site-kit/.github/workflows/checks.yml@afbef2d1b0fa5c383c61c478ce4740c35ee224ba
+    with:
+      build: npm run build
+      engines: chromium webkit:quick
+      shots: ${{ inputs.shots || '' }}

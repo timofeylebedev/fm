@@ -6,7 +6,7 @@ export const STILL = calm;
 
 // The pictures of the drawings (src/assets/img/art-*): a drawing names a file as it was uploaded ("art-face-mark.png"),
 // and gets the address of its optimized copy (.webp, or the .svg itself). Small files come inlined.
-// A photo that also has an AVIF (build/images.mjs) is given as a <picture>: the AVIF first, the WebP for browsers without it.
+// A photo that also has an AVIF (npm run images) is given as a <picture>: the AVIF first, the WebP for browsers without it.
 const FILES = import.meta.glob("../../assets/img/art-*.{avif,webp,svg}", { eager: true, query: "?url", import: "default" });
 const file = (name, format) => FILES["../../assets/img/" + name.replace(/\.png$/, "." + (format || "webp"))];
 

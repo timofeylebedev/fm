@@ -20,7 +20,7 @@ import { calm } from "./motion.js";
 const covers = import.meta.glob("../assets/img/cover-*.{avif,webp}", { eager: true, query: "?url", import: "default" });
 
 // ── the covers, in the order they stand on the ring (3 or more; the files are src/assets/img/cover-*): each one the
-//    files to try in turn, the AVIF first where there is one (build/images.mjs) ──
+//    files to try in turn, the AVIF first where there is one (npm run images) ──
 const IMAGES = ["m", "lazy-friday", "home", "last-seen", "reminiscence", "love", "rebirth", "first-steps"]
   .map((n) => ["avif", "webp"].map((f) => covers[`../assets/img/cover-${n}.${f}`]).filter(Boolean));
 

@@ -1,6 +1,6 @@
 {
   "$about": [
-    "Design decisions that depart from a rule on purpose, so nobody 'fixes' them by accident and everyone can see them (and reconsider them). Read by build/audit.mjs: an exception with an 'audit' entry is not reported as a failure, but it is measured and printed under 'Kept as designed' on every run, with the value of that run.",
+    "Design decisions that depart from a rule on purpose, so nobody 'fixes' them by accident and everyone can see them (and reconsider them). Read by the audit (npm run audit, site-kit audit): an exception with an 'audit' entry is not reported as a failure, but it is measured and printed under 'Kept as designed' on every run, with the value of that run.",
     "kind: exception = it fails a check (contrast, …) and is kept; decision = a deliberate choice the system's general rule does not make by itself.",
     "audit.axe: the axe rule and the elements it may fail on (a regular expression on the target). audit.pixels: which texts drawn over a canvas this exception covers. The audit finds every text over a canvas by itself (axe cannot see a canvas) and measures it from the pixels behind it; one that fails and is not covered here is a failure.",
     "checks (since Oct 26, 2026): the measured checks of design/checks/ this decision covers: [{ rule, match (a regular expression on the item's place and text), band: [least, greatest] of its value (optional) }]. A covered item is «accepted»: shown with its value on every deploy, not a finding. When the value leaves the band, when nothing matches any more (the exception may not be needed), or after `until` (a date), the decision comes back to the report's «What needs you»."
@@ -200,10 +200,10 @@
     {
       "id": "typeset",
       "kind": "decision",
-      "what": "Where lines may break is decided by build/typeset (it replaced build/typograph.js): one answer per space, by the language of each text (lang), Russian and English rules plus rules for any language; no-break spaces and word joiners only. Letters you can see are never changed by the build: straight quotes, a hyphen for a dash, look-alike letters are reported (npm run typeset -- --lint) and changed only with --fix. No length limit on what is held together (Tim, 2026-10-24: «let's not set limits for that»)",
+      "what": "Where lines may break is decided by site-kit's typesetter (site-kit typeset; it was build/typeset, which replaced build/typograph.js): one answer per space, by the language of each text (lang), Russian and English rules plus rules for any language; no-break spaces and word joiners only. Letters you can see are never changed by the build: straight quotes, a hyphen for a dash, look-alike letters are reported (npm run typeset -- --lint) and changed only with --fix. No length limit on what is held together (Tim, 2026-10-24: «let's not set limits for that»)",
       "decided": "Claude, 2026-10-19; Tim, 2026-10-24 (no length limits, merged)",
       "why": "the old typograph missed every second word of a chain («а⍽не в последний»), held numbers to the wrong word («3⍽Политики»), treated РФ/ПД and Latin words as Russian prepositions, double-escaped entities (&#8209;) and had no English rules. Measured in Chromium at 9 widths: lines ending in a short Russian word 108 → 0; on an English sample at 17 widths, faults 114 (old) / 151 (none) → 0",
-      "fix": "a rule that misbehaves: switch it off for one text with data-typeset=off, or fix its test in build/typeset/test.mjs first"
+      "fix": "a rule that misbehaves: switch it off for one text with data-typeset=off, or fix its test in site-kit (test/typeset.test.mjs, a site-kit pull request) first"
     },
     {
       "id": "hero-bounds",
