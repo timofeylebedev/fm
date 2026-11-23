@@ -17,8 +17,8 @@ rules Claude follows. The site's history, open PRs and open questions live in th
 - **site-kit** (https://github.com/timofeylebedev/site-kit): Tim's shared kit for his sites. The checks, the review
   page, the typesetter, the picture pipeline, the audit, the code rules (the lessons learned) and the CI workflows are
   the kit's; what is particular to Flow Medium is in its adapter, `site-kit.config.mjs` (pages, sizes, palette, probes,
-  scenarios, code rules, report, pictures, audit). The kit is pinned to a release tag (now `v0.1.1`) in two places:
-  `package.json` (`"site-kit": "github:timofeylebedev/site-kit#v0.1.1"`) and the `uses: …@…` lines of `.github/workflows/`.
+  scenarios, code rules, report, pictures, audit). The kit is pinned to a release tag (now `v0.1.2`) in two places:
+  `package.json` (`"site-kit": "github:timofeylebedev/site-kit#v0.1.2"`) and the `uses: …@…` lines of `.github/workflows/`.
   Raise both together, on purpose, in a PR of its own. A change to the kit's code goes in a site-kit PR, never into
   `node_modules/`; FM's settings change in `site-kit.config.mjs`. The kit's own lessons: `node_modules/site-kit/AGENTS.md`.
 - **The review page of the design system** (every colour, size, step, shadow, curve and decision, each block, and each
