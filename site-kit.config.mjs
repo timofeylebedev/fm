@@ -216,6 +216,8 @@ export default {
     },
     // one table of curves: M.curve in motion.js (GSAP "fm-<name>", css.* for WAAPI/CSS), and the --ease tokens
     curves: { modules: ["src/scripts/motion.js"], tokens: "--ease" },
+    // what every decision must say (who decided, when, why) and what an exception says besides
+    decisionFields: { "*": ["id", "kind", "what", "decided", "why"], exception: ["rule", "fix"] },
     notes: {
       "type-from-scale": "Objects scaled as a whole (the ID cards' 24/13px, the tiles' --u, the hero chips' --u, the drawings' --fm-px) are pictures of UI, not page text.",
     },
