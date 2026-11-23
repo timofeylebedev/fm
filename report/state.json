@@ -1,30 +1,30 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-11-16T19:57:20.415Z",
- "commit": "1d322d893d8db152ca787df2a50d9a63d9e94e03",
+ "generated": "2026-11-23T17:02:21.161Z",
+ "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
  "ref": "main",
  "pr": null,
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-11-16T19:48:25.921Z",
+   "when": "2026-11-23T16:52:30.687Z",
    "quick": false,
-   "seconds": 367,
+   "seconds": 405,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-11-16T19:54:50.275Z",
+   "when": "2026-11-23T16:59:32.714Z",
    "quick": true,
-   "seconds": 150,
+   "seconds": 168,
    "errors": []
   }
  },
  "base": {
-  "commit": "c583f788a2047a98685d9c8ea26d0c7590e93f99",
-  "generated": "2026-10-27T22:36:52.996Z"
+  "commit": "1d322d893d8db152ca787df2a50d9a63d9e94e03",
+  "generated": "2026-11-16T19:57:20.415Z"
  },
  "kinds": {
   "hard": "any item is a failure",
@@ -36,19 +36,35 @@
   "inventory": "what there is, no verdict"
  },
  "summary": {
-  "rules": 54,
+  "rules": 63,
   "errors": 0,
-  "pass": 35,
+  "pass": 43,
   "warn": 7,
-  "fail": 6,
+  "fail": 7,
   "info": 6,
-  "findings": 76,
-  "new": 0,
-  "fixed": 0,
+  "findings": 84,
+  "new": 14,
+  "fixed": 6,
   "accepted": 5,
   "questions": 17
  },
  "needs": [
+  {
+   "type": "rule",
+   "id": "code.learn.window-scroll",
+   "severity": "fail",
+   "area": "Code",
+   "title": "The scroll goes through one module",
+   "kind": "hard",
+   "why": "8 places",
+   "fresh": 8,
+   "sample": [
+    "src/scripts/debug.js:19: reads the window's scrollY",
+    "src/scripts/debug.js:24: reads the window's scrollY",
+    "src/scripts/debug.js:39: listens to the window's scroll"
+   ],
+   "rank": 358
+  },
   {
    "type": "rule",
    "id": "code.curves",
@@ -57,13 +73,13 @@
    "title": "Curves from one table (motion.js)",
    "kind": "hard",
    "why": "7 places",
-   "fresh": 0,
+   "fresh": 6,
    "sample": [
     "src/styles/components/book.css:152: ease-in-out in & i",
-    "scripts/cookies.js:30: cubic-bezier(0.65, 0, 0.35, 1)",
-    "scripts/deck.js:78: ease = \"power2.in\""
+    "src/scripts/cookies.js:30: cubic-bezier(0.65, 0, 0.35, 1)",
+    "src/scripts/deck.js:78: ease = \"power2.in\""
    ],
-   "rank": 307
+   "rank": 357
   },
   {
    "type": "rule",
@@ -141,6 +157,207 @@
   },
   {
    "type": "question",
+   "id": "report-on-devices",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The review page on your devices: the System tabs one by one (the Type slider), zooming a chart on Responsive (trackpad pinch in Safari), the Typesetter demo — on your Mac in Safari and on your iPhone. Does each work?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/report/",
+   "options": [
+    "All works",
+    "Something is broken (say what)"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #62",
+   "why": "open since 2026-10-25 (PR #62)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "hero-shake-safari",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Reload the home page a few times (and once as a first visit): does the team picture in the hero still shake or jump in Safari on your Mac and on your iPhone?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "No shake",
+    "Still shakes"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #22, PR #61",
+   "why": "open since 2026-10-20 (PR #22, PR #61)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "fast-scroll-drawings",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Right after the page loads, scroll fast to the bottom: are the drawings of the cards there in time, or do you see empty cards? Also open the link to #clients: does it land on the clients?",
+   "needs": [
+    "iphone",
+    "mac-safari"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#clients",
+   "options": [
+    "In time, lands right",
+    "Empty cards or a wrong landing (say where)"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #61",
+   "why": "open since 2026-10-25 (PR #61)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "cta-dust-devices",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The CTA card's dust on your Mac (Safari) and iPhone: does it look as in the lab, and does the phone stay smooth while it moves (about 217 000 specks there)?",
+   "needs": [
+    "mac-safari",
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "options": [
+    "Looks right and smooth",
+    "Looks wrong",
+    "Stutters on the phone"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #58",
+   "why": "open since 2026-10-25 (PR #58)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "cta-lead-contrast",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The CTA's lead stays just under 4.5 : 1 over the dust (4.45 at 1440, 4.21 at 390). Keep it, or dim the middle a bit more so it passes?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#tools",
+   "options": [
+    "Keep as it is",
+    "Dim more until it passes 4.5 : 1"
+   ],
+   "since": "2026-10-25",
+   "from": "PR #58",
+   "why": "open since 2026-10-25 (PR #58)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "cta-dust-shape",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Which shape for the CTA's dust: as it is on the site now, the burst at the left and right edges (lab of Oct 25), or the one band round the border (lab of Oct 24)?",
+   "needs": [
+    "choice",
+    "eye"
+   ],
+   "link": "https://claude.ai/artifact/PyjsPWv2XDVEYto6M5D7SF",
+   "options": [
+    "As on the site",
+    "Burst at the sides",
+    "One band round the border"
+   ],
+   "since": "2026-10-25",
+   "from": "labs of Oct 24 and Oct 25",
+   "why": "open since 2026-10-25 (labs of Oct 24 and Oct 25)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "ring-safari",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The ring of covers in Safari on your Mac and iPhone: smooth and sharp? And is it OK that browsers without a real GPU show it still?",
+   "needs": [
+    "mac-safari",
+    "iphone",
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Smooth, a still ring is fine",
+    "Not smooth or not sharp",
+    "A still ring is not fine"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #20",
+   "why": "open since 2026-10-20 (PR #20)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "navbar-sideways-iphone",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Your iPhone turned sideways, in Safari: scroll up and down past the hero. Is the navbar's jump gone, and does it follow smoothly?",
+   "needs": [
+    "iphone"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Smooth, no jump",
+    "Still jumps"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #13",
+   "why": "open since 2026-10-20 (PR #13)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "short-laptop-hero",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "On short laptop windows (1366×650, 1280×620) the hero now runs past the first screen and the first card's pill is not seen. Is that OK, or should the team picture be smaller there?",
+   "needs": [
+    "choice",
+    "eye"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "OK as it is",
+    "Make the picture smaller on short screens"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #13",
+   "why": "open since 2026-10-20 (PR #13)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "wide-card-drawing",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "On a wide stack card the drawing is cut at the card's top while the card opens (it stays centred in the open part). Is that the look you wanted?",
+   "needs": [
+    "eye"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Yes",
+    "No (say how it should be)"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #22",
+   "why": "open since 2026-10-20 (PR #22)",
+   "rank": 230
+  },
+  {
+   "type": "question",
    "id": "tools-white-reload",
    "severity": "ask",
    "area": "Questions",
@@ -156,6 +373,82 @@
    "since": "2026-10-18",
    "from": "PR #8",
    "why": "open since 2026-10-18 (PR #8)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "planerka-account",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "Which Planerka account should the booking window use? flow-medium-8nzjz3/demo (now; shows Planerka's ribbon on the free plan) or t-l-sfkcrg/30min (hides the branding)?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#demo",
+   "options": [
+    "flow-medium-8nzjz3/demo",
+    "t-l-sfkcrg/30min"
+   ],
+   "since": "2026-10-19",
+   "from": "PR #11",
+   "why": "open since 2026-10-19 (PR #11)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "cookie-text",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The cookie notice says «Оставаясь, вы даете согласие» (staying = consent), but only «ОК» counts. Change it to «Нажимая «ОК», вы даёте согласие на обработку данных»?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Change the text",
+    "Keep the text"
+   ],
+   "since": "2026-10-19",
+   "from": "PR #10",
+   "why": "open since 2026-10-19 (PR #10)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "cookie-withdraw",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "A way to take consent back (e.g. «Настройки куки» in the footer, which shows the notice again): design one now?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/",
+   "options": [
+    "Yes, design it",
+    "Not now"
+   ],
+   "since": "2026-10-19",
+   "from": "PR #10",
+   "why": "open since 2026-10-19 (PR #10)",
+   "rank": 230
+  },
+  {
+   "type": "question",
+   "id": "fifth-publication",
+   "severity": "ask",
+   "area": "Questions",
+   "title": "The publications include a copy of «Как разобраться в отчетах по роялти» put there to test «Показать больше». Which real publication goes in its place?",
+   "needs": [
+    "choice"
+   ],
+   "link": "https://timofeylebedev.github.io/fm/#publications",
+   "options": [
+    "Send the publication",
+    "Remove the copy"
+   ],
+   "since": "2026-10-20",
+   "from": "PR #19",
+   "why": "open since 2026-10-20 (PR #19)",
    "rank": 230
   },
   {
@@ -179,283 +472,6 @@
   },
   {
    "type": "question",
-   "id": "planerka-account",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "Which Planerka account should the booking window use? flow-medium-8nzjz3/demo (now; shows Planerka's ribbon on the free plan) or t-l-sfkcrg/30min (hides the branding)?",
-   "needs": [
-    "choice"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/#demo",
-   "options": [
-    "flow-medium-8nzjz3/demo",
-    "t-l-sfkcrg/30min"
-   ],
-   "since": "2026-10-19",
-   "from": "PR #11",
-   "why": "open since 2026-10-19 (PR #11)",
-   "rank": 229
-  },
-  {
-   "type": "question",
-   "id": "cookie-text",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "The cookie notice says «Оставаясь, вы даете согласие» (staying = consent), but only «ОК» counts. Change it to «Нажимая «ОК», вы даёте согласие на обработку данных»?",
-   "needs": [
-    "choice"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/",
-   "options": [
-    "Change the text",
-    "Keep the text"
-   ],
-   "since": "2026-10-19",
-   "from": "PR #10",
-   "why": "open since 2026-10-19 (PR #10)",
-   "rank": 229
-  },
-  {
-   "type": "question",
-   "id": "cookie-withdraw",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "A way to take consent back (e.g. «Настройки куки» in the footer, which shows the notice again): design one now?",
-   "needs": [
-    "choice"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/",
-   "options": [
-    "Yes, design it",
-    "Not now"
-   ],
-   "since": "2026-10-19",
-   "from": "PR #10",
-   "why": "open since 2026-10-19 (PR #10)",
-   "rank": 229
-  },
-  {
-   "type": "question",
-   "id": "hero-shake-safari",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "Reload the home page a few times (and once as a first visit): does the team picture in the hero still shake or jump in Safari on your Mac and on your iPhone?",
-   "needs": [
-    "mac-safari",
-    "iphone"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/",
-   "options": [
-    "No shake",
-    "Still shakes"
-   ],
-   "since": "2026-10-20",
-   "from": "PR #22, PR #61",
-   "why": "open since 2026-10-20 (PR #22, PR #61)",
-   "rank": 228
-  },
-  {
-   "type": "question",
-   "id": "ring-safari",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "The ring of covers in Safari on your Mac and iPhone: smooth and sharp? And is it OK that browsers without a real GPU show it still?",
-   "needs": [
-    "mac-safari",
-    "iphone",
-    "choice"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/",
-   "options": [
-    "Smooth, a still ring is fine",
-    "Not smooth or not sharp",
-    "A still ring is not fine"
-   ],
-   "since": "2026-10-20",
-   "from": "PR #20",
-   "why": "open since 2026-10-20 (PR #20)",
-   "rank": 228
-  },
-  {
-   "type": "question",
-   "id": "navbar-sideways-iphone",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "Your iPhone turned sideways, in Safari: scroll up and down past the hero. Is the navbar's jump gone, and does it follow smoothly?",
-   "needs": [
-    "iphone"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/",
-   "options": [
-    "Smooth, no jump",
-    "Still jumps"
-   ],
-   "since": "2026-10-20",
-   "from": "PR #13",
-   "why": "open since 2026-10-20 (PR #13)",
-   "rank": 228
-  },
-  {
-   "type": "question",
-   "id": "short-laptop-hero",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "On short laptop windows (1366×650, 1280×620) the hero now runs past the first screen and the first card's pill is not seen. Is that OK, or should the team picture be smaller there?",
-   "needs": [
-    "choice",
-    "eye"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/",
-   "options": [
-    "OK as it is",
-    "Make the picture smaller on short screens"
-   ],
-   "since": "2026-10-20",
-   "from": "PR #13",
-   "why": "open since 2026-10-20 (PR #13)",
-   "rank": 228
-  },
-  {
-   "type": "question",
-   "id": "wide-card-drawing",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "On a wide stack card the drawing is cut at the card's top while the card opens (it stays centred in the open part). Is that the look you wanted?",
-   "needs": [
-    "eye"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/",
-   "options": [
-    "Yes",
-    "No (say how it should be)"
-   ],
-   "since": "2026-10-20",
-   "from": "PR #22",
-   "why": "open since 2026-10-20 (PR #22)",
-   "rank": 228
-  },
-  {
-   "type": "question",
-   "id": "fifth-publication",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "The publications include a copy of «Как разобраться в отчетах по роялти» put there to test «Показать больше». Which real publication goes in its place?",
-   "needs": [
-    "choice"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/#publications",
-   "options": [
-    "Send the publication",
-    "Remove the copy"
-   ],
-   "since": "2026-10-20",
-   "from": "PR #19",
-   "why": "open since 2026-10-20 (PR #19)",
-   "rank": 228
-  },
-  {
-   "type": "question",
-   "id": "report-on-devices",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "The review page on your devices: the System tabs one by one (the Type slider), zooming a chart on Responsive (trackpad pinch in Safari), the Typesetter demo — on your Mac in Safari and on your iPhone. Does each work?",
-   "needs": [
-    "mac-safari",
-    "iphone"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/report/",
-   "options": [
-    "All works",
-    "Something is broken (say what)"
-   ],
-   "since": "2026-10-25",
-   "from": "PR #62",
-   "why": "open since 2026-10-25 (PR #62)",
-   "rank": 223
-  },
-  {
-   "type": "question",
-   "id": "fast-scroll-drawings",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "Right after the page loads, scroll fast to the bottom: are the drawings of the cards there in time, or do you see empty cards? Also open the link to #clients: does it land on the clients?",
-   "needs": [
-    "iphone",
-    "mac-safari"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/#clients",
-   "options": [
-    "In time, lands right",
-    "Empty cards or a wrong landing (say where)"
-   ],
-   "since": "2026-10-25",
-   "from": "PR #61",
-   "why": "open since 2026-10-25 (PR #61)",
-   "rank": 223
-  },
-  {
-   "type": "question",
-   "id": "cta-dust-devices",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "The CTA card's dust on your Mac (Safari) and iPhone: does it look as in the lab, and does the phone stay smooth while it moves (about 217 000 specks there)?",
-   "needs": [
-    "mac-safari",
-    "iphone"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/#tools",
-   "options": [
-    "Looks right and smooth",
-    "Looks wrong",
-    "Stutters on the phone"
-   ],
-   "since": "2026-10-25",
-   "from": "PR #58",
-   "why": "open since 2026-10-25 (PR #58)",
-   "rank": 223
-  },
-  {
-   "type": "question",
-   "id": "cta-lead-contrast",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "The CTA's lead stays just under 4.5 : 1 over the dust (4.45 at 1440, 4.21 at 390). Keep it, or dim the middle a bit more so it passes?",
-   "needs": [
-    "choice"
-   ],
-   "link": "https://timofeylebedev.github.io/fm/#tools",
-   "options": [
-    "Keep as it is",
-    "Dim more until it passes 4.5 : 1"
-   ],
-   "since": "2026-10-25",
-   "from": "PR #58",
-   "why": "open since 2026-10-25 (PR #58)",
-   "rank": 223
-  },
-  {
-   "type": "question",
-   "id": "cta-dust-shape",
-   "severity": "ask",
-   "area": "Questions",
-   "title": "Which shape for the CTA's dust: as it is on the site now, the burst at the left and right edges (lab of Oct 25), or the one band round the border (lab of Oct 24)?",
-   "needs": [
-    "choice",
-    "eye"
-   ],
-   "link": "https://claude.ai/artifact/PyjsPWv2XDVEYto6M5D7SF",
-   "options": [
-    "As on the site",
-    "Burst at the sides",
-    "One band round the border"
-   ],
-   "since": "2026-10-25",
-   "from": "labs of Oct 24 and Oct 25",
-   "why": "open since 2026-10-25 (labs of Oct 24 and Oct 25)",
-   "rank": 223
-  },
-  {
-   "type": "question",
    "id": "hsts-preload",
    "severity": "ask",
    "area": "Questions",
@@ -471,7 +487,7 @@
    "since": "2026-10-25",
    "from": "PR #61",
    "why": "open since 2026-10-25 (PR #61)",
-   "rank": 223
+   "rank": 230
   },
   {
    "type": "rule",
@@ -587,7 +603,7 @@
    "area": "Type",
    "kind": "share",
    "title": "Text is set in the roles of the scale",
-   "how": "Every text holder at every measured size: its size against each role of design/scale.json at that screen (±0.6px). Objects sized as a whole or fitted to their box (hero, CTA and stack titles, ID cards, tiles) are left out.",
+   "how": "Every text holder at every measured size: its size against each role of the scale at that screen (±0.6px). Objects sized as a whole or fitted to their box (checks.typeObjects) are left out.",
    "value": 100,
    "unit": "% of text holders",
    "on": 397,
@@ -653,7 +669,7 @@
    "area": "Colour",
    "kind": "share",
    "title": "Every colour drawn is a token",
-   "how": "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of design/tokens.json (±1.5 a channel, ±1.5% alpha).",
+   "how": "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of the palette (±1.5 a channel, ±1.5% alpha).",
    "value": 98.1,
    "unit": "% of colour uses",
    "on": 1176,
@@ -738,8 +754,8 @@
    "webkit": {
     "status": "warn",
     "value": 98.2,
-    "on": 1176,
-    "total": 1198
+    "on": 1175,
+    "total": 1196
    },
    "accepted": 0,
    "was": {
@@ -865,7 +881,7 @@
    "accepted": 5,
    "was": {
     "status": "pass",
-    "value": 99
+    "value": 98.8
    }
   },
   {
@@ -1013,7 +1029,7 @@
    "area": "Layers",
    "kind": "convention",
    "title": "A short ladder of layers",
-   "how": "Distinct z-index values of positioned elements (drawings and chips left out); more than 6 warns. The order: page (−1…2), cookie notice, navbar, skip link.",
+   "how": "Distinct z-index values of positioned elements (what checks.skip leaves out excepted); more than 6 warns. The order: page (−1…2), cookie notice, navbar, skip link.",
    "value": 7,
    "unit": "values",
    "warn": 6,
@@ -1987,7 +2003,7 @@
    "area": "Privacy",
    "kind": "hard",
    "title": "Nothing optional before «ОК»",
-   "how": "A first visit: the page, a scroll, a pointer over a demo button and 3.5 s of waiting. Nothing may go to another host, set a cookie or store anything until the cookie notice's «ОК» is pressed (152-ФЗ; CLAUDE.md).",
+   "how": "A first visit: the page, a scroll, a pointer over what may preload a third party and 3.5 s of waiting. Nothing may go to another host, set a cookie or store anything until the consent («ОК») is given. 152-ФЗ; CLAUDE.md.",
    "status": "pass",
    "items": [],
    "accepted": 0,
@@ -2106,7 +2122,7 @@
    "how": "The files a browser or a search engine asks for, all there.",
    "status": "pass",
    "items": [],
-   "note": "robots.txt keeps every search engine out (until the launch; open item).",
+   "note": "robots.txt keeps every search engine out.",
    "webkit": {
     "status": "pass"
    },
@@ -2218,7 +2234,7 @@
    "area": "Colour",
    "kind": "hard",
    "title": "Colours from the tokens only",
-   "how": "literal #hex / rgb() / hsl() / oklch() in the page's stylesheets (tokens.css definitions and the drawings' art.css left out) (read from the code).",
+   "how": "literal #hex / rgb() / hsl() / oklch() in the page's stylesheets (token definitions and the drawings left out) (read from the code).",
    "status": "fail",
    "value": 4,
    "unit": "places",
@@ -2256,7 +2272,7 @@
    "area": "Type",
    "kind": "hard",
    "title": "Text sizes from the scale",
-   "how": "every font-size: a --type-* role, em or %, the fit sizes (--hero-title, --cta-title, --card-title) or an object's own unit (--u, --fm-px) (read from the code).",
+   "how": "every font-size: a --type-* role, em or %, or an object's own size (--hero-title, --cta-title, --card-title, --u, --fm-px) (read from the code).",
    "status": "fail",
    "value": 2,
    "unit": "places",
@@ -2307,7 +2323,7 @@
    "area": "Code",
    "kind": "hard",
    "title": "Every var() defined, every token used",
-   "how": "179 custom properties used, 106 tokens in tokens.css + tokens.gen.css (read from the code).",
+   "how": "179 custom properties used, 106 tokens in tokens.gen.css + tokens.css (read from the code).",
    "status": "fail",
    "value": 2,
    "unit": "places",
@@ -2334,8 +2350,8 @@
    "id": "code.layout-steps",
    "area": "Layout",
    "kind": "hard",
-   "title": "Layouts change only at S, M, L or a written own step",
-   "how": "13 width container queries against S 22rem, M 43rem, L 58rem and the own steps written in CLAUDE.md (35rem, 32rem, 10em, 400px, 27.5rem, 45.75rem) (read from the code).",
+   "title": "Layouts change only at the shared steps or a declared own step",
+   "how": "13 width container queries against 22rem, 43rem, 58rem and the declared own steps (35rem, 32rem, 10em, 400px, 27.5rem, 45.75rem) (read from the code).",
    "status": "pass",
    "value": 0,
    "unit": "places",
@@ -2375,7 +2391,7 @@
    "area": "Motion",
    "kind": "hard",
    "title": "Curves from one table (motion.js)",
-   "how": "cubic-bezier() and named eases in the page's stylesheets and scripts, outside motion.js and the --ease tokens (read from the code).",
+   "how": "cubic-bezier() and named eases in the page's stylesheets and scripts, outside src/scripts/motion.js and the --ease tokens (read from the code).",
    "status": "fail",
    "value": 7,
    "unit": "places",
@@ -2387,33 +2403,33 @@
      "what": "ease-in-out in & i"
     },
     {
-     "key": "scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
-     "where": "scripts/cookies.js:30",
+     "key": "src/scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
+     "where": "src/scripts/cookies.js:30",
      "what": "cubic-bezier(0.65, 0, 0.35, 1)"
     },
     {
-     "key": "scripts/deck.js|ease = \"power2.in\"#1",
-     "where": "scripts/deck.js:78",
+     "key": "src/scripts/deck.js|ease = \"power2.in\"#1",
+     "where": "src/scripts/deck.js:78",
      "what": "ease = \"power2.in\""
     },
     {
-     "key": "scripts/deck.js|ease = \"power1.out\"#1",
-     "where": "scripts/deck.js:80",
+     "key": "src/scripts/deck.js|ease = \"power1.out\"#1",
+     "where": "src/scripts/deck.js:80",
      "what": "ease = \"power1.out\""
     },
     {
-     "key": "scripts/deck.js|ease: \"power2.inOut\"#1",
-     "where": "scripts/deck.js:166",
+     "key": "src/scripts/deck.js|ease: \"power2.inOut\"#1",
+     "where": "src/scripts/deck.js:166",
      "what": "ease: \"power2.inOut\""
     },
     {
-     "key": "scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
-     "where": "scripts/menu.js:18",
+     "key": "src/scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
+     "where": "src/scripts/menu.js:18",
      "what": "CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\""
     },
     {
-     "key": "scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
-     "where": "scripts/menu.js:19",
+     "key": "src/scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
+     "where": "src/scripts/menu.js:19",
      "what": "CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\""
     }
    ],
@@ -2439,6 +2455,164 @@
     "status": "pass",
     "value": 0
    }
+  },
+  {
+   "id": "code.learn.window-scroll",
+   "area": "Code",
+   "kind": "hard",
+   "title": "The scroll goes through one module",
+   "how": "No script reads window.scrollY / scrollX / pageYOffset or the root's scrollTop, listens to the window's (or document's) scroll, or scrolls the window, outside the scroll module (src/scripts/scroller.js, src/scripts/boot.js). In Safari on a Mac the page may scroll in its own box (runtime/scroller.js): the window's scroll then never changes. Ask the module: y(), to(), onScroll(). (read from the code).",
+   "status": "fail",
+   "value": 8,
+   "unit": "places",
+   "note": "",
+   "items": [
+    {
+     "key": "src/scripts/debug.js|reads the window's scrollY#1",
+     "where": "src/scripts/debug.js:19",
+     "what": "reads the window's scrollY"
+    },
+    {
+     "key": "src/scripts/debug.js|reads the window's scrollY#2",
+     "where": "src/scripts/debug.js:24",
+     "what": "reads the window's scrollY"
+    },
+    {
+     "key": "src/scripts/debug.js|listens to the window's scroll#1",
+     "where": "src/scripts/debug.js:39",
+     "what": "listens to the window's scroll"
+    },
+    {
+     "key": "src/scripts/nav.js|reads the window's scrollY#1",
+     "where": "src/scripts/nav.js:80",
+     "what": "reads the window's scrollY"
+    },
+    {
+     "key": "src/scripts/nav.js|reads the window's scrollY#2",
+     "where": "src/scripts/nav.js:95",
+     "what": "reads the window's scrollY"
+    },
+    {
+     "key": "src/scripts/nav.js|listens to the window's scroll#1",
+     "where": "src/scripts/nav.js:106",
+     "what": "listens to the window's scroll"
+    },
+    {
+     "key": "src/scripts/nav.js|reads the window's scrollY#3",
+     "where": "src/scripts/nav.js:109",
+     "what": "reads the window's scrollY"
+    },
+    {
+     "key": "src/scripts/nav.js|reads the window's scrollY#4",
+     "where": "src/scripts/nav.js:110",
+     "what": "reads the window's scrollY"
+    }
+   ],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.io-root",
+   "area": "Code",
+   "kind": "hard",
+   "title": "Observers that look ahead watch from the scroller",
+   "how": "Every IntersectionObserver with a rootMargin also names its root (the scroll module's ioRoot): in the box the box clips what is in it, so seen from the screen nothing below it would ever be \"near\" and nothing loads. (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.webgl-caveat",
+   "area": "Code",
+   "kind": "hard",
+   "title": "WebGL only on a real GPU",
+   "how": "Every getContext(\"webgl\"/\"webgl2\") (and three.js WebGLRenderer) asks for failIfMajorPerformanceCaveat or reads the renderer's name right after (software: SwiftShader, llvmpipe), or goes through runtime/gpu.js. Without a GPU, Chrome copies a WebGL canvas back to the processor every frame (≈ 12 ms a frame for one ring of covers). (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.bare-load",
+   "area": "Code",
+   "kind": "hard",
+   "title": "Nothing waits for a load that has passed",
+   "how": "No addEventListener(\"load\") on the window unless the line or the three above check document.readyState: a script that starts late (after the first frame, imported on demand) comes after the load, and the listener never runs. Use whenLoaded(fn) (runtime/loaded.js; here src/scripts/loaded.js). (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.styles-first",
+   "area": "Code",
+   "kind": "hard",
+   "title": "The start-up waits for the stylesheets",
+   "how": "The entry script waits for every stylesheet (runtime/styles.js stylesReady(), or the same wait written out) before its first call of anything it imports: Safari may run a module before the stylesheet applies (WebKit bug 261655), and what is measured then stays wrong. (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.consent-first",
+   "area": "Code",
+   "kind": "hard",
+   "title": "Third parties start only after consent",
+   "how": "Anything that loads a third party (a script element, an iframe or a request to another site, a <script>/<iframe> with another site's address in a page) starts only from onConsent() of the consent module (src/scripts/consent.js): only an explicit «OK» is consent, and nothing optional may run before it. (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.lazy-media",
+   "area": "Code",
+   "kind": "hard",
+   "title": "A stylesheet loaded on its own imports the custom media",
+   "how": "Every stylesheet the pages or the scripts load (an entry) has, in its @import closure, the file of the custom media (src/styles/base/media.css) when any file of that closure uses one: Lightning CSS (Vite) defines a custom media per bundle, and fails on (or drops) one it has not seen. (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "5 stylesheets loaded on their own",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.bar-guard",
+   "area": "Code",
+   "kind": "hard",
+   "title": "The bottom bar's guard stays empty",
+   "how": "No rule for .bar-guard gives it a background, a backdrop filter, content or pointer-events: none: Safari skips it as see-through only while it has nothing to show and takes taps (a backdrop filter made the bar white; runtime/safari.css). (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "",
+   "items": [],
+   "accepted": 0
+  },
+  {
+   "id": "code.learn.box-every-page",
+   "area": "Code",
+   "kind": "hard",
+   "title": "Every page with the box runs the box script first",
+   "how": "Every page that has the page's box ([data-page]) runs the box script (src/scripts/box.js) in its <head>, before any other script: else Safari on a Mac scrolls that page in the window (a glass bar), and scripts that ask the scroll module read the wrong scroller. (read from the code).",
+   "status": "pass",
+   "value": 0,
+   "unit": "places",
+   "note": "4 pages with the box",
+   "items": [],
+   "accepted": 0
   }
  ],
  "findings": [
@@ -3073,61 +3247,170 @@
    "new": false
   },
   {
-   "key": "code.curves::scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
+   "key": "code.curves::src/scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
    "rule": "code.curves",
    "status": "fail",
-   "where": "scripts/cookies.js:30",
+   "where": "src/scripts/cookies.js:30",
    "what": "cubic-bezier(0.65, 0, 0.35, 1)",
    "at": "",
-   "new": false
+   "new": true
+  },
+  {
+   "key": "code.curves::src/scripts/deck.js|ease = \"power2.in\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "src/scripts/deck.js:78",
+   "what": "ease = \"power2.in\"",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.curves::src/scripts/deck.js|ease = \"power1.out\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "src/scripts/deck.js:80",
+   "what": "ease = \"power1.out\"",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.curves::src/scripts/deck.js|ease: \"power2.inOut\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "src/scripts/deck.js:166",
+   "what": "ease: \"power2.inOut\"",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.curves::src/scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "src/scripts/menu.js:18",
+   "what": "CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.curves::src/scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
+   "rule": "code.curves",
+   "status": "fail",
+   "where": "src/scripts/menu.js:19",
+   "what": "CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/debug.js|reads the window's scrollY#1",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/debug.js:19",
+   "what": "reads the window's scrollY",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/debug.js|reads the window's scrollY#2",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/debug.js:24",
+   "what": "reads the window's scrollY",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/debug.js|listens to the window's scroll#1",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/debug.js:39",
+   "what": "listens to the window's scroll",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/nav.js|reads the window's scrollY#1",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/nav.js:80",
+   "what": "reads the window's scrollY",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/nav.js|reads the window's scrollY#2",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/nav.js:95",
+   "what": "reads the window's scrollY",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/nav.js|listens to the window's scroll#1",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/nav.js:106",
+   "what": "listens to the window's scroll",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/nav.js|reads the window's scrollY#3",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/nav.js:109",
+   "what": "reads the window's scrollY",
+   "at": "",
+   "new": true
+  },
+  {
+   "key": "code.learn.window-scroll::src/scripts/nav.js|reads the window's scrollY#4",
+   "rule": "code.learn.window-scroll",
+   "status": "fail",
+   "where": "src/scripts/nav.js:110",
+   "what": "reads the window's scrollY",
+   "at": "",
+   "new": true
+  }
+ ],
+ "fixed": [
+  {
+   "key": "code.curves::scripts/cookies.js|cubic-bezier(0.65, 0, 0.35, 1)#1",
+   "rule": "code.curves",
+   "where": "scripts/cookies.js:30",
+   "what": "cubic-bezier(0.65, 0, 0.35, 1)"
   },
   {
    "key": "code.curves::scripts/deck.js|ease = \"power2.in\"#1",
    "rule": "code.curves",
-   "status": "fail",
    "where": "scripts/deck.js:78",
-   "what": "ease = \"power2.in\"",
-   "at": "",
-   "new": false
+   "what": "ease = \"power2.in\""
   },
   {
    "key": "code.curves::scripts/deck.js|ease = \"power1.out\"#1",
    "rule": "code.curves",
-   "status": "fail",
    "where": "scripts/deck.js:80",
-   "what": "ease = \"power1.out\"",
-   "at": "",
-   "new": false
+   "what": "ease = \"power1.out\""
   },
   {
    "key": "code.curves::scripts/deck.js|ease: \"power2.inOut\"#1",
    "rule": "code.curves",
-   "status": "fail",
    "where": "scripts/deck.js:166",
-   "what": "ease: \"power2.inOut\"",
-   "at": "",
-   "new": false
+   "what": "ease: \"power2.inOut\""
   },
   {
    "key": "code.curves::scripts/menu.js|CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"#1",
    "rule": "code.curves",
-   "status": "fail",
    "where": "scripts/menu.js:18",
-   "what": "CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\"",
-   "at": "",
-   "new": false
+   "what": "CustomEase.create(\"menuIn\", \"0.42, 0, 1, 1\""
   },
   {
    "key": "code.curves::scripts/menu.js|CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"#1",
    "rule": "code.curves",
-   "status": "fail",
    "where": "scripts/menu.js:19",
-   "what": "CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\"",
-   "at": "",
-   "new": false
+   "what": "CustomEase.create(\"menuOut\", \"0, 0, 0.58, 1\""
   }
  ],
- "fixed": [],
  "decisions": [
   {
    "id": "cta-light-middle",
@@ -3279,7 +3562,7 @@
    "id": "typeset",
    "kind": "decision",
    "state": "unbound",
-   "what": "Where lines may break is decided by build/typeset (it replaced build/typograph.js): one answer per space, by the language of each text (lang), Russian and English rules plus rules for any language; no-break spaces and word joiners only. Letters you can see are never changed by the build: straight quotes, a hyphen for a dash, look-alike letters are reported (npm run typeset -- --lint) and changed only with --fix. No length limit on what is held together (Tim, 2026-10-24: «let's not set limits for that»)",
+   "what": "Where lines may break is decided by site-kit's typesetter (site-kit typeset; it was build/typeset, which replaced build/typograph.js): one answer per space, by the language of each text (lang), Russian and English rules plus rules for any language; no-break spaces and word joiners only. Letters you can see are never changed by the build: straight quotes, a hyphen for a dash, look-alike letters are reported (npm run typeset -- --lint) and changed only with --fix. No length limit on what is held together (Tim, 2026-10-24: «let's not set limits for that»)",
    "decided": "Claude, 2026-10-19; Tim, 2026-10-24 (no length limits, merged)"
   },
   {
@@ -3362,8 +3645,8 @@
     "Something is broken (say what)"
    ],
    "about": [
-    "design/report/site/report.js",
-    "design/report/site/report.css"
+    "node_modules/site-kit/report/page/report.js",
+    "node_modules/site-kit/report/page/report.css"
    ],
    "status": "open",
    "state": "open"
@@ -3693,7 +3976,7 @@
    "state": "open"
   }
  ],
- "from": "the last deploy of main",
- "whose": "measured on main at 1d322d8, an earlier commit than this one (7110893)",
- "own": false
+ "from": "this build",
+ "whose": "measured on this commit (7110893)",
+ "own": true
 }
