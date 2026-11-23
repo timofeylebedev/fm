@@ -1,7 +1,0 @@
-# While this is a test site, search engines are asked to stay away.
-# At launch, replace both lines with:
-#   User-agent: *
-#   Allow: /
-#   Sitemap: https://flowmedium.pro/sitemap.xml
-User-agent: *
-Disallow: /
