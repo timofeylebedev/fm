@@ -1,4 +1,4 @@
-# Netlify and Cloudflare Pages: copy this file into dist/ before uploading it — the same headers as nginx.conf.
+# Netlify and Cloudflare Pages: the same headers as nginx.conf. `npm run export` puts it into export/site/, where they read it.
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff

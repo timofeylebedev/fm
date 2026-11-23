@@ -8,6 +8,7 @@
     "prebuild": "node build/tokens.mjs",
     "build": "vite build",
     "preview": "vite preview",
+    "export": "node build/export.mjs",
     "images": "node build/images.mjs",
     "fonts": "python3 build/fonts.py",
     "check": "html-validate dist/index.html dist/404.html dist/privacy_policy_ru.html dist/soglasie_cookie.html",

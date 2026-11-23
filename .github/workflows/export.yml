@@ -1,0 +1,42 @@
+# The site as it goes to its real host (flowmedium.pro): `npm run export` on every push to main and on demand
+# (Actions → Export → Run workflow). The zip is kept with the run for 90 days: open the run, «Artifacts», flowmedium-site
+# (the same files as the zip `npm run export` makes locally).
+# It changes nothing on GitHub Pages.
+name: Export
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths: ["build/export.mjs", "deploy/**", ".github/workflows/export.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: export-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run export
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flowmedium-site
+          # the folders themselves, so the download is the export (not a zip inside a zip); .htaccess is a hidden file
+          path: |
+            export/site
+            export/server
+            export/README.txt
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
