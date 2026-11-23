@@ -1,30 +1,30 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-11-23T22:04:21.572Z",
- "commit": "112dd11746d44b203f963e03392fbd941c214c75",
- "ref": "main",
- "pr": null,
+ "generated": "2026-11-23T23:05:43.151Z",
+ "commit": "63d9a1e84500dcec44f403ac113a045363a68ba0",
+ "ref": "claude/kit-v0.1.2",
+ "pr": "71",
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-11-23T21:55:12.301Z",
+   "when": "2026-11-23T22:56:44.152Z",
    "quick": false,
-   "seconds": 382,
+   "seconds": 371,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-11-23T22:01:52.508Z",
+   "when": "2026-11-23T23:03:11.851Z",
    "quick": true,
-   "seconds": 148,
+   "seconds": 151,
    "errors": []
   }
  },
  "base": {
-  "commit": "004d46fd54274e88b5d69f0b21d941f00e2d3210",
-  "generated": "2026-11-23T21:36:45.728Z"
+  "commit": "112dd11746d44b203f963e03392fbd941c214c75",
+  "generated": "2026-11-23T22:04:21.572Z"
  },
  "kinds": {
   "hard": "any item is a failure",
@@ -3975,7 +3975,7 @@
    "state": "open"
   }
  ],
- "from": "the last deploy of main",
- "whose": "measured on main at 112dd11, before this change (claude/kit-v0.1.2 at 63d9a1e)",
- "own": false
+ "from": "this build",
+ "whose": "measured on this commit (63d9a1e)",
+ "own": true
 }
