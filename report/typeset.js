@@ -16,6 +16,7 @@ var Typeset = (function(exports) {
     января февраля марта апреля мая июня июля августа сентября октября ноября декабря
     январь февраль март апрель май июнь июль август сентябрь октябрь ноябрь декабрь
     янв фев мар апр июн июл авг сен сент окт ноя нояб дек`),
+		bareUnits: set("г м л ч"),
 		labels: set(`
     ст п пп ч гл рис табл с стр т вып кв д корп оф эт пр ул инн огрн огрнип кпп бик окпо
     статья статьи статье статью статей пункт пункта пункте пунктом пункты пунктов подпункт подпункта подпункте
@@ -151,7 +152,7 @@ var Typeset = (function(exports) {
 		return !!w && labels.has(low(w));
 	};
 	const labelWord = (toks, k) => abbr(toks, k) || (isWord(toks[k - 1]) && letters(toks[k - 1]) > 1 ? toks[k - 1] : null);
-	const unitAt = (toks, k, units) => units.has(low(toks[k])) && (letters(toks[k]) > 1 || toks[k + 1]?.s === ".");
+	const unitAt = (toks, k, units, bare) => units.has(low(toks[k])) && (letters(toks[k]) > 1 || toks[k + 1]?.s === "." || !!bare?.has(low(toks[k])));
 	const inCompound = (toks, k) => toks[k - 2]?.t === "h" || toks[k - 2]?.s === "'" || toks[k - 2]?.s === "’";
 	const compoundPrep = (toks, k) => toks[k - 2]?.t === "h" && isWord(toks[k - 3]) && RU.compoundPreps.has(low(toks[k - 3]) + "-" + low(toks[k - 1]));
 	const RULES = [
@@ -272,9 +273,19 @@ var Typeset = (function(exports) {
 			test: (g) => cyr(g.L) && isCap(g.L) && !isCaps(g.L) && cyr(g.R) && letters(g.R) === 1 && isCap(g.R) && g.toks[g.k + 2]?.s === "." && STRENGTH.should
 		},
 		{
+			name: "number-of-number",
+			lang: "ru",
+			test: (g) => (isNum(g.L) && cyr(g.R) && low(g.R) === "из" && isNum(g.toks[g.k + 3]) && g.toks[g.k + 2]?.t === "s" || cyr(g.L) && low(g.L) === "из" && isNum(g.R) && isNum(g.toks[g.k - 3]) && g.toks[g.k - 2]?.t === "s") && STRENGTH.must
+		},
+		{
+			name: "number-sign",
+			lang: "ru",
+			test: (g) => isNum(g.L) && g.R?.t === "x" && "%‰°".includes(g.R.s) && STRENGTH.must
+		},
+		{
 			name: "number-word",
 			lang: "ru",
-			test: (g) => isNum(g.L) && cyr(g.R) && !labelled(g.toks, g.k - 1, RU.labels) && !isCap(g.R) && (unitAt(g.toks, g.k + 1, RU.units) ? STRENGTH.must : letters(g.R) > 2 && !FUNCTION.has(low(g.R)) && STRENGTH.should)
+			test: (g) => isNum(g.L) && cyr(g.R) && !labelled(g.toks, g.k - 1, RU.labels) && !isCap(g.R) && (unitAt(g.toks, g.k + 1, RU.units, RU.bareUnits) ? STRENGTH.must : letters(g.R) > 2 && !FUNCTION.has(low(g.R)) && STRENGTH.should)
 		},
 		{
 			name: "short-word",
