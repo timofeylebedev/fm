@@ -258,7 +258,9 @@
 .logo-card, .stat {
   position: relative; min-width: 0; border-radius: var(--radius-s); background: var(--tint);
 }
-.logo-card__img { width: 100%; height: 100%; }
+/* the mouse never lands on the picture itself, only on its tile: Yandex Browser puts its own image buttons (search by
+   picture, Alice…) over any <img> under the mouse, right over the label's name. The tile's hover and tap are unchanged. */
+.logo-card__img { width: 100%; height: 100%; pointer-events: none; -webkit-user-drag: none; }
 .logo-card__name {
   position: absolute; left: 0; right: 0; bottom: 0;
   /* one line, never two: a long name ends in "…" (the whole name is still read by screen readers). The space at its
