@@ -65,15 +65,14 @@
         <a class="nav__logo" href="#top" aria-label="Flow Medium, в начало страницы"><svg data-icon="logo"></svg></a>
       </div>
       <nav class="nav__links" aria-label="Разделы страницы" data-pill-row>
-        <a class="nav__link" href="#product">Продукт</a>
-        <a class="nav__link" href="#clients">Клиенты</a>
-        <a class="nav__link" href="#tools">Инструменты</a>
-        <a class="nav__link" href="#publications">Публикации</a>
+        <a class="nav__link" href="#management">Управление</a>
+        <a class="nav__link" href="#documents">Документы</a>
+        <a class="nav__link" href="#finance">Финансы</a>
+        <a class="nav__link" href="#royalty">Роялти</a>
         <a class="nav__link" href="#contacts">Контакты</a>
       </nav>
       <div class="nav__end">
         <div class="nav__ctas">
-          <a class="btn btn--line btn--nav" href="https://stage.beta.flowmedium.pro/login" data-login>Войти</a>
           <a class="btn btn--purple btn--nav" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo>Запланировать демо</a>
         </div>
         <button class="nav__burger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="menu" data-menu-button><i></i><i></i></button>
@@ -82,10 +81,10 @@
   </header>
 
   <nav class="menu" id="menu" aria-label="Меню" data-menu>
-    <a class="menu__item" href="#product">Продукт</a>
-    <a class="menu__item" href="#clients">Клиенты</a>
-    <a class="menu__item" href="#tools">Инструменты</a>
-    <a class="menu__item" href="#publications">Публикации</a>
+    <a class="menu__item" href="#management">Управление</a>
+    <a class="menu__item" href="#documents">Документы</a>
+    <a class="menu__item" href="#finance">Финансы</a>
+    <a class="menu__item" href="#royalty">Роялти</a>
     <a class="menu__item" href="#contacts">Контакты</a>
     <a class="menu__item menu__item--demo" href="https://planerka.app/flow-medium-8nzjz3/demo" target="_blank" rel="noopener" data-demo>Демо</a>
   </nav>
@@ -120,7 +119,7 @@
     <!-- ── Card stack: Управление, Документы, Финансы (scripts/cards.js) ── -->
     <section class="stack" aria-label="Возможности Flow Medium" data-stack>
       <div class="stack__stage">
-        <article class="card" style="--card-bg: var(--blue)">
+        <article class="card" id="management" style="--card-bg: var(--blue)">
           <div class="card__text">
             <h2 class="card__tag"><span class="card__tag-label">Управление</span></h2>
             <div class="card__titles">
@@ -135,7 +134,7 @@
             <div class="art" data-art="s1-3"></div>
           </div>
         </article>
-        <article class="card" style="--card-bg: var(--orange)">
+        <article class="card" id="documents" style="--card-bg: var(--orange)">
           <div class="card__text">
             <h2 class="card__tag"><span class="card__tag-label">Документы</span></h2>
             <div class="card__titles">
@@ -148,7 +147,7 @@
             <div class="art" data-art="s2-2"></div>
           </div>
         </article>
-        <article class="card" style="--card-bg: var(--green)">
+        <article class="card" id="finance" style="--card-bg: var(--green)">
           <div class="card__text">
             <h2 class="card__tag"><span class="card__tag-label">Финансы</span></h2>
             <div class="card__titles">
@@ -167,7 +166,7 @@
     </section>
 
     <!-- ── Royalty ── -->
-    <section class="royalty">
+    <section class="royalty" id="royalty">
       <div class="head"><h2 class="head__title" data-reveal="chars">Роялти без споров о цифрах</h2></div>
       <div class="royalty__cards">
         <article class="royalty__card" data-reveal="block">

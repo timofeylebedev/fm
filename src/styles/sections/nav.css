@@ -52,8 +52,8 @@ html:not(.pill-on) .nav__link[aria-current] { border-color: var(--ink-50); }
 /* hover darkens the other links only: the current one stays as it is, text and outline (Tim, Oct 20) */
 @media (--mouse) { .nav__link:not([aria-current]):hover { color: var(--ink); transition-duration: var(--hover-in); } }
 
-/* «Войти» and «Запланировать демо», side by side, one size (.btn--nav). «Войти» is there at every width; on phones the
-   demo moves to the menu */
+/* «Запланировать демо» (.btn--nav); on phones it moves to the menu («Войти» was beside it until Nov 24, 2026: Tim took
+   it out) */
 .nav__ctas { display: flex; gap: 12px; }
 .nav__ctas [data-demo] { @media (--phone) { display: none; } }
 
