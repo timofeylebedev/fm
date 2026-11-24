@@ -1,30 +1,30 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-11-24T00:17:09.140Z",
- "commit": "93bef0515bfc386b046343479747c6ff7274fc33",
- "ref": "main",
- "pr": null,
+ "generated": "2026-11-24T16:03:27.230Z",
+ "commit": "f6327da5663de9f770e66a7a98ca1f6ba1a1ebef",
+ "ref": "claude/logos-yandex-buttons",
+ "pr": "72",
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-11-24T00:08:03.999Z",
+   "when": "2026-11-24T15:54:03.118Z",
    "quick": false,
-   "seconds": 380,
+   "seconds": 394,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-11-24T00:14:42.097Z",
+   "when": "2026-11-24T16:00:55.641Z",
    "quick": true,
-   "seconds": 147,
+   "seconds": 151,
    "errors": []
   }
  },
  "base": {
-  "commit": "112dd11746d44b203f963e03392fbd941c214c75",
-  "generated": "2026-11-23T22:04:21.572Z"
+  "commit": "93bef0515bfc386b046343479747c6ff7274fc33",
+  "generated": "2026-11-24T00:17:09.140Z"
  },
  "kinds": {
   "hard": "any item is a failure",
@@ -755,7 +755,7 @@
     "status": "warn",
     "value": 98.2,
     "on": 1176,
-    "total": 1198
+    "total": 1197
    },
    "accepted": 0,
    "was": {
@@ -2158,16 +2158,16 @@
      "value": 83
     },
     {
-     "key": "images",
-     "where": "images",
-     "what": "43 files, 963 KB sent (was 963 KB)",
-     "value": 963
-    },
-    {
      "key": "js",
      "where": "js",
      "what": "15 files, 112 KB sent (was 112 KB)",
      "value": 112
+    },
+    {
+     "key": "images",
+     "where": "images",
+     "what": "43 files, 963 KB sent (was 963 KB)",
+     "value": 963
     },
     {
      "key": "css",
@@ -3157,20 +3157,20 @@
    "new": false
   },
   {
-   "key": "weight.total::images",
-   "rule": "weight.total",
-   "status": "pass",
-   "where": "images",
-   "what": "43 files, 963 KB sent (was 963 KB)",
-   "at": "",
-   "new": false
-  },
-  {
    "key": "weight.total::js",
    "rule": "weight.total",
    "status": "pass",
    "where": "js",
    "what": "15 files, 112 KB sent (was 112 KB)",
+   "at": "",
+   "new": false
+  },
+  {
+   "key": "weight.total::images",
+   "rule": "weight.total",
+   "status": "pass",
+   "where": "images",
+   "what": "43 files, 963 KB sent (was 963 KB)",
    "at": "",
    "new": false
   },
@@ -3975,7 +3975,7 @@
    "state": "open"
   }
  ],
- "from": "the last deploy of main",
- "whose": "measured on main at 93bef05, before this change (claude/logos-yandex-buttons at f6327da)",
- "own": false
+ "from": "this build",
+ "whose": "measured on this commit (f6327da)",
+ "own": true
 }
