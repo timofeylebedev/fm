@@ -1,30 +1,30 @@
 {
  "schema": 1,
  "site": "Flow Medium",
- "generated": "2026-11-24T00:17:09.140Z",
- "commit": "93bef0515bfc386b046343479747c6ff7274fc33",
+ "generated": "2026-11-24T16:40:17.200Z",
+ "commit": "9bac40bfaacb79b45aeb3d400807432cb073bb73",
  "ref": "main",
  "pr": null,
  "errors": [],
  "engines": {
   "chromium": {
    "version": "141.0.7390.37",
-   "when": "2026-11-24T00:08:03.999Z",
+   "when": "2026-11-24T16:31:27.249Z",
    "quick": false,
-   "seconds": 380,
+   "seconds": 366,
    "errors": []
   },
   "webkit": {
    "version": "26.0",
-   "when": "2026-11-24T00:14:42.097Z",
+   "when": "2026-11-24T16:37:50.533Z",
    "quick": true,
-   "seconds": 147,
+   "seconds": 146,
    "errors": []
   }
  },
  "base": {
-  "commit": "112dd11746d44b203f963e03392fbd941c214c75",
-  "generated": "2026-11-23T22:04:21.572Z"
+  "commit": "93bef0515bfc386b046343479747c6ff7274fc33",
+  "generated": "2026-11-24T00:17:09.140Z"
  },
  "kinds": {
   "hard": "any item is a failure",
@@ -38,17 +38,31 @@
  "summary": {
   "rules": 63,
   "errors": 0,
-  "pass": 43,
+  "pass": 42,
   "warn": 7,
-  "fail": 7,
+  "fail": 8,
   "info": 6,
-  "findings": 84,
-  "new": 0,
+  "findings": 85,
+  "new": 1,
   "fixed": 0,
   "accepted": 5,
   "questions": 17
  },
  "needs": [
+  {
+   "type": "rule",
+   "id": "logic.section-link",
+   "severity": "fail",
+   "area": "Logic",
+   "title": "Navbar: a section link is clicked",
+   "kind": "scenario",
+   "why": "1 place",
+   "fresh": 1,
+   "sample": [
+    "Navbar: no navbar link to #clients"
+   ],
+   "rank": 351
+  },
   {
    "type": "rule",
    "id": "code.learn.window-scroll",
@@ -606,8 +620,8 @@
    "how": "Every text holder at every measured size: its size against each role of the scale at that screen (±0.6px). Objects sized as a whole or fitted to their box (checks.typeObjects) are left out.",
    "value": 100,
    "unit": "% of text holders",
-   "on": 397,
-   "total": 397,
+   "on": 389,
+   "total": 389,
    "pass": 97,
    "warn": 90,
    "status": "pass",
@@ -615,8 +629,8 @@
    "webkit": {
     "status": "pass",
     "value": 100,
-    "on": 397,
-    "total": 397
+    "on": 389,
+    "total": 389
    },
    "accepted": 0,
    "was": {
@@ -672,8 +686,8 @@
    "how": "Every text, background, border and icon colour the browser drew (drawings and canvases left out) against the colours of the palette (±1.5 a channel, ±1.5% alpha).",
    "value": 98.1,
    "unit": "% of colour uses",
-   "on": 1176,
-   "total": 1199,
+   "on": 1160,
+   "total": 1183,
    "pass": 99,
    "warn": 95,
    "status": "warn",
@@ -753,9 +767,9 @@
    ],
    "webkit": {
     "status": "warn",
-    "value": 98.2,
-    "on": 1176,
-    "total": 1198
+    "value": 98.1,
+    "on": 1160,
+    "total": 1182
    },
    "accepted": 0,
    "was": {
@@ -806,8 +820,8 @@
    "how": "Every rounded box: its corner against radius/s, m, l at that screen (±0.6px), a pill (half its height), or a listed object. Inner corners (outer − inset) show up here as their own values.",
    "value": 98.8,
    "unit": "% of rounded boxes",
-   "on": 343,
-   "total": 423,
+   "on": 335,
+   "total": 415,
    "pass": 90,
    "warn": 75,
    "status": "pass",
@@ -875,8 +889,8 @@
    "webkit": {
     "status": "pass",
     "value": 98.8,
-    "on": 349,
-    "total": 423
+    "on": 341,
+    "total": 415
    },
    "accepted": 5,
    "was": {
@@ -899,7 +913,7 @@
      "key": "1",
      "where": "a.btn, dl.idcard__table, div.idcard__row, button.btn, div.footer__legal, a.nav__link",
      "what": "1px",
-     "value": 21
+     "value": 20
     }
    ],
    "webkit": {
@@ -1885,8 +1899,14 @@
    "kind": "scenario",
    "title": "Navbar: a section link is clicked",
    "how": "Given a computer (navbar links); when a section link is clicked; then the page scrolls to the section and the address keeps no #id. At 1440×900.",
-   "status": "pass",
-   "items": [],
+   "status": "fail",
+   "items": [
+    {
+     "key": "fail",
+     "where": "Navbar",
+     "what": "no navbar link to #clients"
+    }
+   ],
    "scenario": {
     "given": "a computer (navbar links)",
     "when": "a section link is clicked",
@@ -2444,7 +2464,7 @@
    "area": "Decisions",
    "kind": "hard",
    "title": "Every decision complete",
-   "how": "30 entries: id, kind, what, decided, why; the rule and a fix for each exception; ids unique (read from the code).",
+   "how": "31 entries: id, kind, what, decided, why; the rule and a fix for each exception; ids unique (read from the code).",
    "status": "pass",
    "value": 0,
    "unit": "places",
@@ -3121,6 +3141,15 @@
    "new": false
   },
   {
+   "key": "logic.section-link::fail",
+   "rule": "logic.section-link",
+   "status": "fail",
+   "where": "Navbar",
+   "what": "no navbar link to #clients",
+   "at": "",
+   "new": true
+  },
+  {
    "key": "fallback.fonts::h3.feature__titleЛегкий сбор данных от ар",
    "rule": "fallback.fonts",
    "status": "warn",
@@ -3626,6 +3655,13 @@
    "state": "unbound",
    "what": "The ID cards of the row start their drop tipped 10° with the top edge toward the visitor and lie flat again at an even speed by the landing (M.DROP.tip); they fade in slowly at both ends (M.curve.reveal, cubic-bezier(0.5, 0, 0.5, 1); 0.2s as before). A light from the top, 75° above the page, shades a face as the card tips or leans: brighter turned towards it, darker turned away, ×4 at most 45%, nothing lying flat (M.LIGHT). The shadow stays the site's own box-shadow, with a 0.5px hairline of the face's colour as its first layer, so no light line shows between the card's edge and its shadow",
    "decided": "Tim, 2026-10-23 — the settings of the access-cards lab (light from the top at 75°, shade 4, no gloss; tilt −20°, even, 1× the fall; −10° since Oct 24, Tim: «change the tilt at the start from -20 to -10»; fade 0.36 of the fall on 0.5, 0, 0.5, 1); «the drop shadow should be consistent with the current website»; «there's a thin white line at the bottom»"
+  },
+  {
+   "id": "pictures-no-mouse",
+   "kind": "decision",
+   "state": "unbound",
+   "what": "No picture (<img>) takes the mouse or a touch: `img { pointer-events: none; -webkit-user-drag: none }` in base.css. What holds it (a tile, a card, a link) takes the hover, the tap and the click instead. So Yandex Browser shows no buttons of its own (Alice, the eye, search by picture) over the pictures: they covered the client logos' names. The price: a picture can't be dragged off the page or saved from the right-click menu",
+   "decided": "Tim, 2026-11-24 — the logos first (a screenshot of the CPLUS tile in Yandex Browser), then «yes» to every picture on the site"
   }
  ],
  "questions": [

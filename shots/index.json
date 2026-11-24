@@ -1,6 +1,6 @@
 {
- "generated": "2026-11-24T00:17:09.589Z",
- "commit": "93bef0515bfc386b046343479747c6ff7274fc33",
+ "generated": "2026-11-24T16:40:17.835Z",
+ "commit": "9bac40bfaacb79b45aeb3d400807432cb073bb73",
  "mode": "changed",
  "sizes": [
   "390x844",
@@ -12,13 +12,13 @@
    "page": "",
    "selector": ".nav",
    "files": {
-    "src/styles/sections/nav.css": "366a9d9eb64997fc8ea85d30649c25a367274113",
+    "src/styles/sections/nav.css": "800ba281d1c7a5148145aae09d8cc0ed3cf46dc3",
     "src/scripts/nav.js": "c44bdb93e70d72f390fcea4a467258c85178a9f6",
-    "src/scripts/nav-pill.js": "dce3def2c8fce115eb5870a537bced1cf69b0e7b",
+    "src/scripts/nav-pill.js": "3ebdde9ea0ebef82c34639eb3fa12af827746573",
     "src/scripts/menu.js": "2f179ae91931faad0c2876299f9ea76c68daf12b"
    },
-   "taken": "2026-11-23T17:03:08.370Z",
-   "commit": "71108935cef4ba51509b0bcf5a3f74ef7913a55c",
+   "taken": "2026-11-24T16:40:36.528Z",
+   "commit": "9bac40bfaacb79b45aeb3d400807432cb073bb73",
    "sizes": [
     {
      "w": 390,
@@ -28,7 +28,7 @@
       "w": 390,
       "h": 52
      },
-     "bytes": 6870
+     "bytes": 5657
     },
     {
      "w": 1440,
@@ -38,7 +38,7 @@
       "w": 1440,
       "h": 56
      },
-     "bytes": 4850
+     "bytes": 4261
     }
    ]
   },
