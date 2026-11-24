@@ -276,6 +276,14 @@
       "decided": "Tim, 2026-10-23 — the settings of the access-cards lab (light from the top at 75°, shade 4, no gloss; tilt −20°, even, 1× the fall; −10° since Oct 24, Tim: «change the tilt at the start from -20 to -10»; fade 0.36 of the fall on 0.5, 0, 0.5, 1); «the drop shadow should be consistent with the current website»; «there's a thin white line at the bottom»",
       "why": "the drop reads as a card falling onto a table: it comes in at an angle and settles flat; the light makes the angle visible on the face",
       "fix if reconsidered": "M.DROP.tip, M.curve.reveal and M.LIGHT in scripts/motion.js; the hairline is the first layer of the box-shadow of .idcard__face (sections.css). Measured in Chromium at 2×: columns along the cards' bottom edges with a light line 605 → 0; at 1× 331 → 42, at most +15 levels lighter instead of +27"
+    },
+    {
+      "id": "pictures-no-mouse",
+      "kind": "decision",
+      "what": "No picture (<img>) takes the mouse or a touch: `img { pointer-events: none; -webkit-user-drag: none }` in base.css. What holds it (a tile, a card, a link) takes the hover, the tap and the click instead. So Yandex Browser shows no buttons of its own (Alice, the eye, search by picture) over the pictures: they covered the client logos' names. The price: a picture can't be dragged off the page or saved from the right-click menu",
+      "decided": "Tim, 2026-11-24 — the logos first (a screenshot of the CPLUS tile in Yandex Browser), then «yes» to every picture on the site",
+      "why": "Yandex Browser puts its own panel over any <img> under the mouse; on the logo tiles it sat right where the label's name comes in. Nothing on the site listens to a picture itself, so one rule for every picture covers the ones added later too. src/styles/base/base.css (img rule). Measured in Chromium: under every picture's centre the element hit is its holder, not the <img>; the logos' names still come in on hover and on tap; the ID deck still swipes; links with a picture inside still open",
+      "fix if reconsidered": "Drop the two properties from the img rule in base.css (or keep them only on .logo-card__img)"
     }
   ]
 }

@@ -67,7 +67,11 @@ h1, h2, h3, p, ul, dl, dd, figure { margin: 0; }
 h1, h2, h3 { font: inherit; }
 ul { padding: 0; list-style: none; }
 img, svg, picture, canvas { display: block; }
-img { max-width: 100%; }
+/* the mouse never lands on a picture, only on what holds it (a tile, a card, a link): Yandex Browser puts its own
+   buttons (search by picture, Alice, camera) over any <img> under the mouse — over the client logos' names, the team,
+   the tool screenshots. Hover, taps, links and the ID deck's swipe work as before; pictures can't be dragged off or
+   saved from the right-click menu (decision `pictures-no-mouse`). */
+img { max-width: 100%; pointer-events: none; -webkit-user-drag: none; }
 a { color: inherit; text-decoration: none; }
 button { margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
 /* no focus ring anywhere (Tim, Oct 20: no design for focus states). Only the high-contrast modes of the system keep
