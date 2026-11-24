@@ -40,6 +40,14 @@ function navCover(down) {
 // the scroll position at which a block is seen as described above
 export function placeOf(el) {
   if (!el || el === document.body || el === root) return 0;
+  // a block that sticks (a card of the stack, the navbar's Управление, Документы, Финансы): where it starts to stick,
+  // its top at its own sticky top. Its box says where it is stuck now, so its place is read from its slot: the top of the
+  // slot's content (the card is the slot's first block that takes room; stack.css)
+  const own = getComputedStyle(el), slot = el.parentElement;
+  if (own.position === "sticky" && slot) {
+    const top = slot.getBoundingClientRect().top + slot.clientTop + (parseFloat(getComputedStyle(slot).paddingTop) || 0) + scrollY();
+    return Math.round(Math.min(max(), Math.max(0, top - (parseFloat(own.top) || 0))));
+  }
   const spacer = el.parentElement && el.parentElement.classList.contains("pin-spacer") ? el.parentElement : null;
   const top = (spacer || el).getBoundingClientRect().top + scrollY();
   let y = top - navCover(top > scrollY());

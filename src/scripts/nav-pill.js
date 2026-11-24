@@ -4,7 +4,8 @@
      · a link takes part when it leads to a block on this page (#…);
      · a link that is hidden at some width is skipped there; while the section of a hidden link is on screen, the
        outline fades out;
-     · a section without a link of its own (the card stack, for one) keeps the outline on the link above it.
+     · a section without a link of its own (the clients, the tools, the publications) keeps the outline on the link above
+       it; above the first link (the hero) there is no outline.
    A section counts as reached when its top has come up to LINE: 40% of the way from the navbar's bottom edge down to
    the bottom of the screen. At the very bottom of the page the last section with a link is reached whatever its size.
    After a click on a link, the outline goes straight there and waits until the page has stopped scrolling, instead of
