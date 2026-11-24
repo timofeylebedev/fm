@@ -13,7 +13,8 @@
                                                            so the longer «Дизайн и разработка» link never squeezes the row)
        1200–      laptops, computers             (base)    the links of the navbar: the navbar's own step. Below it there is
                                                            too little room around them next to «Войти» and «Запланировать
-                                                           демо» (at 1200 they keep 44px, as they had at 1024 before «Войти»)
+                                                           демо» (set by PR #67; «Войти» was taken out Nov 24, 2026, the
+                                                           step was kept)
 
    Heights are handled without steps: every size of the scale takes the screen's height into account (a screen counts
    as only as big as its height allows), and what is sized by the screen's height (the hero, the cards of the stack,
